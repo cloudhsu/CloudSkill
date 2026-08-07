@@ -1,6 +1,6 @@
 ---
 name: agent-development-process
-description: Build or improve an AI-agent product or agentic system: task contract, autonomy, tools, context, memory, orchestration, evals, traces, guardrails, hardening, release, and operations. Do not use merely to govern coding agents working in a software repository.
+description: Use when building or improving an AI-agent product whose task contract, autonomy, tools, context, memory, orchestration, evaluation, guardrails, release, or operations must be designed.
 ---
 
 # AI-agent System Development Process

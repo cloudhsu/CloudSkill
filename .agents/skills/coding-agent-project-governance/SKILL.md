@@ -1,6 +1,6 @@
 ---
 name: coding-agent-project-governance
-description: Create or review repository instructions and software-delivery rules for Codex or other coding agents: AGENTS.md, risk routing, subagent roles, worktrees, plans, tests, migrations, documentation sync, release, and truthful handoff. Do not use to design the AI agent product itself.
+description: Use when a repository needs coding-agent instructions, risk routing, worktree rules, multi-agent ownership, test evidence, migration controls, release rules, or truthful handoff.
 ---
 
 # Coding-agent Project Governance

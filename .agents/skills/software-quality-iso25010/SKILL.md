@@ -1,6 +1,6 @@
 ---
 name: software-quality-iso25010
-description: Define, review, measure, or gate software and ICT product quality using ISO/IEC 25010. Use for quality requirements, architecture quality scenarios, test objectives, acceptance criteria, quality dashboards, release gates, and defect analysis. Do not use the standard as a generic checklist without system-specific measures.
+description: Use when software quality must be translated into measurable scenarios, acceptance criteria, metrics, evidence, dashboards, release gates, or defect analysis using ISO/IEC 25010.
 ---
 
 # Software Quality Using ISO/IEC 25010

@@ -1,6 +1,6 @@
 ---
 name: safe-incremental-refactoring
-description: Plan or execute behavior-preserving modernization of a legacy or brownfield system, especially god classes, monoliths, persistence layers, transaction-heavy code, or compatibility-sensitive APIs. Use when responsibilities must move without breaking contracts, data, release behavior, or fault-injection seams.
+description: Use when legacy or brownfield responsibilities must move without breaking behavior, public contracts, data, transaction order, release compatibility, recovery, or test seams.
 ---
 
 # Safe Incremental Refactoring

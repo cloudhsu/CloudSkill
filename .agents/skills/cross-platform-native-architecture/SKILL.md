@@ -1,6 +1,6 @@
 ---
 name: cross-platform-native-architecture
-description: Design or review cross-platform native software, Qt tools and Designer plug-ins, OpenGL engines, touch/device utilities, HID/USB hardware integration, privileged OS integration, firmware/update workflows, build systems, packaging, and legacy Qt modernization. Do not use for ordinary browser-only frontend architecture.
+description: Use when a native or Qt system spans OS-specific lifecycle, HID/USB devices, firmware update, privileged integration, packaging, Designer plug-ins, or Qt build/version migration boundaries.
 ---
 
 # Cross-platform Native Architecture

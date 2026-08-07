@@ -1,6 +1,6 @@
 ---
 name: cross-platform-engine-architecture
-description: Design or review a cross-platform 2D/game/graphics engine with a portable core, director/scene lifecycle, update/render loop, rendering backend, actions/events, resources, input, platform services, and iOS/Android/Windows adapters. Use for engine architecture rather than ordinary application UI.
+description: Use when a 2D, game, or graphics engine spans director/scene lifecycle, update/render loops, rendering backends, resources, actions/events, input, context loss, or platform adapters.
 ---
 
 # Cross-platform Engine Architecture

@@ -1,6 +1,6 @@
 ---
 name: framework-design
-description: Design or refine a reusable software framework, platform layer, engine, SDK, or product-line architecture. Use when separating reusable capability from domain-specific behavior, defining extension points, plug-ins, state/command contracts, or cross-platform boundaries. Do not use merely to add abstractions to a single stable implementation.
+description: Use when reusable capability must be separated from product or domain behavior through framework, SDK, plug-in, platform, extension-point, state/command, or product-line contracts.
 ---
 
 # Framework Design

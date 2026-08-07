@@ -1,6 +1,6 @@
 ---
 name: application-client-server-architecture
-description: Design or review full-stack, frontend/backend, web, desktop-client/server, API, persistence, authentication, responsive UI, deployment, and operational architecture. Use when authority, transactions, contracts, state ownership, data history, or client/server boundaries matter. Do not use for native rendering-engine portability.
+description: Use when an application crosses client/server, API, persistence, identity, transaction, state-authority, data-history, deployment, or operational boundaries.
 ---
 
 # Application and Client/Server Architecture

@@ -1,6 +1,6 @@
 ---
 name: development-process-tailoring
-description: Select, tailor, review, or improve a software/product lifecycle using waterfall, iterative, agile, XP, or hybrid practices. Use for project governance, specification evolution, release trains, customer/field feedback, product variants, stage gates, hardware/software coordination, and process diagnosis. Do not treat one methodology as universally superior.
+description: Use when delivery is constrained by unstable requirements, hardware dependencies, release trains, urgent work, field feedback, product variants, stage gates, or competing lifecycle models.
 ---
 
 # Development Process Tailoring

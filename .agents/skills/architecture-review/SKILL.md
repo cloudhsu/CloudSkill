@@ -1,6 +1,6 @@
 ---
 name: architecture-review
-description: Review a software architecture, module boundary, refactoring plan, state model, distributed design, or platform/domain split. Use for architecture proposals in cross-platform tools, frameworks, engines, industrial or semiconductor equipment software. Do not use for syntax-only questions or isolated one-line bug fixes.
+description: Use when comparing or assessing architecture decisions, module boundaries, state ownership, distributed design, platform/domain separation, failure behavior, or migration risk.
 ---
 
 # Architecture Review

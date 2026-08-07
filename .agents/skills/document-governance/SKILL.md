@@ -1,6 +1,6 @@
 ---
 name: document-governance
-description: Create, restructure, review, or standardize engineering documents, evolving specifications, requirements baselines, reports, management summaries, training material, release notes, and evidence packs. Use when purpose, audience, traceability, version lineage, status, terminology, or source-of-truth control matters. Do not use for casual prose.
+description: Use when engineering documents disagree on authority, version lineage, audience, approval state, traceability, terminology, source data, or release baseline.
 ---
 
 # Document Governance

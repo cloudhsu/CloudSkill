@@ -1,6 +1,6 @@
 ---
 name: code-review
-description: Review production C, C++, C#, Qt, WinForms, WPF, framework, engine, device-control, communication, or industrial software code. Use for correctness, concurrency, state management, resource lifetime, failure recovery, maintainability, and architecture-boundary review. Do not focus on formatting unless it affects correctness or comprehension.
+description: Use when production C, C++, C#, Qt, WinForms, WPF, framework, device-control, communication, or industrial code must be checked for correctness, concurrency, state, lifetime, recovery, maintainability, or boundary violations.
 ---
 
 # Code Review
