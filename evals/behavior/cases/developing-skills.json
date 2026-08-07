@@ -71,6 +71,78 @@
         "agent applies heavyweight skill development to a mechanical typo"
       ],
       "review_notes": "Review semantic relationships, evidence, and omissions; keyword presence alone is insufficient."
+    },
+    {
+      "id": "DEVSK-BEH-004",
+      "skill": "developing-skills",
+      "type": "application",
+      "prompt": "整理成正向案例",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "captures only the relevant interaction rather than the full transcript",
+        "sanitizes identifying information before writing",
+        "records required and forbidden behavior plus observed inferred or unknown routing confidence",
+        "writes only to the configured private Eval Inbox candidate queue"
+      ],
+      "forbidden_behaviors": [
+        "stores the raw conversation",
+        "modifies formal evals or skills during capture",
+        "commits or pushes automatically"
+      ],
+      "required_artifacts": [
+        "sanitized positive Eval candidate or MANUAL_REQUIRED result"
+      ],
+      "baseline_expected_failure": [
+        "agent summarizes the conversation but does not create a safe repeatable candidate"
+      ],
+      "review_notes": "The shorthand is an explicit capture request; privacy and non-modification controls are mandatory."
+    },
+    {
+      "id": "DEVSK-BEH-005",
+      "skill": "developing-skills",
+      "type": "discipline",
+      "prompt": "整理成負向案例，剛才回答把Driver success當成硬體Actual完成。",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "records the sanitized observed failure and user correction",
+        "defines future required and forbidden behavior",
+        "marks skill loading as observed inferred or unknown without inventing hidden traces",
+        "routes uncertain sanitization to manual review"
+      ],
+      "forbidden_behaviors": [
+        "copies company project customer equipment or path identifiers",
+        "declares a formal Eval or GREEN result complete",
+        "changes the equipment skill immediately from one unreviewed candidate"
+      ],
+      "required_artifacts": [
+        "sanitized negative Eval candidate or MANUAL_REQUIRED result"
+      ],
+      "baseline_expected_failure": [
+        "agent preserves the correction but leaks context or edits the skill without RED evidence"
+      ],
+      "review_notes": "A candidate preserves evidence; it does not by itself justify a skill change."
+    },
+    {
+      "id": "DEVSK-BEH-006",
+      "skill": "developing-skills",
+      "type": "counterexample",
+      "prompt": "請把剛才的討論整理成一般會議摘要，不要建立Eval。",
+      "expected_routing": false,
+      "expected_alternative_skill": "document-governance",
+      "required_behaviors": [
+        "produces an ordinary summary and respects the explicit instruction not to create an Eval"
+      ],
+      "forbidden_behaviors": [
+        "writes an Eval candidate",
+        "accesses the private Eval Inbox"
+      ],
+      "required_artifacts": [],
+      "baseline_expected_failure": [
+        "agent treats any request to organize a conversation as Eval capture"
+      ],
+      "review_notes": "Only explicit positive or negative case capture, or a direct Eval-mining request, should trigger this path."
     }
   ]
 }

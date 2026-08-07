@@ -72,10 +72,15 @@ required = [
     'scripts/install.ps1', 'scripts/install.sh', 'scripts/audit_docs.py',
     'scripts/validate_descriptions.py', 'scripts/validate_behavior_evals.py',
     'scripts/smoke_install.py', 'scripts/run_all_checks.py',
+    'scripts/capture_eval_candidate.py', 'scripts/validate_interaction_capture.py',
+    'config/cloudskill-config.template.json', '.gitignore',
     'evals/README.md', 'evals/skill-routing-cases.csv', 'evals/behavior/README.md',
     'evals/behavior/schema.json', 'evals/behavior/RESULT.template.json',
     '.agents/skills/using-cloudskill/SKILL.md',
     '.agents/skills/developing-skills/SKILL.md',
+    '.agents/skills/developing-skills/references/interaction-eval-capture.md',
+    '.agents/skills/developing-skills/assets/INTERACTION_EVAL_CANDIDATE.template.json',
+    '.agents/skills/developing-skills/assets/EVAL_MINING_REPORT.template.md',
     '.agents/skills/equipment-control-architecture/SKILL.md',
     '.agents/skills/equipment-domain-modeling/SKILL.md',
     '.agents/skills/semiconductor-equipment-domain-knowledge/SKILL.md',
@@ -83,6 +88,14 @@ required = [
 for rel in required:
     if not (ROOT / rel).exists():
         errors.append(f'missing required file: {rel}')
+
+
+private_tracked = [
+    path for path in ROOT.rglob('*')
+    if path.is_file() and ('.local' in path.parts or path.name == 'config.local.json' or path.suffix == '.jsonl' or path.name.endswith('.transcript.md'))
+]
+if private_tracked:
+    errors.append('private local interaction data must not be tracked: ' + ', '.join(str(path.relative_to(ROOT)) for path in private_tracked))
 
 claude_text = (ROOT / 'CLAUDE.md').read_text(encoding='utf-8') if (ROOT / 'CLAUDE.md').exists() else ''
 if '@AGENTS.md' not in claude_text:

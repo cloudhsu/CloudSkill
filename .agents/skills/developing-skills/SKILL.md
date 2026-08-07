@@ -1,6 +1,6 @@
 ---
 name: developing-skills
-description: Use when creating, editing, splitting, merging, evaluating, or releasing CloudSkill skills, descriptions, references, assets, routing cases, or behavior tests.
+description: Use when creating, editing, splitting, merging, evaluating, or releasing CloudSkill skills, descriptions, references, assets, routing cases, behavior tests, or capturing the current interaction as a positive or negative Eval candidate.
 ---
 
 # Developing CloudSkill Skills
@@ -13,11 +13,34 @@ Read:
 
 - `references/behavior-driven-skill-development.md`
 - `references/skill-authoring-sources.md` when reviewing external influences or attribution.
+- `references/interaction-eval-capture.md` when converting a live interaction into a private Eval candidate or reviewing an Eval Inbox.
 
 Use:
 
 - `assets/SKILL_CONTRACT.template.md`
 - `assets/BEHAVIOR_EVAL_CASE.template.json`
+- `assets/INTERACTION_EVAL_CANDIDATE.template.json`
+- `assets/EVAL_MINING_REPORT.template.md`
+
+
+## Interaction capture shorthand
+
+Treat these user phrases as explicit capture requests:
+
+- `整理成正向案例` — preserve a successful route and the behaviors that made the result useful.
+- `整理成負向案例` — preserve the observed failure, user correction, and future required/forbidden behavior.
+
+For either phrase:
+
+1. Capture only the turns needed to understand the task, result, and correction; do not save the raw or complete transcript.
+2. Apply mandatory sanitization before writing. Generalize organization, customer, person, project, product, equipment, site, account, address, path, URL, schedule, recipe, safety-limit, and other identifying data.
+3. Distinguish observed skill loading from inferred or unknown routing. Do not claim hidden runtime traces.
+4. Read project `.cloudskill/config.local.json`, then user `~/.cloudskill/config.json`. Do not guess an output path when no valid configuration exists.
+5. Create a draft from `INTERACTION_EVAL_CANDIDATE.template.json` and use the configured local repository's `scripts/capture_eval_candidate.py` helper.
+6. Save a sanitization-safe record to the private candidate queue. Route uncertain records to `manual-review`.
+7. Do not modify formal Evals, skills, commits, tags, branches, or remotes during capture.
+
+A captured candidate is evidence to review, not proof that routing or behavior passed. Batch conversion requires deduplication, owner analysis, a repeatable prompt, required and forbidden behavior, and an explicit RED/GREEN decision.
 
 ## Workflow
 
@@ -32,6 +55,7 @@ Classify the need as one or more of:
 - A prohibited action or unsupported claim occurs.
 - Instructions are duplicated or owned by the wrong skill.
 - A mechanical rule should be automated rather than documented.
+- A live interaction should be preserved as a positive or negative Eval candidate.
 
 Preserve the source evidence and confidence level. A historical project demonstrates a solved pressure; it does not make every historical implementation choice normative.
 
@@ -130,3 +154,5 @@ Before release:
 7. Adjacent-skill regression
 8. Structural and install checks
 9. Release and remaining limitations
+
+For interaction capture, the required output is the saved candidate path or a `MANUAL_REQUIRED` result; do not claim that a formal Eval or skill change was completed.

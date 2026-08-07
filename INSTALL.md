@@ -1,209 +1,214 @@
 # CloudSkill 安裝指南
 
-CloudSkill 的 `SKILL.md` 採用共同的 Agent Skills 結構，因此同一份 Skill 可以供 Codex 與 Claude Code 使用；差異主要是安裝目錄與叫用語法。
+CloudSkill 的 `.agents/skills/` 是 Codex 與 Claude Code 的 canonical Skill 來源。建議先將 Repository Clone 到固定本機路徑，再由各工作專案從該路徑安裝、更新並寫入私人 Eval Inbox。
 
-## 1. 先決條件
+## 1. Clone 到固定本機路徑
 
-Clone Repository：
+Windows：
+
+```powershell
+git clone https://github.com/cloudhsu/CloudSkill.git D:\Git\CloudSkill
+```
+
+macOS / Linux：
 
 ```bash
-git clone https://github.com/cloudhsu/CloudSkill.git
-cd CloudSkill
+git clone https://github.com/cloudhsu/CloudSkill.git ~/Git/CloudSkill
 ```
 
-CloudSkill 的唯一 Skill 原始來源是：
+安裝器不保存 GitHub Token 或其他憑證，只保存本機 Repository 與 Eval Inbox 絕對路徑。
 
-```text
-.agents/skills/
-```
+## 2. 安裝模式
 
-不要同時手動維護 `.agents/skills` 與 `.claude/skills` 兩份內容。Claude Code 的目錄由安裝 Script 從 canonical source 複製。
-
-## 2. 建議安裝模式
-
-### 個人完整模式
-
-適合 Repository 擁有者：安裝全部 Skills，並加入個人的架構工作原則。
-
-### Skills-only 模式
-
-適合其他使用者或團隊：只安裝 Skills，不匯入 `AGENTS.md` 中的個人架構背景。
-
-### Project 模式
-
-只對指定 Repository 生效，適合團隊共同 Commit。
+- **User scope**：同一位使用者的多個專案共用 Skills 與 `~/.cloudskill/config.json`。
+- **Project scope**：只對指定專案生效，並寫入不應提交的 `<project>/.cloudskill/config.local.json`。
+- **Skills-only**：使用 `-SkipGuidance` / `--skip-guidance`，不匯入個人架構 Guidance。
+- **No local config**：使用 `-SkipLocalConfig` / `--skip-local-config`；此模式無法使用簡短的正向／負向案例收集流程。
 
 ## 3. Windows PowerShell
 
-### Codex 與 Claude Code，個人完整安裝
+### 從固定本機 CloudSkill 安裝到目前 Project
 
 ```powershell
-.\scripts\install.ps1 -Tool both -Scope user
-```
-
-### 只安裝 Skills
-
-```powershell
-.\scripts\install.ps1 -Tool both -Scope user -SkipGuidance
-```
-
-### 安裝到指定 Project
-
-```powershell
-.\scripts\install.ps1 `
+& "D:\Git\CloudSkill\scripts\install.ps1" `
   -Tool both `
   -Scope project `
-  -ProjectPath "D:\Work\MyProject"
+  -ProjectPath (Get-Location).Path `
+  -CloudSkillRepoPath "D:\Git\CloudSkill"
 ```
 
-### 只安裝 Codex 或 Claude Code
+未指定 `-EvalInboxPath` 時，預設使用：
+
+```text
+D:\Git\CloudSkill\.local\eval-inbox
+```
+
+指定獨立私人 Inbox：
 
 ```powershell
-.\scripts\install.ps1 -Tool codex -Scope user
-.\scripts\install.ps1 -Tool claude -Scope user
+& "D:\Git\CloudSkill\scripts\install.ps1" `
+  -Tool codex `
+  -Scope project `
+  -ProjectPath "D:\Work\EquipmentProject" `
+  -CloudSkillRepoPath "D:\Git\CloudSkill" `
+  -EvalInboxPath "D:\Private\CloudSkill-Eval-Inbox"
+```
+
+User scope：
+
+```powershell
+& "D:\Git\CloudSkill\scripts\install.ps1" `
+  -Tool both `
+  -Scope user `
+  -CloudSkillRepoPath "D:\Git\CloudSkill"
 ```
 
 ## 4. macOS / Linux / WSL / Git Bash
 
 ```bash
-chmod +x scripts/install.sh
-```
-
-### Codex 與 Claude Code，個人完整安裝
-
-```bash
-./scripts/install.sh --tool both --scope user
-```
-
-### 只安裝 Skills
-
-```bash
-./scripts/install.sh --tool both --scope user --skip-guidance
-```
-
-### 安裝到指定 Project
-
-```bash
-./scripts/install.sh \
+chmod +x ~/Git/CloudSkill/scripts/install.sh
+~/Git/CloudSkill/scripts/install.sh \
   --tool both \
   --scope project \
-  --project-path /path/to/project
+  --project-path "$PWD" \
+  --cloudskill-repo-path ~/Git/CloudSkill
 ```
 
-## 5. Codex 安裝結果
-
-### 個人範圍
-
-```text
-~/.agents/skills/<skill-name>/SKILL.md
-~/.codex/AGENTS.md
-```
-
-### Project 範圍
-
-```text
-<repo>/.agents/skills/<skill-name>/SKILL.md
-<repo>/AGENTS.md
-```
-
-Codex 會從目前目錄向 Repository root 搜尋 `.agents/skills`；個人 Skills 位於 `$HOME/.agents/skills`。全域指令預設位於 `~/.codex/AGENTS.md`。
-
-驗證：
-
-```text
-/skills
-$architecture-review
-```
-
-也可以執行：
+指定私人 Inbox：
 
 ```bash
-codex --ask-for-approval never "Summarize the current instructions and list the CloudSkill skills you can see."
+~/Git/CloudSkill/scripts/install.sh \
+  --tool codex \
+  --scope project \
+  --project-path ~/Work/EquipmentProject \
+  --cloudskill-repo-path ~/Git/CloudSkill \
+  --eval-inbox-path ~/Private/CloudSkill-Eval-Inbox
 ```
 
-## 6. Claude Code 安裝結果
-
-### 個人範圍
-
-```text
-~/.claude/skills/<skill-name>/SKILL.md
-~/.claude/cloudskill/AGENTS.md
-~/.claude/CLAUDE.md
-```
-
-安裝器會在 `~/.claude/CLAUDE.md` 加入受管理的 import：
-
-```text
-@~/.claude/cloudskill/AGENTS.md
-```
-
-### Project 範圍
-
-```text
-<repo>/.claude/skills/<skill-name>/SKILL.md
-<repo>/AGENTS.md
-<repo>/CLAUDE.md
-```
-
-Project 的 `CLAUDE.md` 使用：
-
-```text
-@AGENTS.md
-```
-
-這使 Codex 與 Claude Code 共用同一份專案規範，而不複製內容。
-
-Claude Code 叫用方式：
-
-```text
-/architecture-review
-/application-client-server-architecture
-```
-
-可使用 `/skills` 檢查 Skill，使用 `/memory` 檢查載入的 `CLAUDE.md`。
-
-## 7. 更新
-
-```bash
-git pull
-```
-
-重新執行相同安裝命令。安裝器會：
-
-- 只替換 CloudSkill 同名 Skill 目錄。
-- 不刪除其他來源的 Skills。
-- 更新受 `CLOUDSKILL:BEGIN/END` 標記管理的 Guidance 區段。
-- 保留標記以外的既有 `AGENTS.md`／`CLAUDE.md` 內容。
-
-## 8. 手動安裝
+## 5. 安裝結果
 
 ### Codex
 
-```bash
-mkdir -p ~/.agents/skills ~/.codex
-cp -R .agents/skills/* ~/.agents/skills/
-cp AGENTS.md ~/.codex/AGENTS.md
+```text
+User:    ~/.agents/skills/<skill-name>/SKILL.md
+Project: <repo>/.agents/skills/<skill-name>/SKILL.md
 ```
 
 ### Claude Code
 
-```bash
-mkdir -p ~/.claude/skills ~/.claude/cloudskill
-cp -R .agents/skills/* ~/.claude/skills/
-cp AGENTS.md ~/.claude/cloudskill/AGENTS.md
-printf '\n@~/.claude/cloudskill/AGENTS.md\n' >> ~/.claude/CLAUDE.md
+```text
+User:    ~/.claude/skills/<skill-name>/SKILL.md
+Project: <repo>/.claude/skills/<skill-name>/SKILL.md
 ```
 
-手動指令可能覆蓋或重複既有設定；已有自訂內容時，優先使用安裝 Script。
+完整安裝時，Codex 使用受管理的 `AGENTS.md` 區塊；Claude Code 透過 `CLAUDE.md` 匯入同一份 Guidance。安裝器只替換 CloudSkill 同名技能，並保留受管理區塊外的既有內容。
 
-## 9. 相容性說明
+## 6. 本機設定與 Eval Inbox
 
-- `SKILL.md` 的 `name`、`description`、references、assets 與 scripts 可由兩個工具共用。
-- `agents/openai.yaml` 是 Codex/OpenAI 的額外 metadata；Claude Code 會忽略它，不需刪除。
-- Claude Code 支援額外 frontmatter，但 CloudSkill 不依賴 Claude 專屬欄位，因此 canonical Skill 保持可攜。
-- Codex 以 `$skill-name` 明確叫用；Claude Code 以 `/skill-name` 明確叫用。
+Project scope 設定：
 
-## 10. 官方參考
+```text
+<project>/.cloudskill/config.local.json
+```
+
+User scope 設定：
+
+```text
+~/.cloudskill/config.json
+```
+
+設定包含：
+
+- `cloudskill_repository`
+- `eval_inbox`
+- `sensitive_terms_path`
+- 強制 sanitization 與禁止 raw transcript、auto skill modification、auto commit、auto push 的安全值
+
+Inbox 結構：
+
+```text
+.local/eval-inbox/
+├── candidates/
+├── manual-review/
+├── processed/
+├── rejected/
+└── sensitive-terms.local.txt
+```
+
+`.local/` 與 `config.local.json` 均由 Git 忽略。請將公司、客戶、專案、產品、設備、人員與其他私人識別字加入 `sensitive-terms.local.txt`；不要將該檔案提交。
+
+## 7. 日常正向與負向案例
+
+在已設定的專案內，直接對 Codex 或 Claude Code 說：
+
+```text
+整理成正向案例
+```
+
+或：
+
+```text
+整理成負向案例
+```
+
+Agent 應使用 `developing-skills`：
+
+1. 只擷取理解案例所需的相關互動。
+2. 預設去除識別資訊，不保存完整對話。
+3. 產生候選 JSON，並呼叫本機 CloudSkill Repository 的 `scripts/capture_eval_candidate.py`。
+4. 安全案例寫入 `candidates/`；有疑慮的案例寫入 `manual-review/`。
+5. 不修改正式 `evals/`、技能、Commit、Tag、Branch 或 Remote。
+
+缺少有效設定時，Agent 應停止並要求重新執行安裝，不得自行猜測寫入位置。
+
+## 8. 批次整理到 CloudSkill
+
+累積候選案例後，在 CloudSkill Repository 啟動 Agent：
+
+```powershell
+cd D:\Git\CloudSkill
+codex
+```
+
+使用：
+
+```text
+使用 developing-skills 整理 Eval Inbox，重新掃描識別資訊、合併重複案例、判斷 Skill Owner，建立正式 Eval 分支並執行完整檢查；不要自動 Push。
+```
+
+正式 `evals/` 只接受已審查、可公開、可重播的案例。候選案例不是行為測試 PASS，也不應直接原封不動提交。
+
+## 9. 更新
+
+```bash
+cd /path/to/CloudSkill
+git pull
+```
+
+回到工作專案後重新執行原安裝命令。安裝器會更新 Skills、Guidance 受管理區塊、本機版本與路徑設定，但不刪除 Inbox 內容或非 CloudSkill 技能。
+
+## 10. 驗證
+
+```bash
+python scripts/run_all_checks.py
+```
+
+Codex：
+
+```text
+/skills
+$developing-skills
+```
+
+Claude Code：
+
+```text
+/skills
+/memory
+/developing-skills
+```
+
+## 11. 官方參考
 
 - OpenAI Codex Skills: https://developers.openai.com/codex/build-skills
 - OpenAI Codex AGENTS.md: https://developers.openai.com/codex/agent-configuration/agents-md

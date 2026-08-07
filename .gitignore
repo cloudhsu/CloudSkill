@@ -1,0 +1,5 @@
+# Private local interaction evidence and machine-specific configuration
+.local/
+.cloudskill/config.local.json
+*.session.jsonl
+*.transcript.md

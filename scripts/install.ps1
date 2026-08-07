@@ -8,14 +8,27 @@ param(
 
     [string]$ProjectPath = (Get-Location).Path,
 
-    [switch]$SkipGuidance
+    [string]$CloudSkillRepoPath,
+
+    [string]$EvalInboxPath,
+
+    [switch]$SkipGuidance,
+
+    [switch]$SkipLocalConfig
 )
 
 $ErrorActionPreference = 'Stop'
-$RepoRoot = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
+$ScriptRepoRoot = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
+$RepoRoot = if ($CloudSkillRepoPath) { (Resolve-Path $CloudSkillRepoPath).Path } else { $ScriptRepoRoot }
 $SourceSkills = Join-Path $RepoRoot '.agents\skills'
 $BeginMarker = '<!-- CLOUDSKILL:BEGIN -->'
 $EndMarker = '<!-- CLOUDSKILL:END -->'
+
+foreach ($required in @('.agents\skills', 'AGENTS.md', 'VERSION', 'scripts\capture_eval_candidate.py')) {
+    if (-not (Test-Path (Join-Path $RepoRoot $required))) {
+        throw "CloudSkill repository is missing $required`: $RepoRoot"
+    }
+}
 
 function Copy-CloudSkillSet {
     param([Parameter(Mandatory)][string]$Destination)
@@ -59,9 +72,53 @@ function Set-ManagedBlock {
     Set-Content $Path $updated -Encoding UTF8
 }
 
+function Initialize-EvalInbox {
+    param([Parameter(Mandatory)][string]$Inbox)
+
+    New-Item -ItemType Directory -Force $Inbox | Out-Null
+    foreach ($folder in @('candidates', 'manual-review', 'processed', 'rejected')) {
+        New-Item -ItemType Directory -Force (Join-Path $Inbox $folder) | Out-Null
+    }
+    $terms = Join-Path $Inbox 'sensitive-terms.local.txt'
+    if (-not (Test-Path $terms)) {
+        @(
+            '# One private identifier per line. This file is never committed by CloudSkill.',
+            '# Add company, customer, project, product, machine, site, server, repository, and person names.',
+            '# Lines beginning with # are comments.'
+        ) | Set-Content $terms -Encoding UTF8
+    }
+    return $terms
+}
+
+function Write-LocalConfig {
+    param(
+        [Parameter(Mandatory)][string]$Path,
+        [Parameter(Mandatory)][string]$Inbox,
+        [Parameter(Mandatory)][string]$SensitiveTerms
+    )
+
+    $parent = Split-Path $Path -Parent
+    New-Item -ItemType Directory -Force $parent | Out-Null
+    $version = (Get-Content (Join-Path $RepoRoot 'VERSION') -Raw -Encoding UTF8).Trim()
+    $config = [ordered]@{
+        schema_version = '1.0'
+        cloudskill_version = $version
+        cloudskill_repository = $RepoRoot
+        eval_inbox = $Inbox
+        sensitive_terms_path = $SensitiveTerms
+        default_sanitization = $true
+        save_raw_transcript = $false
+        auto_modify_skills = $false
+        auto_commit = $false
+        auto_push = $false
+    }
+    $config | ConvertTo-Json -Depth 4 | Set-Content $Path -Encoding UTF8
+}
+
 $installCodex = $Tool -in @('codex', 'both')
 $installClaude = $Tool -in @('claude', 'both')
 $guidance = Get-Content (Join-Path $RepoRoot 'AGENTS.md') -Raw -Encoding UTF8
+$project = $null
 
 if ($Scope -eq 'user') {
     if ($installCodex) {
@@ -98,4 +155,24 @@ if ($Scope -eq 'user') {
     }
 }
 
-Write-Host "CloudSkill installation complete: tool=$Tool scope=$Scope skipGuidance=$SkipGuidance"
+if (-not $SkipLocalConfig) {
+    $inbox = if ($EvalInboxPath) {
+        [System.IO.Path]::GetFullPath($EvalInboxPath)
+    } else {
+        Join-Path $RepoRoot '.local\eval-inbox'
+    }
+    $terms = Initialize-EvalInbox $inbox
+    if ($Scope -eq 'user') {
+        $configPath = Join-Path $HOME '.cloudskill\config.json'
+    } else {
+        $configDir = Join-Path $project '.cloudskill'
+        New-Item -ItemType Directory -Force $configDir | Out-Null
+        $configPath = Join-Path $configDir 'config.local.json'
+        Set-ManagedBlock (Join-Path $configDir '.gitignore') "config.local.json`neval-outbox/"
+    }
+    Write-LocalConfig $configPath $inbox $terms
+    Write-Host "CloudSkill local config: $configPath"
+    Write-Host "CloudSkill Eval Inbox: $inbox"
+}
+
+Write-Host "CloudSkill installation complete: tool=$Tool scope=$Scope skipGuidance=$SkipGuidance skipLocalConfig=$SkipLocalConfig"

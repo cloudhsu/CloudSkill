@@ -1,0 +1,36 @@
+{
+  "schema_version": "1.0",
+  "case_kind": "positive",
+  "status": "candidate",
+  "cloudskill_version": "5.5.1",
+  "runtime": "codex",
+  "task_summary": "Generalized task summary",
+  "prompt_sanitized": "Standalone prompt with identifying details removed or generalized.",
+  "expected_skills": [
+    "skill-name"
+  ],
+  "observed_skills": {
+    "skills": [],
+    "confidence": "unknown"
+  },
+  "failure_types": [],
+  "required_behaviors": [
+    "Observable behavior that should remain or become required."
+  ],
+  "forbidden_behaviors": [
+    "Observable behavior that must not occur."
+  ],
+  "user_correction_sanitized": null,
+  "outcome": "accepted",
+  "verification": {
+    "build": "NOT RUN",
+    "test": "NOT RUN",
+    "device": "NOT RUN"
+  },
+  "sanitization": {
+    "status": "PASS",
+    "raw_transcript_saved": false,
+    "replacements": []
+  },
+  "review_notes": "Candidate only; formal Eval and behavior execution are not yet complete."
+}

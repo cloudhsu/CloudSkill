@@ -77,3 +77,6 @@ ECA-08,PVD Recipe步驟要如何定義真空、MFC流量、壓力穩定、冷卻
 EDM-06,MFC模型要同時表示氣體種類、單位、Desired Flow、Actual Flow、Range、Pending、Stabilized與Fault，怎麼建模？,equipment-domain-modeling,true,analog regulator state command and units
 EDM-07,Chamber Pressure Snapshot不能只有double，還要處理Gauge來源、Range、Validity、Timestamp與ATM Switch，資料契約怎麼設計？,equipment-domain-modeling,true,measurement quality and source modeling
 USE-03,我先要解釋PVD與真空元件，再設計Pump/Vent Sequence與MFC資料模型，CloudSkill技能應如何選擇與排序？,using-cloudskill,true,domain knowledge architecture and modeling composition
+DEVSK-03,整理成正向案例,developing-skills,true,explicit sanitized positive interaction capture
+DEVSK-04,整理成負向案例,developing-skills,true,explicit sanitized negative interaction capture
+DEVSK-NEG-02,請把剛才的討論整理成一般會議摘要且不要建立Eval。,developing-skills,false,ordinary summary explicitly excludes Eval capture

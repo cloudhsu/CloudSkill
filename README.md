@@ -1,6 +1,6 @@
 # CloudSkill
 
-**Current version: 5.5.0**
+**Current version: 5.5.1**
 
 CloudSkill is a portable set of software/system architecture skills and operating guidance for **OpenAI Codex** and **Claude Code**.
 
@@ -9,6 +9,11 @@ The same canonical `SKILL.md` directories are used for both tools. Codex install
 ## Install
 
 See [INSTALL.md](INSTALL.md) for user-level and project-level installation on Windows, macOS, and Linux.
+
+
+## Interaction-derived Eval capture
+
+A local CloudSkill clone can be registered during installation. The installer stores only local paths and safe defaults; it does not store credentials. After configuration, the phrases `整理成正向案例` and `整理成負向案例` create sanitized candidates under the private Eval Inbox. Candidates do not modify formal Evals, skills, commits, or remote branches until a separate review/import task is explicitly requested.
 
 ## Skills
 
@@ -43,7 +48,8 @@ CloudSkill/
 ├── PLANS.md                 # ExecPlan convention
 ├── docs/                    # Profile, evidence, governance, audit, references
 ├── evals/                   # Routing and behavior evaluation contracts
-├── scripts/                 # Install, validation, and documentation audit
+├── config/                  # Local configuration template
+├── scripts/                 # Install, capture, validation, and documentation audit
 ├── CHANGELOG.md
 └── VERSION
 ```

@@ -1,5 +1,25 @@
 # Changelog
 
+## 5.5.1
+
+### Local repository installation and configuration
+
+- Added optional local CloudSkill repository and Eval Inbox paths to the PowerShell and Bash installers.
+- Added user-level and project-local configuration files so Codex or Claude Code can reuse the configured repository without repeating paths.
+- Added a private `.local/eval-inbox` lifecycle with candidate, manual-review, processed, and rejected states; local interaction data remains excluded from Git.
+
+### Interaction-derived Eval capture
+
+- Extended `developing-skills` so the phrases `整理成正向案例` and `整理成負向案例` capture the current relevant interaction as a sanitized Eval candidate.
+- Made sanitization mandatory by default, prohibited raw transcript storage, and prevented daily capture from modifying formal Evals, skills, commits, or remote branches.
+- Added candidate and mining-report templates plus a deterministic capture helper that discovers project or user configuration and routes uncertain records to manual review.
+
+### Validation and baseline repair
+
+- Added install/config/candidate-capture smoke validation to the standard check runner.
+- Restored trigger-only `Use when...` descriptions for legacy skills that had regressed during the 5.5 repository rebuild, then regenerated the manifest.
+- Added routing and behavior contracts for positive capture, negative capture, sanitization failure, and non-Eval conversation summaries.
+
 ## 5.5.0
 
 ### Semiconductor equipment domain knowledge

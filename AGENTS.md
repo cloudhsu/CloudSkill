@@ -104,6 +104,18 @@ When equipment software is in scope:
 - Validate topology through a reversible ladder: current deployment, same-machine separation, distributed simulation, then a bounded real-equipment pilot.
 - Do not publish confidential project names, schedules, customer details, topology, or hardware identifiers merely because private evidence informed a generalized skill.
 
+
+## Interaction-derived Eval capture
+
+When the user says `整理成正向案例` or `整理成負向案例`, use `developing-skills` to capture only the relevant current interaction as an Eval candidate.
+
+- Read project `.cloudskill/config.local.json` first, then user `~/.cloudskill/config.json`.
+- Sanitization is mandatory. Remove or generalize company, customer, person, project, product, machine, site, network, path, schedule, recipe, safety-limit, and other identifying details before writing.
+- Preserve the technical mechanism, user correction, expected skills, required behavior, forbidden behavior, and evidence status.
+- Never save the raw or complete transcript. If safe sanitization is uncertain, route the candidate to manual review rather than the normal candidate queue.
+- Daily capture may write only to the configured private Eval Inbox. It must not modify formal `evals/`, skill files, Git commits, tags, branches, or remotes.
+- Convert candidates into formal routing or behavior Evals only from the CloudSkill repository after explicit batch-review instruction, deduplication, ownership analysis, sensitive-content scanning, and human review of the diff.
+
 ## Brownfield modernization
 
 - Establish characterization and fault-injection tests before moving high-risk responsibility.
