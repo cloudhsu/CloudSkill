@@ -1,4 +1,4 @@
-﻿id,prompt,expected_skill,should_trigger,notes
+id,prompt,expected_skill,should_trigger,notes
 AR-01,請比較單機模組化與分散式架構的狀態所有權、HA與遷移風險。,architecture-review,true,architecture decision comparison
 AR-NEG-01,請把這段中文翻成英文。,architecture-review,false,not architecture
 APP-01,設計一個員工訂餐系統的前端、後端、API、RBAC、SQLite交易與NAS部署。,application-client-server-architecture,true,full-stack client/server
@@ -6,6 +6,8 @@ APP-02,這個管理頁隱藏按鈕後，是否就算完成權限控管？,applic
 APP-NEG-01,設計OpenGL texture cache與context loss recovery。,application-client-server-architecture,false,native engine task
 XPLAT-01,把OpenGL 2D engine從Windows移植到iOS與Android，如何切platform layer？,cross-platform-native-architecture,true,OpenGL cross-platform
 XPLAT-02,Qt工具要支援Windows、Linux、Android與USB/I2C裝置，架構怎麼切？,cross-platform-native-architecture,true,Qt and hardware abstraction
+XPLAT-03,這套Qt Designer元件有qmake絕對路徑、重複widget來源和舊ui檔，如何先拆runtime與plugin再轉CMake和Qt6？,cross-platform-native-architecture,true,legacy Qt component modernization
+XPLAT-04,Designer plugin在Qt Creator找不到，請檢查IID、Qt ABI、debug release、domXml、includeFile與部署路徑。,cross-platform-native-architecture,true,Designer plugin contract and packaging
 XPLAT-NEG-01,設計REST API的錯誤碼。,cross-platform-native-architecture,false,web API task
 FW-01,設計一個可供不同產品共用的Command/State/Device framework。,framework-design,true,framework
 CR-01,Review這段NetworkStream code是否會重送command或讀到上一輪response。,code-review,true,production code failure
@@ -20,6 +22,7 @@ AID-02,為工具型Agent定義task contract、eval、trace、guardrail與release
 AID-NEG-01,替C# repo寫commit與branch規範。,agent-development-process,false,repo governance not agent product
 REF-01,BentoDatabase 還有很多 method，如何不改 API 與交易語意逐步拆成 Service 和 Repository？,safe-incremental-refactoring,true,compatibility facade and god class
 REF-02,重構 sql.js persistence 時如何測 COMMIT 後檔案寫入失敗與記憶體回復？,safe-incremental-refactoring,true,persistence failure and fault injection
+REF-03,cbComponent和cbWorkshop有同名但不同版本的Qt元件，如何選唯一來源並用forwarding header逐步遷移？,safe-incremental-refactoring,true,duplicate source authority and compatibility migration
 REF-NEG-01,從零設計一個新的 Client/Server 訂餐系統。,safe-incremental-refactoring,false,greenfield application architecture
 ENG-01,設計 iOS Android Windows 共用的 Director Scene Action Event 與 OpenGL render loop。,cross-platform-engine-architecture,true,engine runtime
 ENG-02,Android resume 後 GL context loss，texture pool 應如何重建？,cross-platform-engine-architecture,true,engine resource lifecycle

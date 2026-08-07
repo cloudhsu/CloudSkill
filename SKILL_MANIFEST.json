@@ -1,5 +1,5 @@
 {
-  "version": "5.0.0",
+  "version": "5.1.0",
   "skills": [
     {
       "name": "agent-development-process",
@@ -39,9 +39,9 @@
     },
     {
       "name": "cross-platform-native-architecture",
-      "description": "Design or review cross-platform native software, Qt tools, OpenGL 2D engines, platform layers, rendering loops, input, resources, hardware integration, build systems, and deployment across Windows, Linux, Android, or iOS. Do not use for ordinary browser-only frontend architecture.",
+      "description": "Design or review cross-platform native software, Qt tools and Designer plug-ins, OpenGL 2D engines, platform layers, rendering loops, input, resources, hardware integration, build systems, packaging, and legacy Qt/qmake-to-CMake or Qt 5-to-Qt 6 modernization. Do not use for ordinary browser-only frontend architecture.",
       "path": ".agents/skills/cross-platform-native-architecture/SKILL.md",
-      "file_count": 6
+      "file_count": 8
     },
     {
       "name": "development-process-tailoring",

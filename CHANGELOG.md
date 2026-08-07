@@ -1,5 +1,15 @@
 # Changelog
 
+## 5.1.0
+
+### Qt component modernization
+
+- Added repository evidence from the historical `cbComponent` and `cbWorkshop` Qt component suites.
+- Expanded cross-platform native architecture guidance for legacy Qt Designer plug-ins, qmake/CMake coexistence, Qt 5/Qt 6 migration, ABI and `.ui` compatibility, duplicate-source authority, and optional Qt/OpenCV/Charts/3D feature boundaries.
+- Added a Qt component modernization reference and execution-plan template.
+- Added routing evaluations that distinguish native Qt modernization from generic framework design and safe incremental refactoring.
+- Upgraded the architect profile from user-stated Qt-tool capability to repository-verified evidence.
+
 ## 5.0.0
 
 ### Documentation architecture

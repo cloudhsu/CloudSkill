@@ -9,7 +9,7 @@ The recurring capability is establishing system boundaries, authoritative state,
 ## Evidence levels
 
 - **Source-verified:** reviewed source and executable tests.
-- **Repository-verified:** public repository/history inspected, but not necessarily rebuilt.
+- **Repository-verified:** public or supplied repository/history inspected, but not necessarily rebuilt end to end.
 - **Document-verified:** detailed controlled specifications.
 - **User-stated:** supplied by the user without source verification in this repository.
 
@@ -17,19 +17,19 @@ Historical source demonstrates capability; it does not automatically define curr
 
 ## Capability matrix
 
-| Capability | Bento system | CloudBox | Qt IC tools | Equipment systems |
+| Capability | Bento system | CloudBox | Qt component/tool suites | Equipment systems |
 |---|---|---|---|---|
-| Frontend architecture | Source-verified | Engine UI/components | User-stated | Current practice |
-| Backend/application services | Source-verified | Not primary | Tool services | Current practice |
-| Client/Server and API contracts | Source-verified | Native service boundaries | User-stated | Current practice |
-| Data, transaction, migration, history | Source-verified | Resource/save state | User-stated | Recipe/history/state |
-| Cross-platform native architecture | Deployment targets | Repository-verified | User-stated | Windows/IPC focus |
-| Rendering and engine lifecycle | Not primary | Repository-verified | Not primary | Analogies only |
-| Device/hardware abstraction | Not primary | Platform adapters | User-stated | Current practice |
-| Recovery and lifecycle | Persistence recovery | App/resource lifecycle | User-stated | Current practice |
-| Deployment and operations | Source-verified | Multi-platform builds | User-stated | Current practice |
-| Safe incremental refactoring | Source-verified | Historical evolution | User-stated | Current practice |
-| Quality/process governance | Source-verified | Historical release evidence | User-stated | Current practice |
+| Frontend architecture | Source-verified | Engine UI/components | Repository-verified | Current practice |
+| Backend/application services | Source-verified | Not primary | Tool services and component hosts | Current practice |
+| Client/Server and API contracts | Source-verified | Native service boundaries | Repository-verified utility/network components | Current practice |
+| Data, transaction, migration, history | Source-verified | Resource/save state | Logging/configuration/history utilities | Recipe/history/state |
+| Cross-platform native architecture | Deployment targets | Repository-verified | Repository-verified Qt/OpenCV/Designer suites | Windows/IPC focus |
+| Rendering and engine lifecycle | Not primary | Repository-verified | Custom paint, Qt Charts, Qt3D, camera/video lifecycle | Analogies only |
+| Device/hardware abstraction | Not primary | Platform adapters | Camera/OpenCV and native integration | Current practice |
+| Recovery and lifecycle | Persistence recovery | App/resource lifecycle | Capture, plug-in and QObject ownership evidence | Current practice |
+| Deployment and operations | Source-verified | Multi-platform builds | qmake/deployment plug-ins; modernization required | Current practice |
+| Safe incremental refactoring | Source-verified | Historical evolution | Duplicate-source and compatibility migration case | Current practice |
+| Quality/process governance | Source-verified | Historical release evidence | Characterization/build-matrix needs identified | Current practice |
 
 ## Demonstrated working style
 
@@ -50,3 +50,4 @@ Detailed evidence:
 
 - `../evidence/BENTO_SYSTEM.md`
 - `../evidence/CLOUDBOX_ENGINE.md`
+- `../evidence/QT_COMPONENT_SUITE.md`

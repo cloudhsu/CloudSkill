@@ -1,6 +1,6 @@
 # CloudSkill
 
-**Current version: 5.0.0**
+**Current version: 5.1.0**
 
 CloudSkill is a portable set of software/system architecture skills and operating guidance for **OpenAI Codex** and **Claude Code**.
 
@@ -16,7 +16,7 @@ See [INSTALL.md](INSTALL.md) for user-level and project-level installation on Wi
 |---|---|
 | `architecture-review` | Reconstruct and compare architecture decisions |
 | `application-client-server-architecture` | Frontend/backend, API, RBAC, transactions, data, UI, deployment |
-| `cross-platform-native-architecture` | Qt/native platforms, OS integration, ABI, hardware, packaging |
+| `cross-platform-native-architecture` | Qt/native platforms, Designer plug-ins, OS integration, ABI, hardware, packaging, legacy modernization |
 | `cross-platform-engine-architecture` | Director/scene, update/render, graphics, resources, platform adapters |
 | `framework-design` | Frameworks, SDKs, plug-ins, product-line architecture |
 | `safe-incremental-refactoring` | Brownfield modernization and compatibility-preserving decomposition |
