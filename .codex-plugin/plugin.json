@@ -1,0 +1,39 @@
+{
+  "name": "cloudbox",
+  "version": "5.5.2",
+  "description": "Architecture, equipment-domain, quality, governance, refactoring, and Eval workflows for Codex and ChatGPT.",
+  "author": {
+    "name": "CloudBox"
+  },
+  "homepage": "https://github.com/cloudhsu/CloudSkill",
+  "repository": "https://github.com/cloudhsu/CloudSkill",
+  "keywords": [
+    "architecture",
+    "equipment",
+    "domain-modeling",
+    "quality",
+    "evals",
+    "codex",
+    "claude-code"
+  ],
+  "skills": "./.agents/skills/",
+  "interface": {
+    "displayName": "CloudBox",
+    "shortDescription": "Architecture and equipment engineering skills",
+    "longDescription": "Reusable architecture, equipment-domain, modeling, refactoring, quality, governance, documentation, and interaction-derived Eval workflows.",
+    "developerName": "CloudBox",
+    "category": "Productivity",
+    "capabilities": [
+      "Read",
+      "Write"
+    ],
+    "websiteURL": "https://github.com/cloudhsu/CloudSkill",
+    "defaultPrompt": [
+      "Use CloudBox to select the smallest sufficient engineering skills for this task.",
+      "Use CloudBox to review this architecture, its failure boundaries, and its verification evidence."
+    ],
+    "brandColor": "#00A2EA",
+    "composerIcon": "./assets/cloudbox-icon.png",
+    "logo": "./assets/cloudbox-logo.png"
+  }
+}

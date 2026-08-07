@@ -54,7 +54,7 @@ for pattern in ('.local/', '.cloudskill/config.local.json', '*.session.jsonl', '
         fail(f'.gitignore missing private pattern: {pattern}')
 
 ps_text = (ROOT / 'scripts/install.ps1').read_text(encoding='utf-8')
-for marker in ('CloudSkillRepoPath', 'EvalInboxPath', 'SkipLocalConfig', 'config.local.json', 'sensitive-terms.local.txt'):
+for marker in ('CloudSkillRepoPath', 'EvalInboxPath', 'SkipLocalConfig', 'ConfigOnly', 'config.local.json', 'sensitive-terms.local.txt'):
     if marker not in ps_text:
         fail(f'PowerShell installer missing local-config marker: {marker}')
 
@@ -82,6 +82,21 @@ with tempfile.TemporaryDirectory(prefix='cloudskill-interaction-') as tmp_name:
     for folder in ('candidates', 'manual-review', 'processed', 'rejected'):
         if not (inbox / folder).is_dir():
             fail(f'installer did not create Eval Inbox queue: {folder}')
+
+
+    config_only_project = tmp / 'config-only-project'
+    config_only_inbox = tmp / 'config-only-inbox'
+    config_only_project.mkdir()
+    run([
+        'bash', 'scripts/install.sh', '--scope', 'project', '--project-path', str(config_only_project),
+        '--cloudskill-repo-path', str(ROOT), '--eval-inbox-path', str(config_only_inbox), '--config-only',
+    ], cwd=ROOT, env=env)
+    if not (config_only_project / '.cloudskill/config.local.json').is_file():
+        fail('config-only setup did not create project config')
+    if (config_only_project / '.agents/skills').exists() or (config_only_project / '.claude/skills').exists():
+        fail('config-only setup copied standalone skills')
+    if (config_only_project / 'AGENTS.md').exists() or (config_only_project / 'CLAUDE.md').exists():
+        fail('config-only setup wrote guidance files')
 
     if config_path.is_file():
         config = json.loads(config_path.read_text(encoding='utf-8'))
@@ -137,7 +152,7 @@ with tempfile.TemporaryDirectory(prefix='cloudskill-interaction-') as tmp_name:
         if result.returncode == 0:
             fail('capture helper accepted a raw transcript field')
 
-print('Validated local repository config, private Inbox setup, positive capture, manual-review routing, and raw-transcript rejection')
+print('Validated full and config-only setup, private Inbox setup, positive capture, manual-review routing, and raw-transcript rejection')
 for error in errors:
     print(f'ERROR: {error}')
 sys.exit(1 if errors else 0)

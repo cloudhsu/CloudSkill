@@ -1,6 +1,6 @@
-# CloudSkill 安裝指南
+# CloudBox／CloudSkill 安裝指南
 
-CloudSkill 的 `.agents/skills/` 是 Codex 與 Claude Code 的 canonical Skill 來源。建議先將 Repository Clone 到固定本機路徑，再由各工作專案從該路徑安裝、更新並寫入私人 Eval Inbox。
+CloudBox 是外掛顯示品牌，`CloudSkill` 是 Repository 與既有內部相容名稱。`.agents/skills/` 是 Codex、ChatGPT 與 Claude Code 共用的 canonical Skill 來源。可選擇 Plugin 模式或既有 Standalone 模式；同一個 Host 不要同時載入兩份 CloudBox 技能。
 
 ## 1. Clone 到固定本機路徑
 
@@ -18,14 +18,48 @@ git clone https://github.com/cloudhsu/CloudSkill.git ~/Git/CloudSkill
 
 安裝器不保存 GitHub Token 或其他憑證，只保存本機 Repository 與 Eval Inbox 絕對路徑。
 
-## 2. 安裝模式
+
+## 2. Plugin 模式（建議）
+
+完整說明見 [docs/CLOUDBOX_PLUGIN.md](docs/CLOUDBOX_PLUGIN.md)。
+
+### Codex／ChatGPT
+
+```powershell
+codex plugin marketplace add D:\Git\CloudSkill
+```
+
+重新整理 Plugins Directory，在 **CloudBox** marketplace 安裝 **CloudBox**。OpenAI manifest 會使用 CloudBox 圖示、Logo 與品牌色。
+
+### Claude Code
+
+```powershell
+claude plugin marketplace add D:\Git\CloudSkill
+claude plugin install cloudbox@cloudbox-marketplace --scope user
+claude plugin list
+```
+
+安裝後執行 `/reload-plugins`。Claude Code 的明確技能名稱為 `/cloudbox:<skill-name>`。
+
+Plugin 模式可與 Superpowers 等其他 Plugin 同時安裝，但應在 Host 中停用不需要的 Plugin，或明確劃分 generic development workflow 與 CloudBox domain/architecture responsibility。CloudBox 不會自行修改其他 Plugin 的啟用狀態。
+
+Plugin 模式若要使用 `整理成正向案例`／`整理成負向案例`，只建立本機設定與 Eval Inbox，不複製第二份技能：
+
+```powershell
+& "D:\Git\CloudSkill\scripts\install.ps1" `
+  -Scope user `
+  -CloudSkillRepoPath "D:\Git\CloudSkill" `
+  -ConfigOnly
+```
+
+## 3. Standalone 安裝模式
 
 - **User scope**：同一位使用者的多個專案共用 Skills 與 `~/.cloudskill/config.json`。
 - **Project scope**：只對指定專案生效，並寫入不應提交的 `<project>/.cloudskill/config.local.json`。
 - **Skills-only**：使用 `-SkipGuidance` / `--skip-guidance`，不匯入個人架構 Guidance。
 - **No local config**：使用 `-SkipLocalConfig` / `--skip-local-config`；此模式無法使用簡短的正向／負向案例收集流程。
 
-## 3. Windows PowerShell
+## 4. Windows PowerShell
 
 ### 從固定本機 CloudSkill 安裝到目前 Project
 
@@ -63,7 +97,7 @@ User scope：
   -CloudSkillRepoPath "D:\Git\CloudSkill"
 ```
 
-## 4. macOS / Linux / WSL / Git Bash
+## 5. macOS / Linux / WSL / Git Bash
 
 ```bash
 chmod +x ~/Git/CloudSkill/scripts/install.sh
@@ -85,7 +119,7 @@ chmod +x ~/Git/CloudSkill/scripts/install.sh
   --eval-inbox-path ~/Private/CloudSkill-Eval-Inbox
 ```
 
-## 5. 安裝結果
+## 6. 安裝結果
 
 ### Codex
 
@@ -103,7 +137,7 @@ Project: <repo>/.claude/skills/<skill-name>/SKILL.md
 
 完整安裝時，Codex 使用受管理的 `AGENTS.md` 區塊；Claude Code 透過 `CLAUDE.md` 匯入同一份 Guidance。安裝器只替換 CloudSkill 同名技能，並保留受管理區塊外的既有內容。
 
-## 6. 本機設定與 Eval Inbox
+## 7. 本機設定與 Eval Inbox
 
 Project scope 設定：
 
@@ -137,7 +171,7 @@ Inbox 結構：
 
 `.local/` 與 `config.local.json` 均由 Git 忽略。請將公司、客戶、專案、產品、設備、人員與其他私人識別字加入 `sensitive-terms.local.txt`；不要將該檔案提交。
 
-## 7. 日常正向與負向案例
+## 8. 日常正向與負向案例
 
 在已設定的專案內，直接對 Codex 或 Claude Code 說：
 
@@ -161,7 +195,7 @@ Agent 應使用 `developing-skills`：
 
 缺少有效設定時，Agent 應停止並要求重新執行安裝，不得自行猜測寫入位置。
 
-## 8. 批次整理到 CloudSkill
+## 9. 批次整理到 CloudSkill
 
 累積候選案例後，在 CloudSkill Repository 啟動 Agent：
 
@@ -178,7 +212,7 @@ codex
 
 正式 `evals/` 只接受已審查、可公開、可重播的案例。候選案例不是行為測試 PASS，也不應直接原封不動提交。
 
-## 9. 更新
+## 10. 更新
 
 ```bash
 cd /path/to/CloudSkill
@@ -187,7 +221,7 @@ git pull
 
 回到工作專案後重新執行原安裝命令。安裝器會更新 Skills、Guidance 受管理區塊、本機版本與路徑設定，但不刪除 Inbox 內容或非 CloudSkill 技能。
 
-## 10. 驗證
+## 11. 驗證
 
 ```bash
 python scripts/run_all_checks.py
@@ -208,9 +242,13 @@ Claude Code：
 /developing-skills
 ```
 
-## 11. 官方參考
+## 12. 官方參考
 
+- OpenAI Codex Plugins: https://developers.openai.com/codex/build-plugins
+- OpenAI Plugin Packaging: https://developers.openai.com/plugins/build/plugins
 - OpenAI Codex Skills: https://developers.openai.com/codex/build-skills
 - OpenAI Codex AGENTS.md: https://developers.openai.com/codex/agent-configuration/agents-md
+- Anthropic Claude Code Plugins: https://code.claude.com/docs/zh-TW/plugins
+- Anthropic Claude Code Plugin Marketplaces: https://code.claude.com/docs/en/plugin-marketplaces
 - Anthropic Claude Code Skills: https://code.claude.com/docs/zh-TW/skills
 - Anthropic Claude Code Memory/CLAUDE.md: https://docs.anthropic.com/zh-CN/docs/claude-code/memory

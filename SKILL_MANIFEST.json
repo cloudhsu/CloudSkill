@@ -1,5 +1,5 @@
 {
-  "version": "5.5.1",
+  "version": "5.5.2",
   "skills": [
     {
       "name": "agent-development-process",
@@ -99,9 +99,9 @@
     },
     {
       "name": "using-cloudskill",
-      "description": "Use when starting a task that may require one or more CloudSkill skills, especially when routing, ordering, or composing process, domain-knowledge, architecture, change, quality, and handoff skills is non-obvious.",
+      "description": "Use when starting a task that may require one or more CloudBox skills, especially when routing, ordering, composing, or isolating process, domain-knowledge, architecture, change, quality, and handoff skills is non-obvious.",
       "path": ".agents/skills/using-cloudskill/SKILL.md",
-      "file_count": 2
+      "file_count": 3
     }
   ]
 }

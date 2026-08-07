@@ -8,6 +8,7 @@ CLOUDSKILL_REPO_PATH=""
 EVAL_INBOX_PATH=""
 SKIP_GUIDANCE=0
 SKIP_LOCAL_CONFIG=0
+CONFIG_ONLY=0
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -18,6 +19,7 @@ while [[ $# -gt 0 ]]; do
     --eval-inbox-path) EVAL_INBOX_PATH="$2"; shift 2 ;;
     --skip-guidance) SKIP_GUIDANCE=1; shift ;;
     --skip-local-config) SKIP_LOCAL_CONFIG=1; shift ;;
+    --config-only) CONFIG_ONLY=1; shift ;;
     -h|--help)
       cat <<'EOF'
 Usage: ./scripts/install.sh [options]
@@ -28,6 +30,7 @@ Usage: ./scripts/install.sh [options]
   --eval-inbox-path PATH
   --skip-guidance
   --skip-local-config
+  --config-only
 EOF
       exit 0 ;;
     *) echo "Unknown argument: $1" >&2; exit 2 ;;
@@ -36,6 +39,7 @@ done
 
 [[ "$TOOL" =~ ^(codex|claude|both)$ ]] || { echo "Invalid --tool" >&2; exit 2; }
 [[ "$SCOPE" =~ ^(user|project)$ ]] || { echo "Invalid --scope" >&2; exit 2; }
+[[ $CONFIG_ONLY -eq 0 || $SKIP_LOCAL_CONFIG -eq 0 ]] || { echo "--config-only cannot be combined with --skip-local-config" >&2; exit 2; }
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SCRIPT_REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
@@ -125,38 +129,41 @@ path.write_text(json.dumps(config, ensure_ascii=False, indent=2) + '\n', encodin
 PYCONFIG
 }
 
+if [[ "$SCOPE" == "project" ]]; then PROJECT_PATH="$(cd "$PROJECT_PATH" && pwd)"; fi
+
 INSTALL_CODEX=0
 INSTALL_CLAUDE=0
 [[ "$TOOL" == "codex" || "$TOOL" == "both" ]] && INSTALL_CODEX=1
 [[ "$TOOL" == "claude" || "$TOOL" == "both" ]] && INSTALL_CLAUDE=1
 
-if [[ "$SCOPE" == "user" ]]; then
-  if [[ $INSTALL_CODEX -eq 1 ]]; then
-    copy_skills "$HOME/.agents/skills"
-    [[ $SKIP_GUIDANCE -eq 1 ]] || set_managed_block "$HOME/.codex/AGENTS.md" "$REPO_ROOT/AGENTS.md"
-  fi
-  if [[ $INSTALL_CLAUDE -eq 1 ]]; then
-    copy_skills "$HOME/.claude/skills"
-    if [[ $SKIP_GUIDANCE -eq 0 ]]; then
-      mkdir -p "$HOME/.claude/cloudskill"
-      cp "$REPO_ROOT/AGENTS.md" "$HOME/.claude/cloudskill/AGENTS.md"
-      tmp_import="$(mktemp)"
-      printf '%s\n' '@~/.claude/cloudskill/AGENTS.md' > "$tmp_import"
-      set_managed_block "$HOME/.claude/CLAUDE.md" "$tmp_import"
-      rm -f "$tmp_import"
+if [[ $CONFIG_ONLY -eq 0 ]]; then
+  if [[ "$SCOPE" == "user" ]]; then
+    if [[ $INSTALL_CODEX -eq 1 ]]; then
+      copy_skills "$HOME/.agents/skills"
+      [[ $SKIP_GUIDANCE -eq 1 ]] || set_managed_block "$HOME/.codex/AGENTS.md" "$REPO_ROOT/AGENTS.md"
     fi
-  fi
-else
-  PROJECT_PATH="$(cd "$PROJECT_PATH" && pwd)"
-  [[ $INSTALL_CODEX -eq 1 ]] && copy_skills "$PROJECT_PATH/.agents/skills"
-  [[ $INSTALL_CLAUDE -eq 1 ]] && copy_skills "$PROJECT_PATH/.claude/skills"
-  if [[ $SKIP_GUIDANCE -eq 0 ]]; then
-    set_managed_block "$PROJECT_PATH/AGENTS.md" "$REPO_ROOT/AGENTS.md"
     if [[ $INSTALL_CLAUDE -eq 1 ]]; then
-      tmp_import="$(mktemp)"
-      printf '%s\n' '@AGENTS.md' > "$tmp_import"
-      set_managed_block "$PROJECT_PATH/CLAUDE.md" "$tmp_import"
-      rm -f "$tmp_import"
+      copy_skills "$HOME/.claude/skills"
+      if [[ $SKIP_GUIDANCE -eq 0 ]]; then
+        mkdir -p "$HOME/.claude/cloudskill"
+        cp "$REPO_ROOT/AGENTS.md" "$HOME/.claude/cloudskill/AGENTS.md"
+        tmp_import="$(mktemp)"
+        printf '%s\n' '@~/.claude/cloudskill/AGENTS.md' > "$tmp_import"
+        set_managed_block "$HOME/.claude/CLAUDE.md" "$tmp_import"
+        rm -f "$tmp_import"
+      fi
+    fi
+  else
+    [[ $INSTALL_CODEX -eq 1 ]] && copy_skills "$PROJECT_PATH/.agents/skills"
+    [[ $INSTALL_CLAUDE -eq 1 ]] && copy_skills "$PROJECT_PATH/.claude/skills"
+    if [[ $SKIP_GUIDANCE -eq 0 ]]; then
+      set_managed_block "$PROJECT_PATH/AGENTS.md" "$REPO_ROOT/AGENTS.md"
+      if [[ $INSTALL_CLAUDE -eq 1 ]]; then
+        tmp_import="$(mktemp)"
+        printf '%s\n' '@AGENTS.md' > "$tmp_import"
+        set_managed_block "$PROJECT_PATH/CLAUDE.md" "$tmp_import"
+        rm -f "$tmp_import"
+      fi
     fi
   fi
 fi
@@ -181,4 +188,4 @@ if [[ $SKIP_LOCAL_CONFIG -eq 0 ]]; then
   echo "CloudSkill Eval Inbox: $EVAL_INBOX_PATH"
 fi
 
-echo "CloudSkill installation complete: tool=$TOOL scope=$SCOPE skipGuidance=$SKIP_GUIDANCE skipLocalConfig=$SKIP_LOCAL_CONFIG"
+echo "CloudSkill setup complete: tool=$TOOL scope=$SCOPE configOnly=$CONFIG_ONLY skipGuidance=$SKIP_GUIDANCE skipLocalConfig=$SKIP_LOCAL_CONFIG"

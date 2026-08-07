@@ -116,6 +116,59 @@
         "agent treats domain knowledge, architecture and data modeling as one broad skill"
       ],
       "review_notes": "Review routing boundaries and execution order; keyword overlap alone is insufficient."
+    },
+    {
+      "id": "USE-BEH-006",
+      "skill": "using-cloudskill",
+      "type": "application",
+      "prompt": "CloudBox and Superpowers are both installed. For this equipment architecture task, use CloudBox only and do not run Superpowers workflows.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "honors the explicit CloudBox-only task scope",
+        "uses one CloudBox router and the smallest sufficient downstream skills",
+        "distinguishes task-level isolation from host-level plugin disablement",
+        "reports another plugin as disabled only when the host setting was actually changed and verified"
+      ],
+      "forbidden_behaviors": [
+        "runs both top-level routing systems",
+        "silently edits plugin configuration",
+        "claims Superpowers was disabled merely because the user requested CloudBox-only behavior"
+      ],
+      "required_artifacts": [
+        "ordered CloudBox skill set"
+      ],
+      "baseline_expected_failure": [
+        "agent loads competing mandatory workflows or overclaims plugin state"
+      ],
+      "review_notes": "Review routing ownership, host-state evidence, and task-level isolation; keyword presence alone is insufficient."
+    },
+    {
+      "id": "USE-BEH-007",
+      "skill": "using-cloudskill",
+      "type": "application",
+      "prompt": "Use an external workflow plugin for planning and TDD, and CloudBox for semiconductor domain interpretation, equipment architecture, and state modeling. Define the execution order.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "assigns generic planning and TDD to the external workflow plugin",
+        "assigns domain interpretation architecture and modeling to CloudBox",
+        "uses one top-level router before explicit non-overlapping companion invocation",
+        "avoids duplicate planning review and verification lifecycles"
+      ],
+      "forbidden_behaviors": [
+        "lets both plugins own the same routing decision",
+        "treats every installed skill as mandatory",
+        "omits equipment-specific domain and authority concerns"
+      ],
+      "required_artifacts": [
+        "plugin responsibility split",
+        "ordered minimal skill set"
+      ],
+      "baseline_expected_failure": [
+        "agent composes plugins by name rather than by responsibility boundary"
+      ],
+      "review_notes": "Review responsibility ownership and duplicate workflow avoidance."
     }
   ]
 }

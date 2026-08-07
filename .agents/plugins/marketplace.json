@@ -1,0 +1,20 @@
+{
+  "name": "cloudbox-marketplace",
+  "interface": {
+    "displayName": "CloudBox"
+  },
+  "plugins": [
+    {
+      "name": "cloudbox",
+      "source": {
+        "source": "local",
+        "path": "./"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}

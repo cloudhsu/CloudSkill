@@ -1,0 +1,20 @@
+{
+  "name": "cloudbox",
+  "displayName": "CloudBox",
+  "version": "5.5.2",
+  "description": "Architecture, equipment-domain, quality, governance, refactoring, and Eval workflows for Claude Code.",
+  "author": {
+    "name": "CloudBox"
+  },
+  "homepage": "https://github.com/cloudhsu/CloudSkill",
+  "repository": "https://github.com/cloudhsu/CloudSkill",
+  "keywords": [
+    "architecture",
+    "equipment",
+    "domain-modeling",
+    "quality",
+    "evals",
+    "claude-code"
+  ],
+  "skills": "./.agents/skills/"
+}

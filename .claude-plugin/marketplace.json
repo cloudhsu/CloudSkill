@@ -1,0 +1,15 @@
+{
+  "name": "cloudbox-marketplace",
+  "owner": {
+    "name": "CloudBox"
+  },
+  "description": "CloudBox architecture and equipment engineering workflows.",
+  "plugins": [
+    {
+      "name": "cloudbox",
+      "source": "./",
+      "description": "Architecture, equipment-domain, quality, governance, refactoring, and Eval workflows.",
+      "category": "Development"
+    }
+  ]
+}

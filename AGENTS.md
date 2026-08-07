@@ -26,7 +26,7 @@ Act as an architecture peer and implementation assistant.
 
 ## Skill use and composition
 
-Use `using-cloudskill` when routing or composition is non-obvious. Select the smallest sufficient skill set before substantial analysis or modification.
+CloudBox is the user-facing plugin brand; `CloudSkill` remains the repository and compatibility name. Use `using-cloudskill` when routing or composition is non-obvious. Select the smallest sufficient skill set before substantial analysis or modification.
 
 When multiple skills apply, use this order:
 
@@ -37,6 +37,8 @@ When multiple skills apply, use this order:
 5. Documentation and handoff.
 
 Do not force skills onto trivial tasks. An explicitly requested skill takes priority unless it conflicts with higher-level instructions. Use `developing-skills` for every new or materially changed skill and require RED baseline evidence before claiming behavior improvement.
+
+When CloudBox coexists with Superpowers or another workflow plugin, use one top-level router. Honor an explicit CloudBox-only scope without claiming host settings changed; in hybrid mode assign generic implementation workflow to the other plugin and domain/architecture/modeling/quality responsibilities to CloudBox. Do not load a standalone CloudBox copy together with the CloudBox plugin.
 
 ## Core architecture rules
 

@@ -1,14 +1,16 @@
-# CloudSkill
+# CloudBox
 
-**Current version: 5.5.1**
+<p align="center"><img src="assets/cloudbox-logo.png" width="160" alt="CloudBox logo"></p>
 
-CloudSkill is a portable set of software/system architecture skills and operating guidance for **OpenAI Codex** and **Claude Code**.
+**Current version: 5.5.2**
 
-The same canonical `SKILL.md` directories are used for both tools. Codex installs them under `.agents/skills`; Claude Code installs them under `.claude/skills`.
+CloudBox is the user-facing plugin brand for the `CloudSkill` repository: a portable set of software/system architecture skills and operating guidance for **OpenAI Codex**, **ChatGPT**, and **Claude Code**.
+
+The same canonical `.agents/skills/` directories are used by both plugin manifests and by the standalone installers. Existing skill IDs remain stable.
 
 ## Install
 
-See [INSTALL.md](INSTALL.md) for user-level and project-level installation on Windows, macOS, and Linux.
+CloudBox supports Codex/ChatGPT and Claude Code plugins, plus the existing standalone user/project installation. See [INSTALL.md](INSTALL.md) and [docs/CLOUDBOX_PLUGIN.md](docs/CLOUDBOX_PLUGIN.md).
 
 
 ## Interaction-derived Eval capture
@@ -41,6 +43,10 @@ A local CloudSkill clone can be registered during installation. The installer st
 
 ```text
 CloudSkill/
+├── .codex-plugin/           # Codex and ChatGPT plugin manifest
+├── .claude-plugin/          # Claude Code plugin manifest and marketplace
+├── assets/                  # CloudBox logo and icon
+├── .agents/plugins/         # Codex and ChatGPT marketplace
 ├── .agents/skills/          # Canonical skill source
 ├── AGENTS.md                # Codex/shared architecture guidance
 ├── CLAUDE.md                # Claude Code adapter importing AGENTS.md

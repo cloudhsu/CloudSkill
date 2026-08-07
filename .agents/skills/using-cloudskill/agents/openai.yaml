@@ -1,4 +1,5 @@
 interface:
-  display_name: "CloudSkill 路由"
-  short_description: "選擇、排序並組合最小充分的 CloudSkill 技能"
-  default_prompt: "Use $using-cloudskill to select and order the relevant CloudSkill skills for this task."
+  display_name: "CloudBox 路由"
+  short_description: "選擇、排序並組合最小充分的 CloudBox 技能"
+  brand_color: "#00A2EA"
+  default_prompt: "Use $using-cloudskill to select and order the relevant CloudBox skills for this task."

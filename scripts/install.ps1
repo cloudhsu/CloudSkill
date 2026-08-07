@@ -14,7 +14,9 @@ param(
 
     [switch]$SkipGuidance,
 
-    [switch]$SkipLocalConfig
+    [switch]$SkipLocalConfig,
+
+    [switch]$ConfigOnly
 )
 
 $ErrorActionPreference = 'Stop'
@@ -118,39 +120,43 @@ function Write-LocalConfig {
 $installCodex = $Tool -in @('codex', 'both')
 $installClaude = $Tool -in @('claude', 'both')
 $guidance = Get-Content (Join-Path $RepoRoot 'AGENTS.md') -Raw -Encoding UTF8
-$project = $null
+$project = if ($Scope -eq 'project') { (Resolve-Path $ProjectPath).Path } else { $null }
 
-if ($Scope -eq 'user') {
-    if ($installCodex) {
-        Copy-CloudSkillSet (Join-Path $HOME '.agents\skills')
-        if (-not $SkipGuidance) {
-            Set-ManagedBlock (Join-Path $HOME '.codex\AGENTS.md') $guidance
+if ($ConfigOnly -and $SkipLocalConfig) {
+    throw 'ConfigOnly cannot be combined with SkipLocalConfig.'
+}
+
+if (-not $ConfigOnly) {
+    if ($Scope -eq 'user') {
+        if ($installCodex) {
+            Copy-CloudSkillSet (Join-Path $HOME '.agents\skills')
+            if (-not $SkipGuidance) {
+                Set-ManagedBlock (Join-Path $HOME '.codex\AGENTS.md') $guidance
+            }
         }
-    }
 
-    if ($installClaude) {
-        Copy-CloudSkillSet (Join-Path $HOME '.claude\skills')
-        if (-not $SkipGuidance) {
-            $cloudSkillHome = Join-Path $HOME '.claude\cloudskill'
-            New-Item -ItemType Directory -Force $cloudSkillHome | Out-Null
-            Set-Content (Join-Path $cloudSkillHome 'AGENTS.md') $guidance -Encoding UTF8
-            Set-ManagedBlock (Join-Path $HOME '.claude\CLAUDE.md') '@~/.claude/cloudskill/AGENTS.md'
-        }
-    }
-} else {
-    $project = (Resolve-Path $ProjectPath).Path
-
-    if ($installCodex) {
-        Copy-CloudSkillSet (Join-Path $project '.agents\skills')
-    }
-    if ($installClaude) {
-        Copy-CloudSkillSet (Join-Path $project '.claude\skills')
-    }
-
-    if (-not $SkipGuidance) {
-        Set-ManagedBlock (Join-Path $project 'AGENTS.md') $guidance
         if ($installClaude) {
-            Set-ManagedBlock (Join-Path $project 'CLAUDE.md') '@AGENTS.md'
+            Copy-CloudSkillSet (Join-Path $HOME '.claude\skills')
+            if (-not $SkipGuidance) {
+                $cloudSkillHome = Join-Path $HOME '.claude\cloudskill'
+                New-Item -ItemType Directory -Force $cloudSkillHome | Out-Null
+                Set-Content (Join-Path $cloudSkillHome 'AGENTS.md') $guidance -Encoding UTF8
+                Set-ManagedBlock (Join-Path $HOME '.claude\CLAUDE.md') '@~/.claude/cloudskill/AGENTS.md'
+            }
+        }
+    } else {
+        if ($installCodex) {
+            Copy-CloudSkillSet (Join-Path $project '.agents\skills')
+        }
+        if ($installClaude) {
+            Copy-CloudSkillSet (Join-Path $project '.claude\skills')
+        }
+
+        if (-not $SkipGuidance) {
+            Set-ManagedBlock (Join-Path $project 'AGENTS.md') $guidance
+            if ($installClaude) {
+                Set-ManagedBlock (Join-Path $project 'CLAUDE.md') '@AGENTS.md'
+            }
         }
     }
 }
@@ -175,4 +181,4 @@ if (-not $SkipLocalConfig) {
     Write-Host "CloudSkill Eval Inbox: $inbox"
 }
 
-Write-Host "CloudSkill installation complete: tool=$Tool scope=$Scope skipGuidance=$SkipGuidance skipLocalConfig=$SkipLocalConfig"
+Write-Host "CloudSkill setup complete: tool=$Tool scope=$Scope configOnly=$ConfigOnly skipGuidance=$SkipGuidance skipLocalConfig=$SkipLocalConfig"

@@ -1,9 +1,9 @@
 ---
 name: using-cloudskill
-description: Use when starting a task that may require one or more CloudSkill skills, especially when routing, ordering, or composing process, domain-knowledge, architecture, change, quality, and handoff skills is non-obvious.
+description: Use when starting a task that may require one or more CloudBox skills, especially when routing, ordering, composing, or isolating process, domain-knowledge, architecture, change, quality, and handoff skills is non-obvious.
 ---
 
-# Using CloudSkill
+# Using CloudBox
 
 ## Purpose
 
@@ -53,6 +53,16 @@ Examples:
 - Do not use a repository-governance skill to design the AI-agent product itself.
 - Do not use process tailoring to replace code review, ownership decisions, or technical verification.
 - If no skill applies, proceed normally instead of inventing a match.
+
+## Plugin coexistence
+
+Read `references/plugin-coexistence.md` when CloudBox is installed with Superpowers or another workflow plugin.
+
+- Use only one top-level routing or orchestration skill for a task.
+- An explicit CloudBox-only request excludes other optional workflow plugins from the current task, but does not prove their host setting was changed.
+- Do not modify another plugin's enabled state unless the user explicitly requests that host-level action and the result can be verified.
+- In hybrid mode, assign generic implementation workflow to the external plugin and domain, architecture, modeling, migration, quality, or evidence decisions to CloudBox.
+- Do not enable both the CloudBox plugin and a standalone copy of the same CloudBox skills in one host.
 
 ## Handoff
 

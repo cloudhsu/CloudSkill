@@ -1,5 +1,25 @@
 # Changelog
 
+## 5.5.2
+
+### CloudBox dual-plugin packaging
+
+- Added a `cloudbox` plugin manifest for Codex/ChatGPT and a separate Claude Code plugin manifest, both pointing to the existing canonical `.agents/skills/` source instead of duplicating skills.
+- Added local/Git marketplace catalogs for both plugin systems and documented installation, update, namespacing, and standalone-versus-plugin collision rules.
+- Added configuration-only installer mode so plugin users can configure the private Eval Inbox without copying duplicate standalone skills or guidance.
+- Added the supplied CloudBox ICO plus generated PNG icon and logo assets; the OpenAI manifest exposes the logo, composer icon, and `#00A2EA` brand color.
+
+### Plugin coexistence and branding
+
+- Rebranded user-facing routing metadata to CloudBox while preserving the `CloudSkill` repository name, configuration paths, and stable skill IDs.
+- Added CloudBox-only and hybrid coexistence rules for Superpowers or other workflow plugins, including one-router ownership and truthful reporting of host-level enable/disable state.
+- Added routing and behavior regression cases for explicit CloudBox-only use, hybrid responsibility separation, and host plugin-management requests.
+
+### Validation
+
+- Added deterministic validation for both plugin manifests, both marketplace catalogs, canonical skill paths, matching versions, and PNG branding assets.
+- Added plugin validation to the standard check runner and package-required-file audit.
+
 ## 5.5.1
 
 ### Local repository installation and configuration
