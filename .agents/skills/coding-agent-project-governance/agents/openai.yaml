@@ -1,0 +1,4 @@
+interface:
+  display_name: "Coding Agent 專案治理"
+  short_description: "建立 AGENTS、風險路由、Sub Agent、Git、測試、文件與發版規範"
+  default_prompt: "Use $coding-agent-project-governance to create or review this repository's coding-agent operating model."

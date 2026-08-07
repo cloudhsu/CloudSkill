@@ -1,9 +1,12 @@
 ---
 name: agent-development-process
-description: Specify, design, implement, evaluate, harden, release, or improve an AI agent, coding agent, tool-using agent, workflow agent, or multi-agent system. Use when autonomy, tools, prompts/instructions, context, traces, evaluations, guardrails, approvals, or production operation are involved. Do not treat a successful demo as release evidence.
+description: Build or improve an AI-agent product or agentic system: task contract, autonomy, tools, context, memory, orchestration, evals, traces, guardrails, hardening, release, and operations. Do not use merely to govern coding agents working in a software repository.
 ---
 
-# Agent Development Process
+# AI-agent System Development Process
+
+This skill governs the product engineering of an AI agent or agentic system. For repository rules controlling Codex or other coding agents, use `coding-agent-project-governance`.
+
 
 Follow `references/agent-lifecycle.md`.
 

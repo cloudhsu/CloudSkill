@@ -1,6 +1,19 @@
 # External References
 
-These references support the structure of this pack. Organization-specific standards and licensed copies remain authoritative.
+These references support the pack structure. Organization-specific standards and licensed copies remain authoritative.
+
+## OpenAI Codex and Skills
+
+- Build skills  
+  https://developers.openai.com/codex/build-skills
+- Custom instructions with AGENTS.md  
+  https://developers.openai.com/codex/agent-configuration/agents-md
+- Using PLANS.md for multi-hour problem solving  
+  https://developers.openai.com/cookbook/articles/codex_exec_plans
+- Testing Agent Skills Systematically with Evals  
+  https://developers.openai.com/blog/eval-skills
+- Build an Agent Improvement Loop with Traces, Evals, and Codex  
+  https://developers.openai.com/cookbook/examples/agents_sdk/agent_improvement_loop
 
 ## ISO
 
@@ -9,13 +22,6 @@ These references support the structure of this pack. Organization-specific stand
 - ISO/IEC 25019:2023 — Quality-in-use model  
   https://www.iso.org/standard/78177.html
 
-## OpenAI Codex and Agent Workflows
+## Note
 
-- Build skills  
-  https://developers.openai.com/codex/build-skills
-- Custom instructions with AGENTS.md  
-  https://developers.openai.com/codex/agent-configuration/agents-md
-- Using PLANS.md for multi-hour problem solving  
-  https://developers.openai.com/cookbook/articles/codex_exec_plans
-- Build an Agent Improvement Loop with Traces, Evals, and Codex  
-  https://developers.openai.com/cookbook/examples/agents_sdk/agent_improvement_loop
+The pack does not reproduce licensed ISO standard content. Use the organization's licensed standards and approved mappings as the authoritative source.

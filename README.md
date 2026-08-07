@@ -1,77 +1,86 @@
 # Software Architect Codex Pack
 
-Version: **2.0.0**
+Version: **3.0.0**
 
-This pack provides persistent architecture guidance, reusable Codex/ChatGPT skills, engineering standards, and templates.
+This pack encodes a broad software/system architect operating model rather than a single-domain identity.
 
-## Contents
+## Architecture Profile
+
+The profile now explicitly covers:
+
+- Frontend/backend and Client/Server application architecture.
+- HTTP API, transaction, RBAC, audit, migration, responsive UI, deployment, and operations.
+- Qt-based cross-platform IC tools on Windows, Linux, and Android.
+- An OpenGL-based 2D game engine on iOS, Android, and Windows.
+- Framework and platform architecture.
+- Semiconductor equipment and industrial-control architecture.
+- ISO/IEC 25010 quality governance.
+- Waterfall, iterative, Agile, XP, and hybrid lifecycle tailoring.
+- AI-agent system development and coding-agent project governance.
+
+Read:
+
+- `ARCHITECT_PROFILE.md`
+- `PRACTICAL_ARCHITECTURE_EVIDENCE.md`
+
+## Skills
+
+| Skill | Primary use |
+|---|---|
+| `$architecture-review` | Review and compare architecture decisions |
+| `$application-client-server-architecture` | Full-stack, frontend/backend, APIs, persistence, RBAC, UI, deployment |
+| `$cross-platform-native-architecture` | Qt, OpenGL, native lifecycle, platform layers, hardware integration |
+| `$framework-design` | Frameworks, engines, SDKs, plug-ins, product-line architecture |
+| `$code-review` | Production correctness, concurrency, resources, communication, recovery |
+| `$document-governance` | Controlled and traceable engineering documents |
+| `$software-quality-iso25010` | Product-quality scenarios, metrics, evidence, release gates |
+| `$development-process-tailoring` | Waterfall, iterative, Agile, XP, hybrid process |
+| `$coding-agent-project-governance` | AGENTS.md, risk routing, subagents, worktrees, tests, release |
+| `$agent-development-process` | Building an AI-agent product or agentic system |
+
+## Important Distinction
 
 ```text
-software-architect-codex-pack/
+Coding agent governs software development work in a repository
+    → $coding-agent-project-governance
+
+AI agent is itself the product being designed and released
+    → $agent-development-process
+```
+
+## Package Contents
+
+```text
+software-architect-codex-pack-v3/
 ├── AGENTS.md
+├── ARCHITECT_PROFILE.md
+├── PRACTICAL_ARCHITECTURE_EVIDENCE.md
 ├── AGENT_DEVELOPMENT_STANDARD.md
+├── CODING_AGENT_PROJECT_STANDARD.md
 ├── DOCUMENT_STANDARD.md
 ├── PLANS.md
 ├── REFERENCES.md
 ├── CHANGELOG.md
 ├── VERSION
+├── scripts/
+├── evals/
 └── .agents/
     └── skills/
         ├── architecture-review/
+        ├── application-client-server-architecture/
+        ├── cross-platform-native-architecture/
         ├── framework-design/
         ├── code-review/
         ├── document-governance/
         ├── software-quality-iso25010/
         ├── development-process-tailoring/
+        ├── coding-agent-project-governance/
         └── agent-development-process/
 ```
 
-## Skills
+## Installation
 
-### `$architecture-review`
-
-Architecture alternatives, state ownership, failure/recovery, migration, and verification.
-
-### `$framework-design`
-
-Framework, platform, engine, plug-in, cross-platform, and product-line design.
-
-### `$code-review`
-
-Production code review emphasizing correctness, concurrency, lifecycle, communication, and recovery.
-
-### `$document-governance`
-
-Engineering document creation and review, including multi-audience reports, specifications, traceability, and change control.
-
-### `$software-quality-iso25010`
-
-ISO/IEC 25010-based quality requirements, quality scenarios, metrics, test objectives, dashboards, and release gates.
-
-Defaults to ISO/IEC 25010:2023 unless a project explicitly declares the 2011 edition.
-
-### `$development-process-tailoring`
-
-Selection and tailoring of waterfall, iterative, agile, XP, and hybrid lifecycles.
-
-### `$agent-development-process`
-
-AI-agent task contract, autonomy, tools, data, harness, evaluations, hardening, release, and continuous improvement.
-
-## Repository Installation
-
-Copy these into the repository root:
-
-- `AGENTS.md`
-- `.agents/skills/`
-- `PLANS.md`
-- Standards/templates required by the project
-
-Commit them to Git when they are intended as shared team rules.
-
-## Personal Global Installation
-
-Windows PowerShell:
+### Personal global guidance
 
 ```powershell
 New-Item -ItemType Directory -Force "$HOME\.codex"
@@ -81,43 +90,41 @@ Copy-Item ".\AGENTS.md" "$HOME\.codex\AGENTS.md" -Force
 Copy-Item ".\.agents\skills\*" "$HOME\.agents\skills\" -Recurse -Force
 ```
 
-Keep project-specific rules in each repository instead of placing all details in the global `AGENTS.md`.
+Keep detailed project-specific rules in each repository.
 
-## Invocation
+### Repository installation
 
-In Codex CLI or IDE:
+Copy:
 
-```text
-/skills
-$architecture-review
-$framework-design
-$code-review
-$document-governance
-$software-quality-iso25010
-$development-process-tailoring
-$agent-development-process
-```
+- `AGENTS.md`
+- selected `.agents/skills/`
+- `PLANS.md`
+- project-specific standards/templates
 
-Skills may also be selected automatically when the task matches their descriptions.
+into the repository and commit them when they are team rules.
 
-## Recommended Agent Development Workflow
+## Validation
+
+Run:
 
 ```text
-Need / problem
-  → agent task contract
-  → autonomy and risk classification
-  → evaluation plan
-  → harness architecture
-  → minimum vertical slice
-  → trace and failure review
-  → controlled improvement
-  → regression and quality gates
-  → reviewed release
-  → production feedback loop
+python scripts/validate_pack.py
 ```
 
-Use `AGENT_DEVELOPMENT_STANDARD.md` as the governance document and the `agent-development-process` templates as working artifacts.
+The validator checks:
 
-## ISO/IEC 25010 Note
+- Skill folder/name agreement.
+- Required frontmatter.
+- Duplicate names.
+- Description size.
+- `agents/openai.yaml`.
+- global `AGENTS.md` size.
+- manifest generation.
 
-The pack summarizes a practical application method. It does not reproduce or replace a licensed copy of ISO/IEC 25010. The organization's declared edition, approved mappings, contractual requirements, and licensed standards remain authoritative.
+## Skill Evaluation
+
+`evals/skill-routing-cases.csv` provides positive and negative routing cases. Use it as a seed set and add real failures over time.
+
+## Design Rule
+
+Global `AGENTS.md` stays relatively compact. Detailed workflows live in skills and references so they are loaded only when relevant.

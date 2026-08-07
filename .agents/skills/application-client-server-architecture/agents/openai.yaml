@@ -1,0 +1,4 @@
+interface:
+  display_name: "Client/Server 應用架構"
+  short_description: "設計與審查前後端、API、交易、權限、UI、部署與維運邊界"
+  default_prompt: "Use $application-client-server-architecture to design or review this full-stack or client/server system."
