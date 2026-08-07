@@ -18,3 +18,9 @@ CAG-NEG-01,設計一個會讀郵件並自動分類的AI Agent。,coding-agent-pr
 AID-01,設計一個會讀Outlook郵件、呼叫工具、統計更新失敗並需要人工核准的AI Agent。,agent-development-process,true,AI agent product
 AID-02,為工具型Agent定義task contract、eval、trace、guardrail與release gate。,agent-development-process,true,AI agent lifecycle
 AID-NEG-01,替C# repo寫commit與branch規範。,agent-development-process,false,repo governance not agent product
+REF-01,BentoDatabase 還有很多 method，如何不改 API 與交易語意逐步拆成 Service 和 Repository？,safe-incremental-refactoring,true,compatibility facade and god class
+REF-02,重構 sql.js persistence 時如何測 COMMIT 後檔案寫入失敗與記憶體回復？,safe-incremental-refactoring,true,persistence failure and fault injection
+REF-NEG-01,從零設計一個新的 Client/Server 訂餐系統。,safe-incremental-refactoring,false,greenfield application architecture
+ENG-01,設計 iOS Android Windows 共用的 Director Scene Action Event 與 OpenGL render loop。,cross-platform-engine-architecture,true,engine runtime
+ENG-02,Android resume 後 GL context loss，texture pool 應如何重建？,cross-platform-engine-architecture,true,engine resource lifecycle
+ENG-NEG-01,Qt 工具要抽象 USB I2C SPI 並支援 Windows Linux Android。,cross-platform-engine-architecture,false,general native/tool architecture

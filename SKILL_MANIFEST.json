@@ -1,5 +1,5 @@
 {
-  "version": "3.0.0",
+  "version": "4.0.0",
   "generated": "2026-08-07",
   "skills": [
     {
@@ -33,6 +33,12 @@
       "files": 9
     },
     {
+      "name": "cross-platform-engine-architecture",
+      "description": "Design or review a cross-platform 2D/game/graphics engine with a portable core, director/scene lifecycle, update/render loop, rendering backend, actions/events, resources, input, platform services, and iOS/Android/Windows adapters. Use for engine architecture rather than ordinary application UI.",
+      "path": ".agents/skills/cross-platform-engine-architecture/SKILL.md",
+      "files": 7
+    },
+    {
       "name": "cross-platform-native-architecture",
       "description": "Design or review cross-platform native software, Qt tools, OpenGL 2D engines, platform layers, rendering loops, input, resources, hardware integration, build systems, and deployment across Windows, Linux, Android, or iOS. Do not use for ordinary browser-only frontend architecture.",
       "path": ".agents/skills/cross-platform-native-architecture/SKILL.md",
@@ -55,6 +61,12 @@
       "description": "Design or refine a reusable software framework, platform layer, engine, SDK, or product-line architecture. Use when separating reusable capability from domain-specific behavior, defining extension points, plug-ins, state/command contracts, or cross-platform boundaries. Do not use merely to add abstractions to a single stable implementation.",
       "path": ".agents/skills/framework-design/SKILL.md",
       "files": 3
+    },
+    {
+      "name": "safe-incremental-refactoring",
+      "description": "Plan or execute behavior-preserving modernization of a legacy or brownfield system, especially god classes, monoliths, persistence layers, transaction-heavy code, or compatibility-sensitive APIs. Use when responsibilities must move without breaking contracts, data, release behavior, or fault-injection seams.",
+      "path": ".agents/skills/safe-incremental-refactoring/SKILL.md",
+      "files": 7
     },
     {
       "name": "software-quality-iso25010",

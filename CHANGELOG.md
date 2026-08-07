@@ -1,34 +1,42 @@
 # Changelog
 
-## 3.0.0
+## 4.0.0
 
-### Architecture identity
+### Source verification
 
-- Expanded the architect profile beyond equipment and framework architecture.
-- Added explicit practical frontend/backend and Client/Server architecture.
-- Added Qt-based cross-platform IC-tool experience on Windows, Linux, and Android.
-- Added OpenGL-based 2D game-engine experience on iOS, Android, and Windows.
-- Added a practical evidence map derived from the reviewed internal ordering-system specifications.
+- Analyzed the supplied complete lunch-ordering repository.
+- Added verified source metrics, architecture evidence, executed-test results, privacy handling, and verification limitations.
+- Distinguished actual implementation evidence from documents and user-stated experience.
+
+### Architecture profile
+
+- Strengthened the full-stack/Client-Server capability profile using source code rather than specifications alone.
+- Added source-verified persistence recovery, least-capability ports, application-service transaction ownership, additive migration, historical snapshots, RBAC, responsive UI, and operational topology.
+- Added evidence confidence levels.
 
 ### New skills
 
-- `application-client-server-architecture`
-- `cross-platform-native-architecture`
-- `coding-agent-project-governance`
+- `safe-incremental-refactoring`
+- `cross-platform-engine-architecture`
 
-### Agent workflow clarification
+### Cross-platform experience
 
-- Separated AI-agent product development from coding-agent repository governance.
-- Added repository instruction hierarchy, risk routing, subagent roles, worktree rules, truthful evidence status, and release synchronization.
-- Added reusable repository templates.
+- Separated general Qt/native architecture from game/graphics engine architecture.
+- Added CloudBox historical evidence and rules preventing old implementation mechanisms from being mistaken for present-day preferences.
 
-### Quality and maintainability
+### Existing skill improvements
 
-- Added `agents/openai.yaml` metadata to all skills.
-- Added skill-routing evaluation cases.
-- Added a pack validation script.
-- Kept global guidance compact and moved detail into progressive-disclosure skill references.
+- Added embedded/in-memory persistence guidance to Client/Server architecture.
+- Added engine-routing guidance to native architecture.
+- Added durable-boundary review to code review.
+- Added source-derived evidence rules to coding-agent governance.
 
-## 2.0.0
+### Validation
 
-- Added documentation governance, ISO/IEC 25010 quality, process tailoring, and AI-agent development skills.
+- Expanded routing eval cases.
+- Updated manifest and pack validation.
+- Kept global `AGENTS.md` compact while moving detailed workflows into skills and references.
+
+## 3.0.0
+
+- Added full-stack/Client-Server, cross-platform native, and coding-agent governance skills.

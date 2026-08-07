@@ -1,0 +1,4 @@
+interface:
+  display_name: "AI Agent 系統開發"
+  short_description: "定義 AI Agent 任務契約、工具、評測、風險、上線與持續改善"
+  default_prompt: "Use $agent-development-process to design, build, evaluate, or release this AI-agent system."

@@ -1,104 +1,122 @@
-# Software Architect Profile
+# Software and System Architect Profile
 
 ## Identity
 
-The user is a software and system architect with hands-on architecture and implementation experience across several distinct product types.
+The user is a hands-on software and system architect whose experience spans product architecture, framework and engine design, frontend/backend systems, Client/Server systems, cross-platform native development, industrial control, deployment, quality governance, and engineering-process design.
 
-Do not narrow this identity to the user's current semiconductor-equipment work. The recurring capability is end-to-end software architecture: selecting boundaries, defining authoritative state, designing contracts, implementing platform abstractions, controlling quality, and carrying systems through deployment and maintenance.
+Do not reduce this identity to the user's current semiconductor-equipment domain. Do not reduce it to framework architecture alone.
 
-## Practical Architecture Domains
+The recurring capability is:
 
-### Full-stack and Client/Server Application Architecture
+> Establishing system boundaries, authoritative state, contracts, lifecycle ownership, failure behavior, verification evidence, and controlled evolution across different technology and product domains.
 
-Practical experience includes designing and evolving an internal production web system with:
+## Evidence Classification
 
-- Employee and administration frontends.
-- Server-side business-rule authority.
-- HTTP API contracts.
-- Authentication, authorization, role-based access control, and audit.
-- Transactional order and balance consistency.
-- Historical snapshots and additive database migration.
-- Responsive desktop/mobile interaction design.
-- Logging, backup, health checks, release versioning, packaging, rollback, and NAS/Windows deployment.
-- Repository-level AI-agent operating rules, test evidence, and release governance.
+Use these confidence levels when reasoning about experience:
 
-This experience is not limited to UI implementation. It includes frontend, backend, application services, persistence, security, deployment topology, operations, and lifecycle control.
+- **Source-verified:** directly supported by reviewed source code and executable tests.
+- **Repository-verified:** supported by a public repository and its history, but not rebuilt in the current environment.
+- **Document-verified:** supported by detailed specifications and controlled project documents.
+- **User-stated:** supplied by the user but not independently verified from source in this pack.
 
-### Cross-platform Native Framework and IC Tool Architecture
+Never convert a user-stated or historical fact into a present-day coding preference without additional evidence.
 
-Practical experience includes Qt-based IC mass-production and validation tools deployed across Windows, Linux, and Android.
+## Source-verified Full-stack and Client/Server Architecture
 
-Relevant concerns include:
+The reviewed lunch-ordering system demonstrates practical end-to-end responsibility for:
 
-- Cross-platform UI and application framework design.
-- Separation of platform-independent policy from platform-specific mechanisms.
+- Employee and administration frontend architecture.
+- A Node.js HTTP server and API surface.
+- Server-authoritative business rules.
+- Authentication, session management, RBAC, denial audit, and password policy.
+- Application services, repositories, transaction boundaries, and compatibility façades.
+- SQLite through `sql.js`, whole-file persistence, backup, integrity checks, and recovery behavior.
+- Historical snapshots that survive master-record deletion.
+- Additive migration, schema-version gates, old-database compatibility, and fail-closed future-version handling.
+- Responsive desktop/mobile behavior.
+- Windows and Synology NAS build/deployment concerns.
+- Version, release, rollback, test-evidence, and coding-agent governance.
+
+This is architecture and implementation evidence, not only requirement-writing evidence.
+
+## Repository-verified Cross-platform OpenGL 2D Engine
+
+The public CloudBox repository demonstrates a cross-platform framework/game-engine implementation for iOS, Android, and Win32 using a portable native core and OpenGL/OpenGL ES-era platform integration.
+
+Demonstrated concerns include:
+
+- Director and scene lifecycle.
+- Action, event, view, component, layout, and resource systems.
+- Rendering abstraction and OpenGL backend.
+- Texture pooling and reconstruction.
+- Touch/input, orientation, Retina/display adaptation.
+- Background/foreground and Android resume behavior.
+- Audio, dialog, motion, store/IAP, social, and native platform services.
+- JNI/Java integration on Android.
+- Objective-C++ and native integration on iOS.
+- Win32 integration and build variants.
+
+Treat this as historical architecture evidence. Do not infer that raw pointers, global singletons, fixed-function OpenGL, macros, or the original build system are the user's current preferred implementation style.
+
+## User-stated Qt Cross-platform IC Tool Architecture
+
+The user reports practical Qt-based IC production and validation tool experience across Windows, Linux, and Android.
+
+Relevant capability areas include:
+
+- Cross-platform GUI/application frameworks.
 - Hardware and communication abstraction.
-- Consistent behavior across operating systems.
-- Build, packaging, deployment, and diagnostic differences.
-- Long-lived tool evolution and customer/product variation.
+- Platform-independent policy versus native implementation.
+- Product/customer variation.
+- Long-lived diagnostic and production-tool maintenance.
+- Build, packaging, deployment, and platform-specific behavior.
 
-### Cross-platform OpenGL 2D Game Engine
+This area is user-stated unless a corresponding source repository is supplied.
 
-Practical experience includes a 2D game engine implemented with OpenGL for iOS, Android, and Windows.
+## Current Equipment and Industrial-control Architecture
 
-Relevant concerns include:
+Current work includes:
 
-- Rendering loop and graphics-context lifecycle.
-- Resource ownership and loading.
-- Input abstraction.
-- Scene/entity/component organization where appropriate.
-- Platform application lifecycle.
-- Native window/surface integration.
-- Performance and frame-time control.
-- Portability without erasing platform-specific semantics.
-
-### Semiconductor Equipment and Industrial Control
-
-Current domain experience includes:
-
-- Equipment control frameworks.
-- Device and communication abstraction.
+- Equipment-control frameworks.
 - Command and state modeling.
-- Recipe and process flow.
-- Error handling and recovery.
-- Deployment and remote update.
-- High availability and distributed control considerations.
-- SECS/GEM, industrial communication, and field-service constraints.
+- Recipe/process flow.
+- Device and industrial communication.
+- Recovery and operator intervention.
+- Deployment, remote update, HA, and distributed-control considerations.
+- Field-service and operational constraints.
+
+Do not copy game-engine or web-system patterns into equipment control without validating authority, timing, safety, recovery, and physical-side-effect semantics.
+
+## Demonstrated Architecture Style
+
+The source evidence shows a pragmatic style:
+
+1. Preserve externally visible behavior before structural refactoring.
+2. Establish tests and fault-injection seams before moving responsibility.
+3. Extract pure policy first.
+4. Restrict repository capability instead of passing a powerful database object.
+5. Keep transaction ownership at the application-service/use-case boundary.
+6. Preserve compatibility through a façade during migration.
+7. Split high-risk command flows into independently reviewable slices.
+8. Make migration additive and reversible where practical.
+9. Treat deployment topology and persistence limits as architecture.
+10. Report tests and environmental limits truthfully.
 
 ## Architecture Capabilities
 
-The user's architecture capability spans:
+The user's practical capability spans:
 
-1. Frontend architecture.
-2. Backend and application-service architecture.
-3. Client/Server and distributed boundary design.
-4. API and protocol contracts.
-5. Persistence, transaction, migration, and historical-data design.
-6. Cross-platform native architecture.
-7. Framework and engine architecture.
-8. Device/hardware abstraction.
-9. Operational architecture and release engineering.
-10. Quality governance using ISO/IEC 25010.
-11. Waterfall, iterative, Agile, XP, and hybrid process tailoring.
-12. AI-agent and coding-agent engineering governance.
-
-## Working Style
-
-Prefer:
-
-- Problem-first reasoning.
-- Explicit state ownership.
-- Server or domain authority for business invariants.
-- Stable contracts and controlled side effects.
-- Measurable quality scenarios.
-- Small, verifiable, reversible delivery increments.
-- Architecture that remains traceable in runtime and maintainable by a real team.
-- Methods and patterns selected for a concrete pressure, not for methodology compliance.
-
-Avoid:
-
-- Treating the latest domain as the user's entire career identity.
-- Explaining standard architecture concepts at an introductory level unless requested.
-- Assuming web, game, tool, or equipment architectures share identical lifecycle semantics.
-- Over-generalizing from one implementation.
-- Equating product scale with architectural difficulty.
+- Frontend architecture.
+- Backend and application-service architecture.
+- Client/Server architecture.
+- API and protocol contracts.
+- Data, transaction, migration, and history design.
+- Cross-platform native architecture.
+- Framework and engine architecture.
+- Rendering, resource, and application lifecycle.
+- Device/hardware abstraction.
+- Safe brownfield refactoring.
+- Operational and release architecture.
+- ISO/IEC 25010 quality governance.
+- Waterfall, iterative, Agile, XP, and hybrid process tailoring.
+- Coding-agent and AI-agent engineering governance.

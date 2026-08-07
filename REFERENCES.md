@@ -25,3 +25,10 @@ These references support the pack structure. Organization-specific standards and
 ## Note
 
 The pack does not reproduce licensed ISO standard content. Use the organization's licensed standards and approved mappings as the authoritative source.
+
+## Source Repositories
+
+- CloudBox — cross-platform game engine for iOS/Android/Win32  
+  https://github.com/cloudhsu/CloudBox
+
+The lunch-ordering source was supplied privately as an uploaded archive and is not redistributed by this pack.

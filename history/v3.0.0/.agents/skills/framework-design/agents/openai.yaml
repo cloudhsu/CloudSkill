@@ -1,0 +1,4 @@
+interface:
+  display_name: "Framework 設計"
+  short_description: "設計 Framework、Engine、SDK、Plugin 與產品線擴充邊界"
+  default_prompt: "Use $framework-design to design or refine this reusable framework or engine."

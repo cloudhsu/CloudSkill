@@ -1,0 +1,4 @@
+interface:
+  display_name: "安全漸進式重構"
+  short_description: "在不破壞 API、交易、資料、歷史與部署的前提下拆解 Legacy/God Class"
+  default_prompt: "Use $safe-incremental-refactoring to plan or execute a behavior-preserving modernization in small verified slices."

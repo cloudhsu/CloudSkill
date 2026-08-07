@@ -154,3 +154,17 @@ Test:
 8. Deployment and operations
 9. Quality scenarios and tests
 10. Migration risks and recommendation
+
+## Brownfield and Embedded Persistence
+
+When the application uses an embedded or memory-exported database:
+
+- Treat process count and writer topology as architecture.
+- Distinguish SQL commit from durable file persistence.
+- Define post-commit persistence failure behavior.
+- Test source-database copies rather than modifying production evidence.
+- Use schema-version gates before migration.
+- Fail before writes when a database is newer than supported.
+- Preserve historical snapshots when master records may be deleted.
+
+When modernizing an existing façade, use `$safe-incremental-refactoring` together with this skill.

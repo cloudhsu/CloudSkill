@@ -141,3 +141,14 @@ Define:
 8. Test and evidence contract
 9. Documentation synchronization
 10. Release/rollback checklist
+
+## Source-derived Evidence Discipline
+
+For compatibility-sensitive repositories:
+
+- Preserve public method/API inventories as executable contract tests where valuable.
+- Preserve database/source hashes during migration tests.
+- Test old database copies and future-version refusal.
+- Separate product version changes from pure internal refactoring.
+- Do not commit regenerated bundles merely because tests rebuilt them unless the release requires it.
+- Keep known behavior fixes separate from structural refactoring.

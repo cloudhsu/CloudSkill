@@ -1,26 +1,33 @@
 # Software Architect Codex Pack
 
-Version: **3.0.0**
+Version: **4.0.0**
 
-This pack encodes a broad software/system architect operating model rather than a single-domain identity.
+This pack encodes a source-grounded software/system architect operating model.
 
-## Architecture Profile
+## What changed in v4
 
-The profile now explicitly covers:
+Version 4 uses two concrete implementation sources:
 
-- Frontend/backend and Client/Server application architecture.
-- HTTP API, transaction, RBAC, audit, migration, responsive UI, deployment, and operations.
-- Qt-based cross-platform IC tools on Windows, Linux, and Android.
-- An OpenGL-based 2D game engine on iOS, Android, and Windows.
-- Framework and platform architecture.
-- Semiconductor equipment and industrial-control architecture.
-- ISO/IEC 25010 quality governance.
-- Waterfall, iterative, Agile, XP, and hybrid lifecycle tailoring.
-- AI-agent system development and coding-agent project governance.
+1. The supplied complete lunch-ordering system repository.
+2. The public historical CloudBox cross-platform engine repository.
+
+The pack now separates:
+
+- Full-stack/Client-Server architecture.
+- General cross-platform native architecture.
+- Cross-platform engine architecture.
+- Safe brownfield refactoring.
+- Coding-agent repository governance.
+- AI-agent product development.
+
+## Source-grounded Profile
 
 Read:
 
 - `ARCHITECT_PROFILE.md`
+- `SOURCE_VERIFICATION_BENTO.md`
+- `CROSS_PLATFORM_ENGINE_EVIDENCE.md`
+- `ARCHITECTURE_CAPABILITY_MATRIX.md`
 - `PRACTICAL_ARCHITECTURE_EVIDENCE.md`
 
 ## Skills
@@ -28,32 +35,53 @@ Read:
 | Skill | Primary use |
 |---|---|
 | `$architecture-review` | Review and compare architecture decisions |
-| `$application-client-server-architecture` | Full-stack, frontend/backend, APIs, persistence, RBAC, UI, deployment |
-| `$cross-platform-native-architecture` | Qt, OpenGL, native lifecycle, platform layers, hardware integration |
-| `$framework-design` | Frameworks, engines, SDKs, plug-ins, product-line architecture |
-| `$code-review` | Production correctness, concurrency, resources, communication, recovery |
+| `$application-client-server-architecture` | Frontend/backend, API, RBAC, transaction, data, UI, deployment |
+| `$cross-platform-native-architecture` | Qt/native platform, OS, ABI, hardware, packaging |
+| `$cross-platform-engine-architecture` | Director/scene, update/render, graphics, resources, engine adapters |
+| `$framework-design` | Frameworks, SDKs, plug-ins, product-line architecture |
+| `$safe-incremental-refactoring` | Brownfield modernization and compatibility-preserving decomposition |
+| `$code-review` | Production correctness, concurrency, persistence, communication, recovery |
 | `$document-governance` | Controlled and traceable engineering documents |
 | `$software-quality-iso25010` | Product-quality scenarios, metrics, evidence, release gates |
 | `$development-process-tailoring` | Waterfall, iterative, Agile, XP, hybrid process |
-| `$coding-agent-project-governance` | AGENTS.md, risk routing, subagents, worktrees, tests, release |
+| `$coding-agent-project-governance` | AGENTS, risk routing, subagents, worktrees, tests, release |
 | `$agent-development-process` | Building an AI-agent product or agentic system |
 
-## Important Distinction
+## Important Distinctions
 
 ```text
-Coding agent governs software development work in a repository
-    → $coding-agent-project-governance
+General Qt/native application architecture
+  → $cross-platform-native-architecture
 
-AI agent is itself the product being designed and released
-    → $agent-development-process
+Game/graphics engine runtime architecture
+  → $cross-platform-engine-architecture
+```
+
+```text
+Coding agents modify a software repository
+  → $coding-agent-project-governance
+
+An AI agent is the product being built
+  → $agent-development-process
+```
+
+```text
+Review an intended target architecture
+  → $architecture-review
+
+Move a live legacy system toward it safely
+  → $safe-incremental-refactoring
 ```
 
 ## Package Contents
 
 ```text
-software-architect-codex-pack-v3/
+software-architect-codex-pack-v4/
 ├── AGENTS.md
 ├── ARCHITECT_PROFILE.md
+├── SOURCE_VERIFICATION_BENTO.md
+├── CROSS_PLATFORM_ENGINE_EVIDENCE.md
+├── ARCHITECTURE_CAPABILITY_MATRIX.md
 ├── PRACTICAL_ARCHITECTURE_EVIDENCE.md
 ├── AGENT_DEVELOPMENT_STANDARD.md
 ├── CODING_AGENT_PROJECT_STANDARD.md
@@ -64,23 +92,12 @@ software-architect-codex-pack-v3/
 ├── VERSION
 ├── scripts/
 ├── evals/
-└── .agents/
-    └── skills/
-        ├── architecture-review/
-        ├── application-client-server-architecture/
-        ├── cross-platform-native-architecture/
-        ├── framework-design/
-        ├── code-review/
-        ├── document-governance/
-        ├── software-quality-iso25010/
-        ├── development-process-tailoring/
-        ├── coding-agent-project-governance/
-        └── agent-development-process/
+└── .agents/skills/
 ```
 
 ## Installation
 
-### Personal global guidance
+### Global personal guidance
 
 ```powershell
 New-Item -ItemType Directory -Force "$HOME\.codex"
@@ -90,18 +107,11 @@ Copy-Item ".\AGENTS.md" "$HOME\.codex\AGENTS.md" -Force
 Copy-Item ".\.agents\skills\*" "$HOME\.agents\skills\" -Recurse -Force
 ```
 
-Keep detailed project-specific rules in each repository.
+### Repository use
 
-### Repository installation
+Copy only the skills and standards relevant to that repository.
 
-Copy:
-
-- `AGENTS.md`
-- selected `.agents/skills/`
-- `PLANS.md`
-- project-specific standards/templates
-
-into the repository and commit them when they are team rules.
+Project-specific facts belong in the repository's own `AGENTS.md`, domain-invariant documents, architecture map, and runbooks.
 
 ## Validation
 
@@ -111,20 +121,10 @@ Run:
 python scripts/validate_pack.py
 ```
 
-The validator checks:
+Routing cases are in:
 
-- Skill folder/name agreement.
-- Required frontmatter.
-- Duplicate names.
-- Description size.
-- `agents/openai.yaml`.
-- global `AGENTS.md` size.
-- manifest generation.
+```text
+evals/skill-routing-cases.csv
+```
 
-## Skill Evaluation
-
-`evals/skill-routing-cases.csv` provides positive and negative routing cases. Use it as a seed set and add real failures over time.
-
-## Design Rule
-
-Global `AGENTS.md` stays relatively compact. Detailed workflows live in skills and references so they are loaded only when relevant.
+Add real failures over time instead of expanding instructions speculatively.

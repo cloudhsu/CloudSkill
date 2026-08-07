@@ -94,3 +94,18 @@ For each finding include:
 7. Uncertainties
 
 Do not fabricate defects when evidence is insufficient. Mark uncertain risks explicitly.
+
+## Persistence-model Review
+
+Do not assume a SQL `COMMIT` is the final durable boundary.
+
+Review the actual persistence path:
+
+- Engine-managed durable database.
+- In-memory database exported to a file.
+- Remote acknowledgement.
+- Event append.
+- Temporary-file rename.
+- Deferred flush.
+
+Check whether process restart, save failure, or failed restoration can leave memory and durable state divergent.

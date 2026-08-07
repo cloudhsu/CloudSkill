@@ -133,3 +133,9 @@ Define:
 6. Build and deployment matrix
 7. Performance and quality scenarios
 8. Risks, rejected abstractions, and migration
+
+## Engine Routing
+
+Use this skill for general Qt/native application and platform architecture.
+
+When the primary problem is a director/scene model, update-render loop, rendering backend, texture/resource lifecycle, game actions/events, or engine platform adapters, use `$cross-platform-engine-architecture`.

@@ -1,0 +1,4 @@
+interface:
+  display_name: "跨平台 2D／圖形引擎架構"
+  short_description: "設計 Portable Core、Scene/Director、Render Loop、資源與 iOS/Android/Windows Adapter"
+  default_prompt: "Use $cross-platform-engine-architecture to design or review this cross-platform engine."
