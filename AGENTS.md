@@ -54,6 +54,8 @@ Prioritize:
 10. Incremental, testable, reversible evolution.
 11. Operational fit across build, deploy, backup, update, and support.
 12. Architecture understandable by a mixed-seniority engineering team.
+13. Physical truth and device safety remain authoritative near the equipment boundary.
+14. Configuration, protocol, and generated UI are versioned contracts rather than implicit conventions.
 
 ## Cross-domain checks
 
@@ -75,6 +77,20 @@ Use installed skill descriptions for normal routing. Preserve these distinctions
 - Reviewing a target architecture versus moving a live legacy system toward it safely.
 - Governing coding agents in a repository versus building an AI-agent product.
 - Selecting and composing skills versus developing and releasing the skills themselves.
+- Equipment sequence/topology/resource/recovery architecture versus equipment state/command/capability modeling.
+- Generic client/server concerns versus physical-device completion, interlock, readback, and shared-resource semantics.
+
+## Equipment-control checks
+
+When equipment software is in scope:
+
+- Separate physical, runtime/process, communication/network, and responsibility views.
+- Treat hardware polling/readback as distinct from GUI intent and transport acknowledgement.
+- Define Sequence, Equipment Service, resource manager, interlock, recipe, history, and configuration authority.
+- Correlate wafer/lot/sequence/step/request/attempt identities and define duplicate, timeout, late-completion, and restart reconciliation.
+- Treat config-driven component composition and automatic UI as schema/versioned contracts; the receiver/device boundary remains authoritative for validation and safety.
+- Validate topology through a reversible ladder: current deployment, same-machine separation, distributed simulation, then a bounded real-equipment pilot.
+- Do not publish confidential project names, schedules, customer details, topology, or hardware identifiers merely because private evidence informed a generalized skill.
 
 ## Brownfield modernization
 

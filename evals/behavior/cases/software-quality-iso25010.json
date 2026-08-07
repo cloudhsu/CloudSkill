@@ -67,6 +67,30 @@
         "agent applies a full project quality process to a terminology request"
       ],
       "review_notes": "Review semantic relationships, evidence, and omissions; keyword presence alone is insufficient."
+    },
+    {
+      "id": "ISO-BEH-004",
+      "skill": "software-quality-iso25010",
+      "type": "application",
+      "prompt": "Define release gates for a config-driven distributed equipment prototype moving from simulated IO to real chamber hardware.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "defines reliability, compatibility, performance, security, maintainability and usability scenarios with measures",
+        "distinguishes simulated, multi-process, multi-PC and real-hardware evidence",
+        "includes command/readback, disconnect, restart, schema mismatch and rollback cases"
+      ],
+      "forbidden_behaviors": [
+        "uses a generic checklist without thresholds or owners",
+        "treats demo success as full release evidence"
+      ],
+      "required_artifacts": [
+        "stage-specific quality gate matrix"
+      ],
+      "baseline_expected_failure": [
+        "agent lists ISO characteristics but no executable evidence"
+      ],
+      "review_notes": "Review semantic relationships, authority, lifecycle, failure behavior, and evidence; keyword presence alone is insufficient."
     }
   ]
 }

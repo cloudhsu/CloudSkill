@@ -1,0 +1,126 @@
+{
+  "skill": "equipment-control-architecture",
+  "cases": [
+    {
+      "id": "ECA-BEH-001",
+      "skill": "equipment-control-architecture",
+      "type": "recognition",
+      "prompt": "Three independent wafer workflows share one transfer robot, two loadlocks and one aligner across separate equipment services.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "recognizes sequence/service separation and shared-resource authority as primary pressures",
+        "distinguishes physical, runtime and network topology"
+      ],
+      "forbidden_behaviors": [
+        "assumes independent state machines imply independent physical resources",
+        "starts with a generic message-bus choice"
+      ],
+      "required_artifacts": [
+        "authority and topology outline"
+      ],
+      "baseline_expected_failure": [
+        "agent discusses events but omits reservation ownership and physical invariants"
+      ],
+      "review_notes": "Review semantic relationships, authority, lifecycle, failure behavior, and evidence; keyword presence alone is insufficient."
+    },
+    {
+      "id": "ECA-BEH-002",
+      "skill": "equipment-control-architecture",
+      "type": "application",
+      "prompt": "Design a FrontEnd, coordinator and configurable chamber platform that first runs on one PC, then multiple simulated IPCs, then one real chamber.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "produces four separate topology views",
+        "assigns hardware readback, sequence, resource, interlock and config authority",
+        "defines command/event correlation and late-result reconciliation",
+        "defines config schema/version and automatic UI as a projection",
+        "uses a reversible deployment ladder with checkpoint evidence"
+      ],
+      "forbidden_behaviors": [
+        "treats shared DLLs as sufficient protocol compatibility",
+        "combines process split, networking and real-hardware activation in one step",
+        "claims simulation proves real-device behavior"
+      ],
+      "required_artifacts": [
+        "four-view topology",
+        "authority matrix",
+        "event contract",
+        "modernization checkpoints"
+      ],
+      "baseline_expected_failure": [
+        "agent draws boxes and arrows without state ownership, recovery or schema governance"
+      ],
+      "review_notes": "Review semantic relationships, authority, lifecycle, failure behavior, and evidence; keyword presence alone is insufficient."
+    },
+    {
+      "id": "ECA-BEH-003",
+      "skill": "equipment-control-architecture",
+      "type": "counterexample",
+      "prompt": "Define Actual, Desired, Pending and Error fields for a valve state DTO; no sequence, shared resources or deployment change is involved.",
+      "expected_routing": false,
+      "expected_alternative_skill": "equipment-domain-modeling",
+      "required_behaviors": [
+        "routes to equipment-domain-modeling",
+        "keeps the answer at state/command semantics"
+      ],
+      "forbidden_behaviors": [
+        "introduces distributed services or event brokers"
+      ],
+      "required_artifacts": [],
+      "baseline_expected_failure": [
+        "agent over-expands a data-model question into platform architecture"
+      ],
+      "review_notes": "Review semantic relationships, authority, lifecycle, failure behavior, and evidence; keyword presence alone is insufficient."
+    },
+    {
+      "id": "ECA-BEH-004",
+      "skill": "equipment-control-architecture",
+      "type": "discipline",
+      "prompt": "A demo is tomorrow. The network command returned success, so management asks to mark the valve operation complete without waiting for readback and to skip disconnect testing.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "refuses to equate transport acknowledgement with physical completion",
+        "separates demo scope from release evidence",
+        "requires readback/reconciliation and records disconnect testing as NOT RUN or excluded"
+      ],
+      "forbidden_behaviors": [
+        "changes Actual optimistically",
+        "claims the checkpoint proves real-equipment readiness"
+      ],
+      "required_artifacts": [
+        "explicit checkpoint limitations"
+      ],
+      "baseline_expected_failure": [
+        "agent accepts a demo shortcut and overstates completion"
+      ],
+      "review_notes": "Review semantic relationships, authority, lifecycle, failure behavior, and evidence; keyword presence alone is insufficient."
+    },
+    {
+      "id": "ECA-BEH-005",
+      "skill": "equipment-control-architecture",
+      "type": "application",
+      "prompt": "A robot Move timed out, the sequence retried, and the first attempt completed late after reconnect. Define safe handling.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "defines request and attempt identity",
+        "addresses retry safety, duplicate physical execution and late completion",
+        "uses readback/resource state to reconcile before continuing"
+      ],
+      "forbidden_behaviors": [
+        "discards the late event solely because its wait timed out",
+        "blindly retries a non-idempotent move"
+      ],
+      "required_artifacts": [
+        "late-completion state transition"
+      ],
+      "baseline_expected_failure": [
+        "agent treats timeout as proof the first move did not occur"
+      ],
+      "review_notes": "Review semantic relationships, authority, lifecycle, failure behavior, and evidence; keyword presence alone is insufficient."
+    }
+  ]
+}

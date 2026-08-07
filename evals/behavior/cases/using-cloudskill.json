@@ -66,6 +66,31 @@
         "agent over-routes a trivial task"
       ],
       "review_notes": "Review semantic relationships, evidence, and omissions; keyword presence alone is insufficient."
+    },
+    {
+      "id": "USE-BEH-004",
+      "skill": "using-cloudskill",
+      "type": "application",
+      "prompt": "Plan a legacy equipment migration involving distributed IPCs, Sequence, shared robot resources, config-generated chamber UI, state/command modeling, compatibility and release gates.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "selects equipment-control-architecture before topology/resource design",
+        "adds equipment-domain-modeling for state/command/capability semantics",
+        "adds safe-incremental-refactoring and quality/process/document skills only for the requested concerns",
+        "orders process, domain, change, quality and handoff appropriately"
+      ],
+      "forbidden_behaviors": [
+        "loads only generic client/server architecture",
+        "loads every skill without scope justification"
+      ],
+      "required_artifacts": [
+        "ordered minimal skill set"
+      ],
+      "baseline_expected_failure": [
+        "agent misses equipment-specific physical semantics or over-routes"
+      ],
+      "review_notes": "Review semantic relationships, authority, lifecycle, failure behavior, and evidence; keyword presence alone is insufficient."
     }
   ]
 }

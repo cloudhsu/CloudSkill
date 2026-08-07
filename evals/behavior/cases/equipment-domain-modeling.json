@@ -1,0 +1,126 @@
+{
+  "skill": "equipment-domain-modeling",
+  "cases": [
+    {
+      "id": "EDM-BEH-001",
+      "skill": "equipment-domain-modeling",
+      "type": "recognition",
+      "prompt": "RF, valve, heater and MFC share some OnOff and setpoint fields but have different identities and capabilities.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "recognizes domain identity, capability and repeated data-pattern questions",
+        "distinguishes is-a, has-a, can-do and same-pattern"
+      ],
+      "forbidden_behaviors": [
+        "creates inheritance from field similarity",
+        "forces every component into one generic type"
+      ],
+      "required_artifacts": [
+        "modeling decision outline"
+      ],
+      "baseline_expected_failure": [
+        "agent proposes a deep common base class"
+      ],
+      "review_notes": "Review semantic relationships, authority, lifecycle, failure behavior, and evidence; keyword presence alone is insufficient."
+    },
+    {
+      "id": "EDM-BEH-002",
+      "skill": "equipment-domain-modeling",
+      "type": "application",
+      "prompt": "Design chamber state and commands for valve OnOff, heater setpoint and multi-position valve, including metadata-driven GUI and polling readback.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "separates state, command definition, command request, executor and snapshot lifecycles",
+        "defines Actual, Desired, Pending, Error and stale/readback rules",
+        "selects a typed payload strategy proportional to risk",
+        "uses capabilities/catalog metadata for UI while retaining executor authority",
+        "defines overlapping-command and version behavior"
+      ],
+      "forbidden_behaviors": [
+        "lets GUI write Actual",
+        "uses unrelated non-nullable payload fields as a union",
+        "puts hardware execution in the view model"
+      ],
+      "required_artifacts": [
+        "domain/lifecycle map",
+        "command contract",
+        "reconciliation flow"
+      ],
+      "baseline_expected_failure": [
+        "agent focuses on DTO fields but omits writers, lifecycle and failure transitions"
+      ],
+      "review_notes": "Review semantic relationships, authority, lifecycle, failure behavior, and evidence; keyword presence alone is insufficient."
+    },
+    {
+      "id": "EDM-BEH-003",
+      "skill": "equipment-domain-modeling",
+      "type": "counterexample",
+      "prompt": "Five wafer sequences compete for one robot and two chambers. Define reservation, priority and deadlock handling.",
+      "expected_routing": false,
+      "expected_alternative_skill": "equipment-control-architecture",
+      "required_behaviors": [
+        "routes to equipment-control-architecture",
+        "recognizes physical resource arbitration"
+      ],
+      "forbidden_behaviors": [
+        "reduces the problem to component DTOs"
+      ],
+      "required_artifacts": [],
+      "baseline_expected_failure": [
+        "agent answers with state classes instead of resource ownership"
+      ],
+      "review_notes": "Review semantic relationships, authority, lifecycle, failure behavior, and evidence; keyword presence alone is insufficient."
+    },
+    {
+      "id": "EDM-BEH-004",
+      "skill": "equipment-domain-modeling",
+      "type": "discipline",
+      "prompt": "The driver write returned true and the UI looks better when Actual is updated immediately. Polling normally catches up within one second. Ship this behavior today.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "keeps Actual owned by authoritative readback",
+        "uses Desired/Pending or explicit optimistic projection instead",
+        "requires mismatch/timeout behavior and truthful test status"
+      ],
+      "forbidden_behaviors": [
+        "updates Actual from the GUI or transport result",
+        "hides uncertainty to improve visual responsiveness"
+      ],
+      "required_artifacts": [
+        "state transition rule"
+      ],
+      "baseline_expected_failure": [
+        "agent accepts optimistic mutation of physical truth"
+      ],
+      "review_notes": "Review semantic relationships, authority, lifecycle, failure behavior, and evidence; keyword presence alone is insufficient."
+    },
+    {
+      "id": "EDM-BEH-005",
+      "skill": "equipment-domain-modeling",
+      "type": "application",
+      "prompt": "A config-defined chamber adds a new component capability while an older FrontEnd reads its snapshot. Define compatibility.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "separates configuration schema from snapshot schema",
+        "defines stable component identity and capability version",
+        "defines unknown-field/type behavior and safe activation validation",
+        "keeps UI metadata separate from authorization and execution"
+      ],
+      "forbidden_behaviors": [
+        "assumes serializer defaults provide compatibility",
+        "silently ignores an unknown safety-relevant component"
+      ],
+      "required_artifacts": [
+        "config/snapshot compatibility matrix"
+      ],
+      "baseline_expected_failure": [
+        "agent treats config and snapshot as the same serialized object"
+      ],
+      "review_notes": "Review semantic relationships, authority, lifecycle, failure behavior, and evidence; keyword presence alone is insufficient."
+    }
+  ]
+}

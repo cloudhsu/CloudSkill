@@ -67,6 +67,29 @@
         "agent selects client/server because Android is a client"
       ],
       "review_notes": "Review semantic relationships, evidence, and omissions; keyword presence alone is insufficient."
+    },
+    {
+      "id": "APP-BEH-004",
+      "skill": "application-client-server-architecture",
+      "type": "application",
+      "prompt": "Review the generic network contract for FrontEnd, coordinator and several chamber processes after equipment-specific authority has already been defined.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "defines endpoint/session ownership, startup, health, version negotiation, authentication and bounded queues",
+        "keeps generic transport concerns separate from physical completion semantics owned by equipment-control-architecture"
+      ],
+      "forbidden_behaviors": [
+        "redefines hardware readback authority in the transport layer",
+        "leaves reconnect and duplicate-session behavior implicit"
+      ],
+      "required_artifacts": [
+        "client/server protocol and operations matrix"
+      ],
+      "baseline_expected_failure": [
+        "agent draws connections without lifecycle and operations"
+      ],
+      "review_notes": "Review semantic relationships, authority, lifecycle, failure behavior, and evidence; keyword presence alone is insufficient."
     }
   ]
 }

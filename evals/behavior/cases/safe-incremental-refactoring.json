@@ -68,6 +68,31 @@
         "agent applies migration workflow to greenfield design"
       ],
       "review_notes": "Review semantic relationships, evidence, and omissions; keyword presence alone is insufficient."
+    },
+    {
+      "id": "REF-BEH-004",
+      "skill": "safe-incremental-refactoring",
+      "type": "application",
+      "prompt": "Migrate a monolithic equipment application through shared contracts, same-machine process split, multi-PC simulation and one real chamber without breaking current products.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "establishes characterization and contract baselines",
+        "separates library extraction, behavior refactoring, protocol introduction and hardware activation",
+        "defines per-stage compatibility, rollback and artifact comparison"
+      ],
+      "forbidden_behaviors": [
+        "jumps directly to multi-PC real equipment",
+        "combines product convergence and networking in one patch"
+      ],
+      "required_artifacts": [
+        "reversible migration slices",
+        "stage evidence"
+      ],
+      "baseline_expected_failure": [
+        "agent provides a target diagram but no safe path"
+      ],
+      "review_notes": "Review semantic relationships, authority, lifecycle, failure behavior, and evidence; keyword presence alone is insufficient."
     }
   ]
 }

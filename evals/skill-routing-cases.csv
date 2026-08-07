@@ -44,3 +44,23 @@ USE-NEG-01,請把這句英文翻成中文。,using-cloudskill,false,trivial task
 DEVSK-01,我要新增一個CloudSkill技能，請先建立無技能baseline、skill contract、行為eval與相鄰技能回歸。,developing-skills,true,skill development behavior testing
 DEVSK-02,這個skill description常常誤觸發，請修改並證明新描述不會讓agent跳過SKILL.md。,developing-skills,true,description routing and behavior evidence
 DEVSK-NEG-01,幫我修正README中的一個錯字。,developing-skills,false,ordinary document edit is not skill development
+ECA-01,每片wafer各有Sequence，但Robot與Aligner是共用資源，如何切Sequence、Equipment Service與資源仲裁？,equipment-control-architecture,true,sequence service and shared physical resource ownership
+ECA-02,FrontEnd、MainFrame與多個Chamber分散在不同IPC，請定義連線方向、啟動順序、斷線重連、版本與狀態權威。,equipment-control-architecture,true,distributed equipment IPC topology and recovery
+ECA-03,Move命令timeout後Robot晚到Completed，Sequence已經重試，如何避免重複搬片並reconcile？,equipment-control-architecture,true,late completion idempotency and physical reconciliation
+ECA-04,同一個Equipment Service要支援Local、Simulate與Remote，哪些完成、故障、取消與readback語意必須一致？,equipment-control-architecture,true,implementation semantic parity
+ECA-05,用Config組出不同Chamber並讓GUI自動更新，Config schema、IO binding、interlock、版本與rollback如何治理？,equipment-control-architecture,true,config-driven equipment platform
+ECA-06,將單機設備逐步改成單機多process、多PC模擬器再到真機，請設計每階段checkpoint與rollback。,equipment-control-architecture,true,equipment platform modernization ladder
+ECA-NEG-01,Valve的Actual、Desired、Pending與Command資料結構要怎麼設計？,equipment-control-architecture,false,domain model not topology or sequence architecture
+ECA-NEG-02,設計一般電商網站的REST API、RBAC與資料庫交易。,equipment-control-architecture,false,generic application client server
+EDM-01,GUI下Valve On後寫入成功，但polling仍回Off，Actual、Desired、Pending與Error怎麼表示？,equipment-domain-modeling,true,state command readback reconciliation
+EDM-02,CommandId搭配多個nullable payload可能建立SetPoint命令卻帶OnOff，何時該改typed command？,equipment-domain-modeling,true,command payload strategy and validation
+EDM-03,RF、Valve、MFC都有OnOff，但不是同一種類，如何用繼承、組合、Capability與泛型建模？,equipment-domain-modeling,true,is-a has-a can-do same-pattern
+EDM-04,GUI要根據元件能力自動產生OnOff、SetPoint與Position控制項，Catalog和Executor責任怎麼切？,equipment-domain-modeling,true,metadata-driven UI and command catalog
+EDM-05,ChamberSnapshot要跨process序列化，如何處理component identity、schema version、stale readback與unknown fields？,equipment-domain-modeling,true,snapshot and compatibility contract
+EDM-NEG-01,多個Wafer Sequence同時爭用VTM Robot，如何排程與防死鎖？,equipment-domain-modeling,false,shared resource architecture
+EDM-NEG-02,Review這段Polling thread有沒有race condition。,equipment-domain-modeling,false,specific implementation code review
+USE-02,Nexda類設備平台同時涉及Sequence、分散IPC、Chamber Config、Actual/Desired、共用Framework與遷移Roadmap，技能順序怎麼選？,using-cloudskill,true,equipment multi-skill composition
+FW-03,多個設備產品要共用Component、Command、Network與SECS函式庫，但產品流程與Chamber組成不同，如何定義穩定kernel與版本？,framework-design,true,equipment platform shared kernel and product variation
+REF-04,舊單機設備要先抽共用契約、再同機Client/Server、再多PC模擬、最後真機，如何每階段保留相容與rollback？,safe-incremental-refactoring,true,topology migration ladder
+PROC-04,一份Roadmap按GUI、Recipe、AutoRun能力，另一份按DLL、單機多process、多PC與真機遷移，如何整合依賴與Gate？,development-process-tailoring,true,capability and migration roadmaps
+DOC-05,硬體圖、process圖、network圖與團隊責任圖描述同一設備，怎麼維持各自目的與跨圖追蹤？,document-governance,true,multi-view architecture documentation

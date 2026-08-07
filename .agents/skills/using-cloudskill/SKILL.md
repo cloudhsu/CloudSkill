@@ -36,6 +36,7 @@ Examples:
 - Legacy Qt migration: `coding-agent-project-governance` -> `cross-platform-native-architecture` -> `safe-incremental-refactoring` -> `software-quality-iso25010`.
 - Agent product: `agent-development-process`; add repository governance only when the repository operating model is also in scope.
 - Versioned specification conflict: `document-governance`; add process tailoring only when release planning or lifecycle control is also requested.
+- Equipment platform: `equipment-control-architecture` for sequence/topology/resource/recovery; add `equipment-domain-modeling` for state/command/capability/configuration; compose framework, refactoring, process, quality, or documentation skills only when those concerns are in scope.
 
 ## Routing safeguards
 
@@ -44,6 +45,7 @@ Examples:
 - Do not use an architecture skill for an isolated syntax defect.
 - Do not use a repository-governance skill to design the AI-agent product itself.
 - Do not use process tailoring to replace code review, ownership decisions, or technical verification.
+- Do not route a component state/command question to distributed equipment architecture unless sequence, resource, interlock, topology, or recovery semantics are material.
 - If no skill applies, proceed normally instead of inventing a match.
 
 ## Handoff

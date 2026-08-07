@@ -67,6 +67,30 @@
         "agent treats every defect as a process problem"
       ],
       "review_notes": "Review semantic relationships, evidence, and omissions; keyword presence alone is insufficient."
+    },
+    {
+      "id": "PROC-BEH-004",
+      "skill": "development-process-tailoring",
+      "type": "application",
+      "prompt": "One roadmap is organized by UI, recipe, manual run and auto run capabilities; another by shared libraries, process split, simulation and real hardware. Reconcile delivery governance.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "keeps capability and migration/deployment roadmaps distinct but linked",
+        "defines dependency, staffing, hardware, checkpoint and release-gate ownership",
+        "turns demos into explicit evidence and limitations"
+      ],
+      "forbidden_behaviors": [
+        "merges both roadmaps into dates without entry/exit criteria",
+        "treats a demo milestone as production readiness"
+      ],
+      "required_artifacts": [
+        "linked roadmap and gate map"
+      ],
+      "baseline_expected_failure": [
+        "agent produces a Gantt chart without architecture evidence"
+      ],
+      "review_notes": "Review semantic relationships, authority, lifecycle, failure behavior, and evidence; keyword presence alone is insufficient."
     }
   ]
 }

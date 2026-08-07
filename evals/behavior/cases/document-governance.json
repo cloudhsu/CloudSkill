@@ -68,6 +68,32 @@
         "agent avoids the interface design by proposing document templates"
       ],
       "review_notes": "Review semantic relationships, evidence, and omissions; keyword presence alone is insufficient."
+    },
+    {
+      "id": "DOC-BEH-004",
+      "skill": "document-governance",
+      "type": "application",
+      "prompt": "A confidential equipment deck contains physical, runtime, network and team-responsibility diagrams plus schedules. Create reusable public skill evidence.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "classifies each view by purpose and authority",
+        "preserves traceability without collapsing views",
+        "sanitizes product, company, customer, schedule, hardware and topology details",
+        "separates source-derived facts from generalized inference"
+      ],
+      "forbidden_behaviors": [
+        "copies confidential diagrams or dates into the public repository",
+        "treats one diagram as the full architecture"
+      ],
+      "required_artifacts": [
+        "sanitized evidence record",
+        "document ownership map update"
+      ],
+      "baseline_expected_failure": [
+        "agent republishes sensitive detail or loses evidence provenance"
+      ],
+      "review_notes": "Review semantic relationships, authority, lifecycle, failure behavior, and evidence; keyword presence alone is insufficient."
     }
   ]
 }

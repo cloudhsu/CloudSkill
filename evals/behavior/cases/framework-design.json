@@ -67,6 +67,31 @@
         "agent applies framework patterns merely for cleanliness"
       ],
       "review_notes": "Review semantic relationships, evidence, and omissions; keyword presence alone is insufficient."
+    },
+    {
+      "id": "FW-BEH-004",
+      "skill": "framework-design",
+      "type": "application",
+      "prompt": "Create a shared equipment kernel for several products whose chamber composition, UI and workflows vary by configuration.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "separates stable command/state/capability contracts from product composition and workflow policy",
+        "defines config schema/version and extension lifecycle",
+        "defines source/package/binary authority and consumer compatibility"
+      ],
+      "forbidden_behaviors": [
+        "uses copied DLLs or project trees as the product-line contract",
+        "turns configuration into unrestricted behavior without governance"
+      ],
+      "required_artifacts": [
+        "kernel/variation map",
+        "versioned extension contract"
+      ],
+      "baseline_expected_failure": [
+        "agent centralizes all product behavior into one framework"
+      ],
+      "review_notes": "Review semantic relationships, authority, lifecycle, failure behavior, and evidence; keyword presence alone is insufficient."
     }
   ]
 }
