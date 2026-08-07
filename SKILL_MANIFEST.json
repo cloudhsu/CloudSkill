@@ -5,43 +5,43 @@
       "name": "agent-development-process",
       "description": "Use when building or improving an AI-agent product whose task contract, autonomy, tools, context, memory, orchestration, evaluation, guardrails, release, or operations must be designed.",
       "path": ".agents/skills/agent-development-process/SKILL.md",
-      "file_count": 2
+      "file_count": 11
     },
     {
       "name": "application-client-server-architecture",
       "description": "Use when an application crosses client/server, API, persistence, identity, transaction, state-authority, data-history, deployment, or operational boundaries.",
       "path": ".agents/skills/application-client-server-architecture/SKILL.md",
-      "file_count": 2
+      "file_count": 5
     },
     {
       "name": "architecture-review",
       "description": "Use when comparing or assessing architecture decisions, module boundaries, state ownership, distributed design, platform/domain separation, failure behavior, or migration risk.",
       "path": ".agents/skills/architecture-review/SKILL.md",
-      "file_count": 2
+      "file_count": 4
     },
     {
       "name": "code-review",
       "description": "Use when production C, C++, C#, Qt, WinForms, WPF, framework, device-control, communication, or industrial code must be checked for correctness, concurrency, state, lifetime, recovery, maintainability, or boundary violations.",
       "path": ".agents/skills/code-review/SKILL.md",
-      "file_count": 2
+      "file_count": 3
     },
     {
       "name": "coding-agent-project-governance",
       "description": "Use when a repository needs coding-agent instructions, risk routing, worktree rules, multi-agent ownership, test evidence, migration controls, release rules, or truthful handoff.",
       "path": ".agents/skills/coding-agent-project-governance/SKILL.md",
-      "file_count": 2
+      "file_count": 10
     },
     {
       "name": "cross-platform-engine-architecture",
       "description": "Use when a 2D, game, or graphics engine spans director/scene lifecycle, update/render loops, rendering backends, resources, actions/events, input, context loss, or platform adapters.",
       "path": ".agents/skills/cross-platform-engine-architecture/SKILL.md",
-      "file_count": 2
+      "file_count": 7
     },
     {
       "name": "cross-platform-native-architecture",
       "description": "Use when a native or Qt system spans OS-specific lifecycle, HID/USB devices, firmware update, privileged integration, packaging, Designer plug-ins, or Qt build/version migration boundaries.",
       "path": ".agents/skills/cross-platform-native-architecture/SKILL.md",
-      "file_count": 2
+      "file_count": 9
     },
     {
       "name": "developing-skills",
@@ -53,13 +53,13 @@
       "name": "development-process-tailoring",
       "description": "Use when delivery is constrained by unstable requirements, hardware dependencies, release trains, urgent work, field feedback, product variants, stage gates, or competing lifecycle models.",
       "path": ".agents/skills/development-process-tailoring/SKILL.md",
-      "file_count": 2
+      "file_count": 8
     },
     {
       "name": "document-governance",
       "description": "Use when engineering documents disagree on authority, version lineage, audience, approval state, traceability, terminology, source data, or release baseline.",
       "path": ".agents/skills/document-governance/SKILL.md",
-      "file_count": 2
+      "file_count": 7
     },
     {
       "name": "equipment-control-architecture",
@@ -77,13 +77,13 @@
       "name": "framework-design",
       "description": "Use when reusable capability must be separated from product or domain behavior through framework, SDK, plug-in, platform, extension-point, state/command, or product-line contracts.",
       "path": ".agents/skills/framework-design/SKILL.md",
-      "file_count": 2
+      "file_count": 3
     },
     {
       "name": "safe-incremental-refactoring",
       "description": "Use when legacy or brownfield responsibilities must move without breaking behavior, public contracts, data, transaction order, release compatibility, recovery, or test seams.",
       "path": ".agents/skills/safe-incremental-refactoring/SKILL.md",
-      "file_count": 2
+      "file_count": 7
     },
     {
       "name": "semiconductor-equipment-domain-knowledge",
@@ -95,7 +95,7 @@
       "name": "software-quality-iso25010",
       "description": "Use when software quality must be translated into measurable scenarios, acceptance criteria, metrics, evidence, dashboards, release gates, or defect analysis using ISO/IEC 25010.",
       "path": ".agents/skills/software-quality-iso25010/SKILL.md",
-      "file_count": 2
+      "file_count": 6
     },
     {
       "name": "using-cloudskill",
