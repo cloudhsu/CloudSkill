@@ -1,5 +1,25 @@
 # Changelog
 
+## 5.2.0
+
+### Touch/device utility architecture
+
+- Added repository/document evidence from a historical Qt/C++ touch IC utility without copying proprietary source, command tables, binaries, customer details, or logs.
+- Expanded cross-platform native architecture guidance for authoritative device inventory, HID/USB protocol and transport separation, hot plug, privileged OS behavior, monitor/input mapping, firmware update, installer/startup, product variants, and field support.
+- Added a dedicated touch/native-device utility architecture reference.
+
+### Product evolution and project governance
+
+- Expanded development-process tailoring to reconstruct actual evolution from specifications, Git history, tags, release notes, customer feedback, test utilities, installer changes, and field defects.
+- Added controls for product/release horizons, technical spikes, urgent scope insertion, capacity/dependencies, release baselines, variant divergence, rollback, and field feedback.
+- Added a product-evolution reference and reusable evolution-map template.
+
+### Specification evolution
+
+- Expanded document governance for request/analysis/decision/current-spec/release-baseline separation, version lineage, supersession, and distinct implementation/verification/release status.
+- Added checks for filename, cover title, revision history, approval, content, and release-link consistency.
+- Added routing evaluations for native device utilities, evolution reconstruction, specification drift, product variants, and release quality gates.
+
 ## 5.1.0
 
 ### Qt component modernization

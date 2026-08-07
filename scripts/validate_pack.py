@@ -54,7 +54,7 @@ for folder in sorted(path for path in SKILLS.iterdir() if path.is_dir()):
 required = [
     'AGENTS.md', 'CLAUDE.md', 'INSTALL.md', 'PLANS.md', 'README.md', 'CHANGELOG.md', 'VERSION',
     'docs/README.md', 'docs/profile/ARCHITECT_PROFILE.md',
-    'docs/evidence/BENTO_SYSTEM.md', 'docs/evidence/CLOUDBOX_ENGINE.md', 'docs/evidence/QT_COMPONENT_SUITE.md',
+    'docs/evidence/BENTO_SYSTEM.md', 'docs/evidence/CLOUDBOX_ENGINE.md', 'docs/evidence/QT_COMPONENT_SUITE.md', 'docs/evidence/SIS_TOUCH_UTILITY.md',
     'docs/standards/ENGINEERING_GOVERNANCE.md', 'docs/DOCUMENTATION_AUDIT.md',
     'scripts/install.ps1', 'scripts/install.sh', 'scripts/audit_docs.py',
     'evals/skill-routing-cases.csv',
@@ -74,8 +74,8 @@ if history.exists():
         errors.append(f'full history snapshots are not allowed: {snapshots}')
 
 version = (ROOT / 'VERSION').read_text(encoding='utf-8').strip()
-if version != '5.1.0':
-    errors.append(f'expected VERSION 5.1.0, got {version}')
+if version != '5.2.0':
+    errors.append(f'expected VERSION 5.2.0, got {version}')
 
 with (ROOT / 'evals' / 'skill-routing-cases.csv').open('r', encoding='utf-8-sig', newline='') as handle:
     rows = list(csv.DictReader(handle))

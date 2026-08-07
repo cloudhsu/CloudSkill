@@ -29,3 +29,13 @@ ENG-02,Android resume 後 GL context loss，texture pool 應如何重建？,cros
 ENG-NEG-01,Qt 工具要抽象 USB I2C SPI 並支援 Windows Linux Android。,cross-platform-engine-architecture,false,general native/tool architecture
 DOC-02,這個專案已有三份重複的架構規範，請先判斷唯一來源再合併。,document-governance,true,document ownership and deduplication
 CAG-03,讓同一個repo同時支援Codex的AGENTS.md與Claude Code的CLAUDE.md，但不要維護兩份規則。,coding-agent-project-governance,true,cross-tool repository instruction adapter
+XPLAT-05,設計一個Qt觸控IC工具，需處理HID熱插拔、裝置清單、command builder、monitor mapping、Admin權限、FW update與installer，架構邊界怎麼切？,cross-platform-native-architecture,true,native touch device utility architecture
+XPLAT-06,觸控工具中UI、設定檔、FW實際狀態、裝置掃描、HID傳輸與Windows API誰是權威來源，重新插拔後如何reconcile？,cross-platform-native-architecture,true,device authority lifecycle and reconciliation
+PROC-02,請從多版規格、Git commits、release tags、installer變更與現場修正重建產品演化流程，並規劃下一版release train。,development-process-tailoring,true,evidence based product evolution and release flow
+PROC-03,急件插入既定版本，期間又有請假、客戶待確認與技術spike，該怎麼管理承諾範圍、延期項目、風險與release gate？,development-process-tailoring,true,scope capacity dependency and urgent lane
+PROC-NEG-02,請review這段HID read/write程式是否有buffer overflow。,development-process-tailoring,false,specific code review not process tailoring
+DOC-03,規格檔名是V0.10，但封面、revision history與內容仍是V0.9，應如何判定權威版本並修正文控？,document-governance,true,spec version lineage and metadata drift
+DOC-04,客戶需求簡報、現行規格、release baseline、測試結果與release notes都描述同一功能，如何避免五份文件各自變成真相？,document-governance,true,document roles authority and derived views
+FW-02,同一套觸控工具要衍生一般版、不同GUI版與Keypad版，如何切shared device protocol core與product-specific workflow？,framework-design,true,product line shared core and variants
+ISO-02,替觸控IC工具的熱插拔、FW更新、螢幕mapping、權限與installer定義可靠性、相容性、易用性與release gate。,software-quality-iso25010,true,native device utility quality gates
+DOC-NEG-03,請設計HID command packet builder與CRC介面。,document-governance,false,architecture/framework task not document governance

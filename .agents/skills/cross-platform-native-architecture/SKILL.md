@@ -1,6 +1,6 @@
 ---
 name: cross-platform-native-architecture
-description: Design or review cross-platform native software, Qt tools and Designer plug-ins, OpenGL 2D engines, platform layers, rendering loops, input, resources, hardware integration, build systems, packaging, and legacy Qt/qmake-to-CMake or Qt 5-to-Qt 6 modernization. Do not use for ordinary browser-only frontend architecture.
+description: Design or review cross-platform native software, Qt tools and Designer plug-ins, OpenGL engines, touch/device utilities, HID/USB hardware integration, privileged OS integration, firmware/update workflows, build systems, packaging, and legacy Qt modernization. Do not use for ordinary browser-only frontend architecture.
 ---
 
 # Cross-platform Native Architecture
@@ -11,6 +11,7 @@ Read:
 - `references/opengl-engine-checklist.md`
 - `references/qt-tool-checklist.md`
 - `references/qt-component-modernization.md` when the repository contains legacy Qt widgets, Designer plug-ins, duplicated component sources, qmake coupling, or a Qt-version migration.
+- `references/touch-device-utility-architecture.md` when a native utility owns device discovery, HID/USB commands, monitor/input mapping, privileged OS functions, firmware update, or installer/startup behavior.
 
 Use:
 
@@ -23,18 +24,19 @@ Use:
 
 Record:
 
-- Operating systems.
-- CPU/ABI.
+- Operating systems and supported versions.
+- CPU/ABI and driver architecture.
 - Graphics/API requirements.
-- Device/hardware interfaces.
-- Windowing and input systems.
-- Packaging and store/deployment channels.
+- Device/hardware interfaces and protocol versions.
+- Windowing, display topology, input, and raw-input mechanisms.
+- Privilege, signing, service, scheduled-task, or startup requirements.
+- Packaging, upgrade, rollback, and deployment channels.
 - Supported Qt/native dependency versions.
-- Performance targets.
+- Product/customer variants and performance targets.
 
 ### 2. Build a capability matrix
 
-For each platform identify:
+For each platform and product variant identify:
 
 - Available capability.
 - Semantic differences.
@@ -42,6 +44,7 @@ For each platform identify:
 - Thread-affinity constraints.
 - Permission/security model.
 - File-system and path behavior.
+- Driver and device-discovery behavior.
 - Packaging/deployment constraints.
 - Diagnostics and crash evidence.
 
@@ -51,70 +54,96 @@ Do not hide a meaningful semantic difference behind a falsely uniform API.
 
 Candidates for portable core:
 
-- Domain rules.
-- Scene/game logic.
-- Math and geometry.
-- Resource metadata.
-- Protocol parsing.
-- Application state.
-- Testable policies.
+- Domain and device-mode rules.
+- Protocol framing, parsing, validation, and command construction.
+- Math, geometry, mapping, and coordinate conversion.
+- Configuration schema and normalization.
+- Firmware metadata and update policy.
+- Application state and testable policies.
 
 Candidates for platform layer:
 
 - Window/surface/context creation.
-- App lifecycle.
-- Input and sensors.
-- File/resource access.
-- Thread integration.
-- Native UI bridge.
-- Hardware/device transport.
-- Logging/crash reporting.
-- Packaging/update.
+- App lifecycle, tray, single-instance, startup, and session behavior.
+- Input, global hooks, raw input, touch, keyboard, and sensors.
+- Display enumeration, rotation, calibration, and mapping.
+- File/resource access and public/private configuration paths.
+- Thread integration and native UI bridge.
+- Hardware transport, HID/USB access, driver calls, and hot-plug notification.
+- Logging/crash reporting, installer, signing, update, and rollback.
 
-### 4. Define lifecycle and ownership
+### 4. Define authority, lifecycle, and ownership
 
 For graphics/native resources specify:
 
 - Creation thread/context.
-- Owner.
-- Sharing.
+- Owner and authoritative state.
+- Sharing and synchronization.
 - Destruction order.
-- Suspend/resume.
-- Surface/context loss.
-- Device loss.
-- Reload/reconstruction.
+- Suspend/resume and login/session changes.
+- Surface/context/device loss.
+- Reload/reconstruction and hot-plug reconciliation.
 - Background/foreground transitions.
 
 For Qt components also specify QObject parent ownership, worker-thread affinity, cancellation, queued/direct connection assumptions, and plug-in unload behavior.
 
-### 5. Design performance-critical loops
+For device utilities explicitly identify authority for:
 
-For an engine or real-time UI define:
+- Discovered-device inventory and selected device.
+- Device enabled/disabled state.
+- Configuration loaded from disk versus state read from firmware.
+- Command execution, retries, timeouts, and late responses.
+- Firmware-update session and recovery after interruption.
+- Display/input mapping and topology changes.
 
-- Update/render cadence.
+### 5. Design the device and OS integration pipeline
+
+Use an explicit path such as:
+
+`UI/use case -> application host -> protocol/command service -> device façade -> platform transport -> OS/driver/device`
+
+Keep reverse notifications explicit:
+
+`OS hot-plug/session/display event -> platform adapter -> authoritative inventory/state -> application event -> UI projection`
+
+Check:
+
+- Partial read/write and report-length validation.
+- Device removal during I/O.
+- Duplicate or late notifications.
+- Retry limits and idempotency.
+- Privilege denial and secure-desktop/login-screen constraints.
+- Firmware reset/re-enumeration.
+- Multiple devices with different capabilities.
+- Configuration reconciliation after restart.
+- Operator-safe degraded behavior.
+
+### 6. Design performance-critical loops
+
+For an engine, polling device, gesture detector, or real-time UI define:
+
+- Update/poll/render cadence.
 - Fixed versus variable timestep.
-- Frame budget.
-- Work queues.
-- Resource upload.
-- Synchronization.
+- UI and I/O latency budget.
+- Work queues and cancellation.
+- Synchronization and backpressure.
 - Allocation policy.
 - Profiling evidence.
-- Degraded behavior.
+- Degraded behavior and stop conditions.
 
-### 6. Design extension and product variation
+### 7. Design extension and product variation
 
 Choose among:
 
 - Compile-time platform modules.
 - Runtime capability selection.
-- Plug-ins.
-- Adapters.
-- Configuration.
-- Product-specific modules.
+- Plug-ins and adapters.
+- Configuration and feature policy.
+- Product-specific UI/composition modules.
 
-Require a real variation or lifecycle boundary before introducing an abstraction.
+Separate shared device/protocol capability from customer/product presentation. Require a real variation, ownership, deployment, or lifecycle boundary before introducing an abstraction. Do not let preprocessor flags or copied project trees become the only product-line model.
 
-### 7. Modernize legacy Qt component suites safely
+### 8. Modernize legacy Qt component suites safely
 
 Before changing implementation, inventory:
 
@@ -136,43 +165,46 @@ Then migrate in independent slices:
 
 Do not combine source deduplication, build-system replacement, Qt-version migration, API renaming, and behavior changes in one patch.
 
-### 8. Build and release
+### 9. Build, release, and operate
 
 Define:
 
-- Toolchains.
-- Dependency versions.
-- Build matrix.
-- ABI/public contract.
-- Asset pipeline.
-- Signing.
-- Packaging.
+- Toolchains and dependency versions.
+- Build and product-variant matrix.
+- ABI/public/protocol/configuration contracts.
+- Driver architecture, signing, and test-signing policy.
+- Asset, firmware, and localization pipeline.
+- Installer upgrade/downgrade and silent-install behavior.
+- Startup, scheduled task, service, tray, and single-instance behavior.
+- Log/configuration locations and support evidence.
 - Designer plug-in discovery and deployment.
-- Automated tests.
-- Device/platform test matrix.
-- Rollback and compatibility.
+- Automated tests and device/platform test matrix.
+- Rollback, compatibility, and field-support procedure.
 
 ## Skill composition
 
-- Use `$framework-design` when reusable product-line boundaries and extension contracts are the primary design problem.
-- Use `$safe-incremental-refactoring` when the main task is moving responsibility between duplicate/legacy implementations without changing behavior.
-- Use `$code-review` for specific correctness, lifetime, concurrency, or failure defects.
-- Keep this skill as the owner of Qt/platform/build/ABI/Designer and native lifecycle constraints.
+- Use `$framework-design` when reusable device, command, protocol, or product-line boundaries are the primary problem.
+- Use `$safe-incremental-refactoring` when moving responsibility from a legacy utility or duplicate implementation without changing behavior.
+- Use `$development-process-tailoring` for requirement evolution, release trains, customer feedback, variants, and project controls.
+- Use `$document-governance` for versioned specifications, decisions, release notes, and traceability.
+- Use `$software-quality-iso25010` to define usability, reliability, compatibility, security, maintainability, and release evidence.
+- Use `$code-review` for specific correctness, lifetime, concurrency, protocol, or failure defects.
 
 ## Output Format
 
-1. Platform/product scope
+1. Platform/product/device scope
 2. Capability and compatibility matrix
-3. Current source/build/plug-in authority map
-4. Portable core, runtime libraries, design-time adapters, and platform layers
-5. Lifecycle/resource/thread ownership
-6. Build, dependency, ABI, packaging, and Designer deployment matrix
-7. Incremental migration slices and characterization evidence
-8. Performance and quality scenarios
-9. Risks, rejected abstractions, rollback, and stop conditions
+3. Current source/build/protocol/configuration authority map
+4. Portable core, application hosts, device/protocol services, platform adapters, and UI composition
+5. State/lifecycle/resource/thread ownership
+6. Hot-plug, I/O, firmware-update, privilege, display/input, and recovery behavior
+7. Build, dependency, ABI, driver, packaging, installer, and deployment matrix
+8. Incremental migration slices and characterization evidence
+9. Performance and quality scenarios
+10. Risks, rejected abstractions, rollback, and stop conditions
 
 ## Engine Routing
 
-Use this skill for general Qt/native application and platform architecture.
+Use this skill for general Qt/native application, hardware utility, and platform architecture.
 
 When the primary problem is a director/scene model, update-render loop, rendering backend, texture/resource lifecycle, game actions/events, or engine platform adapters, use `$cross-platform-engine-architecture`.

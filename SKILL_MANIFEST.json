@@ -1,5 +1,5 @@
 {
-  "version": "5.1.0",
+  "version": "5.2.0",
   "skills": [
     {
       "name": "agent-development-process",
@@ -39,21 +39,21 @@
     },
     {
       "name": "cross-platform-native-architecture",
-      "description": "Design or review cross-platform native software, Qt tools and Designer plug-ins, OpenGL 2D engines, platform layers, rendering loops, input, resources, hardware integration, build systems, packaging, and legacy Qt/qmake-to-CMake or Qt 5-to-Qt 6 modernization. Do not use for ordinary browser-only frontend architecture.",
+      "description": "Design or review cross-platform native software, Qt tools and Designer plug-ins, OpenGL engines, touch/device utilities, HID/USB hardware integration, privileged OS integration, firmware/update workflows, build systems, packaging, and legacy Qt modernization. Do not use for ordinary browser-only frontend architecture.",
       "path": ".agents/skills/cross-platform-native-architecture/SKILL.md",
-      "file_count": 8
+      "file_count": 9
     },
     {
       "name": "development-process-tailoring",
-      "description": "Select, tailor, review, or improve a software development lifecycle using waterfall, iterative development, agile practices, Extreme Programming, or a hybrid process. Use for project governance, stage gates, work-product definition, release cadence, hardware/software coordination, and process diagnosis. Do not present one methodology as universally superior.",
+      "description": "Select, tailor, review, or improve a software/product lifecycle using waterfall, iterative, agile, XP, or hybrid practices. Use for project governance, specification evolution, release trains, customer/field feedback, product variants, stage gates, hardware/software coordination, and process diagnosis. Do not treat one methodology as universally superior.",
       "path": ".agents/skills/development-process-tailoring/SKILL.md",
-      "file_count": 6
+      "file_count": 8
     },
     {
       "name": "document-governance",
-      "description": "Create, restructure, review, or standardize engineering documents, specifications, reports, management summaries, training material, release notes, and evidence packs. Use when document purpose, audience, traceability, versioning, terminology, or source-of-truth control matters. Do not use for casual prose with no engineering governance need.",
+      "description": "Create, restructure, review, or standardize engineering documents, evolving specifications, requirements baselines, reports, management summaries, training material, release notes, and evidence packs. Use when purpose, audience, traceability, version lineage, status, terminology, or source-of-truth control matters. Do not use for casual prose.",
       "path": ".agents/skills/document-governance/SKILL.md",
-      "file_count": 6
+      "file_count": 7
     },
     {
       "name": "framework-design",

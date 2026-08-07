@@ -9,7 +9,7 @@ This file defines the authoritative location for each concern.
 | Always-on architecture guidance | `/AGENTS.md` | Import or summarize only when required by another tool |
 | Claude Code adapter | `/CLAUDE.md` | Import `AGENTS.md`; do not restate it |
 | Architect identity and capability | `profile/ARCHITECT_PROFILE.md` | Use a short role summary |
-| Source evidence | `evidence/BENTO_SYSTEM.md`, `evidence/CLOUDBOX_ENGINE.md`, `evidence/QT_COMPONENT_SUITE.md` | Cite, do not copy evidence lists |
+| Source evidence | `evidence/BENTO_SYSTEM.md`, `evidence/CLOUDBOX_ENGINE.md`, `evidence/QT_COMPONENT_SUITE.md`, `evidence/SIS_TOUCH_UTILITY.md` | Cite, do not copy evidence lists |
 | Engineering governance overview | `standards/ENGINEERING_GOVERNANCE.md` | Detailed procedures belong inside skills |
 | Complex-work plan convention | `/PLANS.md` | Use the template in the agent skill |
 | Version history | `/CHANGELOG.md`, Git commits and tags | `history/RELEASES.md` provides an index only |

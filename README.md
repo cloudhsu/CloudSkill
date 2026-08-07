@@ -1,6 +1,6 @@
 # CloudSkill
 
-**Current version: 5.1.0**
+**Current version: 5.2.0**
 
 CloudSkill is a portable set of software/system architecture skills and operating guidance for **OpenAI Codex** and **Claude Code**.
 
@@ -16,14 +16,14 @@ See [INSTALL.md](INSTALL.md) for user-level and project-level installation on Wi
 |---|---|
 | `architecture-review` | Reconstruct and compare architecture decisions |
 | `application-client-server-architecture` | Frontend/backend, API, RBAC, transactions, data, UI, deployment |
-| `cross-platform-native-architecture` | Qt/native platforms, Designer plug-ins, OS integration, ABI, hardware, packaging, legacy modernization |
+| `cross-platform-native-architecture` | Qt/native platforms, touch/device utilities, HID/USB, OS integration, firmware, packaging, legacy modernization |
 | `cross-platform-engine-architecture` | Director/scene, update/render, graphics, resources, platform adapters |
 | `framework-design` | Frameworks, SDKs, plug-ins, product-line architecture |
 | `safe-incremental-refactoring` | Brownfield modernization and compatibility-preserving decomposition |
 | `code-review` | Correctness, concurrency, persistence, communication, recovery |
-| `document-governance` | Controlled and traceable engineering documents |
+| `document-governance` | Controlled documents, evolving specifications, baselines, traceability, release evidence |
 | `software-quality-iso25010` | Quality scenarios, metrics, evidence, release gates |
-| `development-process-tailoring` | Waterfall, iterative, Agile, XP, and hybrid process |
+| `development-process-tailoring` | Lifecycle tailoring, product evolution, release trains, customer/field feedback, project controls |
 | `coding-agent-project-governance` | Repository instructions, risk routing, subagents, tests, release |
 | `agent-development-process` | Building an AI-agent product or agentic system |
 
