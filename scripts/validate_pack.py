@@ -67,7 +67,7 @@ required = [
     'docs/README.md', 'docs/profile/ARCHITECT_PROFILE.md',
     'docs/evidence/BENTO_SYSTEM.md', 'docs/evidence/CLOUDBOX_ENGINE.md',
     'docs/evidence/QT_COMPONENT_SUITE.md', 'docs/evidence/SIS_TOUCH_UTILITY.md',
-    'docs/evidence/EQUIPMENT_CONTROL_PLATFORM.md',
+    'docs/evidence/EQUIPMENT_CONTROL_PLATFORM.md', 'docs/evidence/SEMICONDUCTOR_EQUIPMENT_TRAINING.md',
     'docs/standards/ENGINEERING_GOVERNANCE.md', 'docs/DOCUMENTATION_AUDIT.md',
     'scripts/install.ps1', 'scripts/install.sh', 'scripts/audit_docs.py',
     'scripts/validate_descriptions.py', 'scripts/validate_behavior_evals.py',
@@ -78,6 +78,7 @@ required = [
     '.agents/skills/developing-skills/SKILL.md',
     '.agents/skills/equipment-control-architecture/SKILL.md',
     '.agents/skills/equipment-domain-modeling/SKILL.md',
+    '.agents/skills/semiconductor-equipment-domain-knowledge/SKILL.md',
 ]
 for rel in required:
     if not (ROOT / rel).exists():

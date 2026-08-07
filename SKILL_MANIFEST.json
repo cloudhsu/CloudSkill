@@ -1,47 +1,47 @@
 {
-  "version": "5.4.0",
+  "version": "5.5.0",
   "skills": [
     {
       "name": "agent-development-process",
-      "description": "Use when building or improving an AI-agent product whose task contract, autonomy, tools, context, memory, orchestration, evaluation, guardrails, release, or operations must be designed.",
+      "description": "Build or improve an AI-agent product or agentic system: task contract, autonomy, tools, context, memory, orchestration, evals, traces, guardrails, hardening, release, and operations. Do not use merely to govern coding agents working in a software repository.",
       "path": ".agents/skills/agent-development-process/SKILL.md",
-      "file_count": 2
+      "file_count": 11
     },
     {
       "name": "application-client-server-architecture",
-      "description": "Use when an application crosses client/server, API, persistence, identity, transaction, state-authority, data-history, deployment, or operational boundaries.",
+      "description": "Design or review full-stack, frontend/backend, web, desktop-client/server, API, persistence, authentication, responsive UI, deployment, and operational architecture. Use when authority, transactions, contracts, state ownership, data history, or client/server boundaries matter. Do not use for native rendering-engine portability.",
       "path": ".agents/skills/application-client-server-architecture/SKILL.md",
-      "file_count": 2
+      "file_count": 5
     },
     {
       "name": "architecture-review",
-      "description": "Use when comparing or assessing architecture decisions, module boundaries, state ownership, distributed design, platform/domain separation, failure behavior, or migration risk.",
+      "description": "Review a software architecture, module boundary, refactoring plan, state model, distributed design, or platform/domain split. Use for architecture proposals in cross-platform tools, frameworks, engines, industrial or semiconductor equipment software. Do not use for syntax-only questions or isolated one-line bug fixes.",
       "path": ".agents/skills/architecture-review/SKILL.md",
-      "file_count": 2
+      "file_count": 4
     },
     {
       "name": "code-review",
-      "description": "Use when production C, C++, C#, Qt, WinForms, WPF, framework, device-control, communication, or industrial code must be checked for correctness, concurrency, state, lifetime, recovery, maintainability, or boundary violations.",
+      "description": "Review production C, C++, C#, Qt, WinForms, WPF, framework, engine, device-control, communication, or industrial software code. Use for correctness, concurrency, state management, resource lifetime, failure recovery, maintainability, and architecture-boundary review. Do not focus on formatting unless it affects correctness or comprehension.",
       "path": ".agents/skills/code-review/SKILL.md",
-      "file_count": 2
+      "file_count": 3
     },
     {
       "name": "coding-agent-project-governance",
-      "description": "Use when a repository needs coding-agent instructions, risk routing, worktree rules, multi-agent ownership, test evidence, migration controls, release rules, or truthful handoff.",
+      "description": "Create or review repository instructions and software-delivery rules for Codex or other coding agents: AGENTS.md, risk routing, subagent roles, worktrees, plans, tests, migrations, documentation sync, release, and truthful handoff. Do not use to design the AI agent product itself.",
       "path": ".agents/skills/coding-agent-project-governance/SKILL.md",
-      "file_count": 2
+      "file_count": 10
     },
     {
       "name": "cross-platform-engine-architecture",
-      "description": "Use when a 2D, game, or graphics engine spans director/scene lifecycle, update/render loops, rendering backends, resources, actions/events, input, context loss, or platform adapters.",
+      "description": "Design or review a cross-platform 2D/game/graphics engine with a portable core, director/scene lifecycle, update/render loop, rendering backend, actions/events, resources, input, platform services, and iOS/Android/Windows adapters. Use for engine architecture rather than ordinary application UI.",
       "path": ".agents/skills/cross-platform-engine-architecture/SKILL.md",
-      "file_count": 2
+      "file_count": 7
     },
     {
       "name": "cross-platform-native-architecture",
-      "description": "Use when a native or Qt system spans OS-specific lifecycle, HID/USB devices, firmware update, privileged integration, packaging, Designer plug-ins, or Qt build/version migration boundaries.",
+      "description": "Design or review cross-platform native software, Qt tools and Designer plug-ins, OpenGL engines, touch/device utilities, HID/USB hardware integration, privileged OS integration, firmware/update workflows, build systems, packaging, and legacy Qt modernization. Do not use for ordinary browser-only frontend architecture.",
       "path": ".agents/skills/cross-platform-native-architecture/SKILL.md",
-      "file_count": 2
+      "file_count": 9
     },
     {
       "name": "developing-skills",
@@ -51,49 +51,55 @@
     },
     {
       "name": "development-process-tailoring",
-      "description": "Use when delivery is constrained by unstable requirements, hardware dependencies, release trains, urgent work, field feedback, product variants, stage gates, or competing lifecycle models.",
+      "description": "Select, tailor, review, or improve a software/product lifecycle using waterfall, iterative, agile, XP, or hybrid practices. Use for project governance, specification evolution, release trains, customer/field feedback, product variants, stage gates, hardware/software coordination, and process diagnosis. Do not treat one methodology as universally superior.",
       "path": ".agents/skills/development-process-tailoring/SKILL.md",
-      "file_count": 2
-    },
-    {
-      "name": "document-governance",
-      "description": "Use when engineering documents disagree on authority, version lineage, audience, approval state, traceability, terminology, source data, or release baseline.",
-      "path": ".agents/skills/document-governance/SKILL.md",
-      "file_count": 2
-    },
-    {
-      "name": "equipment-control-architecture",
-      "description": "Use when equipment software coordinates wafer, lot, chamber, robot, aligner, recipe, interlock, shared physical resources, simulation, or local and remote control boundaries.",
-      "path": ".agents/skills/equipment-control-architecture/SKILL.md",
       "file_count": 8
     },
     {
-      "name": "equipment-domain-modeling",
-      "description": "Use when modeling chamber or component state, equipment commands, hardware readback, Actual and Desired values, pending writes, snapshots, capability interfaces, metadata-driven UI, or typed command payloads.",
-      "path": ".agents/skills/equipment-domain-modeling/SKILL.md",
+      "name": "document-governance",
+      "description": "Create, restructure, review, or standardize engineering documents, evolving specifications, requirements baselines, reports, management summaries, training material, release notes, and evidence packs. Use when purpose, audience, traceability, version lineage, status, terminology, or source-of-truth control matters. Do not use for casual prose.",
+      "path": ".agents/skills/document-governance/SKILL.md",
       "file_count": 7
     },
     {
+      "name": "equipment-control-architecture",
+      "description": "Use when equipment software coordinates material flow, pump/vent or chamber readiness, wafer/lot sequences, robots, recipes, interlocks, shared physical resources, simulation, or distributed control across equipment modules.",
+      "path": ".agents/skills/equipment-control-architecture/SKILL.md",
+      "file_count": 9
+    },
+    {
+      "name": "equipment-domain-modeling",
+      "description": "Use when modeling valves, MFCs, pumps, gauges, heaters, power supplies, robots, chamber snapshots, equipment commands, hardware readback, Actual and Desired values, capabilities, engineering units, or metadata-driven UI.",
+      "path": ".agents/skills/equipment-domain-modeling/SKILL.md",
+      "file_count": 8
+    },
+    {
       "name": "framework-design",
-      "description": "Use when reusable capability must be separated from product or domain behavior through framework, SDK, plug-in, platform, extension-point, state/command, or product-line contracts.",
+      "description": "Design or refine a reusable software framework, platform layer, engine, SDK, or product-line architecture. Use when separating reusable capability from domain-specific behavior, defining extension points, plug-ins, state/command contracts, or cross-platform boundaries. Do not use merely to add abstractions to a single stable implementation.",
       "path": ".agents/skills/framework-design/SKILL.md",
-      "file_count": 2
+      "file_count": 3
     },
     {
       "name": "safe-incremental-refactoring",
-      "description": "Use when legacy or brownfield responsibilities must move without breaking behavior, public contracts, data, transaction order, release compatibility, recovery, or test seams.",
+      "description": "Plan or execute behavior-preserving modernization of a legacy or brownfield system, especially god classes, monoliths, persistence layers, transaction-heavy code, or compatibility-sensitive APIs. Use when responsibilities must move without breaking contracts, data, release behavior, or fault-injection seams.",
       "path": ".agents/skills/safe-incremental-refactoring/SKILL.md",
-      "file_count": 2
+      "file_count": 7
+    },
+    {
+      "name": "semiconductor-equipment-domain-knowledge",
+      "description": "Use when a semiconductor-equipment task depends on the physical meaning of EFEM, load ports, loadlocks, transfer chambers, process chambers, vacuum pumps, pressure gauges, gas flow, heaters, power supplies, plasma, sputtering, or process readiness.",
+      "path": ".agents/skills/semiconductor-equipment-domain-knowledge/SKILL.md",
+      "file_count": 8
     },
     {
       "name": "software-quality-iso25010",
-      "description": "Use when software quality must be translated into measurable scenarios, acceptance criteria, metrics, evidence, dashboards, release gates, or defect analysis using ISO/IEC 25010.",
+      "description": "Define, review, measure, or gate software and ICT product quality using ISO/IEC 25010. Use for quality requirements, architecture quality scenarios, test objectives, acceptance criteria, quality dashboards, release gates, and defect analysis. Do not use the standard as a generic checklist without system-specific measures.",
       "path": ".agents/skills/software-quality-iso25010/SKILL.md",
-      "file_count": 2
+      "file_count": 6
     },
     {
       "name": "using-cloudskill",
-      "description": "Use when starting a task that may require one or more CloudSkill skills, especially when routing, ordering, or composing process, domain, change, quality, and handoff skills is non-obvious.",
+      "description": "Use when starting a task that may require one or more CloudSkill skills, especially when routing, ordering, or composing process, domain-knowledge, architecture, change, quality, and handoff skills is non-obvious.",
       "path": ".agents/skills/using-cloudskill/SKILL.md",
       "file_count": 2
     }

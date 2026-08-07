@@ -77,8 +77,20 @@ Use installed skill descriptions for normal routing. Preserve these distinctions
 - Reviewing a target architecture versus moving a live legacy system toward it safely.
 - Governing coding agents in a repository versus building an AI-agent product.
 - Selecting and composing skills versus developing and releasing the skills themselves.
-- Equipment sequence/topology/resource/recovery architecture versus equipment state/command/capability modeling.
-- Generic client/server concerns versus physical-device completion, interlock, readback, and shared-resource semantics.
+- Semiconductor equipment terminology/process knowledge versus equipment sequence/topology/resource/recovery architecture versus equipment state/command/capability modeling.
+- Generic client/server concerns versus physical-device completion, interlock, readback, sensor quality, process readiness, and shared-resource semantics.
+
+## Semiconductor-equipment domain checks
+
+When semiconductor equipment or PVD/vacuum concepts are in scope:
+
+- Separate equipment/material-flow facts from software architecture decisions.
+- Identify EFEM, Main Frame/loadlock/transfer, process-chamber, atmosphere/vacuum, and contamination boundaries before proposing control flow.
+- Classify valves, sensors, MFCs, pressure gauges, motion, pumps, thermal utilities, and power sources by physical capability, command, readback, readiness, units, range, and fault semantics.
+- Treat pressure values as range/quality-dependent measurements; do not assume one gauge is authoritative across every pressure region.
+- Distinguish command accepted, controller state, physical readback, stabilized process condition, and sequence completion.
+- Use PVD principles to identify readiness and evidence, not to invent production recipe values or safe limits.
+- Mark historical training values, vendor behavior, protocols, and operating ranges as requiring current controlled-spec verification.
 
 ## Equipment-control checks
 

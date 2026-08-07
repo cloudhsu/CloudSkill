@@ -121,6 +121,58 @@
         "agent treats timeout as proof the first move did not occur"
       ],
       "review_notes": "Review semantic relationships, authority, lifecycle, failure behavior, and evidence; keyword presence alone is insufficient."
+    },
+    {
+      "id": "ECA-BEH-006",
+      "skill": "equipment-control-architecture",
+      "type": "application",
+      "prompt": "Design a loadlock Pump/Vent and two-sided slit-valve workflow that prevents pressure-difference opening, unknown wafer location, competing robot moves, and unsafe restart behavior.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "models wafer location, pressure domain, valve actual state and resource reservation together",
+        "uses measured endpoints and valid gauge evidence for pump/vent completion",
+        "defines restart reconstruction and uncertain-state handling",
+        "keeps local interlocks authoritative near the physical boundary"
+      ],
+      "forbidden_behaviors": [
+        "completes pump or vent only by elapsed time",
+        "opens a boundary based only on a Sequence command",
+        "assumes last command proves wafer location"
+      ],
+      "required_artifacts": [
+        "readiness/interlock state transition"
+      ],
+      "baseline_expected_failure": [
+        "agent writes a linear timer sequence without physical authority or recovery"
+      ],
+      "review_notes": "Review semantic relationships, authority, lifecycle, physical readiness, failure behavior, and evidence."
+    },
+    {
+      "id": "ECA-BEH-007",
+      "skill": "equipment-control-architecture",
+      "type": "application",
+      "prompt": "Define architecture-level readiness and completion semantics for a PVD recipe phase involving vacuum, MFC flow, pressure stabilization, cooling, power and plasma.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "separates domain knowledge from Sequence and Equipment Service ownership",
+        "defines readiness dependencies, sensor quality and stable physical conditions",
+        "distinguishes power accepted, plasma evidence and sequence completion",
+        "defines fault, timeout and recovery behavior"
+      ],
+      "forbidden_behaviors": [
+        "invents recipe setpoints",
+        "uses one ready Boolean with no dependencies",
+        "equates transport acknowledgement with process completion"
+      ],
+      "required_artifacts": [
+        "process-readiness contract"
+      ],
+      "baseline_expected_failure": [
+        "agent treats the recipe as a list of commands and delays"
+      ],
+      "review_notes": "Review semantic relationships, authority, lifecycle, physical readiness, failure behavior, and evidence."
     }
   ]
 }

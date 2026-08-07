@@ -121,6 +121,57 @@
         "agent treats config and snapshot as the same serialized object"
       ],
       "review_notes": "Review semantic relationships, authority, lifecycle, failure behavior, and evidence; keyword presence alone is insufficient."
+    },
+    {
+      "id": "EDM-BEH-006",
+      "skill": "equipment-domain-modeling",
+      "type": "application",
+      "prompt": "Model an MFC with gas-line identity, engineering units, allowed range, Desired flow, accepted setpoint, Actual flow, Pending, Stabilized, quality and fault.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "distinguishes command, accepted/readback setpoint and measured process value",
+        "includes gas identity, units, command/measurement range, timestamp and quality",
+        "defines stabilization and timeout semantics",
+        "keeps executor validation authoritative"
+      ],
+      "forbidden_behaviors": [
+        "uses one float for desired and actual flow",
+        "omits units or range",
+        "lets the UI set Stabilized directly"
+      ],
+      "required_artifacts": [
+        "MFC state and command contract"
+      ],
+      "baseline_expected_failure": [
+        "agent models only SetPoint and ActualValue fields"
+      ],
+      "review_notes": "Review domain identity, authority, units, quality, lifecycle, and reconciliation."
+    },
+    {
+      "id": "EDM-BEH-007",
+      "skill": "equipment-domain-modeling",
+      "type": "application",
+      "prompt": "Design a chamber-pressure snapshot that may use different gauge ranges and an atmosphere switch across pump-down and vent transitions.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "models value, unit, gauge/source, active range, validity, timestamp and stale state",
+        "separates atmosphere confirmation from an arbitrary numeric pressure",
+        "defines unknown or range-transition behavior",
+        "does not invent a universal crossover value"
+      ],
+      "forbidden_behaviors": [
+        "stores only a double pressure value",
+        "assumes a full-range gauge is equally authoritative everywhere"
+      ],
+      "required_artifacts": [
+        "pressure measurement contract"
+      ],
+      "baseline_expected_failure": [
+        "agent ignores gauge range and measurement quality"
+      ],
+      "review_notes": "Review domain identity, authority, units, quality, lifecycle, and reconciliation."
     }
   ]
 }

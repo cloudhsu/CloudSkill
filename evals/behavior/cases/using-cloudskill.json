@@ -91,6 +91,31 @@
         "agent misses equipment-specific physical semantics or over-routes"
       ],
       "review_notes": "Review semantic relationships, authority, lifecycle, failure behavior, and evidence; keyword presence alone is insufficient."
+    },
+    {
+      "id": "USE-BEH-005",
+      "skill": "using-cloudskill",
+      "type": "application",
+      "prompt": "First explain EFEM, vacuum gauges and PVD principles; then design loadlock pump/vent Sequence and an MFC state model. Select and order the smallest sufficient skills.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "selects semiconductor-equipment-domain-knowledge for physical interpretation",
+        "then selects equipment-control-architecture for pump/vent Sequence and interlocks",
+        "selects equipment-domain-modeling for the MFC state/command contract",
+        "does not add unrelated skills"
+      ],
+      "forbidden_behaviors": [
+        "uses only equipment-control-architecture for terminology and modeling",
+        "loads every CloudSkill skill"
+      ],
+      "required_artifacts": [
+        "ordered minimal skill set"
+      ],
+      "baseline_expected_failure": [
+        "agent treats domain knowledge, architecture and data modeling as one broad skill"
+      ],
+      "review_notes": "Review routing boundaries and execution order; keyword overlap alone is insufficient."
     }
   ]
 }

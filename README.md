@@ -1,6 +1,6 @@
 # CloudSkill
 
-**Current version: 5.4.0**
+**Current version: 5.5.0**
 
 CloudSkill is a portable set of software/system architecture skills and operating guidance for **OpenAI Codex** and **Claude Code**.
 
@@ -17,8 +17,9 @@ See [INSTALL.md](INSTALL.md) for user-level and project-level installation on Wi
 | `using-cloudskill` | Select and order the smallest sufficient skill set |
 | `developing-skills` | Develop and release skills with routing and behavior evidence |
 | `architecture-review` | Reconstruct and compare architecture decisions |
-| `equipment-control-architecture` | Sequence/service, shared resources, interlocks, distributed IPC, config-driven equipment platforms |
-| `equipment-domain-modeling` | Equipment state/command, Actual/Desired, capabilities, snapshots, catalogs, metadata-driven UI |
+| `semiconductor-equipment-domain-knowledge` | EFEM/material flow, component purpose, vacuum, PVD, process readiness, and physical-to-software interpretation |
+| `equipment-control-architecture` | Sequence/service, material flow, readiness, shared resources, interlocks, distributed IPC, config-driven equipment platforms |
+| `equipment-domain-modeling` | Equipment component state/command, units/quality, Actual/Desired, capabilities, snapshots, catalogs, metadata-driven UI |
 | `application-client-server-architecture` | Frontend/backend, API, RBAC, transactions, data, UI, deployment |
 | `cross-platform-native-architecture` | Qt/native platforms, touch/device utilities, HID/USB, OS integration, firmware, packaging, legacy modernization |
 | `cross-platform-engine-architecture` | Director/scene, update/render, graphics, resources, platform adapters |

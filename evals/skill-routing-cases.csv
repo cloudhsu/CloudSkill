@@ -59,8 +59,21 @@ EDM-04,GUI要根據元件能力自動產生OnOff、SetPoint與Position控制項�
 EDM-05,ChamberSnapshot要跨process序列化，如何處理component identity、schema version、stale readback與unknown fields？,equipment-domain-modeling,true,snapshot and compatibility contract
 EDM-NEG-01,多個Wafer Sequence同時爭用VTM Robot，如何排程與防死鎖？,equipment-domain-modeling,false,shared resource architecture
 EDM-NEG-02,Review這段Polling thread有沒有race condition。,equipment-domain-modeling,false,specific implementation code review
-USE-02,Nexda類設備平台同時涉及Sequence、分散IPC、Chamber Config、Actual/Desired、共用Framework與遷移Roadmap，技能順序怎麼選？,using-cloudskill,true,equipment multi-skill composition
+USE-02,分散式設備平台同時涉及Sequence、分散IPC、Chamber Config、Actual/Desired、共用Framework與遷移Roadmap，技能順序怎麼選？,using-cloudskill,true,equipment multi-skill composition
 FW-03,多個設備產品要共用Component、Command、Network與SECS函式庫，但產品流程與Chamber組成不同，如何定義穩定kernel與版本？,framework-design,true,equipment platform shared kernel and product variation
 REF-04,舊單機設備要先抽共用契約、再同機Client/Server、再多PC模擬、最後真機，如何每階段保留相容與rollback？,safe-incremental-refactoring,true,topology migration ladder
 PROC-04,一份Roadmap按GUI、Recipe、AutoRun能力，另一份按DLL、單機多process、多PC與真機遷移，如何整合依賴與Gate？,development-process-tailoring,true,capability and migration roadmaps
 DOC-05,硬體圖、process圖、network圖與團隊責任圖描述同一設備，怎麼維持各自目的與跨圖追蹤？,document-governance,true,multi-view architecture documentation
+SEDK-01,EFEM、Main Frame、Load Lock、Transfer Chamber與Process Chamber各自負責什麼，wafer通常怎麼走？,semiconductor-equipment-domain-knowledge,true,equipment topology and material flow knowledge
+SEDK-02,Load Lock為何要Pump Down與Vent，ATM端與VCE端的邊界在軟體上代表什麼物理條件？,semiconductor-equipment-domain-knowledge,true,vacuum transition domain interpretation
+SEDK-03,MFC、MFM、Throttle Valve、Gate Valve與Slit Valve的物理用途有什麼差異？,semiconductor-equipment-domain-knowledge,true,equipment component purpose
+SEDK-04,Dry Pump、Turbo Pump、Cryo Pump以及Convectron、Baratron、Ion Gauge通常各自處理哪個真空區域？,semiconductor-equipment-domain-knowledge,true,vacuum pump and gauge semantics
+SEDK-05,請用設備軟體工程師能理解的方式說明PVD磁控濺鍍從真空、氬氣、電漿到鍍膜的關係。,semiconductor-equipment-domain-knowledge,true,PVD process principle explanation
+SEDK-06,Bias Sputtering與Reactive Sputtering在物理效果及軟體監控重點上有什麼不同？,semiconductor-equipment-domain-knowledge,true,PVD variant and software implications
+SEDK-NEG-01,FrontEnd、MainFrame與Chamber分散在三台IPC，如何設計斷線重連與狀態權威？,semiconductor-equipment-domain-knowledge,false,distributed architecture belongs to equipment-control-architecture
+SEDK-NEG-02,ValveState的Actual、Desired、Pending與Error class要怎麼設計？,semiconductor-equipment-domain-knowledge,false,state model belongs to equipment-domain-modeling
+ECA-07,設計Load Lock的Pump、Vent與雙側Slit Valve流程，必須避免壓差開門、wafer位置不明與重啟後誤動作。,equipment-control-architecture,true,material flow vacuum readiness and interlocks
+ECA-08,PVD Recipe步驟要如何定義真空、MFC流量、壓力穩定、冷卻、Power與Plasma的readiness及完成條件？,equipment-control-architecture,true,process readiness architecture
+EDM-06,MFC模型要同時表示氣體種類、單位、Desired Flow、Actual Flow、Range、Pending、Stabilized與Fault，怎麼建模？,equipment-domain-modeling,true,analog regulator state command and units
+EDM-07,Chamber Pressure Snapshot不能只有double，還要處理Gauge來源、Range、Validity、Timestamp與ATM Switch，資料契約怎麼設計？,equipment-domain-modeling,true,measurement quality and source modeling
+USE-03,我先要解釋PVD與真空元件，再設計Pump/Vent Sequence與MFC資料模型，CloudSkill技能應如何選擇與排序？,using-cloudskill,true,domain knowledge architecture and modeling composition

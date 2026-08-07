@@ -1,5 +1,24 @@
 # Changelog
 
+## 5.5.0
+
+### Semiconductor equipment domain knowledge
+
+- Added `semiconductor-equipment-domain-knowledge` for EFEM/Main Frame/process-chamber responsibilities, material and environment flow, component capability interpretation, vacuum/gauge/pump semantics, PVD principles, and physical-to-software translation.
+- Added explicit separation of general process principles, historical training evidence, product-specific hardware behavior, recipe-specific values, and current controlled specifications.
+- Added public-sanitization and safety limits so confidential training material informs generalized skill behavior without publishing proprietary topology, schedules, identifiers, or operating procedures.
+
+### Equipment triggers and physical semantics
+
+- Narrowed equipment-skill routing so terminology/process questions use domain knowledge, topology/Sequence/resource/recovery questions use equipment control architecture, and state/command/unit/quality questions use equipment domain modeling.
+- Expanded equipment-control guidance for EFEM/loadlock/transfer/process-chamber material flow, atmosphere/vacuum boundaries, pump/vent completion, sensor validity, process readiness, and power/plasma completion evidence.
+- Expanded equipment-domain modeling with component-state patterns for actuators, measurements, regulators, motion, pumps, thermal utilities, and process-energy sources.
+
+### Evaluation and evidence
+
+- Added routing and behavior contracts for vacuum gauges, MFCs, pump/vent, wafer transfer, plasma/PVD readiness, training-value limitations, and multi-skill composition.
+- Added a sanitized evidence record for semiconductor-equipment training material and updated deterministic validation requirements.
+
 ## 5.4.0
 
 ### Equipment-control architecture

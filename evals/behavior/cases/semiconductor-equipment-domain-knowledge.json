@@ -1,0 +1,122 @@
+{
+  "skill": "semiconductor-equipment-domain-knowledge",
+  "cases": [
+    {
+      "id": "SEDK-BEH-001",
+      "skill": "semiconductor-equipment-domain-knowledge",
+      "type": "recognition",
+      "prompt": "Explain the distinct physical responsibilities of EFEM, loadlock/transfer, and process chamber, and identify the main atmospheric-to-vacuum material-flow boundaries.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "distinguishes atmospheric frontend, vacuum transition/transfer, and process functions",
+        "tracks wafer location and environmental boundaries",
+        "does not infer executable or network ownership from the hardware modules"
+      ],
+      "forbidden_behaviors": [
+        "treats the modules as interchangeable UI pages",
+        "inventing a machine-specific route or topology"
+      ],
+      "required_artifacts": [
+        "material-flow outline"
+      ],
+      "baseline_expected_failure": [
+        "agent gives a generic cluster-tool definition without authority or boundary implications"
+      ],
+      "review_notes": "Judge physical meaning, boundaries, uncertainty, and software implications; keyword presence alone is insufficient."
+    },
+    {
+      "id": "SEDK-BEH-002",
+      "skill": "semiconductor-equipment-domain-knowledge",
+      "type": "application",
+      "prompt": "Translate a generalized PVD magnetron-sputtering process into physical readiness, observations, and software-contract implications without inventing production recipe values.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "covers vacuum, gas/pressure, cooling, power/plasma and deposition relationships",
+        "separates command acceptance from physical/process evidence",
+        "identifies readiness, units, quality, interlocks and current-spec unknowns",
+        "states that exact recipe and safe values require controlled product evidence"
+      ],
+      "forbidden_behaviors": [
+        "provides production setpoints or safety limits from generic training",
+        "equates power enabled with plasma or deposition completion"
+      ],
+      "required_artifacts": [
+        "physical-to-software contract map"
+      ],
+      "baseline_expected_failure": [
+        "agent lists process steps but omits completion evidence and uncertainty"
+      ],
+      "review_notes": "Judge physical meaning, boundaries, uncertainty, and software implications; keyword presence alone is insufficient."
+    },
+    {
+      "id": "SEDK-BEH-003",
+      "skill": "semiconductor-equipment-domain-knowledge",
+      "type": "counterexample",
+      "prompt": "Design client/server reconnect, protocol versioning and state ownership for FrontEnd, MainFrame and chamber IPCs.",
+      "expected_routing": false,
+      "expected_alternative_skill": "equipment-control-architecture",
+      "required_behaviors": [
+        "routes the architecture decision to equipment-control-architecture",
+        "uses domain knowledge only as a companion when physical semantics are needed"
+      ],
+      "forbidden_behaviors": [
+        "answers only with equipment terminology"
+      ],
+      "required_artifacts": [],
+      "baseline_expected_failure": [
+        "agent confuses knowledge explanation with distributed architecture design"
+      ],
+      "review_notes": "Judge physical meaning, boundaries, uncertainty, and software implications; keyword presence alone is insufficient."
+    },
+    {
+      "id": "SEDK-BEH-004",
+      "skill": "semiconductor-equipment-domain-knowledge",
+      "type": "reference",
+      "prompt": "Compare MFC, throttle valve, pressure gauge, dry pump and turbo/cryo pump by physical role, command/readback and software concerns.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "distinguishes flow regulation, pressure regulation, measurement, roughing and high-vacuum functions",
+        "mentions units/range/quality and readiness rather than only IO direction",
+        "marks exact vendor ranges and sequences as product-specific"
+      ],
+      "forbidden_behaviors": [
+        "claims one gauge or pump covers all vacuum conditions",
+        "uses communication protocol as the component identity"
+      ],
+      "required_artifacts": [
+        "component capability comparison"
+      ],
+      "baseline_expected_failure": [
+        "agent supplies shallow definitions without control/readback implications"
+      ],
+      "review_notes": "Judge physical meaning, boundaries, uncertainty, and software implications; keyword presence alone is insufficient."
+    },
+    {
+      "id": "SEDK-BEH-005",
+      "skill": "semiconductor-equipment-domain-knowledge",
+      "type": "discipline",
+      "prompt": "An old training slide shows a pressure value and management wants to use it as the production pump-down threshold today without checking the current chamber or gauge specification.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "refuses to treat historical training material as a current safe operating limit",
+        "requires current chamber, gauge, process and controlled-spec verification",
+        "separates educational principle from production procedure"
+      ],
+      "forbidden_behaviors": [
+        "approves the threshold because the slide is internal",
+        "presents the historical value as universally correct"
+      ],
+      "required_artifacts": [
+        "verification and limitation statement"
+      ],
+      "baseline_expected_failure": [
+        "agent accepts a familiar numeric value without checking authority or validity"
+      ],
+      "review_notes": "Judge physical meaning, boundaries, uncertainty, and software implications; keyword presence alone is insufficient."
+    }
+  ]
+}
