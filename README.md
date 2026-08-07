@@ -1,48 +1,77 @@
 # Software Architect Codex Pack
 
-這是一套給 Codex 使用的個人架構工作規則與 Skills。
+Version: **2.0.0**
 
-## 內容
+This pack provides persistent architecture guidance, reusable Codex/ChatGPT skills, engineering standards, and templates.
+
+## Contents
 
 ```text
 software-architect-codex-pack/
 ├── AGENTS.md
+├── AGENT_DEVELOPMENT_STANDARD.md
+├── DOCUMENT_STANDARD.md
+├── PLANS.md
+├── REFERENCES.md
+├── CHANGELOG.md
+├── VERSION
 └── .agents/
     └── skills/
         ├── architecture-review/
-        │   ├── SKILL.md
-        │   └── references/
-        │       ├── architect-context.md
-        │       └── review-checklist.md
         ├── framework-design/
-        │   ├── SKILL.md
-        │   └── references/
-        │       └── framework-principles.md
-        └── code-review/
-            ├── SKILL.md
-            └── references/
-                └── code-review-checklist.md
+        ├── code-review/
+        ├── document-governance/
+        ├── software-quality-iso25010/
+        ├── development-process-tailoring/
+        └── agent-development-process/
 ```
 
-## 建議安裝方式
+## Skills
 
-### 方式 A：套用到單一 Repository
+### `$architecture-review`
 
-將：
+Architecture alternatives, state ownership, failure/recovery, migration, and verification.
 
-- `AGENTS.md` 複製到 Repository 根目錄。
-- `.agents/skills/` 整個目錄複製到 Repository 內。
+### `$framework-design`
 
-這種方式適合讓團隊共同使用，並可納入 Git。
+Framework, platform, engine, plug-in, cross-platform, and product-line design.
 
-### 方式 B：作為個人全域設定
+### `$code-review`
 
-將：
+Production code review emphasizing correctness, concurrency, lifecycle, communication, and recovery.
 
-- `AGENTS.md` 複製為 `~/.codex/AGENTS.md`
-- `.agents/skills/` 下的三個 Skill 目錄，複製到 `~/.agents/skills/`
+### `$document-governance`
 
-Windows PowerShell 範例：
+Engineering document creation and review, including multi-audience reports, specifications, traceability, and change control.
+
+### `$software-quality-iso25010`
+
+ISO/IEC 25010-based quality requirements, quality scenarios, metrics, test objectives, dashboards, and release gates.
+
+Defaults to ISO/IEC 25010:2023 unless a project explicitly declares the 2011 edition.
+
+### `$development-process-tailoring`
+
+Selection and tailoring of waterfall, iterative, agile, XP, and hybrid lifecycles.
+
+### `$agent-development-process`
+
+AI-agent task contract, autonomy, tools, data, harness, evaluations, hardening, release, and continuous improvement.
+
+## Repository Installation
+
+Copy these into the repository root:
+
+- `AGENTS.md`
+- `.agents/skills/`
+- `PLANS.md`
+- Standards/templates required by the project
+
+Commit them to Git when they are intended as shared team rules.
+
+## Personal Global Installation
+
+Windows PowerShell:
 
 ```powershell
 New-Item -ItemType Directory -Force "$HOME\.codex"
@@ -52,25 +81,43 @@ Copy-Item ".\AGENTS.md" "$HOME\.codex\AGENTS.md" -Force
 Copy-Item ".\.agents\skills\*" "$HOME\.agents\skills\" -Recurse -Force
 ```
 
-## 使用方式
+Keep project-specific rules in each repository instead of placing all details in the global `AGENTS.md`.
 
-在 Codex 中可明確指定：
+## Invocation
+
+In Codex CLI or IDE:
 
 ```text
+/skills
 $architecture-review
 $framework-design
 $code-review
+$document-governance
+$software-quality-iso25010
+$development-process-tailoring
+$agent-development-process
 ```
 
-也可以直接描述任務；當任務符合 Skill 的 description 時，Codex 可自動選用。
+Skills may also be selected automatically when the task matches their descriptions.
 
-## 建議的下一步
+## Recommended Agent Development Workflow
 
-先連續使用兩週，記錄以下情況：
+```text
+Need / problem
+  → agent task contract
+  → autonomy and risk classification
+  → evaluation plan
+  → harness architecture
+  → minimum vertical slice
+  → trace and failure review
+  → controlled improvement
+  → regression and quality gates
+  → reviewed release
+  → production feedback loop
+```
 
-1. 哪些回覆仍太偏教科書。
-2. 哪些檢查項目沒有被執行。
-3. 哪些輸出格式不符合實際決策習慣。
-4. 哪些規則只適用設備業，哪些應提升為跨領域原則。
+Use `AGENT_DEVELOPMENT_STANDARD.md` as the governance document and the `agent-development-process` templates as working artifacts.
 
-再依實際使用結果修改，而不是一次把所有經驗塞入單一 Skill。
+## ISO/IEC 25010 Note
+
+The pack summarizes a practical application method. It does not reproduce or replace a licensed copy of ISO/IEC 25010. The organization's declared edition, approved mappings, contractual requirements, and licensed standards remain authoritative.

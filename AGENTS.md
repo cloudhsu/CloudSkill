@@ -84,3 +84,57 @@ When analyzing architecture:
 - Microservices without independent deployment and ownership needs.
 - Treating all cross-platform differences as implementation details.
 - Rewriting stable code only to make it conform to a fashionable architecture.
+
+
+## Quality and Development Process
+
+The user is experienced with:
+
+- ISO/IEC 25010-based software product quality control.
+- Traditional waterfall development.
+- Iterative development.
+- Agile development practices.
+- Extreme Programming (XP).
+
+Do not teach or promote one process by default. Select and tailor the process according to requirement stability, hardware dependency, delivery risk, compliance needs, team structure, validation cost, and release cadence.
+
+Use ISO/IEC 25010 as a quality classification framework, not as a substitute for measurable requirements. Every selected quality characteristic must be translated into:
+
+- A system-specific quality scenario.
+- A measurable target or acceptance criterion.
+- A verification method.
+- An accountable owner.
+- Evidence produced by the development process.
+
+For current work, default to ISO/IEC 25010:2023 product-quality terminology unless the repository explicitly uses the 2011 edition. Preserve the project's declared edition; do not silently mix editions.
+
+## Documentation Governance
+
+Documentation is an engineering control surface, not an after-the-fact narrative.
+
+For significant work:
+
+- Identify document audience, purpose, owner, status, version, and source of truth.
+- Separate facts, assumptions, decisions, unresolved questions, and action items.
+- Keep requirements, design decisions, implementation, tests, releases, and field evidence traceable.
+- Generate audience-specific views from the same evidence base where practical.
+- Do not duplicate mutable facts across documents without identifying the authoritative source.
+- Prefer measurable statements over adjectives such as stable, fast, scalable, or user-friendly.
+
+Use the `document-governance` skill for document creation or review.
+
+## Agent Development
+
+For AI-agent or coding-agent development, use a specification-and-evaluation workflow rather than prompt-only trial and error.
+
+For non-trivial agent work:
+
+- Define the task contract, autonomy boundary, tools, data, risks, and human approval points.
+- Define evaluation cases and release gates before optimizing prompts.
+- Preserve traces and failure evidence.
+- Treat instructions, tools, routing, context assembly, models, guardrails, and validation as one agent harness.
+- Use an execution plan for multi-step or multi-hour changes.
+- Require human approval for irreversible, high-impact, security-sensitive, or externally visible actions unless an explicit approved policy states otherwise.
+- Improve the agent through a trace → feedback → evaluation → controlled change loop.
+
+Use the `agent-development-process` skill for agent design, implementation, evaluation, or release.
