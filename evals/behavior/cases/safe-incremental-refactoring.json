@@ -1,0 +1,73 @@
+{
+  "skill": "safe-incremental-refactoring",
+  "cases": [
+    {
+      "id": "REF-BEH-001",
+      "skill": "safe-incremental-refactoring",
+      "type": "recognition",
+      "prompt": "Two Qt repositories contain same-named components with divergent behavior and downstream UI files.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "recognizes compatibility, authority, consumer and characterization pressures",
+        "does not choose by filename alone"
+      ],
+      "forbidden_behaviors": [
+        "merges all copies in one patch",
+        "deletes old sources before consumer evidence"
+      ],
+      "required_artifacts": [],
+      "baseline_expected_failure": [
+        "agent recommends deduplication without migration safety"
+      ],
+      "review_notes": "Review semantic relationships, evidence, and omissions; keyword presence alone is insufficient."
+    },
+    {
+      "id": "REF-BEH-002",
+      "skill": "safe-incremental-refactoring",
+      "type": "application",
+      "prompt": "Move transaction-heavy methods from a database façade into services without changing API or failure order.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "records public and transaction invariants",
+        "moves responsibility in bounded slices",
+        "restricts new component capability",
+        "tests validation, write, audit, commit and persistence order",
+        "defines rollback"
+      ],
+      "forbidden_behaviors": [
+        "combines structural move with silent bug fixes",
+        "uses final database state as the only equivalence test"
+      ],
+      "required_artifacts": [
+        "refactoring slices",
+        "equivalence evidence"
+      ],
+      "baseline_expected_failure": [
+        "agent extracts classes without preserving operational semantics"
+      ],
+      "review_notes": "Review semantic relationships, evidence, and omissions; keyword presence alone is insufficient."
+    },
+    {
+      "id": "REF-BEH-003",
+      "skill": "safe-incremental-refactoring",
+      "type": "counterexample",
+      "prompt": "Design a new client/server ordering system from scratch.",
+      "expected_routing": false,
+      "expected_alternative_skill": "application-client-server-architecture",
+      "required_behaviors": [
+        "routes to application-client-server-architecture",
+        "does not invent a legacy compatibility façade"
+      ],
+      "forbidden_behaviors": [
+        "assumes brownfield constraints that do not exist"
+      ],
+      "required_artifacts": [],
+      "baseline_expected_failure": [
+        "agent applies migration workflow to greenfield design"
+      ],
+      "review_notes": "Review semantic relationships, evidence, and omissions; keyword presence alone is insufficient."
+    }
+  ]
+}

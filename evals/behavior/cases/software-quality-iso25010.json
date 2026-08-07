@@ -1,0 +1,72 @@
+{
+  "skill": "software-quality-iso25010",
+  "cases": [
+    {
+      "id": "ISO-BEH-001",
+      "skill": "software-quality-iso25010",
+      "type": "recognition",
+      "prompt": "Define release gates for hot-plug recovery, firmware update, monitor mapping, installer compatibility and operator usability.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "recognizes measurable reliability, compatibility, usability, security and maintainability scenarios",
+        "requires owners, evidence and thresholds"
+      ],
+      "forbidden_behaviors": [
+        "produces a generic quality checklist",
+        "uses subjective labels such as user-friendly without measures"
+      ],
+      "required_artifacts": [],
+      "baseline_expected_failure": [
+        "agent lists ISO characteristics without system scenarios"
+      ],
+      "review_notes": "Review semantic relationships, evidence, and omissions; keyword presence alone is insufficient."
+    },
+    {
+      "id": "ISO-BEH-002",
+      "skill": "software-quality-iso25010",
+      "type": "application",
+      "prompt": "Turn remote-update reliability into measurable acceptance and release evidence.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "defines stimulus, environment, response and measure",
+        "defines pass threshold and evidence source",
+        "includes restart, partial failure and rollback cases",
+        "connects defects to a release decision"
+      ],
+      "forbidden_behaviors": [
+        "claims reliability from unit-test count",
+        "omits operational environment"
+      ],
+      "required_artifacts": [
+        "quality scenarios",
+        "release gate"
+      ],
+      "baseline_expected_failure": [
+        "agent produces metrics unrelated to failure consequences"
+      ],
+      "review_notes": "Review semantic relationships, evidence, and omissions; keyword presence alone is insufficient."
+    },
+    {
+      "id": "ISO-BEH-003",
+      "skill": "software-quality-iso25010",
+      "type": "counterexample",
+      "prompt": "Tell me the names of the ISO/IEC 25010 quality characteristics with no product context.",
+      "expected_routing": false,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "answers as a reference question or asks for context before defining gates",
+        "does not fabricate product-specific thresholds"
+      ],
+      "forbidden_behaviors": [
+        "pretends a release gate can be defined without a system"
+      ],
+      "required_artifacts": [],
+      "baseline_expected_failure": [
+        "agent applies a full project quality process to a terminology request"
+      ],
+      "review_notes": "Review semantic relationships, evidence, and omissions; keyword presence alone is insufficient."
+    }
+  ]
+}

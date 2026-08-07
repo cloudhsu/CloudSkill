@@ -1,5 +1,27 @@
 # Changelog
 
+## 5.3.0
+
+### Skill-system maturity
+
+- Added `using-cloudskill` to select and order the smallest sufficient set of process, domain, change, quality, and handoff skills.
+- Added `developing-skills` to make skill creation and modification evidence-driven and behavior-test-driven.
+- Changed all skill descriptions to trigger-only `Use when...` contracts so routing metadata does not become a shortcut around the skill body.
+
+### Evaluation and validation
+
+- Added behavior-evaluation contracts with recognition, application, and counterexample cases for every skill.
+- Added separate validators for descriptions and behavior cases; case validation is explicitly not treated as a completed model execution.
+- Added installation smoke tests for canonical Codex and Claude skill copies.
+- Added a single check runner and GitHub Actions workflow.
+- Made pack version validation derive from `VERSION` and cross-check README, changelog, and manifest instead of hard-coding one release.
+
+### Development discipline
+
+- Added RED baseline, GREEN verification, adjacent-skill regression, common-mistake, and truthful evidence requirements for skill changes.
+- Added skill contract and behavior-evaluation templates.
+- Documented conceptual influences from public skill-authoring work without importing another repository's full methodology.
+
 ## 5.2.0
 
 ### Touch/device utility architecture

@@ -1,0 +1,87 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "CloudSkill behavior evaluation case file",
+  "type": "object",
+  "required": [
+    "skill",
+    "cases"
+  ],
+  "properties": {
+    "skill": {
+      "type": "string"
+    },
+    "cases": {
+      "type": "array",
+      "minItems": 3,
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "skill",
+          "type",
+          "prompt",
+          "expected_routing",
+          "required_behaviors",
+          "forbidden_behaviors",
+          "baseline_expected_failure"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "skill": {
+            "type": "string"
+          },
+          "type": {
+            "enum": [
+              "recognition",
+              "application",
+              "counterexample",
+              "discipline",
+              "reference"
+            ]
+          },
+          "prompt": {
+            "type": "string"
+          },
+          "expected_routing": {
+            "type": "boolean"
+          },
+          "expected_alternative_skill": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "required_behaviors": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "forbidden_behaviors": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "required_artifacts": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "baseline_expected_failure": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "review_notes": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

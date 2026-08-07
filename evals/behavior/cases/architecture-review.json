@@ -1,0 +1,72 @@
+{
+  "skill": "architecture-review",
+  "cases": [
+    {
+      "id": "AR-BEH-001",
+      "skill": "architecture-review",
+      "type": "recognition",
+      "prompt": "Compare a modular single-process equipment controller with a distributed per-chamber design.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "identifies authority, lifecycle, deployment and failure pressures",
+        "recognizes migration and recovery as architecture concerns"
+      ],
+      "forbidden_behaviors": [
+        "compares only scalability and team ownership",
+        "assumes distributed is inherently modern"
+      ],
+      "required_artifacts": [],
+      "baseline_expected_failure": [
+        "agent gives generic pros and cons"
+      ],
+      "review_notes": "Review semantic relationships, evidence, and omissions; keyword presence alone is insufficient."
+    },
+    {
+      "id": "AR-BEH-002",
+      "skill": "architecture-review",
+      "type": "application",
+      "prompt": "Review a proposal that duplicates equipment state on two IPCs for HA.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "identifies authoritative state and split-brain conditions",
+        "examines command ownership, reconciliation and failover evidence",
+        "separates facts, assumptions and recommendations",
+        "proposes an incremental migration"
+      ],
+      "forbidden_behaviors": [
+        "recommends replication without consistency semantics",
+        "claims HA from process duplication alone"
+      ],
+      "required_artifacts": [
+        "decision comparison",
+        "risk and migration path"
+      ],
+      "baseline_expected_failure": [
+        "agent discusses redundancy but not authority or recovery"
+      ],
+      "review_notes": "Review semantic relationships, evidence, and omissions; keyword presence alone is insufficient."
+    },
+    {
+      "id": "AR-BEH-003",
+      "skill": "architecture-review",
+      "type": "counterexample",
+      "prompt": "Fix a local variable shadowing warning in one C++ function.",
+      "expected_routing": false,
+      "expected_alternative_skill": "code-review",
+      "required_behaviors": [
+        "does not perform a system architecture review",
+        "routes to code review or answers directly"
+      ],
+      "forbidden_behaviors": [
+        "creates a distributed-design analysis"
+      ],
+      "required_artifacts": [],
+      "baseline_expected_failure": [
+        "agent over-scopes an isolated code issue"
+      ],
+      "review_notes": "Review semantic relationships, evidence, and omissions; keyword presence alone is insufficient."
+    }
+  ]
+}

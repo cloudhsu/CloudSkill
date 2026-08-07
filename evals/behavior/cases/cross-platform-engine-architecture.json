@@ -1,0 +1,68 @@
+{
+  "skill": "cross-platform-engine-architecture",
+  "cases": [
+    {
+      "id": "ENG-BEH-001",
+      "skill": "cross-platform-engine-architecture",
+      "type": "recognition",
+      "prompt": "Design a portable director, scene, action, event and rendering loop for iOS, Android and Windows.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "recognizes runtime lifecycle, frame loop, rendering and platform-adapter boundaries",
+        "separates engine core from native services"
+      ],
+      "forbidden_behaviors": [
+        "treats it as ordinary Qt UI architecture",
+        "ignores context and resource lifetime"
+      ],
+      "required_artifacts": [],
+      "baseline_expected_failure": [
+        "agent lists platform APIs without an engine model"
+      ],
+      "review_notes": "Review semantic relationships, evidence, and omissions; keyword presence alone is insufficient."
+    },
+    {
+      "id": "ENG-BEH-002",
+      "skill": "cross-platform-engine-architecture",
+      "type": "application",
+      "prompt": "Android resumes after GL context loss. Define texture and scene recovery.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "identifies CPU-side metadata and GPU resource authority",
+        "defines invalidation and deterministic reconstruction order",
+        "addresses thread/context ownership and partial reload failure"
+      ],
+      "forbidden_behaviors": [
+        "assumes object pointers imply valid GPU resources",
+        "restarts the entire app without evaluating lifecycle"
+      ],
+      "required_artifacts": [],
+      "baseline_expected_failure": [
+        "agent says reload textures without ownership or ordering"
+      ],
+      "review_notes": "Review semantic relationships, evidence, and omissions; keyword presence alone is insufficient."
+    },
+    {
+      "id": "ENG-BEH-003",
+      "skill": "cross-platform-engine-architecture",
+      "type": "counterexample",
+      "prompt": "Abstract HID, USB and I2C transport for a Qt diagnostic utility.",
+      "expected_routing": false,
+      "expected_alternative_skill": "cross-platform-native-architecture",
+      "required_behaviors": [
+        "routes to cross-platform-native-architecture",
+        "does not introduce a director or render loop"
+      ],
+      "forbidden_behaviors": [
+        "treats all native software as an engine"
+      ],
+      "required_artifacts": [],
+      "baseline_expected_failure": [
+        "agent over-applies engine architecture"
+      ],
+      "review_notes": "Review semantic relationships, evidence, and omissions; keyword presence alone is insufficient."
+    }
+  ]
+}

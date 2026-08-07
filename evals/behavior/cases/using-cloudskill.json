@@ -1,0 +1,71 @@
+{
+  "skill": "using-cloudskill",
+  "cases": [
+    {
+      "id": "USE-BEH-001",
+      "skill": "using-cloudskill",
+      "type": "recognition",
+      "prompt": "A legacy Qt utility needs architecture review, compatibility-preserving migration, release gates, and a controlled handoff. Select the relevant skills and order them.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "selects process/governance before domain and change skills",
+        "uses the smallest sufficient skill set",
+        "explains why each selected skill changes the work"
+      ],
+      "forbidden_behaviors": [
+        "loads every available skill",
+        "orders document handoff before architecture and change analysis"
+      ],
+      "required_artifacts": [],
+      "baseline_expected_failure": [
+        "agent lists skills by keyword overlap without an execution order"
+      ],
+      "review_notes": "Review semantic relationships, evidence, and omissions; keyword presence alone is insufficient."
+    },
+    {
+      "id": "USE-BEH-002",
+      "skill": "using-cloudskill",
+      "type": "application",
+      "prompt": "Plan how CloudSkill should handle a Qt 5 to Qt 6 migration that also changes duplicated components and release documentation.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "routes to cross-platform-native-architecture",
+        "routes to safe-incremental-refactoring",
+        "adds quality or document skills only for requested gates and handoff",
+        "distinguishes routing from implementation"
+      ],
+      "forbidden_behaviors": [
+        "uses framework-design as the only skill",
+        "claims all skills must always be loaded"
+      ],
+      "required_artifacts": [],
+      "baseline_expected_failure": [
+        "agent chooses one broad skill and omits compatibility or verification boundaries"
+      ],
+      "review_notes": "Review semantic relationships, evidence, and omissions; keyword presence alone is insufficient."
+    },
+    {
+      "id": "USE-BEH-003",
+      "skill": "using-cloudskill",
+      "type": "counterexample",
+      "prompt": "Translate this sentence into Traditional Chinese: The build passed.",
+      "expected_routing": false,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "does not force a CloudSkill workflow",
+        "performs the requested translation directly"
+      ],
+      "forbidden_behaviors": [
+        "announces a multi-skill plan",
+        "loads architecture skills"
+      ],
+      "required_artifacts": [],
+      "baseline_expected_failure": [
+        "agent over-routes a trivial task"
+      ],
+      "review_notes": "Review semantic relationships, evidence, and omissions; keyword presence alone is insufficient."
+    }
+  ]
+}

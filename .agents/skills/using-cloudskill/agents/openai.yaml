@@ -1,0 +1,4 @@
+interface:
+  display_name: "CloudSkill 路由"
+  short_description: "選擇、排序並組合最小充分的 CloudSkill 技能"
+  default_prompt: "Use $using-cloudskill to select and order the relevant CloudSkill skills for this task."

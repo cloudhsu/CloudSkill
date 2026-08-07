@@ -1,25 +1,20 @@
-# Skill Routing Evaluation Seed
+# CloudSkill evaluations
 
-`skill-routing-cases.csv` tests whether skill names and descriptions route correctly.
+CloudSkill separates evaluation layers:
 
-Include:
+- `skill-routing-cases.csv`: positive, negative, and adjacent-skill routing cases.
+- `behavior/`: recognition, application, counterexample, discipline, and reference behavior contracts.
 
-- Explicit and implicit positive cases.
-- Adjacent negative controls.
-- Cases that distinguish coding-agent governance from AI-agent product development.
-- Cases that distinguish browser client/server architecture from native cross-platform engine architecture.
+Add or update a routing case whenever a skill fails to trigger, over-triggers, or selects the wrong adjacent skill.
 
-Add a row whenever a skill:
+For behavior changes, preserve RED baseline evidence before editing the skill, then run the same case with the candidate skill and regress adjacent cases. Case-schema validation is not a model execution.
 
-- Fails to trigger.
-- Triggers too broadly.
-- Selects the wrong adjacent skill.
-- Produces a recurring process failure.
+Evaluate:
 
-Evaluate both outcome and process:
-
-- Correct skill selected.
-- Required workflow followed.
-- Expected artifacts produced.
-- No prohibited actions.
-- Reasonable command/token efficiency.
+- correct skill selection,
+- required workflow and decisions,
+- required artifacts,
+- prohibited actions and unsupported claims,
+- evidence honesty,
+- multi-skill ordering,
+- reasonable scope and token/command efficiency.

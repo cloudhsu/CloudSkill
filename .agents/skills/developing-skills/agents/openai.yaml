@@ -1,0 +1,4 @@
+interface:
+  display_name: "技能開發"
+  short_description: "以證據、RED-GREEN 行為測試與回歸方式開發 CloudSkill"
+  default_prompt: "Use $developing-skills to create or improve this CloudSkill skill with routing and behavior evidence."

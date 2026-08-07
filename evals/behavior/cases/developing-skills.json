@@ -1,0 +1,76 @@
+{
+  "skill": "developing-skills",
+  "cases": [
+    {
+      "id": "DEVSK-BEH-001",
+      "skill": "developing-skills",
+      "type": "recognition",
+      "prompt": "A historical project contains useful deployment lessons. Decide whether to create a new skill or update an existing skill.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "checks existing authoritative owners",
+        "separates reusable pressure from project-specific history",
+        "requires an observable routing or behavior problem before adding a skill"
+      ],
+      "forbidden_behaviors": [
+        "creates a skill named after the project",
+        "treats historical implementation as current preference"
+      ],
+      "required_artifacts": [],
+      "baseline_expected_failure": [
+        "agent creates a narrow narrative skill without overlap analysis"
+      ],
+      "review_notes": "Review semantic relationships, evidence, and omissions; keyword presence alone is insufficient."
+    },
+    {
+      "id": "DEVSK-BEH-002",
+      "skill": "developing-skills",
+      "type": "application",
+      "prompt": "The code-review skill routes correctly but repeatedly misses late-response and retry-order failures. Improve it.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "creates a baseline behavior case before editing",
+        "defines required and forbidden behavior",
+        "makes a minimal skill change",
+        "re-runs the same case and adjacent regressions",
+        "reports behavior execution status truthfully"
+      ],
+      "forbidden_behaviors": [
+        "treats a new routing row as proof of behavior improvement",
+        "rewrites the whole skill without evidence"
+      ],
+      "required_artifacts": [
+        "skill contract",
+        "RED result",
+        "GREEN/regression result"
+      ],
+      "baseline_expected_failure": [
+        "agent edits prose first and invents tests after the change"
+      ],
+      "review_notes": "Review semantic relationships, evidence, and omissions; keyword presence alone is insufficient."
+    },
+    {
+      "id": "DEVSK-BEH-003",
+      "skill": "developing-skills",
+      "type": "counterexample",
+      "prompt": "Correct one misspelled word in the repository README without changing skill behavior.",
+      "expected_routing": false,
+      "expected_alternative_skill": "document-governance",
+      "required_behaviors": [
+        "does not invoke the full skill-development lifecycle",
+        "uses ordinary document or repository editing controls"
+      ],
+      "forbidden_behaviors": [
+        "creates behavior evals for a spelling-only change",
+        "bumps a feature version unnecessarily"
+      ],
+      "required_artifacts": [],
+      "baseline_expected_failure": [
+        "agent applies heavyweight skill development to a mechanical typo"
+      ],
+      "review_notes": "Review semantic relationships, evidence, and omissions; keyword presence alone is insufficient."
+    }
+  ]
+}

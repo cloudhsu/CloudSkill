@@ -1,0 +1,72 @@
+{
+  "skill": "application-client-server-architecture",
+  "cases": [
+    {
+      "id": "APP-BEH-001",
+      "skill": "application-client-server-architecture",
+      "type": "recognition",
+      "prompt": "Design an employee ordering web system with desktop/mobile clients, SQLite, balances and administrator functions.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "identifies client/server and database authority",
+        "recognizes transaction, identity, history and deployment boundaries"
+      ],
+      "forbidden_behaviors": [
+        "treats hidden UI controls as authorization",
+        "assumes small scale removes integrity risk"
+      ],
+      "required_artifacts": [],
+      "baseline_expected_failure": [
+        "agent gives only page and table lists"
+      ],
+      "review_notes": "Review semantic relationships, evidence, and omissions; keyword presence alone is insufficient."
+    },
+    {
+      "id": "APP-BEH-002",
+      "skill": "application-client-server-architecture",
+      "type": "application",
+      "prompt": "An administrator transfers an order between employees while balances and history must remain correct. Define the operation.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "defines authorization and invariant checks",
+        "defines one visible transaction owner",
+        "addresses idempotency, audit and partial failure",
+        "preserves historical snapshots"
+      ],
+      "forbidden_behaviors": [
+        "relies on client-side validation",
+        "updates balances in separate uncoordinated requests"
+      ],
+      "required_artifacts": [
+        "use-case contract",
+        "transaction boundary"
+      ],
+      "baseline_expected_failure": [
+        "agent specifies endpoints without transaction or failure semantics"
+      ],
+      "review_notes": "Review semantic relationships, evidence, and omissions; keyword presence alone is insufficient."
+    },
+    {
+      "id": "APP-BEH-003",
+      "skill": "application-client-server-architecture",
+      "type": "counterexample",
+      "prompt": "Design texture recovery after an Android OpenGL context loss.",
+      "expected_routing": false,
+      "expected_alternative_skill": "cross-platform-engine-architecture",
+      "required_behaviors": [
+        "routes to cross-platform-engine-architecture",
+        "does not force API or persistence design"
+      ],
+      "forbidden_behaviors": [
+        "invents a server boundary"
+      ],
+      "required_artifacts": [],
+      "baseline_expected_failure": [
+        "agent selects client/server because Android is a client"
+      ],
+      "review_notes": "Review semantic relationships, evidence, and omissions; keyword presence alone is insufficient."
+    }
+  ]
+}

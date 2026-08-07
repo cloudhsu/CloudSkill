@@ -1,0 +1,69 @@
+{
+  "skill": "cross-platform-native-architecture",
+  "cases": [
+    {
+      "id": "XPLAT-BEH-001",
+      "skill": "cross-platform-native-architecture",
+      "type": "recognition",
+      "prompt": "Design a Qt touch utility with HID hot-plug, monitor mapping, firmware update, administrator functions and an installer.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "recognizes platform, device, privilege, lifecycle and packaging boundaries",
+        "identifies authoritative device and configuration state"
+      ],
+      "forbidden_behaviors": [
+        "focuses only on widgets",
+        "hides OS differences behind a false uniform API"
+      ],
+      "required_artifacts": [],
+      "baseline_expected_failure": [
+        "agent produces a GUI module list only"
+      ],
+      "review_notes": "Review semantic relationships, evidence, and omissions; keyword presence alone is insufficient."
+    },
+    {
+      "id": "XPLAT-BEH-002",
+      "skill": "cross-platform-native-architecture",
+      "type": "application",
+      "prompt": "A device is unplugged during firmware transfer and re-enumerates with another path. Define safe recovery.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "defines update session authority and phases",
+        "handles cancellation, stale handles, identity reconciliation and restart",
+        "separates protocol policy from platform transport",
+        "defines operator-safe degraded behavior"
+      ],
+      "forbidden_behaviors": [
+        "retries blindly against the stale handle",
+        "claims success before post-reset verification"
+      ],
+      "required_artifacts": [],
+      "baseline_expected_failure": [
+        "agent treats reconnect as a simple UI refresh"
+      ],
+      "review_notes": "Review semantic relationships, evidence, and omissions; keyword presence alone is insufficient."
+    },
+    {
+      "id": "XPLAT-BEH-003",
+      "skill": "cross-platform-native-architecture",
+      "type": "counterexample",
+      "prompt": "Design REST error codes and SQLite transaction semantics for a web service.",
+      "expected_routing": false,
+      "expected_alternative_skill": "application-client-server-architecture",
+      "required_behaviors": [
+        "routes to application-client-server-architecture",
+        "does not introduce Qt or OS adapters"
+      ],
+      "forbidden_behaviors": [
+        "selects native architecture because SQLite is embedded"
+      ],
+      "required_artifacts": [],
+      "baseline_expected_failure": [
+        "agent confuses implementation technology with system boundary"
+      ],
+      "review_notes": "Review semantic relationships, evidence, and omissions; keyword presence alone is insufficient."
+    }
+  ]
+}

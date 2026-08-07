@@ -1,0 +1,72 @@
+{
+  "skill": "framework-design",
+  "cases": [
+    {
+      "id": "FW-BEH-001",
+      "skill": "framework-design",
+      "type": "recognition",
+      "prompt": "Several equipment products need a shared command, state and device framework with product-specific workflows.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "recognizes reusable capability, variation and extension-contract pressures",
+        "requires real boundaries before abstraction"
+      ],
+      "forbidden_behaviors": [
+        "creates base classes only because names repeat",
+        "mixes product UI into the reusable core"
+      ],
+      "required_artifacts": [],
+      "baseline_expected_failure": [
+        "agent proposes generic inheritance without contracts"
+      ],
+      "review_notes": "Review semantic relationships, evidence, and omissions; keyword presence alone is insufficient."
+    },
+    {
+      "id": "FW-BEH-002",
+      "skill": "framework-design",
+      "type": "application",
+      "prompt": "Design shared device/protocol capability for general, keypad and customer-specific touch utilities.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "separates stable core from product composition and policy",
+        "defines extension points, lifecycle and compatibility contracts",
+        "controls capability granted to plug-ins",
+        "addresses versioning and test matrix"
+      ],
+      "forbidden_behaviors": [
+        "uses copied project trees as the product-line model",
+        "passes a powerful global façade to every extension"
+      ],
+      "required_artifacts": [
+        "core/variation map",
+        "extension contract"
+      ],
+      "baseline_expected_failure": [
+        "agent creates feature flags without ownership or release semantics"
+      ],
+      "review_notes": "Review semantic relationships, evidence, and omissions; keyword presence alone is insufficient."
+    },
+    {
+      "id": "FW-BEH-003",
+      "skill": "framework-design",
+      "type": "counterexample",
+      "prompt": "One small application has one stable implementation and no foreseeable variation. Add abstractions for future reuse.",
+      "expected_routing": false,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "rejects speculative framework extraction",
+        "keeps the implementation simple unless a real pressure exists"
+      ],
+      "forbidden_behaviors": [
+        "introduces plug-ins or factories without variation"
+      ],
+      "required_artifacts": [],
+      "baseline_expected_failure": [
+        "agent applies framework patterns merely for cleanliness"
+      ],
+      "review_notes": "Review semantic relationships, evidence, and omissions; keyword presence alone is insufficient."
+    }
+  ]
+}

@@ -1,0 +1,72 @@
+{
+  "skill": "code-review",
+  "cases": [
+    {
+      "id": "CR-BEH-001",
+      "skill": "code-review",
+      "type": "recognition",
+      "prompt": "Review NetworkStream code that sometimes receives an immediate success response from the previous command.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "recognizes concurrency, framing, stale state and late-response possibilities",
+        "asks for or inspects concrete ownership and ordering"
+      ],
+      "forbidden_behaviors": [
+        "asserts buffer residue without evidence",
+        "focuses on formatting"
+      ],
+      "required_artifacts": [],
+      "baseline_expected_failure": [
+        "agent picks one plausible cause without tracing state"
+      ],
+      "review_notes": "Review semantic relationships, evidence, and omissions; keyword presence alone is insufficient."
+    },
+    {
+      "id": "CR-BEH-002",
+      "skill": "code-review",
+      "type": "application",
+      "prompt": "Review command send/retry code for duplicate writes after timeout and reconnect.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "traces command identity and state transitions",
+        "checks thread safety, retry idempotency, response correlation and cleanup",
+        "ranks findings by consequence",
+        "distinguishes verified defects from hypotheses"
+      ],
+      "forbidden_behaviors": [
+        "claims tests were run when unavailable",
+        "suggests retries without duplicate protection"
+      ],
+      "required_artifacts": [
+        "ranked findings",
+        "verification gaps"
+      ],
+      "baseline_expected_failure": [
+        "agent offers style refactoring but misses duplicate side effects"
+      ],
+      "review_notes": "Review semantic relationships, evidence, and omissions; keyword presence alone is insufficient."
+    },
+    {
+      "id": "CR-BEH-003",
+      "skill": "code-review",
+      "type": "counterexample",
+      "prompt": "Design a reusable command/state/device framework for several products.",
+      "expected_routing": false,
+      "expected_alternative_skill": "framework-design",
+      "required_behaviors": [
+        "routes to framework-design",
+        "does not limit the response to line-level findings"
+      ],
+      "forbidden_behaviors": [
+        "pretends an unseen code review is possible"
+      ],
+      "required_artifacts": [],
+      "baseline_expected_failure": [
+        "agent uses code-review for a greenfield framework design"
+      ],
+      "review_notes": "Review semantic relationships, evidence, and omissions; keyword presence alone is insufficient."
+    }
+  ]
+}

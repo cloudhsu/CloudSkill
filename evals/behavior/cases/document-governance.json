@@ -1,0 +1,73 @@
+{
+  "skill": "document-governance",
+  "cases": [
+    {
+      "id": "DOC-BEH-001",
+      "skill": "document-governance",
+      "type": "recognition",
+      "prompt": "A file is named V0.10, its cover says V0.9, and its revision history and release note disagree.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "recognizes authority, lineage, approval and release-baseline conflict",
+        "does not infer truth from filename alone"
+      ],
+      "forbidden_behaviors": [
+        "silently normalizes the versions",
+        "chooses the newest modified timestamp as authority"
+      ],
+      "required_artifacts": [],
+      "baseline_expected_failure": [
+        "agent edits the title without reconstructing evidence"
+      ],
+      "review_notes": "Review semantic relationships, evidence, and omissions; keyword presence alone is insufficient."
+    },
+    {
+      "id": "DOC-BEH-002",
+      "skill": "document-governance",
+      "type": "application",
+      "prompt": "Create executive and engineering views from one set of field-update records while preserving statistical scope.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "defines one authoritative evidence set",
+        "records exclusions, version scope and calculation rules",
+        "creates audience-specific derived views",
+        "preserves traceability to raw evidence"
+      ],
+      "forbidden_behaviors": [
+        "copies mutable totals independently",
+        "changes denominator between audiences without disclosure"
+      ],
+      "required_artifacts": [
+        "authority map",
+        "audience views",
+        "traceability"
+      ],
+      "baseline_expected_failure": [
+        "agent writes two reports with inconsistent facts"
+      ],
+      "review_notes": "Review semantic relationships, evidence, and omissions; keyword presence alone is insufficient."
+    },
+    {
+      "id": "DOC-BEH-003",
+      "skill": "document-governance",
+      "type": "counterexample",
+      "prompt": "Design a CRC command builder interface for a device protocol.",
+      "expected_routing": false,
+      "expected_alternative_skill": "framework-design",
+      "required_behaviors": [
+        "routes to framework-design or native architecture",
+        "does not create a document-governance workflow"
+      ],
+      "forbidden_behaviors": [
+        "treats every specification as a document problem"
+      ],
+      "required_artifacts": [],
+      "baseline_expected_failure": [
+        "agent avoids the interface design by proposing document templates"
+      ],
+      "review_notes": "Review semantic relationships, evidence, and omissions; keyword presence alone is insufficient."
+    }
+  ]
+}

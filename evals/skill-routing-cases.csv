@@ -39,3 +39,8 @@ DOC-04,客戶需求簡報、現行規格、release baseline、測試結果與rel
 FW-02,同一套觸控工具要衍生一般版、不同GUI版與Keypad版，如何切shared device protocol core與product-specific workflow？,framework-design,true,product line shared core and variants
 ISO-02,替觸控IC工具的熱插拔、FW更新、螢幕mapping、權限與installer定義可靠性、相容性、易用性與release gate。,software-quality-iso25010,true,native device utility quality gates
 DOC-NEG-03,請設計HID command packet builder與CRC介面。,document-governance,false,architecture/framework task not document governance
+USE-01,這個任務同時涉及舊Qt工具、相容重構、Release Gate與文件交付，應該先載入哪些技能、順序如何？,using-cloudskill,true,multi-skill selection and ordering
+USE-NEG-01,請把這句英文翻成中文。,using-cloudskill,false,trivial task should not force skill routing
+DEVSK-01,我要新增一個CloudSkill技能，請先建立無技能baseline、skill contract、行為eval與相鄰技能回歸。,developing-skills,true,skill development behavior testing
+DEVSK-02,這個skill description常常誤觸發，請修改並證明新描述不會讓agent跳過SKILL.md。,developing-skills,true,description routing and behavior evidence
+DEVSK-NEG-01,幫我修正README中的一個錯字。,developing-skills,false,ordinary document edit is not skill development

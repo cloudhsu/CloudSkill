@@ -1,0 +1,72 @@
+{
+  "skill": "development-process-tailoring",
+  "cases": [
+    {
+      "id": "PROC-BEH-001",
+      "skill": "development-process-tailoring",
+      "type": "recognition",
+      "prompt": "An urgent customer feature enters an existing release while a technical spike and hardware dependency are unresolved.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "recognizes scope, capacity, dependency, evidence and release-control pressures",
+        "distinguishes process mismatch from technical uncertainty"
+      ],
+      "forbidden_behaviors": [
+        "prescribes Scrum ceremonies as the solution",
+        "hides displaced work"
+      ],
+      "required_artifacts": [],
+      "baseline_expected_failure": [
+        "agent creates a new sprint without commitment analysis"
+      ],
+      "review_notes": "Review semantic relationships, evidence, and omissions; keyword presence alone is insufficient."
+    },
+    {
+      "id": "PROC-BEH-002",
+      "skill": "development-process-tailoring",
+      "type": "application",
+      "prompt": "Rebuild a product release flow from specifications, commits, tags, installer changes, tests and field fixes.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "separates planned, implemented, verified, released and deployed states",
+        "defines baselines and evidence gates",
+        "maps field feedback into controlled next-cycle work",
+        "assigns decision rights and rollback"
+      ],
+      "forbidden_behaviors": [
+        "treats document version as release truth",
+        "equates commit date with deployment"
+      ],
+      "required_artifacts": [
+        "evolution map",
+        "release control points"
+      ],
+      "baseline_expected_failure": [
+        "agent produces a chronology without governance or gates"
+      ],
+      "review_notes": "Review semantic relationships, evidence, and omissions; keyword presence alone is insufficient."
+    },
+    {
+      "id": "PROC-BEH-003",
+      "skill": "development-process-tailoring",
+      "type": "counterexample",
+      "prompt": "Review a HID read function for buffer overflow and lifetime defects.",
+      "expected_routing": false,
+      "expected_alternative_skill": "code-review",
+      "required_behaviors": [
+        "routes to code-review",
+        "does not substitute a process recommendation for technical findings"
+      ],
+      "forbidden_behaviors": [
+        "suggests a ceremony instead of inspecting code"
+      ],
+      "required_artifacts": [],
+      "baseline_expected_failure": [
+        "agent treats every defect as a process problem"
+      ],
+      "review_notes": "Review semantic relationships, evidence, and omissions; keyword presence alone is insufficient."
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+from pathlib import Path
+import subprocess
+import sys
+
+ROOT = Path(__file__).resolve().parents[1]
+commands = [
+    [sys.executable, 'scripts/validate_pack.py'],
+    [sys.executable, 'scripts/audit_docs.py'],
+    [sys.executable, 'scripts/validate_descriptions.py'],
+    [sys.executable, 'scripts/validate_behavior_evals.py'],
+    [sys.executable, 'scripts/smoke_install.py'],
+]
+
+for command in commands:
+    print('+', ' '.join(command), flush=True)
+    result = subprocess.run(command, cwd=ROOT)
+    if result.returncode:
+        raise SystemExit(result.returncode)
+
+print('All CloudSkill checks passed.')

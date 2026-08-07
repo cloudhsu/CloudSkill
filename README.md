@@ -1,6 +1,6 @@
 # CloudSkill
 
-**Current version: 5.2.0**
+**Current version: 5.3.0**
 
 CloudSkill is a portable set of software/system architecture skills and operating guidance for **OpenAI Codex** and **Claude Code**.
 
@@ -14,6 +14,8 @@ See [INSTALL.md](INSTALL.md) for user-level and project-level installation on Wi
 
 | Skill | Primary use |
 |---|---|
+| `using-cloudskill` | Select and order the smallest sufficient skill set |
+| `developing-skills` | Develop and release skills with routing and behavior evidence |
 | `architecture-review` | Reconstruct and compare architecture decisions |
 | `application-client-server-architecture` | Frontend/backend, API, RBAC, transactions, data, UI, deployment |
 | `cross-platform-native-architecture` | Qt/native platforms, touch/device utilities, HID/USB, OS integration, firmware, packaging, legacy modernization |
@@ -37,7 +39,7 @@ CloudSkill/
 ├── INSTALL.md               # Codex and Claude Code installation
 ├── PLANS.md                 # ExecPlan convention
 ├── docs/                    # Profile, evidence, governance, audit, references
-├── evals/                   # Skill-routing cases
+├── evals/                   # Routing and behavior evaluation contracts
 ├── scripts/                 # Install, validation, and documentation audit
 ├── CHANGELOG.md
 └── VERSION
@@ -55,6 +57,5 @@ See [docs/README.md](docs/README.md) for the document ownership map.
 ## Validate
 
 ```bash
-python scripts/validate_pack.py
-python scripts/audit_docs.py
+python scripts/run_all_checks.py
 ```

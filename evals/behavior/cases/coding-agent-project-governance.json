@@ -1,0 +1,69 @@
+{
+  "skill": "coding-agent-project-governance",
+  "cases": [
+    {
+      "id": "CAG-BEH-001",
+      "skill": "coding-agent-project-governance",
+      "type": "recognition",
+      "prompt": "Set up repository instructions for multiple coding agents working on an equipment-control codebase.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "recognizes instruction hierarchy, risk routing, ownership, worktree and evidence needs",
+        "distinguishes repository governance from product architecture"
+      ],
+      "forbidden_behaviors": [
+        "creates generic rules without inspecting the repository",
+        "lets agents edit the same critical files concurrently"
+      ],
+      "required_artifacts": [],
+      "baseline_expected_failure": [
+        "agent provides only commit naming rules"
+      ],
+      "review_notes": "Review semantic relationships, evidence, and omissions; keyword presence alone is insufficient."
+    },
+    {
+      "id": "CAG-BEH-002",
+      "skill": "coding-agent-project-governance",
+      "type": "application",
+      "prompt": "Define how agents may modify a database migration and device-control workflow in parallel.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "classifies both as high-risk",
+        "assigns integrator ownership and isolated worktrees",
+        "requires migration copies, rollback and real verification states",
+        "prevents unsupported completion claims"
+      ],
+      "forbidden_behaviors": [
+        "allows parallel edits to the same migration or command owner",
+        "uses destructive reset"
+      ],
+      "required_artifacts": [],
+      "baseline_expected_failure": [
+        "agent optimizes concurrency but ignores consequence and integration"
+      ],
+      "review_notes": "Review semantic relationships, evidence, and omissions; keyword presence alone is insufficient."
+    },
+    {
+      "id": "CAG-BEH-003",
+      "skill": "coding-agent-project-governance",
+      "type": "counterexample",
+      "prompt": "Design an AI agent that reads Outlook mail and decides whether to update a ticket.",
+      "expected_routing": false,
+      "expected_alternative_skill": "agent-development-process",
+      "required_behaviors": [
+        "routes to agent-development-process",
+        "does not treat AGENTS.md as the product design"
+      ],
+      "forbidden_behaviors": [
+        "focuses on branches instead of autonomy and tool risk"
+      ],
+      "required_artifacts": [],
+      "baseline_expected_failure": [
+        "agent confuses the repository worker with the agent product"
+      ],
+      "review_notes": "Review semantic relationships, evidence, and omissions; keyword presence alone is insufficient."
+    }
+  ]
+}

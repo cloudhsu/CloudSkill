@@ -1,0 +1,14 @@
+{
+  "case_id": "SKILL-BEH-001",
+  "phase": "RED",
+  "runtime": "",
+  "model": "",
+  "skills_available": [],
+  "executed_at": "",
+  "status": "NOT RUN",
+  "output_or_trace": "",
+  "required_behavior_results": {},
+  "forbidden_behavior_results": {},
+  "reviewer": "",
+  "notes": ""
+}

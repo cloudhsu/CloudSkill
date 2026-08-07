@@ -1,0 +1,73 @@
+{
+  "skill": "agent-development-process",
+  "cases": [
+    {
+      "id": "AID-BEH-001",
+      "skill": "agent-development-process",
+      "type": "recognition",
+      "prompt": "Design an agent that reads support email, invokes tools, drafts a classification, and requires approval before sending.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "identifies task contract, autonomy, tools, approval and failure boundaries",
+        "recognizes wrong-action and untrusted-input risk"
+      ],
+      "forbidden_behaviors": [
+        "treats repository branch rules as the primary design",
+        "assumes model output alone is the product"
+      ],
+      "required_artifacts": [],
+      "baseline_expected_failure": [
+        "agent focuses only on prompting and omits action controls"
+      ],
+      "review_notes": "Review semantic relationships, evidence, and omissions; keyword presence alone is insufficient."
+    },
+    {
+      "id": "AID-BEH-002",
+      "skill": "agent-development-process",
+      "type": "application",
+      "prompt": "Create the minimum release plan for an agent that updates device records after reading field reports.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "defines typed inputs and outputs",
+        "includes duplicate, interruption and tool-failure evals",
+        "defines human approval and rollback/disable controls",
+        "separates model, retrieval, tools and state causes"
+      ],
+      "forbidden_behaviors": [
+        "claims prompt changes alone close recurring failures",
+        "omits operational traces"
+      ],
+      "required_artifacts": [
+        "task contract",
+        "evaluation plan",
+        "release gate"
+      ],
+      "baseline_expected_failure": [
+        "agent proposes a demo without evaluation or operation controls"
+      ],
+      "review_notes": "Review semantic relationships, evidence, and omissions; keyword presence alone is insufficient."
+    },
+    {
+      "id": "AID-BEH-003",
+      "skill": "agent-development-process",
+      "type": "counterexample",
+      "prompt": "Write AGENTS.md rules for branches, worktrees, tests and release evidence in an existing repository.",
+      "expected_routing": false,
+      "expected_alternative_skill": "coding-agent-project-governance",
+      "required_behaviors": [
+        "routes to coding-agent-project-governance instead",
+        "does not redesign an AI-agent product"
+      ],
+      "forbidden_behaviors": [
+        "defines model autonomy or memory unnecessarily"
+      ],
+      "required_artifacts": [],
+      "baseline_expected_failure": [
+        "agent confuses coding-agent governance with agent-product engineering"
+      ],
+      "review_notes": "Review semantic relationships, evidence, and omissions; keyword presence alone is insufficient."
+    }
+  ]
+}
