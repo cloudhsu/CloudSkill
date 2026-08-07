@@ -8,7 +8,7 @@ Keep small because it is loaded broadly.
 
 ## Repository AGENTS.md
 
-Use for rules that apply to every task in the repository:
+Use as the canonical cross-agent repository guidance for rules that apply to every task:
 
 - Start files.
 - Build/test commands.
@@ -43,3 +43,17 @@ Use for repeatable workflows such as:
 Use for detailed domain and project knowledge that should be loaded only when relevant.
 
 Avoid duplicating mutable facts across instruction layers.
+
+## Claude Code adapter
+
+When a repository supports both Codex and Claude Code, keep the full guidance in `AGENTS.md` and make `CLAUDE.md` a small adapter:
+
+```text
+@AGENTS.md
+```
+
+Add only Claude-specific behavior below the import. Do not maintain parallel copies of the same project rules.
+
+## Skill source
+
+Keep one canonical skill source. CloudSkill uses `.agents/skills/` and installs copies to `.claude/skills/`. Generated/installed copies must not become independently edited sources.

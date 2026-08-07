@@ -1,4 +1,0 @@
-interface:
-  display_name: "架構審查"
-  short_description: "還原現況、比較方案、評估狀態、失敗、遷移與驗證"
-  default_prompt: "Use $architecture-review to review this architecture and recommend a justified option."

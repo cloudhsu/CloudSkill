@@ -1,4 +1,0 @@
-interface:
-  display_name: "開發流程裁適"
-  short_description: "依風險與限制裁適瀑布、迭代、敏捷、XP 或混合流程"
-  default_prompt: "Use $development-process-tailoring to tailor the lifecycle and engineering controls for this project."

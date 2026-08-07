@@ -24,3 +24,5 @@ REF-NEG-01,從零設計一個新的 Client/Server 訂餐系統。,safe-increment
 ENG-01,設計 iOS Android Windows 共用的 Director Scene Action Event 與 OpenGL render loop。,cross-platform-engine-architecture,true,engine runtime
 ENG-02,Android resume 後 GL context loss，texture pool 應如何重建？,cross-platform-engine-architecture,true,engine resource lifecycle
 ENG-NEG-01,Qt 工具要抽象 USB I2C SPI 並支援 Windows Linux Android。,cross-platform-engine-architecture,false,general native/tool architecture
+DOC-02,這個專案已有三份重複的架構規範，請先判斷唯一來源再合併。,document-governance,true,document ownership and deduplication
+CAG-03,讓同一個repo同時支援Codex的AGENTS.md與Claude Code的CLAUDE.md，但不要維護兩份規則。,coding-agent-project-governance,true,cross-tool repository instruction adapter

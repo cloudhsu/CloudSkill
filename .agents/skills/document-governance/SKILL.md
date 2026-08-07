@@ -17,6 +17,16 @@ Use the templates in `assets/` when applicable.
 
 ## Workflow
 
+### 0. Locate the authoritative source
+
+Before creating a document:
+
+- Search for an existing document with the same concern, audience, and lifecycle.
+- Update the existing owner when appropriate.
+- Create a new view only when audience, approval status, or lifecycle differs.
+- Link to mutable facts rather than copying them.
+- Record the authoritative owner in the project documentation map.
+
 ### 1. Classify the document
 
 Identify:

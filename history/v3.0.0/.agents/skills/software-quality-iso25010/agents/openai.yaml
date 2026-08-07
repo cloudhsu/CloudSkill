@@ -1,4 +1,0 @@
-interface:
-  display_name: "ISO 25010 品質規劃"
-  short_description: "把品質特性轉成情境、指標、驗證、證據與 Release Gate"
-  default_prompt: "Use $software-quality-iso25010 to define or review measurable product-quality requirements."

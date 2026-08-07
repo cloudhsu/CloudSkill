@@ -1,10 +1,9 @@
-# Version History
+# History
 
-This directory provides directly browsable snapshots of CloudSkill releases.
+Full version snapshots are not stored here because Git already preserves them efficiently.
 
-- `v1.0.0` — Initial architecture, framework, and code-review skills.
-- `v2.0.0` — Documentation governance, ISO/IEC 25010, process tailoring, and AI-agent development.
-- `v3.0.0` — Client/Server, cross-platform native, coding-agent governance, and architect profile.
+See:
 
-The repository's Git commit history and annotated tags remain the authoritative release history.
-The repository root contains the current v4.0.0 release.
+- `../CHANGELOG.md`
+- `../docs/history/RELEASES.md`
+- Annotated tags `v1.0.0` through `v5.0.0`

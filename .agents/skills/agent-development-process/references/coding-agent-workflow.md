@@ -2,7 +2,7 @@
 
 ## Before Modification
 
-- Read applicable `AGENTS.md`.
+- Read applicable `AGENTS.md`, `CLAUDE.md`, and imported/shared project guidance.
 - Reconstruct the repository and build/test commands.
 - Identify the requested behavior and acceptance criteria.
 - Inspect relevant code and tests.

@@ -1,4 +1,0 @@
-interface:
-  display_name: "跨平台原生架構"
-  short_description: "Qt、OpenGL、平台層、生命週期、資源、硬體與多平台部署設計"
-  default_prompt: "Use $cross-platform-native-architecture to design or review this cross-platform native system."

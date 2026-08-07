@@ -1,4 +1,0 @@
-interface:
-  display_name: "工程文件治理"
-  short_description: "建立可追溯、可審核、分眾且有版本控制的工程文件"
-  default_prompt: "Use $document-governance to create or review this controlled engineering document."

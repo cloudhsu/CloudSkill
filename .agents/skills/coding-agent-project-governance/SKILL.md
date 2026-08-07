@@ -56,6 +56,8 @@ Use references and skills for longer workflows.
 Provide:
 
 - `00_START_HERE.md`.
+- Canonical repository guidance in `AGENTS.md`.
+- A minimal `CLAUDE.md` importing `AGENTS.md` when Claude Code is used.
 - `PROJECT_CONTEXT.md`.
 - `DOMAIN_INVARIANTS.md`.
 - `ARCHITECTURE_AND_FILE_MAP.md`.

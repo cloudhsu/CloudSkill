@@ -1,42 +1,45 @@
 # Changelog
 
+## 5.0.0
+
+### Documentation architecture
+
+- Removed full history snapshot directories; Git commits and annotated tags are authoritative.
+- Reduced root-level Markdown entry points and introduced a document ownership map.
+- Consolidated overlapping profile/capability documents.
+- Separated source evidence by source without repeating it in the profile.
+- Replaced standalone duplicated standards with one concise governance overview linked to executable skills.
+- Consolidated migration guidance into the changelog and release index.
+- Added an exact-paragraph duplication audit.
+
+### Codex and Claude Code
+
+- Added `INSTALL.md` for user and project installation.
+- Added PowerShell and Bash installers.
+- Added `CLAUDE.md` as a minimal adapter importing `AGENTS.md`.
+- Kept `.agents/skills/` as the canonical skill source and synchronized it to Claude Code locations.
+- Updated coding-agent governance for dual-tool repositories.
+
+### Skill behavior
+
+- Document governance now checks for an existing authoritative source before creating a new document.
+- Coding-agent workflow recognizes both `AGENTS.md` and `CLAUDE.md`.
+- Added a Claude project adapter template.
+
 ## 4.0.0
 
-### Source verification
-
-- Analyzed the supplied complete lunch-ordering repository.
-- Added verified source metrics, architecture evidence, executed-test results, privacy handling, and verification limitations.
-- Distinguished actual implementation evidence from documents and user-stated experience.
-
-### Architecture profile
-
-- Strengthened the full-stack/Client-Server capability profile using source code rather than specifications alone.
-- Added source-verified persistence recovery, least-capability ports, application-service transaction ownership, additive migration, historical snapshots, RBAC, responsive UI, and operational topology.
-- Added evidence confidence levels.
-
-### New skills
-
-- `safe-incremental-refactoring`
-- `cross-platform-engine-architecture`
-
-### Cross-platform experience
-
-- Separated general Qt/native architecture from game/graphics engine architecture.
-- Added CloudBox historical evidence and rules preventing old implementation mechanisms from being mistaken for present-day preferences.
-
-### Existing skill improvements
-
-- Added embedded/in-memory persistence guidance to Client/Server architecture.
-- Added engine-routing guidance to native architecture.
-- Added durable-boundary review to code review.
-- Added source-derived evidence rules to coding-agent governance.
-
-### Validation
-
-- Expanded routing eval cases.
-- Updated manifest and pack validation.
-- Kept global `AGENTS.md` compact while moving detailed workflows into skills and references.
+- Added source-grounded Bento and CloudBox evidence.
+- Added safe incremental refactoring and cross-platform engine architecture.
+- Added evidence confidence levels and source-aware architecture guidance.
 
 ## 3.0.0
 
-- Added full-stack/Client-Server, cross-platform native, and coding-agent governance skills.
+- Added Client/Server, cross-platform native, coding-agent governance, and architect profile.
+
+## 2.0.0
+
+- Added documentation governance, ISO/IEC 25010, process tailoring, and AI-agent development.
+
+## 1.0.0
+
+- Initial architecture-review, framework-design, and code-review skills.

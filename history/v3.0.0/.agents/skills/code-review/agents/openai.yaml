@@ -1,4 +1,0 @@
-interface:
-  display_name: "生產程式碼審查"
-  short_description: "審查正確性、狀態、併發、資源、通訊、復原與架構邊界"
-  default_prompt: "Use $code-review to review this production code and prioritize concrete failure risks."

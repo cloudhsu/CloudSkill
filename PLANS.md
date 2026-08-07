@@ -1,30 +1,28 @@
 # Execution Plans
 
-Use an execution plan for complex features, architecture migrations, multi-module refactors, agent development, or work expected to span multiple sessions.
+Use an ExecPlan for multi-module, multi-session, architecture-migration, or high-risk work.
 
-An execution plan is a living implementation specification. A new engineer or agent should be able to resume from the plan and the current working tree without relying on hidden conversational context.
+The plan must be resumable from the working tree and document alone. It must include:
 
-## Required Sections
-
-1. Goal and user-visible outcome.
+1. Goal and observable outcome.
 2. Scope and non-goals.
 3. Current-system reconstruction.
 4. Constraints and assumptions.
-5. Architecture or approach.
-6. Milestones.
-7. Verification and acceptance.
-8. Risks and rollback.
+5. Architecture/approach.
+6. Incremental milestones.
+7. Verification and acceptance evidence.
+8. Risk, rollback, and stop conditions.
 9. Progress log.
 10. Decision log.
-11. Discoveries and deviations.
+11. Discoveries/deviations.
 12. Final outcome and remaining work.
 
-## Rules
+Rules:
 
 - Keep progress current after each meaningful stopping point.
-- Record decisions when the plan changes.
-- Include commands, files, tests, and observable acceptance results.
-- Do not mark a milestone complete without evidence.
-- Preserve failed approaches when they explain future constraints.
-- Prefer incremental, runnable milestones.
+- Leave the repository runnable at each milestone where practical.
+- Do not mark work complete without evidence.
+- Record failed approaches when they explain future constraints.
 - Define rollback before high-impact changes.
+
+Use `.agents/skills/agent-development-process/assets/EXEC_PLAN.template.md` as the detailed template.

@@ -1,130 +1,60 @@
-# Software Architect Codex Pack
+# CloudSkill
 
-Version: **4.0.0**
+**Current version: 5.0.0**
 
-This pack encodes a source-grounded software/system architect operating model.
+CloudSkill is a portable set of software/system architecture skills and operating guidance for **OpenAI Codex** and **Claude Code**.
 
-## What changed in v4
+The same canonical `SKILL.md` directories are used for both tools. Codex installs them under `.agents/skills`; Claude Code installs them under `.claude/skills`.
 
-Version 4 uses two concrete implementation sources:
+## Install
 
-1. The supplied complete lunch-ordering system repository.
-2. The public historical CloudBox cross-platform engine repository.
-
-The pack now separates:
-
-- Full-stack/Client-Server architecture.
-- General cross-platform native architecture.
-- Cross-platform engine architecture.
-- Safe brownfield refactoring.
-- Coding-agent repository governance.
-- AI-agent product development.
-
-## Source-grounded Profile
-
-Read:
-
-- `ARCHITECT_PROFILE.md`
-- `SOURCE_VERIFICATION_BENTO.md`
-- `CROSS_PLATFORM_ENGINE_EVIDENCE.md`
-- `ARCHITECTURE_CAPABILITY_MATRIX.md`
-- `PRACTICAL_ARCHITECTURE_EVIDENCE.md`
+See [INSTALL.md](INSTALL.md) for user-level and project-level installation on Windows, macOS, and Linux.
 
 ## Skills
 
 | Skill | Primary use |
 |---|---|
-| `$architecture-review` | Review and compare architecture decisions |
-| `$application-client-server-architecture` | Frontend/backend, API, RBAC, transaction, data, UI, deployment |
-| `$cross-platform-native-architecture` | Qt/native platform, OS, ABI, hardware, packaging |
-| `$cross-platform-engine-architecture` | Director/scene, update/render, graphics, resources, engine adapters |
-| `$framework-design` | Frameworks, SDKs, plug-ins, product-line architecture |
-| `$safe-incremental-refactoring` | Brownfield modernization and compatibility-preserving decomposition |
-| `$code-review` | Production correctness, concurrency, persistence, communication, recovery |
-| `$document-governance` | Controlled and traceable engineering documents |
-| `$software-quality-iso25010` | Product-quality scenarios, metrics, evidence, release gates |
-| `$development-process-tailoring` | Waterfall, iterative, Agile, XP, hybrid process |
-| `$coding-agent-project-governance` | AGENTS, risk routing, subagents, worktrees, tests, release |
-| `$agent-development-process` | Building an AI-agent product or agentic system |
+| `architecture-review` | Reconstruct and compare architecture decisions |
+| `application-client-server-architecture` | Frontend/backend, API, RBAC, transactions, data, UI, deployment |
+| `cross-platform-native-architecture` | Qt/native platforms, OS integration, ABI, hardware, packaging |
+| `cross-platform-engine-architecture` | Director/scene, update/render, graphics, resources, platform adapters |
+| `framework-design` | Frameworks, SDKs, plug-ins, product-line architecture |
+| `safe-incremental-refactoring` | Brownfield modernization and compatibility-preserving decomposition |
+| `code-review` | Correctness, concurrency, persistence, communication, recovery |
+| `document-governance` | Controlled and traceable engineering documents |
+| `software-quality-iso25010` | Quality scenarios, metrics, evidence, release gates |
+| `development-process-tailoring` | Waterfall, iterative, Agile, XP, and hybrid process |
+| `coding-agent-project-governance` | Repository instructions, risk routing, subagents, tests, release |
+| `agent-development-process` | Building an AI-agent product or agentic system |
 
-## Important Distinctions
-
-```text
-General Qt/native application architecture
-  → $cross-platform-native-architecture
-
-Game/graphics engine runtime architecture
-  → $cross-platform-engine-architecture
-```
+## Repository map
 
 ```text
-Coding agents modify a software repository
-  → $coding-agent-project-governance
-
-An AI agent is the product being built
-  → $agent-development-process
-```
-
-```text
-Review an intended target architecture
-  → $architecture-review
-
-Move a live legacy system toward it safely
-  → $safe-incremental-refactoring
-```
-
-## Package Contents
-
-```text
-software-architect-codex-pack-v4/
-├── AGENTS.md
-├── ARCHITECT_PROFILE.md
-├── SOURCE_VERIFICATION_BENTO.md
-├── CROSS_PLATFORM_ENGINE_EVIDENCE.md
-├── ARCHITECTURE_CAPABILITY_MATRIX.md
-├── PRACTICAL_ARCHITECTURE_EVIDENCE.md
-├── AGENT_DEVELOPMENT_STANDARD.md
-├── CODING_AGENT_PROJECT_STANDARD.md
-├── DOCUMENT_STANDARD.md
-├── PLANS.md
-├── REFERENCES.md
+CloudSkill/
+├── .agents/skills/          # Canonical skill source
+├── AGENTS.md                # Codex/shared architecture guidance
+├── CLAUDE.md                # Claude Code adapter importing AGENTS.md
+├── INSTALL.md               # Codex and Claude Code installation
+├── PLANS.md                 # ExecPlan convention
+├── docs/                    # Profile, evidence, governance, audit, references
+├── evals/                   # Skill-routing cases
+├── scripts/                 # Install, validation, and documentation audit
 ├── CHANGELOG.md
-├── VERSION
-├── scripts/
-├── evals/
-└── .agents/skills/
+└── VERSION
 ```
 
-## Installation
+## Documentation policy
 
-### Global personal guidance
+- Git commits and annotated tags are the authoritative version history.
+- `history/` contains only a release index; it does not duplicate full source snapshots.
+- Root documents are entry points. Detailed material lives under `docs/` or inside each skill.
+- Each concern has one authoritative document; other documents link to it instead of copying it.
 
-```powershell
-New-Item -ItemType Directory -Force "$HOME\.codex"
-New-Item -ItemType Directory -Force "$HOME\.agents\skills"
+See [docs/README.md](docs/README.md) for the document ownership map.
 
-Copy-Item ".\AGENTS.md" "$HOME\.codex\AGENTS.md" -Force
-Copy-Item ".\.agents\skills\*" "$HOME\.agents\skills\" -Recurse -Force
-```
+## Validate
 
-### Repository use
-
-Copy only the skills and standards relevant to that repository.
-
-Project-specific facts belong in the repository's own `AGENTS.md`, domain-invariant documents, architecture map, and runbooks.
-
-## Validation
-
-Run:
-
-```text
+```bash
 python scripts/validate_pack.py
+python scripts/audit_docs.py
 ```
-
-Routing cases are in:
-
-```text
-evals/skill-routing-cases.csv
-```
-
-Add real failures over time instead of expanding instructions speculatively.
