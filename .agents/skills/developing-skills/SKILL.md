@@ -1,6 +1,6 @@
 ---
 name: developing-skills
-description: Use when creating, editing, splitting, merging, evaluating, or releasing CloudSkill skills, descriptions, references, assets, routing cases, behavior tests, or capturing the current interaction as a positive or negative Eval candidate.
+description: Use when creating, editing, splitting, merging, evaluating, releasing, or conversation-mining CloudSkill skills, including turning available prior interactions and user corrections into sanitized routing and behavior evidence or a reviewable replacement package.
 ---
 
 # Developing CloudSkill Skills
@@ -14,6 +14,7 @@ Read:
 - `references/behavior-driven-skill-development.md`
 - `references/skill-authoring-sources.md` when reviewing external influences or attribution.
 - `references/interaction-eval-capture.md` when converting a live interaction into a private Eval candidate or reviewing an Eval Inbox.
+- `references/conversation-derived-optimization.md` when mining multiple available interactions or producing an optimized overlay, branch, or release candidate.
 
 Use:
 
@@ -21,7 +22,6 @@ Use:
 - `assets/BEHAVIOR_EVAL_CASE.template.json`
 - `assets/INTERACTION_EVAL_CANDIDATE.template.json`
 - `assets/EVAL_MINING_REPORT.template.md`
-
 
 ## Interaction capture shorthand
 
@@ -42,6 +42,23 @@ For either phrase:
 
 A captured candidate is evidence to review, not proof that routing or behavior passed. Batch conversion requires deduplication, owner analysis, a repeatable prompt, required and forbidden behavior, and an explicit RED/GREEN decision.
 
+## Historical interaction mining and optimization requests
+
+Use this path when the user asks to optimize one or more skills from past conversations, previous corrections, memories, exported transcripts, or an Eval Inbox.
+
+1. **Inventory accessible evidence.** List the current conversation, available memory/context, uploaded exports, configured Eval Inbox, and connected repository evidence that were actually read. Mark unavailable history explicitly.
+2. **Sanitize before synthesis.** Remove or generalize organization, customer, person, project, product, equipment, site, account, address, local path, URL, schedule, recipe, safety limit, credential, and other identifying data.
+3. **Extract reusable pressure.** Preserve failure boundaries such as state ownership, timeout, late completion, retry safety, stale state, lifecycle, evidence denominator, audience transformation, release control, or overengineering. Do not preserve incidental names.
+4. **Cluster and deduplicate.** Merge semantically equivalent corrections. Separate routing failures, behavior omissions, artifact problems, unsupported claims, and project-only preferences.
+5. **Locate the authoritative owner.** Update the smallest existing skill, router, reference, or validator that owns the pressure. Do not modify every skill merely because the source conversation mentioned several domains.
+6. **Establish RED evidence.** Add routing, recognition, application, counterexample, or discipline cases that reproduce the observed failure before changing skill instructions.
+7. **Make the smallest responsible change.** Prefer routing metadata, one decision rule, one safeguard, or one reference over a broad rewrite.
+8. **Regress adjacent routes.** Verify that code review does not become process tailoring, equipment modeling does not become resource architecture, agent product design does not become repository governance, and trivial tasks do not invoke CloudBox.
+9. **Produce a reviewable delivery.** Use a branch/PR only when write access is available and the user authorized it. Otherwise produce a deterministic overlay or patch that preserves repository paths.
+10. **Report execution truthfully.** Distinguish structural validation, model behavior execution, repository write, installation, and host/plugin reload. A generated package is not proof that ChatGPT loaded the updated skill.
+
+Never claim complete account-wide conversation access unless an explicit export or source was actually read. Never store raw transcripts in the repository. Never claim a branch, PR, test, install, or release succeeded after a connector or local command failed.
+
 ## Workflow
 
 ### 1. Define the observed problem
@@ -56,6 +73,7 @@ Classify the need as one or more of:
 - Instructions are duplicated or owned by the wrong skill.
 - A mechanical rule should be automated rather than documented.
 - A live interaction should be preserved as a positive or negative Eval candidate.
+- Multiple available interactions should be mined into a sanitized optimization candidate.
 
 Preserve the source evidence and confidence level. A historical project demonstrates a solved pressure; it does not make every historical implementation choice normative.
 
@@ -142,17 +160,23 @@ Before release:
 - Copying an external methodology without adapting it to CloudSkill's architecture and governance scope.
 - Adding prose for a rule that a validator can enforce deterministically.
 - Declaring behavior tests passed when only schemas or case files were validated.
+- Claiming all past conversations were read when only current context or summaries were available.
+- Claiming a GitHub branch or PR was created after a connector returned an authorization error.
+- Embedding a user's local path or organization-specific terms into a reusable global skill.
 
 ## Required output
 
-1. Observed failure and evidence
-2. Existing owner and overlap decision
-3. Skill contract
-4. RED baseline case and result
-5. Minimal change
-6. GREEN result
-7. Adjacent-skill regression
-8. Structural and install checks
-9. Release and remaining limitations
+1. Accessible evidence inventory and unavailable sources
+2. Observed failure and evidence
+3. Existing owner and overlap decision
+4. Sanitization and deduplication result
+5. Skill contract
+6. RED baseline case and result
+7. Minimal change
+8. GREEN result
+9. Adjacent-skill regression
+10. Structural and install checks
+11. Delivery form: branch/PR, overlay, patch, or MANUAL_REQUIRED
+12. Release status and remaining limitations
 
 For interaction capture, the required output is the saved candidate path or a `MANUAL_REQUIRED` result; do not claim that a formal Eval or skill change was completed.

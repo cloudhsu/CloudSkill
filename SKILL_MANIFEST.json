@@ -1,5 +1,5 @@
 {
-  "version": "5.5.2",
+  "version": "5.5.3",
   "skills": [
     {
       "name": "agent-development-process",
@@ -45,9 +45,9 @@
     },
     {
       "name": "developing-skills",
-      "description": "Use when creating, editing, splitting, merging, evaluating, or releasing CloudSkill skills, descriptions, references, assets, routing cases, behavior tests, or capturing the current interaction as a positive or negative Eval candidate.",
+      "description": "Use when creating, editing, splitting, merging, evaluating, releasing, or conversation-mining CloudSkill skills, including turning available prior interactions and user corrections into sanitized routing and behavior evidence or a reviewable replacement package.",
       "path": ".agents/skills/developing-skills/SKILL.md",
-      "file_count": 9
+      "file_count": 10
     },
     {
       "name": "development-process-tailoring",
@@ -99,7 +99,7 @@
     },
     {
       "name": "using-cloudskill",
-      "description": "Use when starting a task that may require one or more CloudBox skills, especially when routing, ordering, composing, or isolating process, domain-knowledge, architecture, change, quality, and handoff skills is non-obvious.",
+      "description": "Use when a non-trivial engineering task may require one or more CloudBox skills, especially when the prompt is in Chinese, refers to prior corrections or conversations, spans architecture, equipment, code, process, quality, documents, or AI agents, or has ambiguous skill routing and composition.",
       "path": ".agents/skills/using-cloudskill/SKILL.md",
       "file_count": 3
     }

@@ -1,6 +1,6 @@
 ---
 name: using-cloudskill
-description: Use when starting a task that may require one or more CloudBox skills, especially when routing, ordering, composing, or isolating process, domain-knowledge, architecture, change, quality, and handoff skills is non-obvious.
+description: Use when a non-trivial engineering task may require one or more CloudBox skills, especially when the prompt is in Chinese, refers to prior corrections or conversations, spans architecture, equipment, code, process, quality, documents, or AI agents, or has ambiguous skill routing and composition.
 ---
 
 # Using CloudBox
@@ -41,6 +41,33 @@ Examples:
 - Pump/vent, material transfer, readiness, or PVD execution architecture: `semiconductor-equipment-domain-knowledge` -> `equipment-control-architecture`.
 - MFC/gauge/valve state and command model: `semiconductor-equipment-domain-knowledge` when physical semantics need clarification, then `equipment-domain-modeling`.
 - Equipment platform migration: add `safe-incremental-refactoring`, process, quality, or documentation skills only when those concerns are explicitly in scope.
+
+## Conversation-derived routing cues
+
+Treat these as semantic cues, not keyword-only rules. Select a skill only when its decision boundary is material.
+
+| Recurring user pressure | Primary route | Add only when needed |
+|---|---|---|
+| Duplicate command, stale response, NetworkStream/buffer suspicion, thread safety, callback order, timeout, late response | `code-review` | `equipment-domain-modeling` when the issue also requires an Actual/Desired/Pending or command-attempt model |
+| Sequence versus Equipment Service, shared robot/aligner, pump/vent, interlock, material location, distributed IPC, reconnect, failover or HA | `equipment-control-architecture` | `semiconductor-equipment-domain-knowledge` for physical meaning; `architecture-review` for option comparison; `safe-incremental-refactoring` for migration |
+| Valve/MFC/pump/gauge DTOs, typed commands, union-like payloads, Actual/Desired/Readback, stale snapshots, capability-driven UI | `equipment-domain-modeling` | `code-review` for a concrete defect; `framework-design` for a reusable product-line kernel |
+| CEO/management versus engineer/training reports, one source split into multiple views, revision lineage, terminology normalization | `document-governance` | `software-quality-iso25010` for measurable metrics and release gates |
+| Field failures or update success rates must be correlated to an actual software version; unversioned records must be isolated rather than silently included | `software-quality-iso25010` + `document-governance` | `development-process-tailoring` when the result drives release-train or corrective-action governance |
+| Qt/MFC modernization, HID/USB, device hot-plug, firmware update, privileged Windows/macOS integration, installer or Qt version migration | `cross-platform-native-architecture` | `safe-incremental-refactoring`, `framework-design`, or `software-quality-iso25010` only for explicit migration/reuse/gate concerns |
+| Small web/client-server system, API, SQLite, RBAC, concurrent orders, backup, NAS/container deployment | `application-client-server-architecture` | `safe-incremental-refactoring` only for an existing brownfield system |
+| AI Agent task contract, tools, autonomy, memory, evaluation, guardrails, approval and operations | `agent-development-process` | `coding-agent-project-governance` only when repository operating rules are also requested |
+| AGENTS.md, coding-agent worktrees, repository risk routing, release evidence, skill descriptions, Eval mining or plugin packaging | `coding-agent-project-governance` or `developing-skills` | Use `developing-skills` when the requested output changes CloudSkill routing or behavior |
+
+## Historical-context discipline
+
+When the user asks to optimize skills from prior conversations:
+
+- Route to `developing-skills`.
+- Use only conversation context, memory, uploaded exports, or connected sources that are actually available.
+- State unavailable history explicitly; never imply complete account-wide transcript access.
+- Generalize reusable engineering pressure and remove company, customer, project, person, path, URL, machine, recipe, schedule, and safety-limit identifiers.
+- Prefer a small owner-specific change and regression cases over rewriting every skill.
+- If repository write access is unavailable, produce a reviewable overlay or patch and report the limitation truthfully.
 
 ## Routing safeguards
 

@@ -1,0 +1,129 @@
+{
+  "skill": "using-cloudskill",
+  "cases": [
+    {
+      "id": "USE-CONV-001",
+      "skill": "using-cloudskill",
+      "type": "application",
+      "prompt": "這段 C# NetworkStream 程式送出命令後立刻收到成功，但懷疑 dictionary 留有上一輪資料、buffer 殘留或 thread-safe 問題，也可能發生重送。該使用哪些技能？",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "routes primarily to code-review",
+        "focuses on executable state, concurrency, duplicate execution, stale response and timeout ordering",
+        "adds equipment-domain-modeling only if the requested fix changes command/readback state semantics"
+      ],
+      "forbidden_behaviors": [
+        "routes primarily to development-process-tailoring",
+        "assumes NetworkStream buffer residue without reconstructing ownership and lifecycle",
+        "loads every equipment skill"
+      ],
+      "required_artifacts": [
+        "ordered minimal skill set"
+      ],
+      "baseline_expected_failure": [
+        "agent selects a broad architecture or process skill and misses the concrete concurrency and stale-state review"
+      ],
+      "review_notes": "Derived from recurring communication-code corrections; identifiers are generalized."
+    },
+    {
+      "id": "USE-CONV-002",
+      "skill": "using-cloudskill",
+      "type": "application",
+      "prompt": "同一批更新資料要拆成原始資料、管理層報告與工程師學習文件；成功率只能統計能對應實際版本的紀錄，無版本資料要隔離但仍揭露。該如何選技能？",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "routes to document-governance for one authoritative source and multiple audience views",
+        "routes to software-quality-iso25010 for denominator, exclusions, confidence and version scope",
+        "keeps unversioned records outside version success-rate calculations and reports them separately"
+      ],
+      "forbidden_behaviors": [
+        "creates independent facts for each audience",
+        "silently includes unversioned records in a release metric",
+        "uses code-review as the primary route"
+      ],
+      "required_artifacts": [
+        "ordered minimal skill set"
+      ],
+      "baseline_expected_failure": [
+        "agent optimizes presentation but leaves the statistical population ambiguous"
+      ],
+      "review_notes": "Captures audience transformation and version-scoped evidence discipline."
+    },
+    {
+      "id": "USE-CONV-003",
+      "skill": "using-cloudskill",
+      "type": "application",
+      "prompt": "設計一個小型員工訂餐 Web 系統，包含登入、RBAC、SQLite、同時下單、儲值歷史、NAS 容器部署、備份與手機 UI。需要哪些技能？",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "routes primarily to application-client-server-architecture",
+        "covers authority, transactions, concurrency, persistence, security and deployment",
+        "adds software-quality-iso25010 only when measurable gates are requested"
+      ],
+      "forbidden_behaviors": [
+        "routes to equipment-control-architecture because the system is used in a factory",
+        "routes to cross-platform-native-architecture for a web-only design",
+        "adds safe-incremental-refactoring to a greenfield design"
+      ],
+      "required_artifacts": [
+        "ordered minimal skill set"
+      ],
+      "baseline_expected_failure": [
+        "agent confuses operational setting with the application's actual architecture boundary"
+      ],
+      "review_notes": "Separates factory context from equipment-control semantics."
+    },
+    {
+      "id": "USE-CONV-004",
+      "skill": "using-cloudskill",
+      "type": "recognition",
+      "prompt": "請根據我們過去的對話，自動優化已安裝的技能與插件，並提供可覆蓋本機 clone 的版本。",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "routes to developing-skills",
+        "uses only available interaction evidence and repository content",
+        "requires sanitization, owner mapping, RED cases and a reviewable delivery",
+        "reports connector write limitations truthfully"
+      ],
+      "forbidden_behaviors": [
+        "claims access to every historical conversation",
+        "rewrites all skills without owner or regression analysis",
+        "claims a branch or PR exists after a failed write"
+      ],
+      "required_artifacts": [
+        "evidence inventory",
+        "reviewable overlay branch or patch"
+      ],
+      "baseline_expected_failure": [
+        "agent asks the user to upload the same skill package again or overclaims installed-skill source access"
+      ],
+      "review_notes": "Directly exercises conversation-derived skill optimization routing."
+    },
+    {
+      "id": "USE-CONV-005",
+      "skill": "using-cloudskill",
+      "type": "counterexample",
+      "prompt": "列出目前畫面上已安裝的技能名稱，不要修改任何技能。",
+      "expected_routing": false,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "answers from the supplied screen or available plugin metadata",
+        "does not start skill-development or repository modification"
+      ],
+      "forbidden_behaviors": [
+        "creates an Eval candidate",
+        "changes skill descriptions",
+        "claims unseen skills are installed"
+      ],
+      "required_artifacts": [],
+      "baseline_expected_failure": [
+        "agent treats inspection as authorization to optimize or write"
+      ],
+      "review_notes": "Inspection-only requests must remain read-only."
+    }
+  ]
+}

@@ -2,7 +2,7 @@
 
 <p align="center"><img src="assets/cloudbox-logo.png" width="160" alt="CloudBox logo"></p>
 
-**Current version: 5.5.2**
+**Current version: 5.5.3**
 
 CloudBox is the user-facing plugin brand for the `CloudSkill` repository: a portable set of software/system architecture skills and operating guidance for **OpenAI Codex**, **ChatGPT**, and **Claude Code**.
 

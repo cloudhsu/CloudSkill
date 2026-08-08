@@ -1,5 +1,32 @@
 # Changelog
 
+## 5.5.3
+
+### Conversation-derived skill optimization
+
+- Expanded `using-cloudskill` routing for recurring architecture, equipment-control,
+  domain-modeling, code-review, document-governance, application, and agent-development cases.
+- Added clearer routing boundaries for communication defects, equipment state authority,
+  distributed IPC recovery, version-scoped field statistics, and multi-audience documents.
+- Expanded `developing-skills` with a controlled workflow for mining sanitized historical
+  interactions into repeatable routing and behavior evaluation cases.
+- Added explicit handling for incomplete conversation access, sensitive project context,
+  GitHub read-only permissions, overlay delivery, and truthful verification reporting.
+- Added regression cases derived from recurring engineering discussions without retaining
+  proprietary customer, project, equipment, path, or operating-value details.
+
+### Fixes
+
+- Restored the required `CloudBox skills` marker in the `using-cloudskill`
+  OpenAI metadata.
+- Fixed plugin validation failure caused by incompatible metadata wording.
+- Updated manifest metadata and file counts for the optimized skill package.
+
+### Compatibility
+
+- Preserved all existing skill IDs and canonical skill paths.
+- No breaking changes to plugin installation, local configuration, or Eval Inbox behavior.
+
 ## 5.5.2
 
 ### CloudBox dual-plugin packaging
