@@ -1,5 +1,29 @@
 # Changelog
 
+## 5.6.0
+
+### Local Ollama execution
+
+- Added a no-API-key `ollama` provider to the executable Runtime Eval runner.
+- Defaulted local Eval execution to `qwen3:4b`, context 4096, temperature 0, seed 42, and disabled thinking for stable routing JSON.
+- Added installed-model checks, local-server diagnostics, structured-output parsing, and provider-specific timing/token metadata.
+- Kept the OpenAI Responses API provider available for optional cloud or GitHub Actions runs.
+
+### Executable model evaluations
+
+- Added an OpenAI Responses API runtime runner with strict JSON-schema routing output, request IDs, retries, latency, token usage, and privacy-preserving `store=false` requests.
+- Added an eight-case Canary Suite covering code review, equipment state composition, version-scoped documents, application architecture, ACK-versus-completion semantics, no-skill translation, English equipment architecture, and historical-interaction skill optimization.
+- Added a deterministic grader for primary skill, required supporting skills, forbidden selected skills, execution order, valid skill IDs, no-skill accuracy, output validity, and router self-inclusion.
+- Added machine-readable summary metrics and a strict Canary release gate.
+
+### Validation and operations
+
+- Added static Runtime Eval validation to `scripts/run_all_checks.py`; ordinary pushes do not consume model API credits.
+- Added a manually triggered GitHub Actions workflow using the `OPENAI_API_KEY` repository secret and an explicit model input.
+- Added artifact upload for raw JSONL results and graded summaries.
+- Added local-result exclusions so API outputs and machine-specific evidence are not committed by default.
+- Preserved all 17 skill IDs, 87 routing cases, 87 behavior contracts, and existing plugin installation behavior.
+
 ## 5.5.4
 
 ### Routing contract and trigger hygiene

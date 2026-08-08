@@ -1,0 +1,140 @@
+{
+  "suite": "cloudbox-routing-canary",
+  "schema_version": 1,
+  "description": "Eight high-discrimination routing cases for executable model evaluation.",
+  "cases": [
+    {
+      "id": "R01-networkstream-stale-response",
+      "prompt": "這段 C# NetworkStream 程式送出命令後立刻收到成功，但懷疑 dictionary 留有上一輪資料、buffer 殘留或 thread-safe 問題，也可能發生重送。請選擇最小充分的 CloudBox 技能。",
+      "expected": {
+        "primary_skill": "code-review",
+        "required_supporting_skills": [],
+        "forbidden_selected_skills": [
+          "development-process-tailoring",
+          "equipment-control-architecture"
+        ],
+        "execution_order": [
+          "code-review"
+        ],
+        "allow_additional_supporting_skills": false
+      }
+    },
+    {
+      "id": "R02-code-and-command-state",
+      "prompt": "請檢查 C# 通訊程式的重送、callback ordering 與 stale response；同時重新設計 Commanded、Pending、Actual、Readback，以及 timeout 後 late response 的狀態語意。請選擇最小充分的 CloudBox 技能與順序。",
+      "expected": {
+        "primary_skill": "code-review",
+        "required_supporting_skills": [
+          "equipment-domain-modeling"
+        ],
+        "forbidden_selected_skills": [
+          "development-process-tailoring"
+        ],
+        "execution_order": [
+          "code-review",
+          "equipment-domain-modeling"
+        ],
+        "allow_additional_supporting_skills": false
+      }
+    },
+    {
+      "id": "R03-versioned-multi-audience-report",
+      "prompt": "同一批軟體更新資料要整理成原始資料、管理層報告與工程師學習文件。更新成功率只能納入能對應實際軟體版本的紀錄；無版本資料要隔離、不納入成功率，但仍須揭露數量。請選擇技能與執行順序。",
+      "expected": {
+        "primary_skill": "document-governance",
+        "required_supporting_skills": [
+          "software-quality-iso25010"
+        ],
+        "forbidden_selected_skills": [
+          "code-review",
+          "development-process-tailoring"
+        ],
+        "execution_order": [
+          "software-quality-iso25010",
+          "document-governance"
+        ],
+        "allow_additional_supporting_skills": false
+      }
+    },
+    {
+      "id": "R04-greenfield-internal-web",
+      "prompt": "設計一個員工訂餐 Web 系統，包含登入、RBAC、SQLite、同時下單、儲值歷史、NAS 容器部署、備份與手機版介面。系統會在工廠內使用。請選擇最小充分的 CloudBox 技能。",
+      "expected": {
+        "primary_skill": "application-client-server-architecture",
+        "required_supporting_skills": [],
+        "forbidden_selected_skills": [
+          "equipment-control-architecture",
+          "cross-platform-native-architecture",
+          "safe-incremental-refactoring"
+        ],
+        "execution_order": [
+          "application-client-server-architecture"
+        ],
+        "allow_additional_supporting_skills": false
+      }
+    },
+    {
+      "id": "R05-ack-versus-completion",
+      "prompt": "設備控制程式送出 OpenValve 命令後收到通訊層 Success ACK，目前程式立刻把 Valve 狀態設成 Open。請選擇能檢查狀態語意、物理完成判定、逾時與恢復責任的最小充分 CloudBox 技能。",
+      "expected": {
+        "primary_skill": "equipment-domain-modeling",
+        "required_supporting_skills": [
+          "equipment-control-architecture"
+        ],
+        "forbidden_selected_skills": [
+          "development-process-tailoring"
+        ],
+        "execution_order": [
+          "equipment-domain-modeling",
+          "equipment-control-architecture"
+        ],
+        "allow_additional_supporting_skills": false
+      }
+    },
+    {
+      "id": "R06-chinese-translation-no-skill",
+      "prompt": "請把「系統已完成更新」翻譯成英文。",
+      "expected": {
+        "primary_skill": null,
+        "required_supporting_skills": [],
+        "forbidden_selected_skills": [
+          "using-cloudskill",
+          "document-governance"
+        ],
+        "execution_order": [],
+        "allow_additional_supporting_skills": false
+      }
+    },
+    {
+      "id": "R07-english-equipment-architecture",
+      "prompt": "Design the ownership and recovery model for a distributed equipment system where each chamber has an independent IPC, shared transfer resources, reconnection, restart recovery, and failover requirements. Select the smallest sufficient CloudBox skill set.",
+      "expected": {
+        "primary_skill": "equipment-control-architecture",
+        "required_supporting_skills": [],
+        "forbidden_selected_skills": [
+          "application-client-server-architecture"
+        ],
+        "execution_order": [
+          "equipment-control-architecture"
+        ],
+        "allow_additional_supporting_skills": false
+      }
+    },
+    {
+      "id": "R08-historical-interaction-optimization",
+      "prompt": "請根據目前實際可取得的過去互動與 GitHub Repository，自動優化 CloudBox 技能，並提供可覆蓋本機 clone 的版本。請選擇最小充分的 downstream CloudBox 技能。",
+      "expected": {
+        "primary_skill": "developing-skills",
+        "required_supporting_skills": [],
+        "forbidden_selected_skills": [
+          "agent-development-process",
+          "using-cloudskill"
+        ],
+        "execution_order": [
+          "developing-skills"
+        ],
+        "allow_additional_supporting_skills": false
+      }
+    }
+  ]
+}

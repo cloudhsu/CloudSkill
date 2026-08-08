@@ -1,6 +1,6 @@
 {
   "name": "cloudbox",
-  "version": "5.5.4",
+  "version": "5.6.0",
   "description": "Architecture, equipment-domain, quality, governance, refactoring, and Eval workflows for Codex and ChatGPT.",
   "author": {
     "name": "CloudBox"

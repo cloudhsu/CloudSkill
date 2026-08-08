@@ -3,3 +3,9 @@
 .cloudskill/config.local.json
 *.session.jsonl
 *.transcript.md
+
+# Runtime model Eval outputs and workflow artifacts
+evals/runtime/results/
+evals/runtime/reports/generated/
+artifacts/runtime-eval*.jsonl
+artifacts/runtime-eval*.json

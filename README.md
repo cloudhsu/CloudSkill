@@ -2,7 +2,7 @@
 
 <p align="center"><img src="assets/cloudbox-logo.png" width="160" alt="CloudBox logo"></p>
 
-**Current version: 5.5.4**
+**Current version: 5.6.0**
 
 CloudBox is the user-facing plugin brand for the `CloudSkill` repository: a portable set of software/system architecture skills and operating guidance for **OpenAI Codex**, **ChatGPT**, and **Claude Code**.
 
@@ -68,6 +68,47 @@ CloudSkill/
 - Each concern has one authoritative document; other documents link to it instead of copying it.
 
 See [docs/README.md](docs/README.md) for the document ownership map.
+
+## Runtime model evaluations
+
+CloudBox includes an executable routing Eval harness in `evals/runtime/`. Static CI validates the suite and grader without calling a model. Local execution defaults to Ollama and requires no API key; OpenAI execution remains optional. Private results are written under `.local/runtime-evals/`.
+
+Validate the Eval suite without a model call:
+
+```bash
+python3 scripts/validate_runtime_evals.py
+python3 scripts/run_runtime_evals.py --provider ollama --model qwen3:4b --dry-run
+```
+
+Run one local smoke case:
+
+```bash
+python3 scripts/run_runtime_evals.py \
+  --provider ollama \
+  --model qwen3:4b \
+  --case-id R06-chinese-translation-no-skill \
+  --repeat 1
+```
+
+Run the complete local Canary Suite:
+
+```bash
+python3 scripts/run_runtime_evals.py \
+  --provider ollama \
+  --model qwen3:4b \
+  --repeat 1 \
+  --num-ctx 4096
+```
+
+Grade the latest result file:
+
+```bash
+python3 scripts/grade_runtime_evals.py \
+  --input .local/runtime-evals/<result-file>.jsonl \
+  --output .local/runtime-evals/<summary-file>.json
+```
+
+The grader deterministically checks primary-skill accuracy, required supporting skills, forbidden selected skills, execution order, no-skill behavior, valid skill IDs, output shape, and router self-inclusion. It does not claim to grade the full semantic quality of the final engineering answer.
 
 ## Validate
 
