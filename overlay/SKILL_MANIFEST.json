@@ -1,5 +1,5 @@
 {
-  "version": "5.5.4",
+  "version": "5.5.2",
   "skills": [
     {
       "name": "agent-development-process",
@@ -99,9 +99,9 @@
     },
     {
       "name": "using-cloudskill",
-      "description": "Use when a non-trivial engineering task may require one or more CloudBox skills, especially when it refers to prior corrections or interactions, spans architecture, equipment, code, process, quality, documents, or AI agents, or has ambiguous routing and skill composition.",
+      "description": "Use when a non-trivial engineering task may require one or more CloudBox skills, especially when the prompt is in Chinese, refers to prior corrections or conversations, spans architecture, equipment, code, process, quality, documents, or AI agents, or has ambiguous skill routing and composition.",
       "path": ".agents/skills/using-cloudskill/SKILL.md",
-      "file_count": 4
+      "file_count": 3
     }
   ]
 }

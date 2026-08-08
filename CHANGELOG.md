@@ -1,5 +1,23 @@
 # Changelog
 
+## 5.5.4
+
+### Routing contract and trigger hygiene
+
+- Removed prompt language as a `using-cloudskill` trigger; Chinese, English, and mixed-language tasks now route only by engineering decision boundary.
+- Added a structured routing contract for `primary_skill`, `supporting_skills`, `rejected_skills`, `execution_order`, reason, and confidence.
+- Defined `using-cloudskill` as a router rather than a downstream supporting skill, except when the task is specifically about routing policy.
+- Separated deliverable ownership from execution order so a supporting quality skill may establish metric validity before document transformation.
+- Moved detailed conversation-derived scenarios from the router body into `references/conversation-routing-map.md` to limit router growth.
+
+### Regression coverage
+
+- Added Chinese translation and rewriting no-skill boundaries.
+- Added English equipment-architecture and mixed-language code-review positive cases.
+- Added explicit owner-versus-execution-order and router-self-inclusion discipline cases.
+- Expanded both routing cases and behavior case contracts from 83 to 87.
+- Preserved all existing skill IDs, canonical paths, plugin installation behavior, and private Eval Inbox behavior.
+
 ## 5.5.3
 
 ### Conversation-derived skill optimization

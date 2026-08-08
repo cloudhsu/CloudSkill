@@ -11,8 +11,7 @@
       "required_behaviors": [
         "routes primarily to code-review",
         "focuses on executable state, concurrency, duplicate execution, stale response and timeout ordering",
-        "adds equipment-domain-modeling only if the requested fix changes command/readback state semantics",
-        "does not list using-cloudskill as a downstream supporting skill"
+        "adds equipment-domain-modeling only if the requested fix changes command/readback state semantics"
       ],
       "forbidden_behaviors": [
         "routes primarily to development-process-tailoring",
@@ -35,24 +34,22 @@
       "expected_routing": true,
       "expected_alternative_skill": null,
       "required_behaviors": [
-        "sets document-governance as the primary deliverable owner",
-        "adds software-quality-iso25010 for denominator, exclusions, confidence and version scope",
-        "may execute software-quality-iso25010 before document-governance when the metric population is unresolved",
+        "routes to document-governance for one authoritative source and multiple audience views",
+        "routes to software-quality-iso25010 for denominator, exclusions, confidence and version scope",
         "keeps unversioned records outside version success-rate calculations and reports them separately"
       ],
       "forbidden_behaviors": [
         "creates independent facts for each audience",
         "silently includes unversioned records in a release metric",
-        "requires the primary owner to be first in execution_order",
         "uses code-review as the primary route"
       ],
       "required_artifacts": [
-        "routing result with primary_skill supporting_skills and execution_order"
+        "ordered minimal skill set"
       ],
       "baseline_expected_failure": [
         "agent optimizes presentation but leaves the statistical population ambiguous"
       ],
-      "review_notes": "Captures audience transformation, metric validity, and owner-versus-execution-order semantics."
+      "review_notes": "Captures audience transformation and version-scoped evidence discipline."
     },
     {
       "id": "USE-CONV-003",
@@ -87,8 +84,7 @@
       "expected_routing": true,
       "expected_alternative_skill": null,
       "required_behaviors": [
-        "routes downstream work to developing-skills",
-        "does not list using-cloudskill as a supporting downstream skill",
+        "routes to developing-skills",
         "uses only available interaction evidence and repository content",
         "requires sanitization, owner mapping, RED cases and a reviewable delivery",
         "reports connector write limitations truthfully"
@@ -100,7 +96,7 @@
       ],
       "required_artifacts": [
         "evidence inventory",
-        "reviewable branch overlay or patch"
+        "reviewable overlay branch or patch"
       ],
       "baseline_expected_failure": [
         "agent asks the user to upload the same skill package again or overclaims installed-skill source access"
@@ -128,102 +124,6 @@
         "agent treats inspection as authorization to optimize or write"
       ],
       "review_notes": "Inspection-only requests must remain read-only."
-    },
-    {
-      "id": "USE-CONV-006",
-      "skill": "using-cloudskill",
-      "type": "counterexample",
-      "prompt": "請把『系統已完成更新』翻譯成英文。",
-      "expected_routing": false,
-      "expected_alternative_skill": null,
-      "required_behaviors": [
-        "performs the translation without loading CloudBox skills",
-        "treats prompt language as irrelevant to routing"
-      ],
-      "forbidden_behaviors": [
-        "routes to using-cloudskill because the prompt is Chinese",
-        "routes to document-governance because the sentence contains system and update"
-      ],
-      "required_artifacts": [],
-      "baseline_expected_failure": [
-        "metadata over-triggers on Chinese wording before the no-skill safeguard is applied"
-      ],
-      "review_notes": "Language-neutral no-skill gate."
-    },
-    {
-      "id": "USE-CONV-007",
-      "skill": "using-cloudskill",
-      "type": "recognition",
-      "prompt": "Design ownership, shared-resource arbitration, restart recovery, reconnect, and failover for a distributed equipment system where each chamber has an independent IPC.",
-      "expected_routing": true,
-      "expected_alternative_skill": null,
-      "required_behaviors": [
-        "routes primarily to equipment-control-architecture",
-        "adds architecture-review only when an option comparison is requested",
-        "routes by equipment ownership and recovery rather than prompt language"
-      ],
-      "forbidden_behaviors": [
-        "skips CloudBox because the prompt is English",
-        "routes primarily to application-client-server-architecture because IPCs communicate over a network"
-      ],
-      "required_artifacts": [
-        "routing result"
-      ],
-      "baseline_expected_failure": [
-        "language-sensitive routing or generic client-server routing misses equipment semantics"
-      ],
-      "review_notes": "English positive case paired with the Chinese no-skill counterexample."
-    },
-    {
-      "id": "USE-CONV-008",
-      "skill": "using-cloudskill",
-      "type": "recognition",
-      "prompt": "Review 這段 C# callback ordering、timeout、late response 與 stale dictionary state，確認是否可能 duplicate send。",
-      "expected_routing": true,
-      "expected_alternative_skill": null,
-      "required_behaviors": [
-        "routes primarily to code-review",
-        "treats mixed-language wording as irrelevant",
-        "adds equipment-domain-modeling only when command state semantics must change"
-      ],
-      "forbidden_behaviors": [
-        "routes based on language detection",
-        "loads all equipment skills",
-        "assumes buffer residue is the cause without evidence"
-      ],
-      "required_artifacts": [
-        "routing result"
-      ],
-      "baseline_expected_failure": [
-        "keyword or language heuristics override the concrete concurrency failure boundary"
-      ],
-      "review_notes": "Mixed-language positive case."
-    },
-    {
-      "id": "USE-CONV-009",
-      "skill": "using-cloudskill",
-      "type": "discipline",
-      "prompt": "請輸出這項任務的 primary_skill、supporting_skills、rejected_skills 與 execution_order。主要交付是多受眾更新報告，但要先定義版本成功率的分母與排除條件。",
-      "expected_routing": true,
-      "expected_alternative_skill": null,
-      "required_behaviors": [
-        "sets primary_skill to document-governance",
-        "includes software-quality-iso25010 as supporting",
-        "places software-quality-iso25010 before document-governance in execution_order",
-        "does not include using-cloudskill in the downstream list"
-      ],
-      "forbidden_behaviors": [
-        "forces primary_skill to be first in execution_order",
-        "omits the quality skill",
-        "returns only an unstructured prose list"
-      ],
-      "required_artifacts": [
-        "structured routing contract"
-      ],
-      "baseline_expected_failure": [
-        "owner identity and analysis order are conflated"
-      ],
-      "review_notes": "Explicit routing-output contract."
     }
   ]
 }

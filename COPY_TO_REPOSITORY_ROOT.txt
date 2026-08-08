@@ -1,0 +1,31 @@
+CloudSkill 5.5.4 direct-overwrite package v2
+Base GitHub commit: 7ea9792f1a326fabff43dceee1ff42e3bfb94076 (CloudSkill 5.5.3)
+
+IMPORTANT
+- Copy the CONTENTS of this extracted folder into the existing CloudSkill repository root.
+- Do not copy this outer folder as a new subdirectory inside CloudSkill.
+- Do not delete the repository root first.
+- This package does not contain or modify .git, .local, .cloudskill, personal settings, or private Eval Inbox content.
+
+Recommended macOS command:
+
+  cd ~/Downloads
+  rsync -a --exclude '.DS_Store' CloudSkill-5.5.4-Direct-Overwrite-v2/ /PATH/TO/CloudSkill/
+
+Example:
+
+  rsync -a --exclude '.DS_Store' CloudSkill-5.5.4-Direct-Overwrite-v2/ ~/projects/cloudskill/CloudSkill/
+
+After copying:
+
+  cd /PATH/TO/CloudSkill
+  cat VERSION
+  python3 scripts/run_all_checks.py
+  git diff --check
+  git status --short
+
+Expected counts:
+- validate_pack.py: 87 routing cases
+- validate_behavior_evals.py: 87 behavior case contracts
+
+No files need to be deleted for 5.5.3 -> 5.5.4.

@@ -82,3 +82,7 @@ DEVSK-04,整理成負向案例,developing-skills,true,explicit sanitized negativ
 DEVSK-NEG-02,請把剛才的討論整理成一般會議摘要且不要建立Eval。,developing-skills,false,ordinary summary explicitly excludes Eval capture
 USE-04,這個任務用Superpowers管理TDD與實作流程，用CloudBox處理設備領域與架構，技能順序怎麼排？,using-cloudskill,true,hybrid plugin responsibility composition
 USE-NEG-02,請在Claude Code中停用某個已安裝的plugin。,using-cloudskill,false,host plugin management is not skill routing
+USE-05,請把「系統已完成更新」翻譯成英文。,using-cloudskill,false,Chinese translation must not trigger CloudBox routing
+USE-NEG-03,幫我把「系統更新之後目前都正常」寫得順一點。,using-cloudskill,false,Chinese rewriting must not trigger CloudBox routing
+USE-06,Design ownership shared-resource arbitration restart recovery reconnect and failover for a distributed equipment system where each chamber has an independent IPC.,using-cloudskill,true,English engineering task must route by decision boundary
+USE-07,Review 這段 C# callback ordering timeout late response 與 stale dictionary state 確認是否可能 duplicate send。,using-cloudskill,true,mixed-language engineering task must route to code review

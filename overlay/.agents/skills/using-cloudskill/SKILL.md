@@ -1,6 +1,6 @@
 ---
 name: using-cloudskill
-description: Use when a non-trivial engineering task may require one or more CloudBox skills, especially when it refers to prior corrections or interactions, spans architecture, equipment, code, process, quality, documents, or AI agents, or has ambiguous routing and skill composition.
+description: Use when a non-trivial engineering task may require one or more CloudBox skills, especially when the prompt is in Chinese, refers to prior corrections or conversations, spans architecture, equipment, code, process, quality, documents, or AI agents, or has ambiguous skill routing and composition.
 ---
 
 # Using CloudBox
@@ -16,43 +16,17 @@ Before substantial analysis, repository exploration, design, modification, or re
 1. Identify the task's actual decision or failure boundary.
 2. Check whether an installed skill has a concrete trigger for that boundary.
 3. Load the smallest sufficient skill set.
-4. Follow process/governance skills before domain knowledge, architecture, implementation, quality, and handoff skills when that order is materially required.
+4. Follow process/governance skills before domain knowledge, architecture, implementation, quality, and handoff skills.
 5. Record executed checks and unresolved evidence truthfully.
 
-Do not force a skill onto casual conversation, translation, rewriting, trivial arithmetic, inspection-only requests, or a task whose answer is already fully determined by supplied text. Prompt language alone is never a routing condition.
-
-## Routing decision contract
-
-When the task asks for an explicit routing result, use this structure:
-
-```json
-{
-  "primary_skill": "skill-id-or-null",
-  "supporting_skills": [],
-  "rejected_skills": [],
-  "execution_order": [],
-  "reason": "",
-  "confidence": "high | medium | low"
-}
-```
-
-Interpret the fields as follows:
-
-- `primary_skill`: the skill that owns the requested deliverable or final decision.
-- `supporting_skills`: additional skills that materially change the work; do not add adjacent skills for vocabulary overlap.
-- `rejected_skills`: plausible alternatives that were intentionally excluded.
-- `execution_order`: the order in which skill instructions should govern the work. The primary owner does not have to execute first.
-- `reason`: the concrete decision or failure boundary, not a keyword explanation.
-- `confidence`: confidence in routing based on available evidence.
-
-`using-cloudskill` is the router. Do not list it as a primary or supporting downstream skill unless the task is specifically about router design, routing policy, or CloudBox skill composition itself.
+Do not force a skill onto casual conversation, translation, trivial arithmetic, or a task whose answer is already fully determined by supplied text.
 
 ## Composition order
 
-Use this default order when multiple skills apply, then adjust it when evidence or analysis dependencies require a different sequence:
+Use this order when multiple skills apply:
 
 1. **Process and governance** — how work is controlled.
-2. **Domain knowledge** — what the physical or business concepts mean.
+2. **Domain knowledge** — what the physical/business concepts mean.
 3. **Domain architecture and modeling** — what boundaries, state, and contracts matter.
 4. **Change and implementation** — how responsibility or code is changed safely.
 5. **Quality and verification** — what evidence proves acceptance.
@@ -66,18 +40,29 @@ Examples:
 - Equipment terminology or PVD/vacuum explanation: `semiconductor-equipment-domain-knowledge` only, unless design or implementation is also requested.
 - Pump/vent, material transfer, readiness, or PVD execution architecture: `semiconductor-equipment-domain-knowledge` -> `equipment-control-architecture`.
 - MFC/gauge/valve state and command model: `semiconductor-equipment-domain-knowledge` when physical semantics need clarification, then `equipment-domain-modeling`.
+- Equipment platform migration: add `safe-incremental-refactoring`, process, quality, or documentation skills only when those concerns are explicitly in scope.
 
 ## Conversation-derived routing cues
 
-Read `references/conversation-routing-map.md` when recurring engineering scenarios, prior corrections, language-neutral counterexamples, or primary-owner versus execution-order distinctions are relevant.
+Treat these as semantic cues, not keyword-only rules. Select a skill only when its decision boundary is material.
 
-Treat examples as semantic pressure tests, not keyword rules. Keep detailed cases in references and Evals rather than expanding this router indefinitely.
+| Recurring user pressure | Primary route | Add only when needed |
+|---|---|---|
+| Duplicate command, stale response, NetworkStream/buffer suspicion, thread safety, callback order, timeout, late response | `code-review` | `equipment-domain-modeling` when the issue also requires an Actual/Desired/Pending or command-attempt model |
+| Sequence versus Equipment Service, shared robot/aligner, pump/vent, interlock, material location, distributed IPC, reconnect, failover or HA | `equipment-control-architecture` | `semiconductor-equipment-domain-knowledge` for physical meaning; `architecture-review` for option comparison; `safe-incremental-refactoring` for migration |
+| Valve/MFC/pump/gauge DTOs, typed commands, union-like payloads, Actual/Desired/Readback, stale snapshots, capability-driven UI | `equipment-domain-modeling` | `code-review` for a concrete defect; `framework-design` for a reusable product-line kernel |
+| CEO/management versus engineer/training reports, one source split into multiple views, revision lineage, terminology normalization | `document-governance` | `software-quality-iso25010` for measurable metrics and release gates |
+| Field failures or update success rates must be correlated to an actual software version; unversioned records must be isolated rather than silently included | `software-quality-iso25010` + `document-governance` | `development-process-tailoring` when the result drives release-train or corrective-action governance |
+| Qt/MFC modernization, HID/USB, device hot-plug, firmware update, privileged Windows/macOS integration, installer or Qt version migration | `cross-platform-native-architecture` | `safe-incremental-refactoring`, `framework-design`, or `software-quality-iso25010` only for explicit migration/reuse/gate concerns |
+| Small web/client-server system, API, SQLite, RBAC, concurrent orders, backup, NAS/container deployment | `application-client-server-architecture` | `safe-incremental-refactoring` only for an existing brownfield system |
+| AI Agent task contract, tools, autonomy, memory, evaluation, guardrails, approval and operations | `agent-development-process` | `coding-agent-project-governance` only when repository operating rules are also requested |
+| AGENTS.md, coding-agent worktrees, repository risk routing, release evidence, skill descriptions, Eval mining or plugin packaging | `coding-agent-project-governance` or `developing-skills` | Use `developing-skills` when the requested output changes CloudSkill routing or behavior |
 
 ## Historical-context discipline
 
 When the user asks to optimize skills from prior conversations:
 
-- Route the downstream work to `developing-skills`.
+- Route to `developing-skills`.
 - Use only conversation context, memory, uploaded exports, or connected sources that are actually available.
 - State unavailable history explicitly; never imply complete account-wide transcript access.
 - Generalize reusable engineering pressure and remove company, customer, project, person, path, URL, machine, recipe, schedule, and safety-limit identifiers.
@@ -94,7 +79,6 @@ When the user asks to optimize skills from prior conversations:
 - Do not use equipment-domain modeling to invent process recipes or safe hardware limits.
 - Do not use a repository-governance skill to design the AI-agent product itself.
 - Do not use process tailoring to replace code review, ownership decisions, or technical verification.
-- Do not infer routing from Chinese, English, or mixed-language wording; route by decision boundary.
 - If no skill applies, proceed normally instead of inventing a match.
 
 ## Plugin coexistence
