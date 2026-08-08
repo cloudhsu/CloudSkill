@@ -13,14 +13,21 @@ from pathlib import Path
 from typing import Any
 
 from runtime_eval_common import (
+    CONTEXT_MODES,
     DEFAULT_CASES,
     DEFAULT_SCHEMA,
     MANIFEST,
     ROOT,
     VERSION_FILE,
+    ContextBudgetError,
+    assert_router_context,
+    build_routing_prompt,
+    build_selected_skills_prompt,
     load_cases,
     load_manifest,
     load_schema,
+    skill_ids,
+    validate_decision_shape,
 )
 
 OPENAI_API_URL = "https://api.openai.com/v1/responses"
@@ -29,7 +36,7 @@ DEFAULT_OLLAMA_URL = "http://127.0.0.1:11434"
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Execute CloudBox routing Canary Evals with Ollama or the OpenAI Responses API."
+        description="Execute CloudBox Routing Evals or two-stage selected-skill Behavior Evals."
     )
     parser.add_argument(
         "--provider",
@@ -42,13 +49,51 @@ def parse_args() -> argparse.Namespace:
         default="qwen3:4b",
         help="Ollama model name or exact OpenAI model name. Default: qwen3:4b.",
     )
+    parser.add_argument(
+        "--eval-kind",
+        choices=("routing", "behavior"),
+        default="routing",
+        help="routing performs one routing call; behavior routes first and then executes selected SKILL.md files.",
+    )
+    parser.add_argument(
+        "--context-mode",
+        choices=CONTEXT_MODES,
+        help="none, manifest, router, or selected-skills. Defaults to router for routing and selected-skills for behavior.",
+    )
+    parser.add_argument(
+        "--allow-context-baseline",
+        action="store_true",
+        help="Allow executable none/manifest diagnostic baselines. Without this flag Ollama refuses a run that omits using-cloudskill/SKILL.md.",
+    )
+    parser.add_argument(
+        "--context-reserve-tokens",
+        type=int,
+        default=320,
+        help="Tokens reserved for model output and runtime overhead when checking the input context budget.",
+    )
+    parser.add_argument(
+        "--selected-reference-mode",
+        choices=("none", "declared"),
+        default="declared",
+        help="For behavior mode, load no references or references explicitly named by selected SKILL.md files.",
+    )
+    parser.add_argument(
+        "--contract-repair",
+        choices=("none", "deterministic"),
+        default="deterministic",
+        help=(
+            "Repair only mechanical routing-contract relations after model output. "
+            "The deterministic mode never adds a missing supporting skill or changes primary_skill."
+        ),
+    )
     parser.add_argument("--repeat", type=int, default=1, help="Attempts per case.")
     parser.add_argument("--cases", type=Path, default=DEFAULT_CASES)
     parser.add_argument("--schema", type=Path, default=DEFAULT_SCHEMA)
     parser.add_argument("--case-id", action="append", default=[], help="Run only selected case IDs.")
     parser.add_argument("--output", type=Path, help="JSONL output path.")
     parser.add_argument("--timeout", type=float, default=300.0)
-    parser.add_argument("--max-output-tokens", type=int, default=2000)
+    parser.add_argument("--max-output-tokens", type=int, default=320)
+    parser.add_argument("--behavior-max-output-tokens", type=int, default=1200)
     parser.add_argument("--max-retries", type=int, default=2)
     parser.add_argument("--ollama-url", default=DEFAULT_OLLAMA_URL)
     parser.add_argument("--num-ctx", type=int, default=4096, help="Ollama context length.")
@@ -62,7 +107,17 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--dry-run",
         action="store_true",
-        help="Validate and print the request plan without calling a model.",
+        help="Build and validate actual request prompts without calling a model.",
+    )
+    parser.add_argument(
+        "--show-prompt",
+        action="store_true",
+        help="Include complete system and user prompts in --dry-run JSON output.",
+    )
+    parser.add_argument(
+        "--prompt-output",
+        type=Path,
+        help="Write each dry-run request payload to this directory for exact prompt inspection.",
     )
     return parser.parse_args()
 
@@ -71,32 +126,15 @@ def now_utc() -> str:
     return datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
 
 
-def default_output(provider: str, model: str) -> Path:
+def default_output(provider: str, model: str, eval_kind: str, context_mode: str) -> Path:
     stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
     safe_model = "".join(ch if ch.isalnum() or ch in "-_." else "_" for ch in model)
-    return ROOT / ".local" / "runtime-evals" / f"{stamp}-{provider}-{safe_model}.jsonl"
-
-
-def build_instructions(manifest: dict[str, Any]) -> str:
-    catalog = "\n".join(
-        f'- {item["name"]}: {item["description"]}' for item in manifest["skills"]
+    return (
+        ROOT
+        / ".local"
+        / "runtime-evals"
+        / f"{stamp}-{provider}-{safe_model}-{eval_kind}-{context_mode}.jsonl"
     )
-    return f"""You are the CloudBox routing evaluator. Select the smallest sufficient downstream CloudBox skill set for the user task.
-
-Rules:
-- Return one JSON object only. Do not add Markdown fences or explanatory text outside JSON.
-- primary_skill owns the requested deliverable or final decision.
-- supporting_skills contains only skills that materially change the work.
-- execution_order contains every selected skill exactly once and may start with a supporting skill.
-- rejected_skills contains plausible alternatives intentionally excluded.
-- using-cloudskill is the router and must not be selected downstream unless the task is specifically about router design or routing policy.
-- Prompt language is never a routing condition.
-- For translation, simple rewriting, trivial calculation, or inspection-only work, return primary_skill=null with empty supporting_skills and execution_order.
-- Do not answer the engineering task. Only route it.
-- confidence must be high, medium, or low.
-- Use only exact skill IDs from this catalog:
-{catalog}
-"""
 
 
 def parse_json_object(text: str) -> dict[str, Any]:
@@ -134,7 +172,10 @@ def request_json(
     retryable = {408, 409, 429, 500, 502, 503, 504}
     last_error: Exception | None = None
     for attempt in range(max_retries + 1):
-        request_headers = {"Accept": "application/json", "User-Agent": "CloudBox-Runtime-Eval/5.6.0"}
+        request_headers = {
+            "Accept": "application/json",
+            "User-Agent": "CloudBox-Runtime-Eval/5.6.0",
+        }
         if encoded is not None:
             request_headers["Content-Type"] = "application/json"
         if headers:
@@ -187,30 +228,33 @@ def call_ollama(
     *,
     base_url: str,
     model: str,
-    instructions: str,
-    prompt: str,
-    schema: dict[str, Any],
+    system_prompt: str,
+    user_prompt: str,
+    schema: dict[str, Any] | None,
     timeout: float,
     max_retries: int,
     num_ctx: int,
+    max_output_tokens: int,
     temperature: float,
     seed: int,
-) -> tuple[dict[str, Any], str, dict[str, Any]]:
-    body = {
+) -> tuple[dict[str, Any] | str, str, dict[str, Any]]:
+    body: dict[str, Any] = {
         "model": model,
         "messages": [
-            {"role": "system", "content": instructions},
-            {"role": "user", "content": prompt},
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_prompt},
         ],
         "stream": False,
-        "format": schema,
         "think": False,
         "options": {
             "temperature": temperature,
             "num_ctx": num_ctx,
+            "num_predict": max_output_tokens,
             "seed": seed,
         },
     }
+    if schema is not None:
+        body["format"] = schema
     payload, _ = request_json(
         url=f"{normalize_ollama_url(base_url)}/api/chat",
         body=body,
@@ -221,7 +265,7 @@ def call_ollama(
     text = message.get("content")
     if not isinstance(text, str) or not text.strip():
         raise RuntimeError("Ollama response contains no message.content")
-    actual = parse_json_object(text)
+    actual: dict[str, Any] | str = parse_json_object(text) if schema is not None else text
     usage = {
         "prompt_tokens": payload.get("prompt_eval_count"),
         "output_tokens": payload.get("eval_count"),
@@ -256,29 +300,31 @@ def call_openai(
     *,
     api_key: str,
     model: str,
-    instructions: str,
-    prompt: str,
-    schema: dict[str, Any],
+    system_prompt: str,
+    user_prompt: str,
+    schema: dict[str, Any] | None,
     timeout: float,
     max_retries: int,
     max_output_tokens: int,
     client_request_id: str,
-) -> tuple[dict[str, Any], str, dict[str, Any]]:
-    format_config = {
-        "type": "json_schema",
-        "name": "cloudbox_routing_decision",
-        "description": "Smallest sufficient downstream CloudBox skill routing decision.",
-        "strict": True,
-        "schema": schema,
-    }
-    body = {
+) -> tuple[dict[str, Any] | str, str, dict[str, Any]]:
+    body: dict[str, Any] = {
         "model": model,
-        "instructions": instructions,
-        "input": prompt,
+        "instructions": system_prompt,
+        "input": user_prompt,
         "store": False,
         "max_output_tokens": max_output_tokens,
-        "text": {"format": format_config},
     }
+    if schema is not None:
+        body["text"] = {
+            "format": {
+                "type": "json_schema",
+                "name": "cloudbox_routing_decision",
+                "description": "Smallest sufficient downstream CloudBox skill routing decision.",
+                "strict": True,
+                "schema": schema,
+            }
+        }
     payload, headers = request_json(
         url=OPENAI_API_URL,
         body=body,
@@ -290,7 +336,7 @@ def call_openai(
         },
     )
     text = response_text(payload)
-    actual = parse_json_object(text)
+    actual: dict[str, Any] | str = parse_json_object(text) if schema is not None else text
     metadata = {
         "model_returned": payload.get("model"),
         "response_id": payload.get("id"),
@@ -301,58 +347,351 @@ def call_openai(
     return actual, text, metadata
 
 
-def main() -> int:
-    args = parse_args()
-    if args.repeat < 1:
-        raise SystemExit("--repeat must be at least 1")
-    if args.max_output_tokens < 1:
-        raise SystemExit("--max-output-tokens must be positive")
-    if args.num_ctx < 1024:
-        raise SystemExit("--num-ctx must be at least 1024")
+def call_model(
+    *,
+    args: argparse.Namespace,
+    api_key: str | None,
+    system_prompt: str,
+    user_prompt: str,
+    schema: dict[str, Any] | None,
+    max_output_tokens: int,
+    client_request_id: str,
+) -> tuple[dict[str, Any] | str, str, dict[str, Any]]:
+    if args.provider == "ollama":
+        return call_ollama(
+            base_url=args.ollama_url,
+            model=args.model,
+            system_prompt=system_prompt,
+            user_prompt=user_prompt,
+            schema=schema,
+            timeout=args.timeout,
+            max_retries=args.max_retries,
+            num_ctx=args.num_ctx,
+            max_output_tokens=max_output_tokens,
+            temperature=args.temperature,
+            seed=args.seed,
+        )
+    assert api_key is not None
+    return call_openai(
+        api_key=api_key,
+        model=args.model,
+        system_prompt=system_prompt,
+        user_prompt=user_prompt,
+        schema=schema,
+        timeout=args.timeout,
+        max_retries=args.max_retries,
+        max_output_tokens=max_output_tokens,
+        client_request_id=client_request_id,
+    )
 
-    manifest = load_manifest(MANIFEST)
-    suite = load_cases(args.cases)
-    schema = load_schema(args.schema)
-    version = VERSION_FILE.read_text(encoding="utf-8").strip()
+
+def _dedupe_strings(values: list[str]) -> list[str]:
+    seen: set[str] = set()
+    result: list[str] = []
+    for value in values:
+        if value in seen:
+            continue
+        seen.add(value)
+        result.append(value)
+    return result
+
+
+def deterministic_contract_repair(
+    decision: dict[str, Any], valid_skills: set[str]
+) -> tuple[dict[str, Any], list[str]]:
+    """Repair mechanical JSON relations without changing the model's routing classification."""
+
+    repaired = json.loads(json.dumps(decision, ensure_ascii=False))
+    changes: list[str] = []
+    if set(repaired) != {
+        "primary_skill",
+        "supporting_skills",
+        "rejected_skills",
+        "execution_order",
+        "reason",
+        "confidence",
+    }:
+        return repaired, changes
+
+    primary = repaired.get("primary_skill")
+    supporting = repaired.get("supporting_skills")
+    rejected = repaired.get("rejected_skills")
+    order = repaired.get("execution_order")
+    if primary is not None and not isinstance(primary, str):
+        return repaired, changes
+    if not all(
+        isinstance(value, list) and all(isinstance(item, str) for item in value)
+        for value in (supporting, rejected, order)
+    ):
+        return repaired, changes
+    all_ids = ([primary] if isinstance(primary, str) else []) + supporting + rejected + order
+    if any(item not in valid_skills for item in all_ids):
+        return repaired, changes
+
+    new_supporting = _dedupe_strings(supporting)
+    if isinstance(primary, str):
+        new_supporting = [item for item in new_supporting if item != primary]
+    new_supporting = [item for item in new_supporting if item != "using-cloudskill"]
+    if new_supporting != supporting:
+        changes.append("normalized supporting_skills duplicates/overlap/router inclusion")
+        repaired["supporting_skills"] = new_supporting
+
+    selected = ([primary] if isinstance(primary, str) else []) + new_supporting
+    selected_set = set(selected)
+    new_rejected = [item for item in _dedupe_strings(rejected) if item not in selected_set]
+    if new_rejected != rejected:
+        changes.append("removed selected-skill overlap from rejected_skills")
+        repaired["rejected_skills"] = new_rejected
+
+    if primary is None:
+        new_order: list[str] = []
+    else:
+        # Preserve any model-provided selected order, then append missing selected IDs.
+        new_order = [item for item in _dedupe_strings(order) if item in selected_set]
+        for item in selected:
+            if item not in new_order:
+                new_order.append(item)
+    if new_order != order:
+        changes.append("reconciled execution_order with the selected skill set")
+        repaired["execution_order"] = new_order
+
+    return repaired, changes
+
+
+def resolve_context_mode(args: argparse.Namespace) -> str:
+    if args.context_mode:
+        return args.context_mode
+    return "selected-skills" if args.eval_kind == "behavior" else "router"
+
+
+def validate_mode(args: argparse.Namespace, context_mode: str) -> None:
+    if args.eval_kind == "routing" and context_mode == "selected-skills":
+        raise SystemExit("--context-mode selected-skills requires --eval-kind behavior")
+    if args.eval_kind == "behavior" and context_mode != "selected-skills":
+        raise SystemExit("--eval-kind behavior requires --context-mode selected-skills")
+    if args.context_reserve_tokens < 1 or args.context_reserve_tokens >= args.num_ctx:
+        raise SystemExit("--context-reserve-tokens must be positive and smaller than --num-ctx")
+    if args.max_output_tokens < 1 or args.behavior_max_output_tokens < 1:
+        raise SystemExit("output token limits must be positive")
+    if args.provider == "ollama" and not args.dry_run:
+        omits_router = args.eval_kind == "routing" and context_mode in {"none", "manifest"}
+        if omits_router and not args.allow_context_baseline:
+            raise SystemExit(
+                "Refusing invalid Ollama score: using-cloudskill/SKILL.md is not loaded in "
+                f"--context-mode {context_mode}. Use --context-mode router, or add "
+                "--allow-context-baseline only for an explicitly labeled diagnostic comparison."
+            )
+
+
+def select_cases(suite: dict[str, Any], requested_ids: list[str]) -> list[dict[str, Any]]:
     cases = suite["cases"]
-    if args.case_id:
-        requested = set(args.case_id)
+    if requested_ids:
+        requested = set(requested_ids)
         cases = [case for case in cases if case["id"] in requested]
         missing = sorted(requested - {case["id"] for case in cases})
         if missing:
             raise SystemExit(f"unknown --case-id values: {missing}")
     if not cases:
         raise SystemExit("no cases selected")
+    return cases
 
-    output = args.output or default_output(args.provider, args.model)
-    instructions = build_instructions(manifest)
 
-    if args.dry_run:
-        plan = {
-            "cloudbox_version": version,
-            "suite": suite["suite"],
-            "provider": args.provider,
+def build_routing_bundle(
+    *,
+    args: argparse.Namespace,
+    manifest: dict[str, Any],
+    schema: dict[str, Any],
+    case: dict[str, Any],
+    context_mode: str,
+) -> dict[str, Any]:
+    routing_mode = "router" if context_mode == "selected-skills" else context_mode
+    bundle = build_routing_prompt(
+        manifest=manifest,
+        schema=schema,
+        case=case,
+        context_mode=routing_mode,
+        num_ctx=args.num_ctx,
+        reserve_output_tokens=max(args.context_reserve_tokens, args.max_output_tokens),
+        manifest_path=MANIFEST,
+        schema_path=args.schema,
+        cases_path=args.cases,
+    )
+    if routing_mode == "router":
+        assert_router_context(bundle)
+    return bundle
+
+
+def prompt_request_payload(
+    *,
+    args: argparse.Namespace,
+    system_prompt: str,
+    user_prompt: str,
+    schema: dict[str, Any] | None,
+    max_output_tokens: int,
+) -> dict[str, Any]:
+    if args.provider == "ollama":
+        payload: dict[str, Any] = {
             "model": args.model,
-            "case_count": len(cases),
-            "repeat": args.repeat,
-            "request_count": len(cases) * args.repeat,
-            "output": str(output),
-            "case_ids": [case["id"] for case in cases],
-            "ollama": {
-                "url": normalize_ollama_url(args.ollama_url),
-                "num_ctx": args.num_ctx,
+            "messages": [
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_prompt},
+            ],
+            "stream": False,
+            "think": False,
+            "options": {
                 "temperature": args.temperature,
+                "num_ctx": args.num_ctx,
+                "num_predict": max_output_tokens,
                 "seed": args.seed,
-                "thinking": False,
+            },
+        }
+        if schema is not None:
+            payload["format"] = schema
+        return payload
+    payload = {
+        "model": args.model,
+        "instructions": system_prompt,
+        "input": user_prompt,
+        "store": False,
+        "max_output_tokens": max_output_tokens,
+    }
+    if schema is not None:
+        payload["text"] = {"format": {"type": "json_schema", "schema": schema}}
+    return payload
+
+
+def write_prompt_file(directory: Path, name: str, payload: dict[str, Any]) -> str:
+    directory.mkdir(parents=True, exist_ok=True)
+    path = directory / f"{name}.prompt.json"
+    path.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    return str(path)
+
+
+def dry_run_plan(
+    *,
+    args: argparse.Namespace,
+    manifest: dict[str, Any],
+    schema: dict[str, Any],
+    suite: dict[str, Any],
+    cases: list[dict[str, Any]],
+    version: str,
+    context_mode: str,
+    output: Path,
+) -> dict[str, Any]:
+    case_plans = []
+    for case in cases:
+        bundle = build_routing_bundle(
+            args=args,
+            manifest=manifest,
+            schema=schema,
+            case=case,
+            context_mode=context_mode,
+        )
+        request_payload = prompt_request_payload(
+            args=args,
+            system_prompt=bundle["system_prompt"],
+            user_prompt=bundle["user_prompt"],
+            schema=schema,
+            max_output_tokens=args.max_output_tokens,
+        )
+        case_plan: dict[str, Any] = {
+            "case_id": case["id"],
+            "routing_context": bundle["context"],
+            "behavior_context": {
+                "status": "deferred until router returns actual primary/supporting skills"
             }
-            if args.provider == "ollama"
-            else None,
-            "openai": {"store": False, "structured_output": True}
-            if args.provider == "openai"
+            if args.eval_kind == "behavior"
             else None,
         }
-        print(json.dumps(plan, ensure_ascii=False, indent=2))
-        return 0
+        if args.show_prompt:
+            case_plan["routing_request"] = request_payload
+        if args.prompt_output:
+            case_plan["routing_prompt_file"] = write_prompt_file(
+                args.prompt_output,
+                f'{case["id"]}-routing-router' if context_mode == "selected-skills" else f'{case["id"]}-routing-{context_mode}',
+                request_payload,
+            )
+        case_plans.append(case_plan)
+    return {
+        "cloudbox_version": version,
+        "suite": suite["suite"],
+        "provider": args.provider,
+        "model": args.model,
+        "eval_kind": args.eval_kind,
+        "context_mode": context_mode,
+        "contract_repair": args.contract_repair,
+        "case_count": len(cases),
+        "repeat": args.repeat,
+        "request_count": len(cases) * args.repeat,
+        "output": str(output),
+        "case_ids": [case["id"] for case in cases],
+        "ollama": {
+            "url": normalize_ollama_url(args.ollama_url),
+            "num_ctx": args.num_ctx,
+            "temperature": args.temperature,
+            "seed": args.seed,
+            "thinking": False,
+        }
+        if args.provider == "ollama"
+        else None,
+        "openai": {"store": False, "structured_output": True}
+        if args.provider == "openai"
+        else None,
+        "cases": case_plans,
+    }
+
+
+def main() -> int:
+    args = parse_args()
+    if args.repeat < 1:
+        raise SystemExit("--repeat must be at least 1")
+    if args.num_ctx < 1024:
+        raise SystemExit("--num-ctx must be at least 1024")
+
+    context_mode = resolve_context_mode(args)
+    validate_mode(args, context_mode)
+
+    manifest = load_manifest(MANIFEST)
+    suite = load_cases(args.cases)
+    schema = load_schema(args.schema)
+    version = VERSION_FILE.read_text(encoding="utf-8").strip()
+    cases = select_cases(suite, args.case_id)
+    valid_skills = skill_ids(manifest)
+    output = args.output or default_output(args.provider, args.model, args.eval_kind, context_mode)
+
+    preflight_bundles: dict[str, dict[str, Any]] = {}
+    try:
+        for case in cases:
+            preflight_bundles[case["id"]] = build_routing_bundle(
+                args=args,
+                manifest=manifest,
+                schema=schema,
+                case=case,
+                context_mode=context_mode,
+            )
+    except ContextBudgetError as exc:
+        print(json.dumps({"error": str(exc), "context": exc.evidence}, ensure_ascii=False, indent=2))
+        return 2
+    except Exception as exc:
+        raise SystemExit(f"Runtime Eval context preflight failed: {exc}") from exc
+
+    try:
+        if args.dry_run:
+            plan = dry_run_plan(
+                args=args,
+                manifest=manifest,
+                schema=schema,
+                suite=suite,
+                cases=cases,
+                version=version,
+                context_mode=context_mode,
+                output=output,
+            )
+            print(json.dumps(plan, ensure_ascii=False, indent=2))
+            return 0
+    except ContextBudgetError as exc:
+        print(json.dumps({"error": str(exc), "context": exc.evidence}, ensure_ascii=False, indent=2))
+        return 2
 
     api_key: str | None = None
     if args.provider == "openai":
@@ -382,7 +721,7 @@ def main() -> int:
                 client_request_id = str(uuid.uuid4())
                 started = time.perf_counter()
                 record: dict[str, Any] = {
-                    "schema_version": 1,
+                    "schema_version": 3,
                     "run_id": str(uuid.uuid4()),
                     "timestamp_utc": now_utc(),
                     "cloudbox_version": version,
@@ -391,6 +730,9 @@ def main() -> int:
                     "attempt": attempt,
                     "provider": args.provider,
                     "model_requested": args.model,
+                    "eval_kind": args.eval_kind,
+                    "context_mode": context_mode,
+                    "diagnostic_baseline": context_mode in {"none", "manifest"},
                     "client_request_id": client_request_id,
                     "request_id": None,
                     "response_id": None,
@@ -398,40 +740,114 @@ def main() -> int:
                     "done_reason": None,
                     "latency_ms": None,
                     "usage": {},
+                    "context": None,
+                    "initial_actual": None,
                     "actual": None,
                     "raw_output": None,
+                    "contract_repair": {
+                        "mode": args.contract_repair,
+                        "applied": False,
+                        "changes": [],
+                        "initial_errors": [],
+                        "final_errors": [],
+                    },
+                    "behavior_output": None,
+                    "behavior_status": None,
+                    "behavior_usage": {},
                     "error": None,
                 }
                 try:
-                    if args.provider == "ollama":
-                        actual, raw_output, metadata = call_ollama(
-                            base_url=args.ollama_url,
-                            model=args.model,
-                            instructions=instructions,
-                            prompt=case["prompt"],
-                            schema=schema,
-                            timeout=args.timeout,
-                            max_retries=args.max_retries,
-                            num_ctx=args.num_ctx,
-                            temperature=args.temperature,
-                            seed=args.seed,
+                    routing_bundle = preflight_bundles[case["id"]]
+                    routing_context = routing_bundle["context"]
+                    actual_value, raw_output, metadata = call_model(
+                        args=args,
+                        api_key=api_key,
+                        system_prompt=routing_bundle["system_prompt"],
+                        user_prompt=routing_bundle["user_prompt"],
+                        schema=schema,
+                        max_output_tokens=args.max_output_tokens,
+                        client_request_id=client_request_id,
+                    )
+                    if not isinstance(actual_value, dict):
+                        raise RuntimeError("routing model did not return a JSON object")
+                    record["initial_actual"] = actual_value
+                    initial_errors = validate_decision_shape(actual_value, valid_skills)
+                    effective_value = actual_value
+                    repair_changes: list[str] = []
+                    if args.contract_repair == "deterministic" and initial_errors:
+                        effective_value, repair_changes = deterministic_contract_repair(
+                            actual_value, valid_skills
                         )
-                    else:
-                        assert api_key is not None
-                        actual, raw_output, metadata = call_openai(
-                            api_key=api_key,
-                            model=args.model,
-                            instructions=instructions,
-                            prompt=case["prompt"],
-                            schema=schema,
-                            timeout=args.timeout,
-                            max_retries=args.max_retries,
-                            max_output_tokens=args.max_output_tokens,
-                            client_request_id=client_request_id,
-                        )
-                    record["actual"] = actual
+                    final_errors = validate_decision_shape(effective_value, valid_skills)
+                    record["contract_repair"] = {
+                        "mode": args.contract_repair,
+                        "applied": bool(repair_changes),
+                        "changes": repair_changes,
+                        "initial_errors": initial_errors,
+                        "final_errors": final_errors,
+                    }
+                    record["actual"] = effective_value
                     record["raw_output"] = raw_output
                     record.update(metadata)
+                    if args.eval_kind == "routing":
+                        record["context"] = routing_context
+                    else:
+                        if final_errors:
+                            raise RuntimeError(
+                                "behavior stage refused because routing decision remains invalid after contract repair: "
+                                + "; ".join(final_errors)
+                            )
+                        behavior_bundle = build_selected_skills_prompt(
+                            manifest=manifest,
+                            case=case,
+                            decision=effective_value,
+                            num_ctx=args.num_ctx,
+                            reserve_output_tokens=max(args.context_reserve_tokens, args.behavior_max_output_tokens),
+                            include_declared_references=args.selected_reference_mode == "declared",
+                            cases_path=args.cases,
+                        )
+                        if behavior_bundle is None:
+                            record["behavior_status"] = "no-skill"
+                            record["context"] = {
+                                "mode": "selected-skills",
+                                "routing": routing_context,
+                                "behavior": {
+                                    "mode": "selected-skills",
+                                    "loaded_files": [],
+                                    "prompt_characters": 0,
+                                    "estimated_tokens": 0,
+                                    "truncated": False,
+                                    "status": "no downstream skill selected; second model call skipped",
+                                },
+                            }
+                        else:
+                            behavior_request_id = str(uuid.uuid4())
+                            behavior_value, behavior_raw, behavior_metadata = call_model(
+                                args=args,
+                                api_key=api_key,
+                                system_prompt=behavior_bundle["system_prompt"],
+                                user_prompt=behavior_bundle["user_prompt"],
+                                schema=None,
+                                max_output_tokens=args.behavior_max_output_tokens,
+                                client_request_id=behavior_request_id,
+                            )
+                            if not isinstance(behavior_value, str):
+                                raise RuntimeError("behavior model did not return text")
+                            record["behavior_output"] = behavior_raw
+                            record["behavior_status"] = "completed"
+                            record["behavior_usage"] = behavior_metadata.get("usage") or {}
+                            record["context"] = {
+                                "mode": "selected-skills",
+                                "routing": routing_context,
+                                "behavior": behavior_bundle["context"],
+                            }
+                except ContextBudgetError as exc:
+                    failures += 1
+                    record["context"] = exc.evidence
+                    record["error"] = {
+                        "type": type(exc).__name__,
+                        "message": str(exc),
+                    }
                 except Exception as exc:  # Keep one failed record per requested attempt.
                     failures += 1
                     record["error"] = {"type": type(exc).__name__, "message": str(exc)}
@@ -439,9 +855,10 @@ def main() -> int:
                 handle.write(json.dumps(record, ensure_ascii=False) + "\n")
                 handle.flush()
                 status = "ERROR" if record["error"] else "OK"
+                behavior = f' behavior={record["behavior_status"]}' if args.eval_kind == "behavior" else ""
                 print(
                     f'{case["id"]} attempt={attempt} provider={args.provider} '
-                    f'{status} latency_ms={record["latency_ms"]}',
+                    f'mode={context_mode} {status}{behavior} latency_ms={record["latency_ms"]}',
                     flush=True,
                 )
 
