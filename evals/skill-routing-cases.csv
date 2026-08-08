@@ -86,3 +86,6 @@ USE-05,請把「系統已完成更新」翻譯成英文。,using-cloudskill,fals
 USE-NEG-03,幫我把「系統更新之後目前都正常」寫得順一點。,using-cloudskill,false,Chinese rewriting must not trigger CloudBox routing
 USE-06,Design ownership shared-resource arbitration restart recovery reconnect and failover for a distributed equipment system where each chamber has an independent IPC.,using-cloudskill,true,English engineering task must route by decision boundary
 USE-07,Review 這段 C# callback ordering timeout late response 與 stale dictionary state 確認是否可能 duplicate send。,using-cloudskill,true,mixed-language engineering task must route to code review
+LRED-01,請在本機執行 CloudSkill Runtime Eval，自動檢查 Python、Ollama、context budget、Routing與Behavior評分，最後只產生一個可上傳的ZIP。,local-runtime-eval-debugging,true,one-command local Eval execution and review bundle
+LRED-02,Runtime Eval 顯示找不到Python、prompt overflow或report不存在，請依最早失敗stage診斷並保留可上傳證據。,local-runtime-eval-debugging,true,stage-first local Eval diagnosis
+LRED-NEG-01,設計分散式Chamber IPC的共用Robot仲裁、重啟復原與failover。,local-runtime-eval-debugging,false,product recovery belongs to equipment control architecture

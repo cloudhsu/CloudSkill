@@ -27,6 +27,8 @@ from run_runtime_evals import deterministic_contract_repair
 
 
 errors: list[str] = []
+ROUTING_VALIDATION_NUM_CTX = 8192
+BEHAVIOR_VALIDATION_NUM_CTX = 16384
 
 for path in (
     DEFAULT_CASES,
@@ -57,8 +59,10 @@ if manifest.get("version") != version:
 valid_skills = skill_ids(manifest)
 if len(valid_skills) != len(manifest.get("skills", [])):
     errors.append("SKILL_MANIFEST contains duplicate skill IDs")
-if len(valid_skills) != 17:
-    errors.append(f"Runtime Eval routing catalog must contain 17 skill IDs, found {len(valid_skills)}")
+required_runtime_skills = {ROUTER_SKILL, "local-runtime-eval-debugging"}
+missing_runtime_skills = sorted(required_runtime_skills - valid_skills)
+if missing_runtime_skills:
+    errors.append(f"Runtime Eval routing catalog is missing required skill IDs: {missing_runtime_skills}")
 
 required_schema_fields = {
     "primary_skill",
@@ -104,7 +108,8 @@ for case in cases:
         "execution_order",
         "allow_additional_supporting_skills",
     }
-    if set(expected) != required_expected:
+    optional_expected = {"allowed_execution_orders"}
+    if not required_expected.issubset(expected) or set(expected) - required_expected - optional_expected:
         errors.append(f"{cid}: expected fields differ from contract")
         continue
     all_expected_ids = []
@@ -119,6 +124,18 @@ for case in cases:
         if len(value) != len(set(value)):
             errors.append(f"{cid}: {name} contains duplicates")
         all_expected_ids.extend(value)
+    allowed_orders = expected.get("allowed_execution_orders", [expected["execution_order"]])
+    if not isinstance(allowed_orders, list) or not allowed_orders:
+        errors.append(f"{cid}: allowed_execution_orders must be a non-empty array when present")
+        allowed_orders = []
+    for index, candidate in enumerate(allowed_orders):
+        if not isinstance(candidate, list) or any(not isinstance(item, str) for item in candidate):
+            errors.append(f"{cid}: allowed_execution_orders[{index}] must be an array of strings")
+            continue
+        if len(candidate) != len(set(candidate)):
+            errors.append(f"{cid}: allowed_execution_orders[{index}] contains duplicates")
+        all_expected_ids.extend(candidate)
+
     unknown = sorted({item for item in all_expected_ids if item not in valid_skills})
     if unknown:
         errors.append(f"{cid}: unknown expected skill IDs: {unknown}")
@@ -127,6 +144,11 @@ for case in cases:
     selected = ([primary] if primary else []) + expected["required_supporting_skills"]
     if set(expected["execution_order"]) != set(selected):
         errors.append(f"{cid}: execution_order must contain expected selected skills exactly once")
+    for index, candidate in enumerate(allowed_orders):
+        if set(candidate) != set(selected):
+            errors.append(
+                f"{cid}: allowed_execution_orders[{index}] must contain expected selected skills exactly once"
+            )
     if primary is None and (expected["required_supporting_skills"] or expected["execution_order"]):
         errors.append(f"{cid}: no-skill case must not select supporting skills")
 
@@ -190,20 +212,20 @@ for cid in sorted(acceptance_ids):
                 schema=schema,
                 case=case,
                 context_mode=mode,
-                num_ctx=4096,
+                num_ctx=ROUTING_VALIDATION_NUM_CTX,
                 reserve_output_tokens=320,
                 manifest_path=MANIFEST,
                 schema_path=DEFAULT_SCHEMA,
                 cases_path=DEFAULT_CASES,
             )
         except Exception as exc:
-            errors.append(f"{cid}: failed to build {mode} prompt at num_ctx=4096: {exc}")
+            errors.append(f"{cid}: failed to build {mode} prompt at adaptive-safe routing context: {exc}")
             continue
         context = bundles[mode]["context"]
         if context["truncated"]:
             errors.append(f"{cid}: {mode} prompt unexpectedly truncated")
         if context["overflow_tokens"]:
-            errors.append(f"{cid}: {mode} prompt exceeds num_ctx=4096 input budget")
+            errors.append(f"{cid}: {mode} prompt exceeds the routing validation input budget")
         if case["prompt"] not in bundles[mode]["user_prompt"]:
             errors.append(f"{cid}: {mode} prompt omitted the current case")
         for skill_id in valid_skills:
@@ -259,7 +281,7 @@ if r07:
             manifest=manifest,
             case=r07,
             decision=decision,
-            num_ctx=4096,
+            num_ctx=BEHAVIOR_VALIDATION_NUM_CTX,
             reserve_output_tokens=320,
             include_declared_references=True,
             cases_path=DEFAULT_CASES,
@@ -278,7 +300,7 @@ if r07:
             if ROUTER_SKILL_PATH.relative_to(ROOT).as_posix() in loaded_paths:
                 errors.append("selected-skills prompt loaded using-cloudskill downstream")
             if behavior["context"]["overflow_tokens"]:
-                errors.append("selected-skills prompt exceeds num_ctx=8192 with declared references")
+                errors.append("selected-skills prompt exceeds the behavior validation context with declared references")
             declared = [item for item in behavior["context"]["loaded_files"] if item["role"] == "selected-skill-declared-reference"]
             if not declared:
                 errors.append("selected-skills prompt did not discover declared references")

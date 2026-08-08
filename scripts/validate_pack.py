@@ -4,6 +4,7 @@ import csv
 import json
 import re
 import sys
+import subprocess
 
 ROOT = Path(__file__).resolve().parents[1]
 SKILLS = ROOT / '.agents' / 'skills'
@@ -72,6 +73,7 @@ required = [
     'scripts/install.ps1', 'scripts/install.sh', 'scripts/audit_docs.py',
     'scripts/validate_descriptions.py', 'scripts/validate_behavior_evals.py',
     'scripts/smoke_install.py', 'scripts/run_all_checks.py', 'scripts/validate_plugins.py',
+    'cloudskill-eval', 'scripts/run_local_eval_review.py', 'scripts/validate_local_eval_debugging.py',
     '.codex-plugin/plugin.json', '.claude-plugin/plugin.json',
     '.agents/plugins/marketplace.json', '.claude-plugin/marketplace.json',
     'assets/cloudbox.ico', 'assets/cloudbox-icon.png', 'assets/cloudbox-logo.png',
@@ -94,9 +96,24 @@ for rel in required:
         errors.append(f'missing required file: {rel}')
 
 
+tracked_files = []
+try:
+    tracked_result = subprocess.run(
+        ["git", "ls-files", "-z"],
+        cwd=ROOT,
+        capture_output=True,
+        check=True,
+    )
+    tracked_files = [ROOT / item.decode("utf-8") for item in tracked_result.stdout.split(b"\0") if item]
+except (OSError, subprocess.CalledProcessError, UnicodeDecodeError) as exc:
+    errors.append(f"failed to inspect Git-tracked files: {exc}")
+
 private_tracked = [
-    path for path in ROOT.rglob('*')
-    if path.is_file() and ('.local' in path.parts or path.name == 'config.local.json' or path.suffix == '.jsonl' or path.name.endswith('.transcript.md'))
+    path for path in tracked_files
+    if '.local' in path.relative_to(ROOT).parts
+    or path.name == 'config.local.json'
+    or path.suffix == '.jsonl'
+    or path.name.endswith('.transcript.md')
 ]
 if private_tracked:
     errors.append('private local interaction data must not be tracked: ' + ', '.join(str(path.relative_to(ROOT)) for path in private_tracked))

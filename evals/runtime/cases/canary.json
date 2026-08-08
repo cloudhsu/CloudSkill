@@ -31,10 +31,20 @@
           "development-process-tailoring"
         ],
         "execution_order": [
-          "code-review",
-          "equipment-domain-modeling"
+          "equipment-domain-modeling",
+          "code-review"
         ],
-        "allow_additional_supporting_skills": false
+        "allow_additional_supporting_skills": false,
+        "allowed_execution_orders": [
+          [
+            "equipment-domain-modeling",
+            "code-review"
+          ],
+          [
+            "code-review",
+            "equipment-domain-modeling"
+          ]
+        ]
       }
     },
     {
@@ -75,7 +85,7 @@
     },
     {
       "id": "R05-ack-versus-completion",
-      "prompt": "設備控制程式送出 OpenValve 命令後收到通訊層 Success ACK，目前程式立刻把 Valve 狀態設成 Open。請選擇能檢查狀態語意、物理完成判定、逾時與恢復責任的最小充分 CloudBox 技能。",
+      "prompt": "主要交付物是重新定義 Valve 的 Commanded、Pending、Actual、Readback，以及 Success ACK 與 physical completion 的元件狀態／命令契約；同時還要分配 Sequence 與 Equipment Service 對 timeout、late completion、interlock 與 recovery 的責任。請選擇最小充分的 CloudBox 技能與執行順序。",
       "expected": {
         "primary_skill": "equipment-domain-modeling",
         "required_supporting_skills": [

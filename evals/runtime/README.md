@@ -302,3 +302,31 @@ mkdir -p .local/runtime-evals
 ```
 
 Archiving is preferable for this change because the earlier results provide the before/after baseline for Router retrieval, contract validity, and grading behavior.
+
+## Deterministic Behavior evidence grading
+
+Routing correctness and engineering-answer quality are graded separately.
+
+After running a Behavior Eval, grade explicit engineering evidence with:
+
+```bash
+python3 scripts/grade_behavior_evals.py \
+  --input .local/runtime-evals/qwen3-4b-r07-behavior.jsonl \
+  --output .local/runtime-evals/qwen3-4b-r07-behavior-summary.json \
+  --markdown-output .local/runtime-evals/qwen3-4b-r07-behavior-report.md \
+  --allow-failures
+```
+
+The Behavior score checks configured evidence groups and unsafe claims. It is deterministic and human-readable, but it is a coverage-oriented diagnostic rather than proof of complete semantic correctness.
+
+## One-command local review bundle
+
+From the repository root, run:
+
+```bash
+./cloudskill-eval
+```
+
+The command discovers Python 3.10+, verifies Ollama and the requested model, selects an adaptive routing context, runs the focused routing regression and R07 Behavior Eval, grades raw and refined behavior separately, and creates one ignored review ZIP. Upload the ZIP path printed as `UPLOAD THIS ZIP`; do not manually collect individual result files.
+
+A score gate failure still produces a successful diagnostic bundle. Infrastructure and packaging failures also leave a partial ZIP when possible.

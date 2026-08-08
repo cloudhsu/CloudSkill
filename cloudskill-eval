@@ -1,0 +1,54 @@
+#!/bin/sh
+# One-command CloudSkill local Runtime Eval review.
+
+ROOT="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd -P)"
+
+is_supported_python() {
+  candidate="$1"
+  [ -x "$candidate" ] || return 1
+  "$candidate" -c 'import sys; raise SystemExit(0 if sys.version_info >= (3, 10) else 1)' >/dev/null 2>&1
+}
+
+if [ -n "${CLOUDSKILL_PYTHON:-}" ] && is_supported_python "$CLOUDSKILL_PYTHON"; then
+  PYTHON="$CLOUDSKILL_PYTHON"
+else
+  PYTHON=""
+  for candidate in \
+    /usr/local/bin/python3.13 \
+    /usr/local/bin/python3.12 \
+    /usr/local/bin/python3.11 \
+    /usr/local/bin/python3.10 \
+    /opt/homebrew/bin/python3.13 \
+    /opt/homebrew/bin/python3.12 \
+    /opt/homebrew/bin/python3.11 \
+    /opt/homebrew/bin/python3.10 \
+    /Library/Frameworks/Python.framework/Versions/3.13/bin/python3 \
+    /Library/Frameworks/Python.framework/Versions/3.12/bin/python3 \
+    /Library/Frameworks/Python.framework/Versions/3.11/bin/python3 \
+    /Library/Frameworks/Python.framework/Versions/3.10/bin/python3
+  do
+    if is_supported_python "$candidate"; then
+      PYTHON="$candidate"
+      break
+    fi
+  done
+
+  if [ -z "$PYTHON" ]; then
+    for name in python3.13 python3.12 python3.11 python3.10 python3; do
+      candidate="$(command -v "$name" 2>/dev/null || true)"
+      if [ -n "$candidate" ] && is_supported_python "$candidate"; then
+        PYTHON="$candidate"
+        break
+      fi
+    done
+  fi
+fi
+
+if [ -z "$PYTHON" ]; then
+  echo "ERROR: Python 3.10 or newer was not found."
+  echo "Install Python 3.11, then run ./cloudskill-eval again."
+  exit 2
+fi
+
+cd "$ROOT" || exit 2
+exec "$PYTHON" "$ROOT/scripts/run_local_eval_review.py" "$@"

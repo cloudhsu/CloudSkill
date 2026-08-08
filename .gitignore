@@ -1,8 +1,12 @@
 # Private local interaction evidence and machine-specific configuration
 .local/
+__pycache__/
+.cloudskill-backup/
 .cloudskill/config.local.json
 *.session.jsonl
 *.transcript.md
+*.pyc
+
 
 # Runtime model Eval outputs and workflow artifacts
 evals/runtime/results/

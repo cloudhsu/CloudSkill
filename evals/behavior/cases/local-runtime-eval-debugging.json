@@ -1,0 +1,80 @@
+{
+  "skill": "local-runtime-eval-debugging",
+  "cases": [
+    {
+      "id": "LRED-BEH-001",
+      "skill": "local-runtime-eval-debugging",
+      "type": "recognition",
+      "prompt": "The local Runtime Eval says Python was not selected, but the user thinks Ollama may be broken. Diagnose the earliest failed stage.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "identifies Python discovery as the earliest failed stage",
+        "states that Ollama and model execution were not reached",
+        "asks for or uses the status and run log instead of guessing later-stage failures"
+      ],
+      "forbidden_behaviors": [
+        "blames routing quality before the model ran",
+        "asks the user to rerun unrelated graders"
+      ],
+      "required_artifacts": [
+        "stage diagnosis and concrete next action"
+      ],
+      "baseline_expected_failure": [
+        "agent diagnoses the last visible symptom instead of the earliest failed stage"
+      ],
+      "review_notes": "Stage ordering is the primary behavior under test."
+    },
+    {
+      "id": "LRED-BEH-002",
+      "skill": "local-runtime-eval-debugging",
+      "type": "application",
+      "prompt": "Replace a multi-command Ollama Runtime Eval procedure with one repository command that runs routing and behavior, grades both, and produces one ZIP I can upload for diagnosis.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "creates the run directory and latest pointer before validation",
+        "discovers Python and Ollama deterministically",
+        "selects routing context adaptively",
+        "preserves raw routing and behavior evidence",
+        "creates one stable review ZIP path even when a stage fails",
+        "distinguishes pipeline success from evaluation gate success"
+      ],
+      "forbidden_behaviors": [
+        "requires the user to manually chain runner grader open and zip commands",
+        "deletes previous results before confirming the new bundle",
+        "packages credentials or unrelated local history"
+      ],
+      "required_artifacts": [
+        "one-command invocation",
+        "single review ZIP",
+        "status and human-readable summary"
+      ],
+      "baseline_expected_failure": [
+        "agent provides several fragile commands and no failure bundle"
+      ],
+      "review_notes": "The result must remain useful on both PASS and FAIL paths."
+    },
+    {
+      "id": "LRED-BEH-003",
+      "skill": "local-runtime-eval-debugging",
+      "type": "counterexample",
+      "prompt": "Design shared robot arbitration and restart recovery for a distributed chamber-control system.",
+      "expected_routing": false,
+      "expected_alternative_skill": "equipment-control-architecture",
+      "required_behaviors": [
+        "routes the engineering design task to equipment control architecture",
+        "does not introduce local Eval tooling unless execution or diagnosis is requested"
+      ],
+      "forbidden_behaviors": [
+        "turns an architecture answer into an Eval harness procedure",
+        "asks for Python or Ollama diagnostics"
+      ],
+      "required_artifacts": [],
+      "baseline_expected_failure": [
+        "agent triggers on the word recovery and confuses product recovery with Eval debugging"
+      ],
+      "review_notes": "Runtime recovery in the product is not local Runtime Eval debugging."
+    }
+  ]
+}

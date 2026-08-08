@@ -80,6 +80,12 @@
       "file_count": 3
     },
     {
+      "name": "local-runtime-eval-debugging",
+      "description": "Use when executing, diagnosing, grading, or packaging local CloudSkill or CloudBox Runtime Evals, especially with Ollama, Python discovery, context-budget overflow, missing reports, routing versus behavior failures, or a request for one reproducible upload bundle.",
+      "path": ".agents/skills/local-runtime-eval-debugging/SKILL.md",
+      "file_count": 4
+    },
+    {
       "name": "safe-incremental-refactoring",
       "description": "Use when legacy or brownfield responsibilities must move without breaking behavior, public contracts, data, transaction order, release compatibility, recovery, or test seams.",
       "path": ".agents/skills/safe-incremental-refactoring/SKILL.md",

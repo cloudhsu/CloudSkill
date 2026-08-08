@@ -12,6 +12,8 @@ commands = [
     [sys.executable, 'scripts/validate_plugins.py'],
     [sys.executable, 'scripts/smoke_install.py'],
     [sys.executable, 'scripts/validate_runtime_evals.py'],
+    [sys.executable, 'scripts/validate_local_eval_debugging.py'],
+    [sys.executable, 'scripts/validate_behavior_runtime_evals.py'],
 ]
 
 for command in commands:

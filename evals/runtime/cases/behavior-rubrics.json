@@ -1,0 +1,268 @@
+{
+  "schema_version": 1,
+  "description": "Deterministic coverage-oriented Behavior Eval rubrics. These scores measure explicit engineering evidence in model output, not complete semantic correctness.",
+  "cases": {
+    "R07-english-equipment-architecture": {
+      "title": "Distributed equipment ownership and recovery model",
+      "passing_score": 75,
+      "criteria": [
+        {
+          "id": "state-authority",
+          "label": "Defines authoritative state ownership per chamber/IPC",
+          "weight": 12,
+          "all_groups": [
+            [
+              "authoritative state",
+              "state authority",
+              "owns? (?:the )?(?:chamber )?state"
+            ],
+            [
+              "\\bIPC\\b",
+              "chamber"
+            ],
+            [
+              "readback",
+              "actual state",
+              "physical state",
+              "sensor"
+            ]
+          ],
+          "max_span": 600
+        },
+        {
+          "id": "shared-resource-ownership",
+          "label": "Defines one owner and reservation/arbitration for shared transfer resources",
+          "weight": 12,
+          "all_groups": [
+            [
+              "shared (?:transfer )?resource",
+              "transfer robot",
+              "shared robot",
+              "resource manager"
+            ],
+            [
+              "reservation",
+              "arbitration",
+              "lease",
+              "single owner",
+              "resource owner"
+            ]
+          ],
+          "max_span": 600
+        },
+        {
+          "id": "reconnect-reconciliation",
+          "label": "Requires state reconciliation after reconnect before accepting new work",
+          "weight": 12,
+          "all_groups": [
+            [
+              "reconnect",
+              "reconnection"
+            ],
+            [
+              "reconcil",
+              "reconstruct",
+              "compare.*readback",
+              "refresh.*state",
+              "stale session"
+            ],
+            [
+              "before (?:accepting|issuing|new)",
+              "block.*command",
+              "do not accept",
+              "gate.*command",
+              "until.*reconcil"
+            ]
+          ],
+          "max_span": 800
+        },
+        {
+          "id": "restart-reconstruction",
+          "label": "Reconstructs physical/material state after restart",
+          "weight": 12,
+          "all_groups": [
+            [
+              "restart",
+              "reboot",
+              "process restart"
+            ],
+            [
+              "reconstruct",
+              "reconcil",
+              "query.*hardware",
+              "read back",
+              "readback.*before"
+            ],
+            [
+              "wafer (?:identity|location)",
+              "occupancy",
+              "physical state",
+              "sensor state"
+            ]
+          ],
+          "max_span": 600
+        },
+        {
+          "id": "failover-fencing",
+          "label": "Defines failover authority transfer and split-brain prevention",
+          "weight": 14,
+          "all_groups": [
+            [
+              "failover",
+              "takeover"
+            ],
+            [
+              "fenc",
+              "epoch",
+              "lease",
+              "single writer",
+              "single owner",
+              "authority transfer",
+              "split[- ]brain",
+              "quorum"
+            ],
+            [
+              "old owner",
+              "former owner",
+              "previous owner",
+              "stale owner",
+              "dual owner",
+              "duplicate owner",
+              "exclusive"
+            ]
+          ],
+          "max_span": 800
+        },
+        {
+          "id": "command-event-lifecycle",
+          "label": "Covers command identity, duplicate/idempotency and late completion",
+          "weight": 12,
+          "all_groups": [
+            [
+              "command",
+              "event"
+            ],
+            [
+              "correlation",
+              "request id",
+              "command id",
+              "attempt id",
+              "identity"
+            ],
+            [
+              "idempot",
+              "duplicate",
+              "late completion",
+              "late response",
+              "timeout"
+            ]
+          ],
+          "max_span": 800
+        },
+        {
+          "id": "interlock-readiness",
+          "label": "Revalidates interlocks/readiness using current evidence",
+          "weight": 10,
+          "all_groups": [
+            [
+              "interlock",
+              "readiness",
+              "safe(?:ty)? condition"
+            ],
+            [
+              "revalid",
+              "current readback",
+              "current state",
+              "sensor evidence",
+              "physical evidence"
+            ]
+          ],
+          "max_span": 600
+        },
+        {
+          "id": "verification-scenarios",
+          "label": "Defines concrete failure and recovery verification scenarios",
+          "weight": 8,
+          "all_groups": [
+            [
+              "(?:test|verify)\\s+(?:that|by|with|using|a|an|the).{0,250}(?:disconnect|restart|duplicate|out[- ]of[- ]order|owner loss|failover|late completion)",
+              "(?:inject|simulate)\\s+(?:a |an )?(?:disconnect|restart|duplicate|out[- ]of[- ]order|owner loss|failover|late completion)"
+            ]
+          ],
+          "max_span": 1000000
+        },
+        {
+          "id": "assumptions-unknowns",
+          "label": "Separates assumptions and unresolved design inputs",
+          "weight": 4,
+          "all_groups": [
+            [
+              "(?:^|\\n)\\s*#{0,3}\\s*(?:assumptions?|unknowns?|unresolved(?: inputs| questions)?)\\b",
+              "\\bassumption\\s*:",
+              "\\bunknown\\s*:",
+              "requires confirmation",
+              "not specified"
+            ]
+          ],
+          "max_span": 1000000
+        },
+        {
+          "id": "final-answer-discipline",
+          "label": "Returns a final deliverable without exposing internal planning or Eval machinery",
+          "weight": 4,
+          "all_groups": [
+            [
+              ".{500,}"
+            ]
+          ],
+          "must_not_match": [
+            "\\blet me (?:analyze|think|draft)",
+            "\\bi need to\\b",
+            "the router has already selected",
+            "\\bSKILL\\.md\\b",
+            "\\bcase id\\b",
+            "i'll focus on",
+            "let me structure"
+          ],
+          "max_span": 1000000
+        }
+      ],
+      "penalties": [
+        {
+          "id": "unsafe-generic-failover",
+          "label": "Claims simple backup switching without fencing/authority-transfer controls",
+          "points": 15,
+          "trigger_patterns": [
+            "switch to backup resources",
+            "switch(?:es)? to (?:a )?backup",
+            "automatically fail(?:s)? over"
+          ],
+          "unless_patterns": [
+            "fenc",
+            "epoch",
+            "single owner",
+            "authority transfer",
+            "split[- ]brain",
+            "quorum"
+          ]
+        },
+        {
+          "id": "ack-as-completion",
+          "label": "Treats transport acknowledgement as physical completion",
+          "points": 20,
+          "trigger_patterns": [
+            "ack(?:nowledgement)? (?:means|confirms|proves).*completed",
+            "success ack.*(?:open|completed|finished)"
+          ],
+          "unless_patterns": [
+            "does not",
+            "is not",
+            "not proof",
+            "readback",
+            "physical evidence"
+          ]
+        }
+      ]
+    }
+  }
+}

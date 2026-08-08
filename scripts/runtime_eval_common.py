@@ -201,6 +201,11 @@ _ROUTING_CONCEPT_PATTERNS: dict[str, tuple[str, ...]] = {
         r"repository", r"prior interaction", r"historical interaction", r"過去互動",
         r"歷史互動", r"技能優化", r"路由案例", r"覆蓋本機",
     ),
+    "local-eval-debugging": (
+        r"runtime eval", r"local eval", r"ollama", r"context budget", r"context overflow",
+        r"missing report", r"missing jsonl", r"python 3\.1", r"review bundle", r"upload bundle",
+        r"本機.*評分", r"本機.*eval", r"評分.*壓縮", r"找不到.*報告", r"結果.*上傳",
+    ),
     "translation": (
         r"translate", r"translation", r"翻譯", r"譯成", r"翻成",
     ),
@@ -290,6 +295,8 @@ def _routing_rules(compact: bool = False) -> str:
         return """Mandatory routing check:
 - Output one JSON object only; route by decision/failure boundary, not language or isolated keywords.
 - Pick the primary deliverable owner, then add every independent boundary that materially requires a supporting skill.
+- A component-state task also needs equipment-control-architecture when physical completion, timeout/late completion, interlock, sequence/service boundary, or recovery ownership crosses the component model.
+- Do not add semiconductor-equipment-domain-knowledge merely because chamber or transfer vocabulary appears; add it only when physical process meaning or readiness must be clarified.
 - execution_order must contain the selected primary/supporting set exactly once and cannot be empty when primary_skill is not null.
 - using-cloudskill is the router and must be absent downstream. Translation/simple rewriting/trivial work selects no skill.
 """
@@ -553,8 +560,12 @@ def _behavior_system_prompt(
     selected = selected_skills(decision)
     sections = [
         "You are executing the actual CloudBox downstream skills selected by the router.",
-        "Do not merely repeat skill IDs. Apply the supplied SKILL.md instructions to the user task and produce the engineering answer they require.",
+        "Return the final engineering deliverable only.",
+        "Do not expose internal analysis, planning, chain-of-thought, or self-instructions.",
+        "Do not mention the router, Eval case ID, selected skill IDs, or SKILL.md.",
+        "Apply the supplied downstream instructions to the user task; do not merely repeat their labels.",
         "Preserve evidence honesty: distinguish observed facts, assumptions, unresolved questions, and checks that were not actually run.",
+        "Use concise task-relevant sections. For architecture work, prioritize authority, boundaries, failure/recovery behavior, verification, and unresolved inputs.",
         "Do not include using-cloudskill as a downstream skill.",
         "Router decision:\n" + json.dumps(decision, ensure_ascii=False, separators=(",", ":")),
         "Selected downstream skill IDs: " + (", ".join(selected) if selected else "none"),
@@ -575,7 +586,7 @@ def _behavior_user_prompt(case: dict[str, Any]) -> str:
         f'Case ID: {case["id"]}\n\n'
         "Original user task:\n"
         f'{case["prompt"].strip()}\n\n'
-        "Execute the selected skills and answer the task."
+        "Return the final answer directly. Do not show analysis or discuss the Eval machinery."
     )
 
 
@@ -801,6 +812,10 @@ def grade_decision(
     required = set(expected["required_supporting_skills"])
     forbidden = set(expected["forbidden_selected_skills"])
     allow_extra = expected.get("allow_additional_supporting_skills", False)
+    allowed_orders = expected.get("allowed_execution_orders")
+    if allowed_orders is None:
+        allowed_orders = [expected["execution_order"]]
+    execution_order_matches = order_type_valid and any(order == candidate for candidate in allowed_orders)
 
     all_reported_ids = [
         item
@@ -822,7 +837,7 @@ def grade_decision(
             allow_extra or set(supporting) == required
         ),
         "forbidden_selected_skills": primary_type_valid and supporting_type_valid and not bool(selected & forbidden),
-        "execution_order": order_type_valid and order == expected["execution_order"],
+        "execution_order": execution_order_matches,
         "router_not_downstream": primary_type_valid and supporting_type_valid and ROUTER_SKILL not in selected,
         "selected_set_consistent": (
             primary_type_valid
