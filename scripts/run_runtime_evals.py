@@ -39,6 +39,8 @@ from runtime_eval_common import (
 )
 
 from codex_eval_adapter import call_codex_cli, codex_preflight
+from claude_eval_adapter import call_claude_cli, claude_preflight
+from providers_contract import PROVIDER_IDS
 
 OPENAI_API_URL = "https://api.openai.com/v1/responses"
 DEFAULT_OLLAMA_URL = "http://127.0.0.1:11434"
@@ -50,9 +52,12 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--provider",
-        choices=("ollama", "openai", "codex"),
+        choices=(*PROVIDER_IDS, "openai"),
         default="ollama",
-        help="Model runtime. Ollama is local and requires no API key.",
+        help=(
+            "Model runtime: ollama (local, no API key), codex (Codex CLI/GPT), "
+            "claude (Claude Code CLI), or the legacy direct-API openai path."
+        ),
     )
     parser.add_argument(
         "--model",
@@ -63,6 +68,14 @@ def parse_args() -> argparse.Namespace:
         "--codex-model",
         default="",
         help="Optional Codex CLI model override. Empty uses the authenticated Codex default.",
+    )
+    parser.add_argument(
+        "--claude-model",
+        default="",
+        help=(
+            "Optional Claude Code CLI model override (alias like 'opus'/'sonnet' or a full "
+            "model name). Empty uses the CLI's configured default."
+        ),
     )
     parser.add_argument(
         "--eval-kind",
@@ -370,6 +383,15 @@ def call_openai(
     return actual, text, metadata
 
 
+def resolve_model_label(args: argparse.Namespace) -> str:
+    """Return the model identifier to record/label output with, per provider."""
+    if args.provider == "codex":
+        return args.codex_model or "codex-default"
+    if args.provider == "claude":
+        return args.claude_model or "claude-default"
+    return args.model
+
+
 def call_model(
     *,
     args: argparse.Namespace,
@@ -404,18 +426,30 @@ def call_model(
         )
         actual: dict[str, Any] | str = parse_json_object(text) if schema is not None else text
         return actual, text, metadata
-    assert api_key is not None
-    return call_openai(
-        api_key=api_key,
-        model=args.model,
-        system_prompt=system_prompt,
-        user_prompt=user_prompt,
-        schema=schema,
-        timeout=args.timeout,
-        max_retries=args.max_retries,
-        max_output_tokens=max_output_tokens,
-        client_request_id=client_request_id,
-    )
+    if args.provider == "claude":
+        text, metadata = call_claude_cli(
+            model=args.claude_model or None,
+            system_prompt=system_prompt,
+            user_prompt=user_prompt,
+            schema=schema,
+            timeout=args.timeout,
+        )
+        actual = parse_json_object(text) if schema is not None else text
+        return actual, text, metadata
+    if args.provider == "openai":
+        assert api_key is not None
+        return call_openai(
+            api_key=api_key,
+            model=args.model,
+            system_prompt=system_prompt,
+            user_prompt=user_prompt,
+            schema=schema,
+            timeout=args.timeout,
+            max_retries=args.max_retries,
+            max_output_tokens=max_output_tokens,
+            client_request_id=client_request_id,
+        )
+    raise SystemExit(f"unsupported --provider: {args.provider}")
 
 
 def _dedupe_strings(values: list[str]) -> list[str]:
@@ -593,6 +627,18 @@ def prompt_request_payload(
             "output_schema": schema,
             "max_output_tokens_advisory": max_output_tokens,
         }
+    if args.provider == "claude":
+        return {
+            "provider": "claude",
+            "model": args.claude_model or "claude-default",
+            "safe_mode": True,
+            "tools_disabled": True,
+            "no_session_persistence": True,
+            "system_prompt": system_prompt,
+            "user_prompt": user_prompt,
+            "json_schema": schema,
+            "max_output_tokens_advisory": max_output_tokens,
+        }
     payload = {
         "model": args.model,
         "instructions": system_prompt,
@@ -661,7 +707,7 @@ def dry_run_plan(
         "cloudbox_version": version,
         "suite": suite["suite"],
         "provider": args.provider,
-        "model": args.codex_model or "codex-default" if args.provider == "codex" else args.model,
+        "model": resolve_model_label(args),
         "eval_kind": args.eval_kind,
         "context_mode": context_mode,
         "contract_repair": args.contract_repair,
@@ -691,6 +737,15 @@ def dry_run_plan(
         }
         if args.provider == "codex"
         else None,
+        "claude": {
+            "model": args.claude_model or "claude-default",
+            "safe_mode": True,
+            "tools_disabled": True,
+            "no_session_persistence": True,
+            "structured_output": True,
+        }
+        if args.provider == "claude"
+        else None,
         "cases": case_plans,
     }
 
@@ -711,7 +766,7 @@ def main() -> int:
     version = VERSION_FILE.read_text(encoding="utf-8").strip()
     cases = select_cases(suite, args.case_id)
     valid_skills = skill_ids(manifest)
-    model_label = args.codex_model or "codex-default" if args.provider == "codex" else args.model
+    model_label = resolve_model_label(args)
     output = args.output or default_output(args.provider, model_label, args.eval_kind, context_mode)
 
     preflight_bundles: dict[str, dict[str, Any]] = {}
@@ -752,11 +807,17 @@ def main() -> int:
     if args.provider == "openai":
         api_key = os.environ.get("OPENAI_API_KEY")
         if not api_key:
-            raise SystemExit("OPENAI_API_KEY is not set; use --provider ollama or codex for local execution")
+            raise SystemExit("OPENAI_API_KEY is not set; use --provider ollama, codex, or claude for execution without a raw API key")
     elif args.provider == "codex":
         if not args.skip_model_check:
             try:
                 codex_preflight(timeout=min(args.timeout, 30.0))
+            except Exception as exc:
+                raise SystemExit(str(exc)) from exc
+    elif args.provider == "claude":
+        if not args.skip_model_check:
+            try:
+                claude_preflight(timeout=min(args.timeout, 30.0))
             except Exception as exc:
                 raise SystemExit(str(exc)) from exc
     elif not args.skip_model_check:
@@ -790,7 +851,7 @@ def main() -> int:
                     "case_id": case["id"],
                     "attempt": attempt,
                     "provider": args.provider,
-                    "model_requested": args.codex_model or "codex-default" if args.provider == "codex" else args.model,
+                    "model_requested": resolve_model_label(args),
                     "eval_kind": args.eval_kind,
                     "context_mode": context_mode,
                     "diagnostic_baseline": context_mode in {"none", "manifest"},

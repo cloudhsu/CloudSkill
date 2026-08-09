@@ -76,8 +76,44 @@ A stage change is an evidence decision, not a Markdown edit. See `.agents/skills
 ## Provider roles
 
 - Ollama `qwen3:4b` tests the local small-model path and is expected to expose prompt and boundary weaknesses.
-- Codex CLI provides a higher-capability comparison using the same cases, prompts, schemas, and graders.
-- Results remain provider-specific. A stronger provider must not hide a weak local path, and a weak local model must not automatically invalidate deterministic infrastructure work.
+- Codex CLI provides a higher-capability GPT comparison using the same cases, prompts, schemas, and graders.
+- Claude Code CLI (`claude -p`, headless/non-interactive) provides a higher-capability Claude comparison through the same harness, isolated with `--safe-mode --tools "" --no-session-persistence --strict-mcp-config` so it sees only the assembled Eval prompt, not this repository's own CloudBox skills.
+- Results remain provider-specific. A stronger provider must not hide a weak local path, a weak local model must not automatically invalidate deterministic infrastructure work, and Ollama/Codex/Claude scores are never averaged together.
+
+## Provider registry
+
+The authoritative Runtime Eval provider list is:
+
+```text
+evals/runtime/contracts/providers.json
+```
+
+`scripts/providers_contract.py` is the only executable adapter for that data
+(`PROVIDER_IDS`, `LOCAL_PROVIDER_IDS`, `HOSTED_AGENT_PROVIDER_IDS`,
+`get_provider`, `refinement_default`). `scripts/run_runtime_evals.py`,
+`scripts/run_local_eval_review.py`, and `cloudskill-resume` must read the
+provider ID set from this contract rather than hand-copying a literal tuple or
+case statement. `scripts/validate_providers_contract.py` checks the contract
+shape, that every registered hosted-agent adapter exports the expected
+`<name>_preflight`/`call_<name>_cli` functions, that every registered local
+adapter's `call_site` function exists, and that every required consumer
+(including the shell-based `cloudskill-resume`, checked by literal scan since
+shell cannot import Python) actually reaches every registered provider ID.
+
+Two provider families exist:
+
+- `local` — a locally hosted model server called directly over HTTP (today:
+  Ollama's `/api/chat`). Adding a second local backend means adding
+  `scripts/local_providers/<name>_adapter.py` with the same call signature as
+  `call_ollama`, and registering it with `"family": "local"`.
+- `hosted-agent` — an authenticated CLI tool invoked non-interactively in an
+  isolated, read-only, no-tool-access context (Codex CLI, Claude Code CLI).
+  Adding a new one means adding `scripts/<name>_eval_adapter.py` mirroring
+  `scripts/codex_eval_adapter.py` or `scripts/claude_eval_adapter.py`, and
+  registering it with `"family": "hosted-agent"`.
+
+Adding either kind of provider always ends with running
+`scripts/validate_providers_contract.py` before commit.
 
 ## Behavior output contract authority
 

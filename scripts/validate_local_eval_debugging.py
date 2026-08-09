@@ -18,8 +18,13 @@ errors: list[str] = []
 required = [
     ROOT / "cloudskill-eval",
     ROOT / "cloudskill-eval-codex",
+    ROOT / "cloudskill-eval-claude",
     SCRIPTS / "codex_eval_adapter.py",
+    SCRIPTS / "claude_eval_adapter.py",
+    SCRIPTS / "providers_contract.py",
     SCRIPTS / "validate_codex_eval_path.py",
+    SCRIPTS / "validate_providers_contract.py",
+    ROOT / "evals" / "runtime" / "contracts" / "providers.json",
     SCRIPTS / "run_local_eval_review.py",
     SCRIPTS / "behavior_output_contract.py",
     SCRIPTS / "validate_behavior_contract.py",
@@ -107,6 +112,24 @@ if codex_launcher.is_file():
                 f"{marker}"
             )
 
+claude_launcher = ROOT / "cloudskill-eval-claude"
+if claude_launcher.is_file():
+    mode = claude_launcher.stat().st_mode
+    if not (mode & stat.S_IXUSR):
+        errors.append("cloudskill-eval-claude is not executable")
+    text = claude_launcher.read_text(encoding="utf-8")
+    for marker in (
+        "--provider claude",
+        "--repeat 1",
+        "--no-refine",
+        "claude auth login",
+    ):
+        if marker not in text:
+            errors.append(
+                "cloudskill-eval-claude missing operational marker: "
+                f"{marker}"
+            )
+
 runner = SCRIPTS / "run_local_eval_review.py"
 if runner.is_file():
     text = runner.read_text(encoding="utf-8")
@@ -119,8 +142,9 @@ if runner.is_file():
         "source-snapshot",
         "pipeline_status",
         "evaluation_gate",
-        'choices=("ollama", "codex")',
+        "from providers_contract import",
         "codex_preflight",
+        "claude_preflight",
     ):
         if marker not in text:
             errors.append(

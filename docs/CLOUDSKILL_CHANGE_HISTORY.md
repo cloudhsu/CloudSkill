@@ -2,6 +2,89 @@
 
 This document records the evolution rationale and evidence chain for work that may span multiple conversations. Git commits and tags remain the authoritative source history.
 
+## 2026-08-09 — Claude Code CLI Runtime Eval provider + provider registry
+
+Requested by the user: run Codex-provider Evals with GPT (already true, via
+Codex CLI), run a new Claude provider with Claude models, keep local at
+Ollama for now, and make the local family easy to extend later.
+
+Change:
+
+Provider registry (mirrors the Behavior-output-contract precedent: one
+authoritative JSON contract + one executable adapter + one drift Validator):
+
+- Add `evals/runtime/contracts/providers.json` declaring `ollama` (family
+  `local`), `codex` (family `hosted-agent`, GPT via Codex CLI), and `claude`
+  (family `hosted-agent`, Claude via Claude Code CLI), plus
+  `required_consumer_paths` and an extension guide for adding a fourth
+  provider later.
+- Add `scripts/providers_contract.py` (`PROVIDER_IDS`,
+  `LOCAL_PROVIDER_IDS`, `HOSTED_AGENT_PROVIDER_IDS`, `get_provider`,
+  `refinement_default`).
+- Add `scripts/validate_providers_contract.py`: validates contract shape,
+  that every hosted-agent adapter exports `<name>_preflight`/
+  `call_<name>_cli`, that every local adapter's declared `call_site` function
+  exists, that every Python consumer imports `providers_contract`, and that
+  the shell-based `cloudskill-resume` (which cannot `import` Python) contains
+  every registered provider ID literal.
+
+Claude Code CLI adapter (mirrors `scripts/codex_eval_adapter.py`):
+
+- Add `scripts/claude_eval_adapter.py`: `claude_preflight()` (`claude
+  --version` + `claude auth status`) and `call_claude_cli()`, which runs
+  `claude -p --output-format json --safe-mode --tools "" --no-session-persistence
+  --strict-mcp-config --system-prompt <system> [--model <alias>]
+  [--json-schema <schema>]` from an isolated empty temporary directory, piping
+  the user prompt over stdin. `--safe-mode` and `--tools ""` were confirmed to
+  exist via `claude --help` before writing this adapter (not guessed).
+- Add `cloudskill-eval-claude`, a quota-conscious `--repeat 1 --no-refine`
+  smoke wrapper mirroring `cloudskill-eval-codex`.
+- Wire `--provider claude` / `--claude-model` through
+  `scripts/run_runtime_evals.py` (`call_model`, `resolve_model_label`,
+  `prompt_request_payload`, `dry_run_plan`, preflight dispatch),
+  `scripts/run_local_eval_review.py` (`requested_model`,
+  `runtime_provider_args`, environment preflight, refinement eligibility now
+  driven by `refinement_default(args.provider)` instead of a hardcoded
+  `== "ollama"` check), and `cloudskill-resume` (`--provider`/`--claude`
+  flag, dispatch to `./cloudskill-eval-claude`).
+- Extend `scripts/validate_local_eval_debugging.py` and
+  `scripts/validate_pack.py` to also require the new Claude files; fix two
+  markers in `scripts/validate_codex_eval_path.py` and
+  `scripts/validate_local_eval_debugging.py` that hard-coded the pre-refactor
+  literal `choices=("ollama", "codex")` / `args.provider == "ollama" and not
+  args.no_refine` and would otherwise have gone stale silently.
+- Extend `scripts/validate_evolution_handoff.py` and
+  `CLOUDSKILL_AGENT_HANDOFF.md` to require/document a
+  `./cloudskill-resume --provider claude --force-eval` continuation command.
+
+Validation performed:
+
+- `python3 -m py_compile` on every new/changed module.
+- `--dry-run` smoke test of `scripts/run_runtime_evals.py` for all three
+  providers (`ollama`, `codex`, `claude`) confirming correct dispatch and no
+  stray output files.
+- Confirmed the two stale-marker Validators genuinely failed (RED) before the
+  fix and passed (GREEN) after.
+- `python3 scripts/run_all_checks.py` passes in full.
+
+Explicitly NOT done:
+
+- No live `claude`, `codex`, or `ollama` model call was made. The
+  `--output-format json` result-field parsing in `claude_eval_adapter.py` is
+  grounded in `claude --help` and documented CLI behavior, not in an actual
+  executed response — `./cloudskill-eval-claude` is the first point that gets
+  confirmed against a real process, and it spends Claude usage/quota, so it is
+  deferred until explicitly requested.
+
+Unresolved:
+
+- Run `./cloudskill-eval-claude` (one repeat, no refine) to confirm the JSON
+  result-shape parsing against a live Claude Code CLI process.
+- `ollama` stayed a local, inline `call_ollama()` in `run_runtime_evals.py`
+  rather than moving to `scripts/local_providers/ollama_adapter.py` — the
+  registry documents the extension shape but does not force a working path to
+  move file location without a second local backend actually needing it yet.
+
 ## 2026-08-09 — R07 Behavior grader precision hotfix (assumptions/restart false negatives)
 
 Evidence: `CloudSkill-local-eval-review-local-review-20260809-113507.zip`.

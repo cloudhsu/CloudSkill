@@ -174,6 +174,20 @@ Use the Codex path when a higher-capability authenticated Codex baseline is need
 - A Codex failure caused by authentication or usage limits is an infrastructure/availability result, not a Skill-quality failure.
 - Never package `~/.codex/auth.json`, access tokens, account identifiers, or raw authentication output.
 
+## Claude Code CLI evaluation path
+
+Use the Claude path when a higher-capability authenticated Claude baseline is needed alongside the local Ollama baseline and/or the Codex comparison.
+
+- Run `claude auth status` before a long test; use `claude auth login` when no valid session exists.
+- Use `./cloudskill-eval-claude` for the quota-conscious one-repeat smoke path.
+- Use `./cloudskill-eval-claude --repeat 3` only after the smoke path completes and the expected usage budget is available.
+- Execute Claude Code non-interactively through `claude -p --output-format json` with `--safe-mode` (no CLAUDE.md/Skills/plugins/hooks/MCP auto-loading), `--tools ""` (no tool access), and `--no-session-persistence`.
+- Run the model from an isolated empty temporary directory so it cannot silently load extra CloudSkill source beyond the assembled Eval prompt.
+- Keep Claude, Codex, and Ollama results as separate review bundles. Do not average them into one provider-independent score.
+- A Claude failure caused by authentication or usage limits is an infrastructure/availability result, not a Skill-quality failure.
+- Never package Claude Code credential files, access tokens, account identifiers, or raw authentication output.
+- `scripts/claude_eval_adapter.py`'s `--output-format json` result-field parsing was written from CLI documentation and `--help` output but has not been confirmed against a live process; treat its first real run as the point that assumption is actually verified, not the point it was written.
+
 ## Required output
 
 1. Exact one-command invocation

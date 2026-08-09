@@ -60,6 +60,7 @@ if handoff.is_file():
     for command in (
         "./cloudskill-resume --provider ollama --force-eval",
         "./cloudskill-resume --provider codex --force-eval",
+        "./cloudskill-resume --provider claude --force-eval",
     ):
         if command not in text:
             errors.append(f"handoff missing continuation command: {command}")

@@ -98,13 +98,19 @@ local_runner = SCRIPTS / "run_local_eval_review.py"
 if local_runner.is_file():
     text = local_runner.read_text(encoding="utf-8")
     for marker in (
-        'choices=("ollama", "codex")',
+        "from providers_contract import",
+        "PROVIDER_IDS",
         "runtime_provider_args",
-        'args.provider == "ollama" and not args.no_refine',
+        "refinement_default(args.provider)",
         "codex_preflight",
     ):
         if marker not in text:
             errors.append(f"run_local_eval_review.py missing Codex marker: {marker}")
+    if 'choices=("ollama", "codex")' in text:
+        errors.append(
+            "run_local_eval_review.py: --provider choices must come from the shared "
+            "providers_contract registry, not a hand-copied tuple"
+        )
 
 if str(SCRIPTS) not in sys.path:
     sys.path.insert(0, str(SCRIPTS))

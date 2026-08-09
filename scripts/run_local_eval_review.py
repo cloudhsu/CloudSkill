@@ -29,6 +29,8 @@ from behavior_output_contract import (
 )
 
 from codex_eval_adapter import codex_preflight
+from claude_eval_adapter import claude_preflight
+from providers_contract import PROVIDER_IDS, refinement_default
 
 ROOT = Path(__file__).resolve().parents[1]
 RUNTIME_ROOT = ROOT / ".local" / "runtime-evals"
@@ -59,12 +61,17 @@ def parse_args() -> argparse.Namespace:
             "refine behavior output, and produce one uploadable review ZIP."
         )
     )
-    parser.add_argument("--provider", choices=("ollama", "codex"), default="ollama")
+    parser.add_argument("--provider", choices=PROVIDER_IDS, default="ollama")
     parser.add_argument("--model", default=DEFAULT_MODEL, help="Ollama model name.")
     parser.add_argument(
         "--codex-model",
         default="",
         help="Optional Codex CLI model override. Empty uses the authenticated Codex default.",
+    )
+    parser.add_argument(
+        "--claude-model",
+        default="",
+        help="Optional Claude Code CLI model override. Empty uses the CLI's configured default.",
     )
     parser.add_argument("--repeat", type=int, default=3)
     parser.add_argument("--full-routing", action="store_true", help="Run all Canary routing cases instead of R02/R05A/R05B/R05C/R07.")
@@ -82,6 +89,8 @@ def parse_args() -> argparse.Namespace:
 def requested_model(args: argparse.Namespace) -> str:
     if args.provider == "codex":
         return args.codex_model or "codex-default"
+    if args.provider == "claude":
+        return args.claude_model or "claude-default"
     return args.model
 
 
@@ -90,6 +99,9 @@ def runtime_provider_args(args: argparse.Namespace) -> list[str]:
     if args.provider == "codex":
         if args.codex_model:
             values.extend(["--codex-model", args.codex_model])
+    elif args.provider == "claude":
+        if args.claude_model:
+            values.extend(["--claude-model", args.claude_model])
     else:
         values.extend(["--model", args.model])
     return values
@@ -335,8 +347,12 @@ class ReviewRun:
             "SKILL_MANIFEST.json",
             "cloudskill-eval",
             "cloudskill-eval-codex",
+            "cloudskill-eval-claude",
             "scripts/run_local_eval_review.py",
             "scripts/codex_eval_adapter.py",
+            "scripts/claude_eval_adapter.py",
+            "scripts/providers_contract.py",
+            "evals/runtime/contracts/providers.json",
             "scripts/runtime_eval_common.py",
             "scripts/run_runtime_evals.py",
             "scripts/grade_runtime_evals.py",
@@ -352,6 +368,7 @@ class ReviewRun:
             ".agents/skills/local-runtime-eval-debugging/SKILL.md",
             ".agents/skills/local-runtime-eval-debugging/references/local-eval-troubleshooting.md",
             ".agents/skills/local-runtime-eval-debugging/references/codex-runtime-eval.md",
+            "scripts/validate_providers_contract.py",
             ".agents/skills/runtime-evaluation-engineering/SKILL.md",
             ".agents/skills/runtime-evaluation-engineering/references/evaluation-failure-taxonomy.md",
             ".agents/skills/runtime-evaluation-engineering/references/case-and-grader-design.md",
@@ -719,6 +736,8 @@ def run_pipeline(args: argparse.Namespace) -> int:
         required = [
             ROOT / "cloudskill-eval-codex",
             ROOT / "scripts" / "codex_eval_adapter.py",
+            ROOT / "cloudskill-eval-claude",
+            ROOT / "scripts" / "claude_eval_adapter.py",
             ROOT / "scripts" / "run_runtime_evals.py",
             ROOT / "scripts" / "grade_runtime_evals.py",
             ROOT / "scripts" / "grade_behavior_evals.py",
@@ -741,8 +760,12 @@ def run_pipeline(args: argparse.Namespace) -> int:
             if args.model not in names:
                 raise PipelineFailure(f"Ollama model {args.model!r} not installed; available={sorted(names)}")
             runtime_info = {"ollama_url": args.ollama_url, "tags": tags}
-        else:
+        elif args.provider == "codex":
             runtime_info = {"codex": codex_preflight(timeout=30)}
+        elif args.provider == "claude":
+            runtime_info = {"claude": claude_preflight(timeout=30)}
+        else:
+            raise PipelineFailure(f"unsupported --provider: {args.provider}")
         collect_environment(run, runtime_info)
 
         run.set_stage("syntax-check")
@@ -753,6 +776,8 @@ def run_pipeline(args: argparse.Namespace) -> int:
                 "py_compile",
                 "scripts/run_local_eval_review.py",
                 "scripts/codex_eval_adapter.py",
+                "scripts/claude_eval_adapter.py",
+                "scripts/providers_contract.py",
                 "scripts/runtime_eval_common.py",
                 "scripts/run_runtime_evals.py",
                 "scripts/grade_runtime_evals.py",
@@ -881,7 +906,11 @@ def run_pipeline(args: argparse.Namespace) -> int:
         raw_summary = safe_json(behavior_raw_summary_path)
         final_behavior_summary = raw_summary
 
-        if args.provider == "ollama" and not args.no_refine and behavior_needs_refinement(behavior_raw_jsonl, raw_summary):
+        if (
+            refinement_default(args.provider) == "auto"
+            and not args.no_refine
+            and behavior_needs_refinement(behavior_raw_jsonl, raw_summary)
+        ):
             run.set_stage("behavior-refinement")
             refined_jsonl = run.run_dir / "behavior-refined.jsonl"
             refined_summary_path = run.run_dir / "behavior-refined-summary.json"

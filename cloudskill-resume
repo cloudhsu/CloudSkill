@@ -22,8 +22,9 @@ Options:
   --status       Show the current branch, Eval, ZIP, PR, and stash state only.
   --force-eval   Run a new local Runtime Eval even when a current ZIP is reusable.
   --skip-eval    Continue validation/commit/push/PR without running a model.
-  --provider NAME Select local Eval provider: ollama or codex. Default: ollama.
+  --provider NAME Select local Eval provider: ollama, codex, or claude. Default: ollama.
   --codex        Shortcut for --provider codex.
+  --claude       Shortcut for --provider claude.
   --no-push      Stop after local validation and commit.
   --no-watch     Do not wait for GitHub Actions after creating/finding the PR.
   --message TEXT Override the Git commit subject.
@@ -52,13 +53,17 @@ while [ "$#" -gt 0 ]; do
       shift
       ;;
     --provider)
-      [ "$#" -ge 2 ] || { echo "ERROR: --provider requires ollama or codex." >&2; exit 2; }
+      [ "$#" -ge 2 ] || { echo "ERROR: --provider requires ollama, codex, or claude." >&2; exit 2; }
       EVAL_PROVIDER="$2"
-      case "$EVAL_PROVIDER" in ollama|codex) ;; *) echo "ERROR: invalid provider: $EVAL_PROVIDER" >&2; exit 2 ;; esac
+      case "$EVAL_PROVIDER" in ollama|codex|claude) ;; *) echo "ERROR: invalid provider: $EVAL_PROVIDER" >&2; exit 2 ;; esac
       shift 2
       ;;
     --codex)
       EVAL_PROVIDER="codex"
+      shift
+      ;;
+    --claude)
+      EVAL_PROVIDER="claude"
       shift
       ;;
     --no-push)
@@ -377,15 +382,25 @@ else
     exit 2
   }
   echo "Starting exactly one foreground Runtime Eval with provider: $EVAL_PROVIDER"
-  if [ "$EVAL_PROVIDER" = "codex" ]; then
-    [ -x "./cloudskill-eval-codex" ] || {
-      echo "ERROR: ./cloudskill-eval-codex is missing or not executable." >&2
-      exit 2
-    }
-    ./cloudskill-eval-codex
-  else
-    ./cloudskill-eval
-  fi
+  case "$EVAL_PROVIDER" in
+    codex)
+      [ -x "./cloudskill-eval-codex" ] || {
+        echo "ERROR: ./cloudskill-eval-codex is missing or not executable." >&2
+        exit 2
+      }
+      ./cloudskill-eval-codex
+      ;;
+    claude)
+      [ -x "./cloudskill-eval-claude" ] || {
+        echo "ERROR: ./cloudskill-eval-claude is missing or not executable." >&2
+        exit 2
+      }
+      ./cloudskill-eval-claude
+      ;;
+    *)
+      ./cloudskill-eval
+      ;;
+  esac
   REVIEW_ZIP="$(latest_review_zip)"
   [ -n "$REVIEW_ZIP" ] && [ -s "$REVIEW_ZIP" ] || {
     echo "ERROR: Runtime Eval did not produce a valid review ZIP." >&2

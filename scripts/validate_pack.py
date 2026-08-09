@@ -75,7 +75,7 @@ required = [
     'scripts/validate_descriptions.py', 'scripts/validate_behavior_evals.py',
     'scripts/manage_skill.py', 'scripts/validate_skill_lifecycle.py', 'scripts/validate_evolution_handoff.py',
     'scripts/smoke_install.py', 'scripts/run_all_checks.py', 'scripts/validate_plugins.py',
-    'cloudskill-eval', 'cloudskill-eval-codex', 'scripts/codex_eval_adapter.py', 'scripts/run_local_eval_review.py', 'scripts/validate_local_eval_debugging.py', 'scripts/validate_codex_eval_path.py',
+    'cloudskill-eval', 'cloudskill-eval-codex', 'cloudskill-eval-claude', 'scripts/codex_eval_adapter.py', 'scripts/claude_eval_adapter.py', 'scripts/providers_contract.py', 'evals/runtime/contracts/providers.json', 'scripts/run_local_eval_review.py', 'scripts/validate_local_eval_debugging.py', 'scripts/validate_codex_eval_path.py', 'scripts/validate_providers_contract.py',
     '.codex-plugin/plugin.json', '.claude-plugin/plugin.json',
     '.agents/plugins/marketplace.json', '.claude-plugin/marketplace.json',
     'assets/cloudbox.ico', 'assets/cloudbox-icon.png', 'assets/cloudbox-logo.png',

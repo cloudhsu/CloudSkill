@@ -51,7 +51,14 @@ Bundle: `CloudSkill-local-eval-review-local-review-20260809-113507.zip`
 4. Run a fresh Ollama Runtime Eval (`--force-eval`) to get ≥3 repeat behavior evidence for R07 under the corrected rubric. Deferred at the user's explicit request for this increment — do not run Ollama until asked.
 5. Investigate whether the Refiner Prompt should be strengthened to preserve raw's concrete authority identifiers (`ChamberStateAuthority`, `WaferCustodyAuthority`, `FencingToken`, exact `wafer location`/`occupancy` phrasing) instead of paraphrasing them away. Currently n=1 evidence only — do not change the Refiner Prompt until repeat evidence confirms this is systematic, not one sample's variance.
 6. Run the quota-conscious Codex comparison after Codex access is available.
-7. Keep provider results separate; do not average Ollama and Codex scores.
+7. Keep provider results separate; do not average Ollama, Codex, and Claude scores.
+8. A `claude` Runtime Eval provider (Claude Code CLI headless, see
+   `scripts/claude_eval_adapter.py`) was added but has not yet been exercised
+   against a live `claude` process in this repository. Its first real
+   `./cloudskill-eval-claude` smoke run is the point where the `--output-format
+   json` parsing assumption in `_extract_result_text()` is actually confirmed,
+   not assumed. Run it deliberately (it spends Claude usage/quota) before
+   trusting any `claude`-provider evidence.
 
 ## Standard continuation commands
 
@@ -75,12 +82,21 @@ codex login status
 ./cloudskill-resume --provider codex --force-eval
 ```
 
+Fresh Claude evidence:
+
+```bash
+claude auth status
+./cloudskill-resume --provider claude --force-eval
+```
+
 Resume after interruption without forcing a second completed run:
 
 ```bash
 ./cloudskill-resume --provider ollama
 # or
 ./cloudskill-resume --provider codex
+# or
+./cloudskill-resume --provider claude
 ```
 
 ## Evidence handoff contract
