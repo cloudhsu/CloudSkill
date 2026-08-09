@@ -75,6 +75,20 @@ Explicitly NOT done:
   criteria" section; several criteria (R07 repeat >= 3, Codex/Claude live
   comparison) are not yet satisfied.
 
+CI caught a second real gap in this increment: the pushed `SKILL_MANIFEST.json`
+recorded `developing-skills` `file_count: 17`, but GitHub Actions regenerated
+it from a clean checkout as `16` and failed `git diff --exit-code`. Cause:
+`python3 -m py_compile` on the new `export_eval_candidate.py` asset (run
+locally while smoke-testing) created a gitignored
+`.agents/skills/developing-skills/assets/__pycache__/` directory, and
+`scripts/manage_skill.py refresh --all` counted it before that stray cache
+was removed — `run_all_checks.py` had no reason to catch this since it
+doesn't diff against a clean checkout. Fixed by deleting all `__pycache__`
+directories before refreshing the manifest and committing the corrected
+`file_count: 16`. Lesson for future increments: run `find . -iname
+__pycache__ -exec rm -rf {} +` before `manage_skill.py refresh --all`
+whenever a session compiled or imported new Python modules first.
+
 ## 2026-08-09 — Claude Code CLI Runtime Eval provider + provider registry
 
 Requested by the user: run Codex-provider Evals with GPT (already true, via
