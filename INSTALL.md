@@ -156,6 +156,7 @@ User scope 設定：
 - `cloudskill_repository`
 - `eval_inbox`
 - `sensitive_terms_path`
+- `eval_exchange_repo`（選填，見第 8d 節）
 - 強制 sanitization 與禁止 raw transcript、auto skill modification、auto commit、auto push 的安全值
 
 Inbox 結構：
@@ -166,7 +167,8 @@ Inbox 結構：
 ├── manual-review/
 ├── processed/
 ├── rejected/
-├── imports/            # 從外部/中斷連線 session 匯出的壓縮檔，放在這裡等待匯入（見第 8b 節）
+├── synced/              # 已透過 sync_eval_exchange.py --push 送出的候選（保留，不會刪除，見第 8d 節）
+├── imports/            # 從外部/中斷連線 session 匯出的壓縮檔，放在這裡等待匯入（見第 8b、8d 節）
 │   └── processed/       # 已匯入的壓縮檔（保留供追溯，不會刪除）
 └── sensitive-terms.local.txt
 ```
@@ -244,6 +246,35 @@ Agent 應使用 `developing-skills`（見 `references/conversation-derived-optim
 3. 分析別人的開源專案時，只萃取「可遷移的工程壓力」，不複製原始碼或商業邏輯；日後若真的變成正式技能參考，需明確標註來源專案（見 `skill-authoring-sources.md`）。
 4. 輸出走跟第 8/8b 節一樣的管線：本機可連到 CloudSkill Repository 就用 `capture_eval_candidate.py`，連不到就用 `export_eval_candidate.py` 打包 zip；額外產生一份 `EVAL_MINING_REPORT.md` 摘要一起放進 zip。
 5. 不修改正式 `evals/`、技能、Commit、Tag、Branch 或 Remote——這仍然只是證據暫存，正式收斂一樣要走第 9 節的批次審查。
+
+## 8d. 用 Git 在多台機器間傳遞候選案例
+
+情境：第二台機器（例如公司筆電）也裝了 Codex/Claude 且也能連到 CloudSkill Repository，但候選案例還是出不來——因為 `.local/eval-inbox/` 在**每一台機器上**都被 Git 忽略，不會因為兩邊都連得到同一個 Repository 就自動同步。這不是第 8b 節那種「連不到 Repository」的情境，是「兩邊都連得到，但私人候選資料本來就不該進 Git history」的情境。
+
+在 `.cloudskill/config.local.json` / `~/.cloudskill/config.json` 裡加一個你自己擁有的私有 Git repository（純粹當傳輸層，不是 CloudSkill 本身）：
+
+```json
+{
+  "eval_exchange_repo": "git@github.com:<you>/cloudskill-eval-exchange.git"
+}
+```
+
+在**擷取候選的那台機器**：
+
+```bash
+python3 scripts/sync_eval_exchange.py --push
+```
+
+會把 `candidates/`／`manual-review/` 裡還沒送出的候選打包、commit、push 到 exchange repository 的 `incoming/`，來源檔案本機移到 `synced/`（保留，不刪除）。
+
+在**你實際審查、host CloudSkill Repository 的那台機器**：
+
+```bash
+python3 scripts/sync_eval_exchange.py --pull
+python3 scripts/import_eval_candidates.py
+```
+
+`--pull` 會把 exchange repository 裡還沒處理過的壓縮檔複製進 `eval_inbox/imports/`，之後跟第 8b 節的匯入流程完全一樣（重新驗證、用本機私人詞彙表重新掃描、去重）。兩個方向都是冪等的——沒有新東西時重跑不會出錯，也不會重複處理。
 
 ## 9. 批次整理到 CloudSkill
 

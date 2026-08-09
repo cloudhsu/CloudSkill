@@ -14,7 +14,11 @@ Disconnected/external session (no reachable CloudSkill repository on this machin
 
 `current interaction -> sanitized draft -> export_eval_candidate.py -> local eval-outbox + zip -> user transfers zip -> <CloudSkillRepo>/.local/eval-inbox/imports/ -> import_eval_candidates.py -> candidates | manual-review | rejected -> batch review -> formal Eval | rejected -> processed`
 
-The private Inbox is evidence staging in both paths. The public `evals/` tree contains only reviewed, generalized, repeatable cases.
+Second machine with a reachable CloudSkill repository, but `.local/eval-inbox/` is gitignored there too (a repository clone on a second machine does not, by itself, get candidates from that machine's local disk to this one's):
+
+`current interaction -> sanitized draft -> capture_eval_candidate.py -> candidates | manual-review -> sync_eval_exchange.py --push -> private exchange Git repository -> sync_eval_exchange.py --pull -> <CloudSkillRepo>/.local/eval-inbox/imports/ -> import_eval_candidates.py -> candidates | manual-review | rejected -> batch review -> formal Eval | rejected -> processed`
+
+The private Inbox is evidence staging in every path. The public `evals/` tree contains only reviewed, generalized, repeatable cases.
 
 ## Configuration discovery
 
@@ -61,6 +65,47 @@ the repository's own private sensitive-terms file, de-duplicates against
 what the Inbox already has, and files it into `candidates/`,
 `manual-review/`, or `rejected/`. It never touches formal `evals/`, Skill
 files, or Git state — the same authority boundary as direct capture.
+
+## Git-based transport between machines: `sync_eval_exchange.py`
+
+A second machine having its own reachable CloudSkill repository clone (for
+example, a work laptop with both Codex and this repository already
+installed) does not by itself move candidates to the machine you review
+from — `.local/eval-inbox/` is gitignored on every clone, by design, because
+its contents are unreviewed evidence, not a formal Eval. Do not assume
+"both machines can reach the CloudSkill repository" means capture output is
+already available in both places.
+
+`scripts/sync_eval_exchange.py` moves candidates through a separate,
+private Git repository the user owns and lists as `eval_exchange_repo` in
+their `.cloudskill/config.local.json` / `~/.cloudskill/config.json` (this
+repository is transport only — never CloudSkill's own repository, and never
+committed to it).
+
+```bash
+# On the machine where capture_eval_candidate.py already wrote candidates:
+python3 scripts/sync_eval_exchange.py --push
+
+# On the machine that hosts the CloudSkill repository you review from:
+python3 scripts/sync_eval_exchange.py --pull
+python3 scripts/import_eval_candidates.py
+```
+
+`--push` zips whatever is currently in `candidates/`/`manual-review/` (the
+same format `export_eval_candidate.py` produces), commits and pushes it to
+the exchange repository's `incoming/` folder, then moves the source files
+into a local `synced/` folder — never deleted, mirroring the
+`processed/`/`rejected/` bookkeeping already used elsewhere in the Inbox.
+`--pull` copies any zip not already reflected in
+`eval_inbox/imports/processed/` into `eval_inbox/imports/`; from there,
+`import_eval_candidates.py` behaves identically to the disconnected-session
+path above, including the same private-terms re-scan and de-duplication.
+Both directions are idempotent: re-running either with nothing new to send
+or receive is a no-op, not an error.
+
+Use this path instead of the disconnected-session zip-and-manually-transfer
+path whenever both machines can reach a shared private Git remote — it
+removes the "remember to physically move the file" step entirely.
 
 ## Mandatory sanitization
 

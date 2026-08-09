@@ -8,5 +8,6 @@
   "save_raw_transcript": false,
   "auto_modify_skills": false,
   "auto_commit": false,
-  "auto_push": false
+  "auto_push": false,
+  "eval_exchange_repo": "OPTIONAL_GIT_URL_OR_PATH_OF_A_PRIVATE_EXCHANGE_REPOSITORY_YOU_OWN"
 }

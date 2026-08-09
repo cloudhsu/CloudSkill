@@ -87,7 +87,7 @@ required = [
     'assets/cloudbox.ico', 'assets/cloudbox-icon.png', 'assets/cloudbox-logo.png',
     'docs/CLOUDBOX_PLUGIN.md',
     'scripts/capture_eval_candidate.py', 'scripts/validate_interaction_capture.py',
-    'scripts/import_eval_candidates.py',
+    'scripts/import_eval_candidates.py', 'scripts/sync_eval_exchange.py',
     '.agents/skills/developing-skills/assets/export_eval_candidate.py',
     'scripts/package_surface_skills.py', 'scripts/validate_skill_portability.py',
     'config/skill-portability.json', 'docs/PLATFORM_SUPPORT_MATRIX.md',

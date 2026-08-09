@@ -263,7 +263,90 @@ if export_script_path.is_file():
             if 'No import archives found' not in rerun.stdout:
                 fail('re-running import_eval_candidates.py with nothing new to import did not report a no-op')
 
-print('Validated full and config-only setup, private Inbox setup, positive capture, manual-review routing, raw-transcript rejection, and the disconnected-session export/import round trip')
+sync_script_path = ROOT / 'scripts/sync_eval_exchange.py'
+if not sync_script_path.is_file():
+    fail('missing git-based Eval Inbox transport: scripts/sync_eval_exchange.py')
+else:
+    # Full push -> pull -> import round trip through a local bare Git
+    # repository standing in for a private "exchange" repository, so
+    # .local/eval-inbox/ being gitignored on every machine does not strand
+    # candidates captured on a second machine that never reaches this one's
+    # filesystem directly.
+    with tempfile.TemporaryDirectory(prefix='cloudskill-eval-exchange-') as tmp_name:
+        tmp = Path(tmp_name)
+        bare_exchange = tmp / 'bare-exchange.git'
+        source_inbox = tmp / 'source-inbox'
+        dest_inbox = tmp / 'dest-inbox'
+        (source_inbox / 'candidates').mkdir(parents=True)
+        (source_inbox / 'manual-review').mkdir(parents=True)
+        run(['git', 'init', '-q', '--bare', str(bare_exchange)], cwd=tmp)
+
+        draft = dict(candidate_template)
+        draft['cloudskill_version'] = (ROOT / 'VERSION').read_text(encoding='utf-8').strip()
+        draft['task_summary'] = 'Exchange-transport smoke test'
+        draft['prompt_sanitized'] = 'A device accepts a command but the hardware readback has not reached the requested value.'
+        (source_inbox / 'candidates' / 'INT-exchange-smoke-positive.json').write_text(
+            json.dumps(draft, ensure_ascii=False, indent=2), encoding='utf-8'
+        )
+
+        source_config_path = tmp / 'source-config.json'
+        source_config_path.write_text(json.dumps({
+            'schema_version': '1.0', 'cloudskill_version': draft['cloudskill_version'],
+            'cloudskill_repository': str(ROOT), 'eval_inbox': str(source_inbox),
+            'sensitive_terms_path': str(source_inbox / 'sensitive-terms.local.txt'),
+            'default_sanitization': True, 'save_raw_transcript': False,
+            'auto_modify_skills': False, 'auto_commit': False, 'auto_push': False,
+            'eval_exchange_repo': str(bare_exchange),
+        }), encoding='utf-8')
+
+        git_env = os.environ.copy()
+        git_env.setdefault('GIT_AUTHOR_NAME', 'CloudSkill Validator')
+        git_env.setdefault('GIT_AUTHOR_EMAIL', 'validator@example.invalid')
+        git_env.setdefault('GIT_COMMITTER_NAME', 'CloudSkill Validator')
+        git_env.setdefault('GIT_COMMITTER_EMAIL', 'validator@example.invalid')
+
+        run([
+            sys.executable, str(sync_script_path), '--push',
+            '--config', str(source_config_path), '--clone-dir', str(tmp / 'source-clone'),
+            '--label', 'validator-source',
+        ], cwd=ROOT, env=git_env)
+        if list((source_inbox / 'candidates').glob('*.json')):
+            fail('sync_eval_exchange.py --push did not clear the source candidates/ queue')
+        if not list((source_inbox / 'synced').glob('*.json')):
+            fail('sync_eval_exchange.py --push did not move source files into eval_inbox/synced/')
+
+        dest_config_path = tmp / 'dest-config.json'
+        dest_config_path.write_text(json.dumps({
+            'schema_version': '1.0', 'cloudskill_version': draft['cloudskill_version'],
+            'cloudskill_repository': str(ROOT), 'eval_inbox': str(dest_inbox),
+            'sensitive_terms_path': str(dest_inbox / 'sensitive-terms.local.txt'),
+            'default_sanitization': True, 'save_raw_transcript': False,
+            'auto_modify_skills': False, 'auto_commit': False, 'auto_push': False,
+            'eval_exchange_repo': str(bare_exchange),
+        }), encoding='utf-8')
+
+        run([
+            sys.executable, str(sync_script_path), '--pull',
+            '--config', str(dest_config_path), '--clone-dir', str(tmp / 'dest-clone'),
+        ], cwd=ROOT, env=git_env)
+        if len(list((dest_inbox / 'imports').glob('*.zip'))) != 1:
+            fail('sync_eval_exchange.py --pull did not copy the exchanged zip into eval_inbox/imports/')
+
+        run([
+            sys.executable, str(import_script_path), '--eval-inbox', str(dest_inbox),
+        ], cwd=ROOT)
+        if not list((dest_inbox / 'candidates').glob('*.json')) and not list((dest_inbox / 'manual-review').glob('*.json')):
+            fail('exchanged candidate did not reach candidates/ or manual-review/ after import')
+
+        # Idempotent re-pull: nothing new once the exchange repo is unchanged.
+        rerun = run([
+            sys.executable, str(sync_script_path), '--pull',
+            '--config', str(dest_config_path), '--clone-dir', str(tmp / 'dest-clone'),
+        ], cwd=ROOT, env=git_env)
+        if 'Nothing new to pull' not in rerun.stdout:
+            fail('re-running sync_eval_exchange.py --pull with nothing new did not report a no-op')
+
+print('Validated full and config-only setup, private Inbox setup, positive capture, manual-review routing, raw-transcript rejection, the disconnected-session export/import round trip, and the git-based eval-exchange push/pull round trip')
 for error in errors:
     print(f'ERROR: {error}')
 sys.exit(1 if errors else 0)

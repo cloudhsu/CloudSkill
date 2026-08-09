@@ -2,6 +2,74 @@
 
 This document records the evolution rationale and evidence chain for work that may span multiple conversations. Git commits and tags remain the authoritative source history.
 
+## 2026-08-09 — Git-based Eval Inbox exchange between machines
+
+Requested by the user: they capture real subagent-development patterns on
+a work laptop (running Codex), have not yet distilled them (deferred to
+Monday, when usage quota resets — not a machine/network restriction as
+initially assumed), and want to move candidates via Git specifically, not
+manual file transfer, so the exchange works "cross-agent, cross-session"
+regardless of which machine/tool captured them.
+
+Corrected assumption before designing anything: the work laptop *can*
+reach the CloudSkill repository (the user corrected this directly). That
+does not solve the transport problem — `.local/eval-inbox/` is gitignored
+on every clone, by design (candidates are unreviewed evidence, never
+committed to CloudSkill itself), so two machines both having repository
+access still leaves captured candidates stranded on whichever machine
+captured them.
+
+Change:
+
+- Added `scripts/sync_eval_exchange.py`: `--push` zips new
+  `candidates/`/`manual-review/` files (same format
+  `export_eval_candidate.py` already produces) and commits+pushes them to a
+  separate, user-owned private Git repository (`eval_exchange_repo` in
+  `.cloudskill/config.local.json`/`~/.cloudskill/config.json` — transport
+  only, never CloudSkill's own repository), then moves the source files
+  into a new `eval_inbox/synced/` folder (never deleted, mirrors the
+  existing `processed/`/`rejected/` bookkeeping pattern). `--pull` copies
+  any zip not already reflected in `eval_inbox/imports/processed/` into
+  `eval_inbox/imports/`, ready for the existing
+  `scripts/import_eval_candidates.py` unchanged.
+- Deliberately did not duplicate `import_eval_candidates.py`'s validation/
+  sanitization/dedup logic into the new script: `--pull` only moves zips
+  into `imports/`; the existing import tool still does all the real
+  decision-making, so the git-transport layer is additive, not a second
+  code path to keep in sync.
+- Added `eval_exchange_repo` (optional) to
+  `config/cloudskill-config.template.json`.
+- Added "Git-based transport between machines" to
+  `.agents/skills/developing-skills/references/interaction-eval-capture.md`
+  and INSTALL.md section 8d, both pointing out explicitly that "both
+  machines can reach the CloudSkill repository" is not sufficient — this
+  was the actual misunderstanding being corrected.
+- Extended `scripts/validate_interaction_capture.py` with a full push ->
+  pull -> import round trip through a real local bare Git repository
+  (standing in for a private GitHub exchange repo, no network access
+  needed) plus an idempotent-re-pull check, mirroring the manual
+  verification performed first.
+
+Validation performed:
+
+- Manual end-to-end verification first, before writing the permanent test:
+  a temp bare Git repo simulating GitHub, a "source machine" config with a
+  pre-seeded candidate, `--push`, a separate "dest machine" config,
+  `--pull`, then `import_eval_candidates.py` — confirmed the candidate
+  correctly reached `manual-review/` and the source `candidates/` queue was
+  cleared into `synced/`. Confirmed idempotent re-pull reports "Nothing new
+  to pull" rather than re-processing.
+- Same round trip then encoded as a permanent automated test in
+  `scripts/validate_interaction_capture.py`, using real `git init --bare`/
+  `clone`/`push`/`pull` subprocess calls, not mocked.
+- `python3 scripts/run_all_checks.py` passes.
+
+Explicitly NOT done: no real GitHub (or other hosted Git) exchange
+repository has been created or used — the round trip is proven against a
+local bare repository only. The user has not yet created their actual
+exchange repository or run this against real work-laptop-captured
+candidates; that is explicitly deferred to Monday.
+
 ## 2026-08-09 — Platform/surface support matrix, formalized architecture-parity rule
 
 Requested by the user: confirm and formalize CloudSkill's real Windows/Mac +

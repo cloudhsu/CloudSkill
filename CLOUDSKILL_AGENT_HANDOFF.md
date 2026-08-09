@@ -67,7 +67,7 @@ First live Claude evidence: `CloudSkill-local-eval-review-local-review-20260809-
 3. ~~Reject unstructured refinement candidates~~ — resolved; the accepted refined R07 answer passes `final-answer-discipline` (no planning leak) in the latest bundle.
 4. ~~R07 Behavior repeat is hard-coded to 1~~ — resolved (tooling only, no model call). `run_local_eval_review.py` now has a `--behavior-repeat N` option decoupled from routing `--repeat`, threaded through `cloudskill-resume --behavior-repeat N` (ollama only; implies `--force-eval` since ZIP-reuse hashing can't detect a repeat-count mismatch). Default stays 1, so no prior behavior changed. **Still open: nobody has actually run `--behavior-repeat 3` yet** — the flag exists and is validated, but real repeat>=3 Behavior evidence still doesn't exist for either provider. That run is the next model-costing step.
 5. Investigate whether the Refiner Prompt should be strengthened to preserve raw's concrete authority identifiers (`ChamberStateAuthority`, `WaferCustodyAuthority`, `FencingToken`, exact `wafer location`/`occupancy` phrasing) instead of paraphrasing them away. Currently n=1 evidence only — do not change the Refiner Prompt until repeat evidence confirms this is systematic, not one sample's variance.
-6. Run the quota-conscious Codex comparison after Codex access is available.
+6. Run the quota-conscious Codex comparison after Codex access is available. **Explicit deferral (2026-08-09, user-confirmed): Codex cannot be run today.** This is the recorded reason satisfying merge criterion 5's "OR an explicit, dated reason" clause — do not treat this as silently skipped.
 7. Keep provider results separate; do not average Ollama, Codex, and Claude scores.
 8. ~~A `claude` Runtime Eval provider ... has not yet been exercised against a live `claude` process~~ — resolved. First live run hit two real bugs (`/no_think` breaking Claude's stdin slash-command parser; occasional `error_max_structured_output_retries` from an unframed prompt letting the model attempt a disabled tool), both fixed and re-confirmed: routing 5/5, Behavior raw 78.0/100, gate PASS outright, no planning leak. Still n=1 — a `--repeat 3` Claude run is the next step before this counts as release-grade, same repetition-policy caveat as Ollama.
 9. The Eval Inbox import path (`scripts/import_eval_candidates.py` +
@@ -88,6 +88,14 @@ First live Claude evidence: `CloudSkill-local-eval-review-local-review-20260809-
     account and exercised. Gemini CLI's `.agents/skills/` alias claim is
     from Gemini's own docs, not independently installed/tested — deferred
     at the user's explicit request.
+12. `scripts/sync_eval_exchange.py` (git-based Eval Inbox transport between
+    machines, `eval_exchange_repo` config field) is proven only against a
+    local bare Git repository. The user's real use case — a work laptop
+    with real captured subagent-development-pattern candidates, pushed
+    through an actual private GitHub exchange repo they have not created
+    yet — is deferred to Monday (their usage quota resets then). Confirm
+    the real repository URL with the user before assuming this path is
+    ready; do not silently invent one.
 
 ## Standard continuation commands
 
