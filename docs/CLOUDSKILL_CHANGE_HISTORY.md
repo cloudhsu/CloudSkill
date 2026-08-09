@@ -2,6 +2,24 @@
 
 This document records the evolution rationale and evidence chain for work that may span multiple conversations. Git commits and tags remain the authoritative source history.
 
+## 2026-08-09 — Task 4 full baseline PASS; Task 5 no-change decision
+
+Codex executed TC-002 through TC-010 once each through plain JSON transport
+with authoritative local provider-contract and Task 3 runner validation. Every
+case passed provider shape, parent state, expected action attempts, and
+authority-safety checks. Manual semantic adjudication also passed all required
+and forbidden outcomes, including durable handoff use, side-answer return,
+explicit cancellation/pivot/publish authority, promoted side questions,
+already-completed parents, absent parent identity, and harmless prose.
+
+The nine calls used 121,976 input tokens (89,856 cached), 1,083 output tokens,
+and 224 reasoning tokens. Provider cost was not exposed. Combined with TC-001,
+all ten Task 4 cases pass. Because no continuity behavior RED was reproduced,
+Task 5 is closed as `NO_CHANGE_JUSTIFIED`; changing global instructions or
+`agent-development-process` would violate the evidence gate. Task 6 is the next
+increment. Raw evidence and adjudication remain ignored under
+`.local/task-continuity-evals/task4-hosted-baseline-remaining-20260809/`.
+
 ## 2026-08-09 — Task 4 TC-001 hosted baseline PASS after bounded fallback
 
 The user explicitly authorized execution after the earlier sandbox stop

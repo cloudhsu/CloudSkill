@@ -15,6 +15,27 @@ This is the operational entry point for a new conversation or coding agent that 
 
 ## Current repository state
 
+### CloudBox 6.0 Task 4 complete; Task 5 closed without edits (2026-08-09)
+
+- Codex executed TC-002 through TC-010 once each using the same plain-JSON
+  transport plus authoritative local validation established by TC-001. All
+  nine provider contracts, expected parent states, expected action attempts,
+  and authority checks passed.
+- Manual semantic adjudication passed all nine cases: durable handoff recovery,
+  side-answer return, cancellation, pivot, explicit publish authority,
+  side-question promotion, already-completed parent, absent parent identity,
+  and harmless prose continuation all satisfied their required and forbidden
+  outcomes.
+- Usage for TC-002–TC-010 was 121,976 input tokens (89,856 cached), 1,083 output
+  tokens, and 224 reasoning tokens. Provider cost was not exposed. Together
+  with TC-001, Task 4 is PASS across all ten cases.
+- No behavior RED was reproduced, so Task 5 is closed as
+  `NO_CHANGE_JUSTIFIED`: no global invariant, `agent-development-process`
+  Skill, lifecycle, or behavior-case edit was made. Next work is Task 6's
+  executable multi-model panel contract.
+- Ignored raw evidence and adjudication are under
+  `.local/task-continuity-evals/task4-hosted-baseline-remaining-20260809/`.
+
 ### CloudBox 6.0 Task 4 TC-001 hosted baseline completed (2026-08-09)
 
 - The user explicitly authorized one new execution after the earlier sandbox
