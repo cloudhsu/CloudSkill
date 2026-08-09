@@ -60,3 +60,27 @@ A refinement pass is a separate derived artifact. It must:
 - pass a minimum-content and no-planning validation,
 - be rejected rather than replacing raw evidence when it collapses or truncates,
 - be graded separately.
+
+## Multi-model judge protocol
+
+Treat semantic judging as a calibrated experiment, not a popularity contest.
+
+- Freeze and hash one evidence packet before judging. Preserve candidate order
+  randomization and the label map outside judge prompts.
+- Require each judge to return dimension-level findings, cited evidence,
+  confidence, blocking safety findings, and one release state.
+- Keep extraction, patch generation, judging, and adjudication as separate
+  roles. If the same model family performs more than one role, disclose it.
+- Compare inter-judge agreement per dimension and inspect every unique safety or
+  authority objection. Do not use a mean score to hide disagreement.
+- Calibrate judges with positive and negative controls, including a fluent but
+  unsafe answer. A judge that rewards keyword coverage while missing the unsafe
+  mechanism is not release evidence.
+- Persist model/version, judge prompt hash, source-output hash, rubric hash,
+  latency/token usage when available, and the independent raw verdict.
+- Use a human or designated adjudicator for veto findings and unresolved
+  equivalence. The adjudicator may not silently rewrite a verdict.
+
+For Skill changes, judge the same RED case before and after the minimal patch,
+plus adjacent negative controls. Do not tell judges which candidate is the new
+version until their verdicts are frozen.

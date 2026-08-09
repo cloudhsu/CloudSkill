@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import itertools
 import json
 import re
@@ -27,6 +28,14 @@ def parse_args() -> argparse.Namespace:
 
 def load_json(path: Path) -> Any:
     return json.loads(path.read_text(encoding="utf-8"))
+
+
+def sha256_file(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for block in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(block)
+    return digest.hexdigest()
 
 
 def load_jsonl(path: Path) -> list[dict[str, Any]]:
@@ -196,6 +205,9 @@ def render_markdown(report: dict[str, Any]) -> str:
         "# CloudBox Behavior Eval 人類可讀評分報告",
         "",
         f"- 輸入：`{report['input']}`",
+        f"- 輸入 SHA-256：`{report['input_sha256']}`",
+        f"- Rubric：`{report['rubrics']}`",
+        f"- Rubric SHA-256：`{report['rubrics_sha256']}`",
         f"- 產生時間：{report['generated_at_utc']}",
         f"- 可評分紀錄：{report['graded_records']}",
         f"- 通過紀錄：{report['passed_records']}",
@@ -307,7 +319,9 @@ def main() -> int:
         "schema_version": 1,
         "generated_at_utc": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
         "input": str(args.input),
+        "input_sha256": sha256_file(args.input),
         "rubrics": str(args.rubrics),
+        "rubrics_sha256": sha256_file(args.rubrics),
         "graded_records": len(results),
         "passed_records": passed,
         "average_score": round(sum(scores) / len(scores), 1),

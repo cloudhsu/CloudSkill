@@ -191,6 +191,43 @@ Examples:
 - Good structure but missing engineering evidence -> improve the selected Skill or behavior contract.
 - Authentication/quota failure -> classify as provider availability, not Skill quality.
 
+## Multi-model evaluation and Skill distillation
+
+Use multi-model review to expose correlated omissions, not to replace executable
+RED/GREEN evidence with a vote.
+
+```text
+sanitized evidence inventory
+  -> independent candidate extraction
+  -> coordinator deduplication and authoritative owner selection
+  -> RED baseline
+  -> one minimal patch
+  -> blinded before/after + adjacent controls
+  -> independent cross-family judges
+  -> dimension-level disagreement and safety-veto adjudication
+  -> GREEN/regression/release decision
+```
+
+The ordinary path uses deterministic checks and an inexpensive reviewer. Add a
+second model family when RED evidence supports a material change; reserve a
+diverse 2x2 panel for safety, authority, routing ownership, disputed expected
+answers, or release decisions. Provider scores remain separate. The adjudicator
+traces objections to evidence; majority agreement cannot erase a safety,
+privacy, authority, unsupported-claim, or evidence-lineage finding.
+
+Every offline Behavior re-grade records the raw-input and rubric SHA-256 values.
+An archived score and a current-rubric score may both be valid for different
+rubric versions; neither is described as model improvement without a new model
+call.
+
+Coordinator authority is host-neutral. Codex can coordinate Claude Code CLI
+workers, and Claude Code can coordinate Codex CLI workers, using the same frozen
+packet, blinding, role, lineage, and adjudication contract. Read-only workers may
+run in parallel; stable ZIP generation, Skill edits, installs, commits, pushes,
+and release transitions remain single-writer operations. Sandboxed web/Desktop
+surfaces without subprocess access export the packet or report
+`MANUAL_REQUIRED`; they do not claim cross-family execution.
+
 ## Platform and surface support
 
 `docs/PLATFORM_SUPPORT_MATRIX.md` is the authoritative record of which

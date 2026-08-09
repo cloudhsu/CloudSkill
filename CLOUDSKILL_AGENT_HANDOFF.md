@@ -16,6 +16,9 @@ This is the operational entry point for a new conversation or coding agent that 
 ## Current repository state
 
 - Repository: `cloudhsu/CloudSkill`
+- **Active development branch: `feat/multimodel-skill-evaluation-20260809`**
+  for the 5.8.0 adaptive multi-model Skill-evaluation increment. Do not move
+  these edits to `main`; finish checks, commit, push, and review this branch.
 - **Active branch: `main`.** PR #1 (`fix/skill-lifecycle-and-ci-20260809-013048`)
   merged 2026-08-09T08:33:29Z as merge commit `0b73ec2` (regular merge, not
   squashed, so the full 21-commit history and its messages remain
@@ -29,6 +32,42 @@ This is the operational entry point for a new conversation or coding agent that 
 - Local diagnostic bundles live under `.local/runtime-evals/` and must not be committed.
 
 ## Latest verified evidence before this increment
+
+**Claude release-grade repeat=3 evidence:**
+`CloudSkill-local-eval-review-local-review-20260809-180816.zip`
+
+- Pipeline SUCCESS, evaluation gate PASS; Claude Code CLI provider.
+- Routing 15/15; Behavior 3/3 PASS.
+- Archived scores: 82.7/85.0/92.0, average 86.6.
+- The third grader-precision fix recognizes the real bold Markdown scenario
+  form present in all three outputs. Offline regrade of the unchanged raw JSONL:
+  90.7/93.0/100.0, average 94.6. The regrade records raw-input and rubric hashes.
+- Timestamp and stable ZIP SHA-256 before the 5.8.0 source edit:
+  `815370cd6b233437299c916629a4a010332d8018c58ff38b2578141046e362bb`.
+- This is R07-only evidence. Do not extrapolate it to all 19 Skills.
+
+**5.8.0 evaluation-process change in progress:**
+
+- RED evidence exists for the bold-scenario false negative, missing regrade
+  lineage, and an implicit/non-repeatable multi-model adjudication process.
+- Focused GREEN checks and full `run_all_checks.py` pass. Lifecycle refresh and
+  audit pass for all 19 Skills; Codex/Claude plugin packaging and smoke install
+  pass. The initial sandboxed `gh auth status` could not read the macOS keyring;
+  the user re-authenticated and an escalated preflight confirmed the active
+  `cloudhsu` account, `repo`/`workflow` scopes, repository access, and `main` as
+  the default branch. Commit/push/PR/CI/tag/host reload remain pending until
+  recorded below.
+- Luna/Sol independent judges found semantic risks a deterministic coverage
+  score cannot settle. No equipment Skill change is justified by that n=1
+  comparison; the process owner is `runtime-evaluation-engineering` plus
+  `developing-skills`.
+- The completed 2x2 semantic panel was Luna, Sol, Claude Sonnet 5, and Claude
+  Opus 5. Claude n=1 adjudication is `MANUAL_REQUIRED`: all judges found the
+  cross-host local epoch-store assumption ambiguous or unsafe, while their
+  release labels differed. Codex n=1 received no blocking semantic finding.
+- Host-neutral orchestration is now in scope: Claude Code may coordinate Codex
+  CLI workers and Codex may coordinate Claude CLI workers. Sandboxed surfaces
+  without subprocess evidence must not claim this capability.
 
 **First live Codex evidence:** `CloudSkill-local-eval-review-local-review-20260809-155256.zip`
 

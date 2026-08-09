@@ -103,6 +103,12 @@ if GRADER.exists():
 # bundle 78->84 -- consistent across all three providers, confirming this was
 # grader precision, not a content quality gap.
 #
+# Round 3: the live Claude repeat=3 run
+# (local-review-20260809-180816) used numbered bold Markdown scenario titles
+# followed by ``Expected:``. All three answers contained concrete scenarios,
+# but the deterministic grader awarded 0/8. Preserve that exact formatting
+# family here so future re-grades do not repeat the false negative.
+#
 # Re-run the deterministic grader against representative synthetic text on
 # every check so these precision regressions cannot silently reappear.
 r07 = cases.get("R07-english-equipment-architecture")
@@ -128,6 +134,8 @@ if isinstance(r07, dict) and r07.get("criteria"):
         "Fault-injection verification\n"
         "1. Disconnect a chamber IPC after command acceptance. Expect quarantine on reconnect "
         "and readback reconciliation before new work is accepted.\n"
+        "2. **Restart during an in-flight move.** Expected: the reservation remains "
+        "RecoveryRequired until current occupancy and position evidence reconcile.\n"
     )
     negative_text = (
         "The system restarts and continues processing commands without "

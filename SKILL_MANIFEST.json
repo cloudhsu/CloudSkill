@@ -1,5 +1,5 @@
 {
-  "version": "5.7.0",
+  "version": "5.8.0",
   "skills": [
     {
       "name": "agent-development-process",
@@ -89,7 +89,7 @@
       "name": "runtime-evaluation-engineering",
       "description": "Use when designing, reviewing, or debugging an executable AI, agent, model, router, or skill evaluation system involving case validity, context evidence, reproducibility, structured outputs, deterministic grading, semantic judging, score interpretation, regression gates, or release decisions.",
       "path": ".agents/skills/runtime-evaluation-engineering/SKILL.md",
-      "file_count": 6
+      "file_count": 7
     },
     {
       "name": "safe-incremental-refactoring",

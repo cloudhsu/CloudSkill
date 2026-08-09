@@ -97,6 +97,70 @@
         "agent overfits the repository to one small-model run"
       ],
       "review_notes": "Schedule pressure does not waive Eval validity."
+    },
+    {
+      "id": "RTE-BEH-005",
+      "skill": "runtime-evaluation-engineering",
+      "type": "application",
+      "prompt": "A deterministic coverage grader passes two architecture answers, but reviewers suspect one answer's node-local epoch cannot fence a competing failover owner. Design a cost-conscious multi-model evaluation and release decision.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "freezes one hashed evidence packet and blinds candidate identity or before-after order",
+        "uses independent cross-family judges with extraction generation judging and adjudication roles separated",
+        "compares dimension-level evidence and preserves disagreements rather than averaging provider scores",
+        "treats authority and safety objections as veto findings requiring adjudication",
+        "uses MANUAL_REQUIRED when semantic safety remains unresolved",
+        "scales from inexpensive review to a diverse 2x2 panel only when risk or disagreement warrants it"
+      ],
+      "forbidden_behaviors": [
+        "declares the majority vote correct without examining the fencing mechanism",
+        "averages provider scores into one quality number",
+        "lets a judge see other verdicts before recording its independent result",
+        "treats deterministic keyword coverage as architecture safety proof"
+      ],
+      "required_artifacts": [
+        "judge panel contract",
+        "dimension-level disagreement record",
+        "adjudicated release state"
+      ],
+      "baseline_expected_failure": [
+        "the existing workflow mentions a second model or semantic review but does not define blinding role separation safety veto adaptive 2x2 escalation or disagreement adjudication"
+      ],
+      "review_notes": "Derived from a real R07 comparison where deterministic coverage missed a plausible split-brain mechanism defect."
+    },
+    {
+      "id": "RTE-BEH-006",
+      "skill": "runtime-evaluation-engineering",
+      "type": "application",
+      "prompt": "Claude Code is the coordinator. It must launch Claude sub-agents plus Codex CLI judges to evaluate a Skill change with the same 2x2 rules used when Codex is coordinator. Define the execution and failure contract.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "keeps coordinator authority host-neutral and gives no preference to its own model family",
+        "uses Claude sub-agents and non-interactive read-only codex exec or the repository adapter with least capability",
+        "freezes and hashes one sanitized evidence packet and uses unique per-worker outputs",
+        "records requested aliases canonical returned models prompt and evidence hashes exit state and fallbacks",
+        "blinds independent judges and serializes shared artifact or repository writes",
+        "reports missing CLI authentication quota model access or subprocess capability as BLOCKED or a truthfully degraded panel"
+      ],
+      "forbidden_behaviors": [
+        "claims a completed 2x2 when one worker never ran",
+        "lets parallel workers write the same latest artifact",
+        "copies credentials into prompts or reports",
+        "claims claude.ai or Desktop can launch local Codex without subprocess evidence",
+        "silently replaces an unavailable requested model"
+      ],
+      "required_artifacts": [
+        "host-neutral role map",
+        "worker capability and lineage records",
+        "independent verdict paths",
+        "truthful panel and release state"
+      ],
+      "baseline_expected_failure": [
+        "the generic multi-model workflow did not specify symmetric Claude-led Codex invocation capability boundaries per-worker outputs or truthful panel degradation"
+      ],
+      "review_notes": "Cross-family orchestration is a CLI capability contract, not a property of every Claude or Codex surface."
     }
   ]
 }

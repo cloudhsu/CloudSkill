@@ -1,5 +1,21 @@
 # Changelog
 
+## 5.8.0
+
+### Multi-model Skill distillation and Eval adjudication
+
+- Added an adaptive, role-separated multi-model protocol: independent sanitized extraction, RED and owner selection, one minimal patch, blinded cross-family judging, dimension-level disagreement capture, safety vetoes, and explicit adjudication.
+- Added cost controls: routine candidates use deterministic checks and an inexpensive reviewer; a diverse 2x2 panel is reserved for safety, authority, routing-owner, disputed-answer, or release-significant decisions and stops when findings saturate.
+- Made the coordinator contract host-neutral: Codex may coordinate Claude Code CLI workers and Claude Code may coordinate read-only `codex exec` workers, with unique worker outputs, canonical returned-model evidence, truthful degraded-panel states, and explicit no-subprocess boundaries for sandboxed surfaces.
+- Added permanent behavior contracts for multi-model Runtime Eval design and conversation-derived Skill optimization. Multi-model agreement alone is not GREEN evidence.
+
+### R07 Claude repeat evidence and grader lineage
+
+- Completed the first release-grade Claude Code CLI R07 run: routing 15/15 and Behavior 3/3 PASS. The archived deterministic scores were 82.7 / 85.0 / 92.0 (average 86.6).
+- Fixed a third demonstrated `verification-scenarios` false negative: all three outputs contained numbered bold Markdown fault-injection scenarios followed by `Expected:`, but the grader awarded 0/8. Re-grading the preserved raw JSONL without a new model call yields 90.7 / 93.0 / 100.0 (average 94.6).
+- Behavior grade reports now persist input and rubric SHA-256 values, separating model-output changes from offline grader changes.
+- Kept semantic safety outside keyword scoring. Cross-model judges identified failover fencing, late-completion, physical-authority, and over-assumption concerns that require semantic adjudication even when deterministic coverage passes.
+
 ## 5.7.0
 
 ### Claude Code CLI Runtime Eval provider

@@ -13,6 +13,7 @@ Read:
 
 - `references/evaluation-failure-taxonomy.md`
 - `references/case-and-grader-design.md`
+- `references/cross-agent-multimodel-orchestration.md` when one agent host coordinates judges or extractors from another model family.
 
 Use:
 
@@ -143,6 +144,37 @@ Use:
 - `AMBIGUOUS`: the case or expected answer lacks a unique contract;
 - `MANUAL_REQUIRED`: semantic equivalence or safety cannot be resolved deterministically.
 
+### 8. Use multi-model judging without turning it into a vote
+
+Use a judge panel when architecture safety, equivalent terminology, disputed
+expected answers, or a material Skill change cannot be resolved mechanically.
+
+1. Freeze one sanitized evidence packet: case, rubric, raw outputs, hashes, and
+   known evidence limits. Give every judge the same packet.
+2. Blind labels and candidate order when comparing before/after or competing
+   outputs. Do not reveal other judges' conclusions before an independent
+   verdict is recorded.
+3. Separate roles. Extractors propose reusable pressure; patch authors make one
+   minimal change; judges look for counterexamples, safety violations, and
+   regressions. A judge must not grade its own undisclosed rewrite.
+4. Prefer cross-family diversity over several nearby variants. A cost-conscious
+   default is one efficient and one frontier judge from each of two independent
+   model families for release-significant disputes.
+5. Aggregate dimensions and evidence, not provider scores. Record agreement,
+   disagreement, unique findings, model/version, prompt hash, and raw-output
+   hash. Never average different providers into one quality score.
+6. Safety, authority, privacy, unsupported-claim, or evidence-lineage objections
+   are veto findings requiring adjudication; a majority vote cannot erase them.
+7. The adjudicator traces every disputed finding to source evidence and returns
+   `PASS`, `FAIL`, `AMBIGUOUS`, or `MANUAL_REQUIRED`. Unresolved disagreement is
+   evidence, not noise to discard.
+
+Scale adaptively: use deterministic checks and one inexpensive reviewer for
+ordinary candidates; add a second family when RED evidence supports a change;
+use the full panel for authority, safety, routing-owner, or release decisions.
+Stop adding judges when findings saturate, or when another run cannot change the
+decision.
+
 ## Required output
 
 1. Earliest failed layer
@@ -155,6 +187,7 @@ Use:
 8. GREEN and adjacent regressions
 9. Release decision
 10. Remaining limitations and next review trigger
+11. Judge-panel composition, blinded evidence packet, disagreements, and adjudication when multi-model review was used
 
 ## Common mistakes
 

@@ -64,3 +64,15 @@
 - `PASS` / `FAIL` / `BLOCKED` / `AMBIGUOUS` / `MANUAL_REQUIRED`
 - Limitations:
 - Next review trigger:
+
+## Multi-model judge panel (when used)
+
+- Frozen evidence packet/hash:
+- Blind labels and candidate-order record:
+- Judge models/versions and roles:
+- Independent verdict paths:
+- Per-dimension agreement:
+- Unique or veto findings:
+- Adjudication:
+- Token/latency cost:
+- Stop reason:
