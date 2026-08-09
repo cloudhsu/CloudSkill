@@ -18,53 +18,40 @@ This is the operational entry point for a new conversation or coding agent that 
 - Repository: `cloudhsu/CloudSkill`
 - Active review branch: `fix/skill-lifecycle-and-ci-20260809-013048`
 - Pull request: `#1`
-- Current baseline commit for this increment: `61f33c39ce9ba4628dd1225ead5df9542bb64d4c`
+- Current baseline commit for this increment: `a910b76` (already includes the
+  Behavior contract consumer-registry closure; the grader-precision hotfix
+  below is uncommitted working-tree state on top of it).
 - PR remains Draft until local Runtime Eval evidence is interpreted and accepted.
 - Local diagnostic bundles live under `.local/runtime-evals/` and must not be committed.
 
 ## Latest verified evidence before this increment
 
-Bundle: `CloudSkill-local-eval-review-local-review-20260809-101744.zip`
+Bundle: `CloudSkill-local-eval-review-local-review-20260809-113507.zip`
 
 - Pipeline: SUCCESS
-- Evaluation gate: FAIL
+- Evaluation gate: PASS
 - Provider/model: Ollama `qwen3:4b`
-- Routing strict pass: 80%
-- Routing contract validity: 100%
-- Primary accuracy: 100%
+- Routing strict pass: 100%, contract validity: 100%, primary accuracy: 100%
+- R02 routing: 3/3 — the prior displacement by `equipment-control-architecture`
+  is resolved; `equipment-domain-modeling` now returns correctly.
 - R05A/R05B/R05C/R07 routing: 3/3 each
-- R02 routing: 0/3 because `equipment-control-architecture` displaced the required `equipment-domain-modeling` support
-- Raw R07 Behavior: 70/100
-- Reported refined R07 Behavior: 84/100, but acceptance was invalid because the refiner output still exposed planning text and did not provide a valid final-deliverable boundary
-
-
-
-## Current recovery note — Behavior consumer registry
-
-The structured Behavior, durable-handoff, and shared-contract overlays are
-already present in the working tree. Do not reapply them.
-
-The latest static failure occurred before a model call because
-`validate_local_eval_debugging.py` still searched for the retired implementation
-literal `json-final-v1`.
-
-Apply the consumer-registry hotfix once, then continue with:
-
-```bash
-./cloudskill-resume --provider ollama
-```
-
-After a successful continuation, replace this transient note with the resulting
-commit, GitHub Actions status, and newest Review ZIP interpretation.
+- Raw R07 Behavior: 74/100 (gate FAIL at n=1)
+- Refined R07 Behavior: 88/100, accepted, no planning-leak
+- Re-graded offline (no new model call) after the grader-precision hotfix
+  below: raw 74→78 (now passes standalone), refined 88→100. See
+  `docs/CLOUDSKILL_CHANGE_HISTORY.md` 2026-08-09 "R07 Behavior grader
+  precision hotfix" for full evidence and the regression fixture added to
+  `scripts/validate_behavior_runtime_evals.py`.
 
 ## Open evolution items
 
-1. Restore the R02 `code-review` plus `equipment-domain-modeling` boundary without regressing R05 composition.
-2. Use a structured `{ "final": "..." }` Behavior output contract so planning text is not graded as the deliverable.
-3. Reject unstructured refinement candidates even when keyword coverage is high.
-4. Run the Ollama regression after applying this increment.
-5. Run the quota-conscious Codex comparison after Codex access is available.
-6. Keep provider results separate; do not average Ollama and Codex scores.
+1. ~~Restore the R02 `code-review` plus `equipment-domain-modeling` boundary~~ — resolved, confirmed 3/3 in the 20260809-113507 bundle.
+2. ~~Use a structured `{ "final": "..." }` Behavior output contract~~ — resolved; contract ID/fingerprint confirmed consistent across environment.json and both raw/refined JSONL records.
+3. ~~Reject unstructured refinement candidates~~ — resolved; the accepted refined R07 answer passes `final-answer-discipline` (no planning leak) in the latest bundle.
+4. Run a fresh Ollama Runtime Eval (`--force-eval`) to get ≥3 repeat behavior evidence for R07 under the corrected rubric. Deferred at the user's explicit request for this increment — do not run Ollama until asked.
+5. Investigate whether the Refiner Prompt should be strengthened to preserve raw's concrete authority identifiers (`ChamberStateAuthority`, `WaferCustodyAuthority`, `FencingToken`, exact `wafer location`/`occupancy` phrasing) instead of paraphrasing them away. Currently n=1 evidence only — do not change the Refiner Prompt until repeat evidence confirms this is systematic, not one sample's variance.
+6. Run the quota-conscious Codex comparison after Codex access is available.
+7. Keep provider results separate; do not average Ollama and Codex scores.
 
 ## Standard continuation commands
 

@@ -83,6 +83,55 @@ if GRADER.exists():
         if marker not in text:
             errors.append(f"Behavior grader missing marker: {marker}")
 
+# Regression fixture: 2026-08-09 grader-precision hotfix.
+#
+# The R07 "assumptions-unknowns" and "restart-reconstruction" criteria were
+# proven to false-negative against real captured Runtime Eval output
+# (CloudSkill-local-eval-review-local-review-20260809-113507.zip) because the
+# regex patterns did not tolerate common numbered/bulleted heading markers,
+# markdown emphasis, plural "assumptions:", or a "physical/material state"
+# phrasing. Re-run the deterministic grader against representative synthetic
+# text on every check so this precision regression cannot silently reappear.
+r07 = cases.get("R07-english-equipment-architecture")
+if isinstance(r07, dict) and r07.get("criteria"):
+    sys.path.insert(0, str(GRADER.parent))
+    from grade_behavior_evals import grade_output  # noqa: E402
+
+    def _criterion_passed(report: dict, criterion_id: str) -> bool:
+        for item in report["criteria"]:
+            if item["id"] == criterion_id:
+                return bool(item["passed"])
+        return False
+
+    positive_text = (
+        "Restart Reconstruction\n"
+        "Upon reboot, the controller must reconstruct the physical/material state "
+        "from sensor readback before accepting new commands.\n\n"
+        "9. **Assumptions & Unresolved Inputs**\n"
+        "- Assumptions: sensors report within 100ms.\n"
+        "- Unresolved: fencing token width.\n"
+    )
+    negative_text = (
+        "The system restarts and continues processing commands without "
+        "recording any design caveats or open questions.\n"
+    )
+
+    positive_report = grade_output(positive_text, r07)
+    negative_report = grade_output(negative_text, r07)
+
+    for criterion_id in ("restart-reconstruction", "assumptions-unknowns"):
+        if not _criterion_passed(positive_report, criterion_id):
+            errors.append(
+                f"R07-english-equipment-architecture/{criterion_id}: regression fixture "
+                "expected this criterion to match numbered/bulleted real-world phrasing "
+                "but the grader did not detect it"
+            )
+        if _criterion_passed(negative_report, criterion_id):
+            errors.append(
+                f"R07-english-equipment-architecture/{criterion_id}: negative-control "
+                "fixture unexpectedly matched; the pattern may have become too permissive"
+            )
+
 print(f"Validated deterministic Behavior Eval rubrics for {len(cases)} case(s).")
 print(
     "NOTE: output-contract integration is validated separately by validate_behavior_contract.py; this validator does not copy prompt markers."

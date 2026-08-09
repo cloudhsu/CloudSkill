@@ -2,6 +2,79 @@
 
 This document records the evolution rationale and evidence chain for work that may span multiple conversations. Git commits and tags remain the authoritative source history.
 
+## 2026-08-09 — R07 Behavior grader precision hotfix (assumptions/restart false negatives)
+
+Evidence: `CloudSkill-local-eval-review-local-review-20260809-113507.zip`.
+
+Observed:
+
+- Pipeline: SUCCESS, evaluation gate: PASS.
+- Routing: strict pass 100%, contract valid 100%, primary accuracy 100%; R02
+  now returns `code-review` plus `equipment-domain-modeling` 3/3 (the prior
+  R02 regression is resolved).
+- R05A/B/C and R07 routing remain 3/3 each.
+- Raw R07 Behavior scored 74/100 (below the 75 gate); refined R07 Behavior
+  was accepted at 88/100 with no planning-leak (final-answer-discipline
+  criterion passed on both raw and refined).
+
+Diagnosed earliest failing layer:
+
+- Deterministic grader (layer 7), not the model or the Skill. Re-reading the
+  actual captured raw and refined text against the rubric regexes showed both
+  answers already contained a dedicated "Assumptions & Unresolved Inputs"
+  section and explicit wafer/occupancy/physical-state restart-reconstruction
+  evidence. Two rubric patterns in `assumptions-unknowns` and
+  `restart-reconstruction` (case `R07-english-equipment-architecture`) were
+  too rigid for realistic formatting:
+  - the heading pattern required a bare line start or a Markdown `#`, so a
+    numbered (`9. `) or bold (`**Assumptions**`) heading never matched;
+  - the inline pattern required singular `assumption:`, so the model's
+    natural plural `Assumptions:` never matched;
+  - `physical state` required that exact two-word phrase, so `physical/material
+    state` (the model echoing the rubric's own label wording) never matched.
+
+Change:
+
+- Widen the two `R07-english-equipment-architecture` rubric patterns in
+  `evals/runtime/cases/behavior-rubrics.json` to accept numbered/bulleted/bold
+  headings, plural `assumptions:`/`unknowns:`, and `physical[/ ]material
+  state` without loosening them into a generic match (still anchored to the
+  keyword at/near line start).
+- Add an executable regression fixture to
+  `scripts/validate_behavior_runtime_evals.py` that grades a positive
+  synthetic snippet (must match) and a negative-control snippet (must not
+  match) through the real `grade_output` function, so this precision
+  regression cannot silently reappear.
+
+Validation performed without a new model call:
+
+- Re-ran `scripts/grade_behavior_evals.py` against the exact captured
+  `behavior-raw.jsonl` / `behavior-refined.jsonl` from the
+  `local-review-20260809-113507` run directory before and after the patch:
+  - raw: 74.0 → 78.0 (now legitimately passes the 75-point gate on its own,
+    without refinement);
+  - refined: 88.0 → 100.0.
+- Confirmed the fixture fails against the pre-patch pattern text (RED) and
+  passes against the patched rubric (GREEN).
+- `python3 scripts/run_all_checks.py` passes.
+
+Unresolved:
+
+- This is n=1 behavior evidence (one Ollama attempt); the repetition policy
+  in `runtime-evaluation-engineering` calls for at least three repeats before
+  treating a local-model behavior score as stable. A fresh
+  `./cloudskill-resume --provider ollama --force-eval` run is the next
+  Ollama-dependent step, deferred at the user's request for this increment.
+- Content-fidelity risk in the Refiner: the accepted refined answer replaced
+  raw's concrete authority class names (`ChamberStateAuthority`,
+  `WaferCustodyAuthority`, `FencingToken`, …) and exact `wafer
+  location`/`occupancy` phrasing with vaguer prose. It still passes under the
+  corrected grader because it independently states "reconstruct the
+  physical/material state", but this narrowed margin is worth watching over
+  additional repetitions before deciding whether the Refiner Prompt needs an
+  explicit "preserve concrete identifiers from the raw answer" instruction.
+- Codex quota-conscious comparison still pending Codex availability.
+
 ## 2026-08-09 — Behavior contract consumer registry closure
 
 Observed:
