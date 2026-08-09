@@ -3,7 +3,7 @@
   "skill": "coding-agent-project-governance",
   "stage": "active",
   "introduced_version": "unknown",
-  "last_reviewed_version": "5.6.0",
+  "last_reviewed_version": "5.8.0",
   "routing_case_ids": [
     "CAG-01",
     "CAG-02",

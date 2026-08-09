@@ -17,6 +17,24 @@ POLICY = ROOT / "config" / "skill-lifecycle-policy.json"
 VERSION = ROOT / "VERSION"
 
 NAME_RE = re.compile(r"[a-z0-9]+(?:-[a-z0-9]+)*")
+VERSION_RE = re.compile(r"([0-9]+)\.([0-9]+)\.([0-9]+)")
+
+
+def lifecycle_semantic_errors(payload: dict[str, Any], current_version: str) -> list[str]:
+    errors: list[str] = []
+    introduced = payload.get("introduced_version")
+    reviewed = payload.get("last_reviewed_version")
+    current_match = VERSION_RE.fullmatch(current_version)
+    if current_match and introduced == "unreleased":
+        errors.append("introduced_version cannot remain unreleased in a shipped repository version")
+    reviewed_match = VERSION_RE.fullmatch(reviewed) if isinstance(reviewed, str) else None
+    triggers = payload.get("next_review_triggers") or []
+    if current_match and reviewed_match and "the skill has not been reviewed for two feature releases" in triggers:
+        current_major, current_minor = int(current_match.group(1)), int(current_match.group(2))
+        reviewed_major, reviewed_minor = int(reviewed_match.group(1)), int(reviewed_match.group(2))
+        if current_major > reviewed_major or (current_major == reviewed_major and current_minor - reviewed_minor >= 2):
+            errors.append("last_reviewed_version is at least two feature releases behind")
+    return errors
 
 
 def load_json(path: Path) -> Any:
@@ -168,6 +186,7 @@ def audit(check: bool = False) -> list[str]:
             errors.append(f"{skill}: lifecycle schema_version must be 1")
         if payload.get("skill") != skill:
             errors.append(f"{skill}: lifecycle skill name mismatch")
+        errors.extend(f"{skill}: {error}" for error in lifecycle_semantic_errors(payload, VERSION.read_text(encoding="utf-8").strip()))
         stage = payload.get("stage")
         if stage not in valid_stages:
             errors.append(f"{skill}: invalid lifecycle stage {stage!r}")

@@ -2,6 +2,27 @@
 
 This document records the evolution rationale and evidence chain for work that may span multiple conversations. Git commits and tags remain the authoritative source history.
 
+## 2026-08-09 — Task 7 lifecycle truth and 6.0 compatibility boundary
+
+Lifecycle semantic tests first failed because production validation lacked an
+API for shipped `unreleased` metadata and two-feature-release review triggers.
+After the minimum validator was added, all 19 Skills correctly failed their
+declared review trigger and `runtime-evaluation-engineering` also failed its
+stale introduction marker.
+
+Repository/tag evidence places that Skill in v5.7.0; the 5.8.0 release record
+documents lifecycle refresh/audit across all 19 Skills. GREEN therefore sets
+its introduction to 5.7.0 and all 19 review versions to 5.8.0 without changing
+any stage. Mechanical refresh is explicitly tested to preserve rather than
+invent those semantic fields.
+
+The accepted 6.0 major boundary is contributor/runtime evidence compatibility:
+host-level continuity schemas, non-mutating authority/action evidence,
+multi-model panel lineage, and stricter lifecycle semantics. Canonical Skill
+IDs and routing remain compatible. Added migration/rollback and immutable
+pre-release evidence documents; no merge, tag, Release, or host reload is
+claimed.
+
 ## 2026-08-09 — Task 6 reproducible multi-model panel foundation
 
 Added `multimodel-panel.schema.json`, a shared panel contract/validator and cost

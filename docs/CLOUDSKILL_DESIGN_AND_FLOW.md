@@ -253,3 +253,12 @@ supported without a corresponding row in that matrix.
 - reverse-chronological change history;
 - current agent handoff;
 - interruption-safe application and resume command.
+
+## 6.0 evidence-contract boundary
+
+CloudBox 6.0 treats host task continuity and multi-model panel lineage as
+versioned public contributor/runtime contracts. This is distinct from Skill
+routing: ordinary continuation can be evaluated without forcing a specialist
+Skill to load. The compatibility and rollback boundary is documented in
+`docs/releases/6.0.0-compatibility-and-migration.md`; pre-release facts and
+post-release operational facts remain separate immutable evidence phases.

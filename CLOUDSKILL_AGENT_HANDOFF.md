@@ -15,6 +15,21 @@ This is the operational entry point for a new conversation or coding agent that 
 
 ## Current repository state
 
+### CloudBox 6.0 Task 7 lifecycle and compatibility decision (2026-08-09)
+
+- Lifecycle semantic RED detected all 19 declared two-feature-release review
+  triggers and the shipped `runtime-evaluation-engineering` record still marked
+  `unreleased`. Repository/tag evidence identifies its introduction as 5.7.0;
+  the 5.8.0 release record documents lifecycle refresh/audit for all 19 Skills.
+- GREEN corrects `last_reviewed_version` to 5.8.0 for all 19 and the one
+  `introduced_version` to 5.7.0. No stage changed and mechanical refresh still
+  cannot invent these fields.
+- The 6.0 boundary is accepted as a contributor/runtime evidence-contract
+  break: host continuity, authority/action evidence, panel lineage, and stricter
+  lifecycle semantics. Skill IDs and user-facing routing remain compatible.
+- Compatibility/migration/rollback and pre-release evidence documents now
+  exist. Merge, tag, Release, and host reload remain not performed.
+
 ### CloudBox 6.0 Task 6 executable panel foundation (2026-08-09)
 
 - Added an authoritative multi-model panel schema, shared validator/aggregator,
