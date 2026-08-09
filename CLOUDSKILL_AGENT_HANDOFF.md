@@ -26,6 +26,32 @@ This is the operational entry point for a new conversation or coding agent that 
 
 ## Latest verified evidence before this increment
 
+**First live Codex evidence:** `CloudSkill-local-eval-review-local-review-20260809-155256.zip`
+
+- Pipeline: SUCCESS, Evaluation gate: PASS
+- Provider/model: Codex (`codex-default`, codex-cli 0.147.0)
+- Routing: 5/5 (100%), contract valid
+- Raw R07 Behavior: 78.0/100 as captured; **re-graded to 100.0/100 offline
+  after the grader-precision hotfix below (no new model call)**, gate PASS,
+  no refinement attempted
+- First real exercise of `codex_eval_adapter.py` since it was written
+  (commit `61f33c3`) — found and fixed a real bug (`--ask-for-approval`
+  retired from the CLI), see `docs/CLOUDSKILL_CHANGE_HISTORY.md` "First live
+  Codex evidence, retired CLI flag fixed, second-round grader precision
+  hotfix"
+
+**Second grader-precision hotfix** (found by reading this real Codex output
+against its own rubric, not assumed): `verification-scenarios` and
+`state-authority` were false-negatives for the same reason as the first
+hotfix earlier today (regex too narrow for real, high-quality phrasing);
+`reconnect-reconciliation`'s `max_span` was too tight for a long,
+well-organized answer. Re-graded already-captured output from all three
+providers, no new model calls: Codex 78.0->100.0, Ollama repeat=3 avg
+79.8->83.8, Claude 78.0->84.0. Consistent across three independent
+providers — grader precision, not a content gap. **Answers "should we
+refine the output?": no — refining would have rewritten already-strong
+answers to chase a score the grader was wrongly withholding.**
+
 **Ollama, repeat=3 routing AND repeat=3 Behavior (release-grade):**
 `CloudSkill-local-eval-review-local-review-20260809-150657.zip`
 
@@ -65,7 +91,13 @@ First live Claude evidence: `CloudSkill-local-eval-review-local-review-20260809-
 3. ~~Reject unstructured refinement candidates~~ — resolved; the accepted refined R07 answer passes `final-answer-discipline` (no planning leak) in the latest bundle.
 4. ~~R07 Behavior repeat is hard-coded to 1~~ — fully resolved, including real evidence. `--behavior-repeat 3` run completed: 3/3 attempts passed (78.0/80.7/80.7, avg 79.8), gate PASS. Claude provider is still n=1 for Behavior (`./cloudskill-eval --provider claude --behavior-repeat 3`, bypassing the fixed-repeat smoke wrapper, would get equivalent evidence there if wanted later).
 5. Investigate whether the Refiner Prompt should be strengthened to preserve raw's concrete authority identifiers (`ChamberStateAuthority`, `WaferCustodyAuthority`, `FencingToken`, exact `wafer location`/`occupancy` phrasing) instead of paraphrasing them away. Currently n=1 evidence only — do not change the Refiner Prompt until repeat evidence confirms this is systematic, not one sample's variance.
-6. Run the quota-conscious Codex comparison after Codex access is available. **Explicit deferral (2026-08-09, user-confirmed): Codex cannot be run today.** This is the recorded reason satisfying merge criterion 5's "OR an explicit, dated reason" clause — do not treat this as silently skipped.
+6. ~~Run the quota-conscious Codex comparison~~ — resolved. Quota recovered
+   earlier than expected the same day; user asked for it to be run. First
+   live Codex run ever in this repository's history: found and fixed a real
+   bug (`--ask-for-approval` retired from codex-cli 0.147.0), then succeeded:
+   routing 5/5, Behavior 78.0 raw -> 100.0 after the grader-precision fix
+   below, gate PASS. **Merge criterion 5 is now satisfied with real
+   evidence.**
 7. Keep provider results separate; do not average Ollama, Codex, and Claude scores.
 8. ~~A `claude` Runtime Eval provider ... has not yet been exercised against a live `claude` process~~ — resolved. First live run hit two real bugs (`/no_think` breaking Claude's stdin slash-command parser; occasional `error_max_structured_output_retries` from an unframed prompt letting the model attempt a disabled tool), both fixed and re-confirmed: routing 5/5, Behavior raw 78.0/100, gate PASS outright, no planning leak. Still n=1 — a `--repeat 3` Claude run is the next step before this counts as release-grade, same repetition-policy caveat as Ollama.
 9. The Eval Inbox import path (`scripts/import_eval_candidates.py` +
@@ -284,6 +316,14 @@ document.
    and this handoff reflect the final accepted state — no "Unresolved" bullet
    that was actually resolved should remain unresolved in the text.
 9. The user has reviewed the PR diff and raised no open objection.
+   **Satisfied (2026-08-09, user-confirmed): "我看過diff了" — reviewed, no
+   objection raised.**
+
+**Status as of 2026-08-09: all nine criteria satisfied.** Do not treat this
+note as standing authorization for a future increment — re-verify criteria
+1-8 (especially 1/2/8, which drift the moment any further commit lands)
+before merging; criterion 9 needs fresh confirmation if the diff changes
+after this point.
 
 When all nine hold, mark the PR ready for review and merge — do not do
 either step silently; confirm with the user first even if the criteria

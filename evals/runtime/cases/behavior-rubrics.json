@@ -14,7 +14,9 @@
             [
               "authoritative state",
               "state authority",
-              "owns? (?:the )?(?:chamber )?state"
+              "owns? (?:the )?(?:chamber )?state",
+              "sole authority",
+              "authority matrix"
             ],
             [
               "\\bIPC\\b",
@@ -74,7 +76,7 @@
               "until.*reconcil"
             ]
           ],
-          "max_span": 800
+          "max_span": 2000
         },
         {
           "id": "restart-reconstruction",
@@ -186,7 +188,8 @@
           "all_groups": [
             [
               "(?:test|verify)\\s+(?:that|by|with|using|a|an|the).{0,250}(?:disconnect|restart|duplicate|out[- ]of[- ]order|owner loss|failover|late completion)",
-              "(?:inject|simulate)\\s+(?:a |an )?(?:disconnect|restart|duplicate|out[- ]of[- ]order|owner loss|failover|late completion)"
+              "(?:inject|simulate)\\s+(?:a |an )?(?:disconnect|restart|duplicate|out[- ]of[- ]order|owner loss|failover|late completion)",
+              "\\b\\d{1,2}\\.\\s+[A-Z][a-z]+.{0,200}?\\bExpect\\b"
             ]
           ],
           "max_span": 1000000

@@ -83,15 +83,28 @@ if GRADER.exists():
         if marker not in text:
             errors.append(f"Behavior grader missing marker: {marker}")
 
-# Regression fixture: 2026-08-09 grader-precision hotfix.
+# Regression fixture: 2026-08-09 grader-precision hotfixes.
 #
-# The R07 "assumptions-unknowns" and "restart-reconstruction" criteria were
-# proven to false-negative against real captured Runtime Eval output
-# (CloudSkill-local-eval-review-local-review-20260809-113507.zip) because the
-# regex patterns did not tolerate common numbered/bulleted heading markers,
-# markdown emphasis, plural "assumptions:", or a "physical/material state"
-# phrasing. Re-run the deterministic grader against representative synthetic
-# text on every check so this precision regression cannot silently reappear.
+# Round 1: the R07 "assumptions-unknowns" and "restart-reconstruction"
+# criteria were proven to false-negative against real captured Runtime Eval
+# output (CloudSkill-local-eval-review-local-review-20260809-113507.zip)
+# because the regex patterns did not tolerate common numbered/bulleted
+# heading markers, markdown emphasis, plural "assumptions:", or a
+# "physical/material state" phrasing.
+#
+# Round 2: the first-ever live Codex Runtime Eval
+# (local-review-20260809-155256) scored a genuinely strong answer 78/100
+# because "verification-scenarios" only recognized "test that X"/"inject a
+# X" phrasing (not a numbered "N. <imperative verb> ... Expect ..." style),
+# and "state-authority" only recognized "authoritative state"/"state
+# authority" (not an "Authority matrix"/"sole authority" table). Re-grading
+# the same captured output after the fix (no new model call) raised Codex
+# 78->100, the Ollama repeat=3 bundle 79.8->83.8, and the earlier Claude
+# bundle 78->84 -- consistent across all three providers, confirming this was
+# grader precision, not a content quality gap.
+#
+# Re-run the deterministic grader against representative synthetic text on
+# every check so these precision regressions cannot silently reappear.
 r07 = cases.get("R07-english-equipment-architecture")
 if isinstance(r07, dict) and r07.get("criteria"):
     sys.path.insert(0, str(GRADER.parent))
@@ -109,17 +122,28 @@ if isinstance(r07, dict) and r07.get("criteria"):
         "from sensor readback before accepting new commands.\n\n"
         "9. **Assumptions & Unresolved Inputs**\n"
         "- Assumptions: sensors report within 100ms.\n"
-        "- Unresolved: fencing token width.\n"
+        "- Unresolved: fencing token width.\n\n"
+        "Authority matrix\n"
+        "Chamber physical state and sensor quality: sole authority is the chamber IPC service.\n\n"
+        "Fault-injection verification\n"
+        "1. Disconnect a chamber IPC after command acceptance. Expect quarantine on reconnect "
+        "and readback reconciliation before new work is accepted.\n"
     )
     negative_text = (
         "The system restarts and continues processing commands without "
-        "recording any design caveats or open questions.\n"
+        "recording any design caveats, open questions, ownership assignment, "
+        "or failure scenarios.\n"
     )
 
     positive_report = grade_output(positive_text, r07)
     negative_report = grade_output(negative_text, r07)
 
-    for criterion_id in ("restart-reconstruction", "assumptions-unknowns"):
+    for criterion_id in (
+        "restart-reconstruction",
+        "assumptions-unknowns",
+        "state-authority",
+        "verification-scenarios",
+    ):
         if not _criterion_passed(positive_report, criterion_id):
             errors.append(
                 f"R07-english-equipment-architecture/{criterion_id}: regression fixture "

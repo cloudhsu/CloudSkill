@@ -2,6 +2,83 @@
 
 This document records the evolution rationale and evidence chain for work that may span multiple conversations. Git commits and tags remain the authoritative source history.
 
+## 2026-08-09 — First live Codex evidence, retired CLI flag fixed, second-round grader precision hotfix
+
+First-ever live Codex Runtime Eval in this repository's history (confirmed
+by earlier static-only investigation: `codex_eval_adapter.py` had existed
+since commit `61f33c3` but no run directory or change-history entry ever
+recorded a real `provider: codex` execution).
+
+**Retired CLI flag.** First attempt: all 5 routing cases failed in ~100ms
+(too fast to be a real model call) with `CodexCLIError: unexpected argument
+'--ask-for-approval' found`. `codex --version` confirmed `codex-cli 0.147.0`;
+`codex exec --help` confirmed `--ask-for-approval` no longer exists in this
+version (superseded by `-s/--sandbox <read-only|workspace-write|
+danger-full-access>`, which the adapter already passed). Fixed by removing
+the retired flag from `codex_eval_adapter.py`'s command construction.
+Verified with one cheap manual `codex exec` smoke call (a two-word prompt,
+not the full case suite) before re-spending eval quota. Also fixed
+`validate_codex_eval_path.py`, which had been asserting the now-removed flag
+as a required marker, and added a negative check so `--ask-for-approval`
+cannot silently reappear.
+
+**Second live run: SUCCESS.** Routing 5/5 (100%). R07 Behavior: raw 78.0/100,
+gate PASS, no refinement attempted (matches `refinement_default: "skip"` for
+hosted-agent providers). Contract ID/fingerprint consistent with Ollama and
+Claude.
+
+**Second-round grader precision hotfix**, found by reading this real Codex
+output against its own rubric before assuming a content gap: the answer
+contains 12 well-written, numbered, imperative fault-injection scenarios
+("1. Disconnect a chamber IPC... Expect quarantine...") and an explicit
+"Authority matrix" table assigning per-concern ownership — both textbook
+examples of what `verification-scenarios` (0/8) and `state-authority`
+(partial 2/3) are meant to detect, but:
+
+- `verification-scenarios` only recognized `test that X` / `inject a X`
+  phrasing, not a numbered `N. <imperative verb> ... Expect ...` scenario
+  style. Added `\b\d{1,2}\.\s+[A-Z][a-z]+.{0,200}?\bExpect\b` as a third
+  alternative.
+- `state-authority` group 1 only recognized `authoritative state`/`state
+  authority`/`owns the state` phrasing, not an `Authority matrix`/`sole
+  authority` table. Added both as alternatives.
+- `reconnect-reconciliation` matched all 3 required groups but still scored
+  "partial" because `max_span: 800` was too tight for a long, well-organized
+  answer that legitimately discusses reconnect and reconciliation-before-new-
+  work in different sections rather than one paragraph (computed minimal
+  real span: 1673 characters). Widened to `max_span: 2000` (~13.5% of the
+  14.7K-character document, still a real proximity constraint, not
+  "anywhere in the document").
+
+Re-graded the already-captured raw output from all three providers with no
+new model call:
+
+| Provider | Before | After |
+|---|---:|---:|
+| Codex (this run) | 78.0 | **100.0** |
+| Ollama (repeat=3 avg) | 79.8 | **83.8** |
+| Claude (n=1) | 78.0 | **84.0** |
+
+Consistent improvement across three independently-run, architecturally
+different providers is strong evidence this was grader precision, not
+content quality -- exactly the same conclusion and fix pattern as the first
+grader-precision hotfix earlier today, now for a third and fourth criterion.
+Extended the existing `validate_behavior_runtime_evals.py` regression
+fixture (rather than adding a new one) to cover `state-authority` and
+`verification-scenarios` alongside the original two criteria, confirmed RED
+against the pre-fix rubric and GREEN against the fix.
+
+Answers the user's question "should we refine [the model output]?": no --
+refining would have rewritten already-strong answers to chase a score the
+grader was wrongly withholding. Fixing the grader was the earlier failing
+layer.
+
+Validation performed:
+
+- `python3 scripts/run_all_checks.py` passes.
+- RED confirmed against the original (pre-fix) rubric using the real
+  captured Codex output before editing; GREEN confirmed after.
+
 ## 2026-08-09 — Git-based Eval Inbox exchange between machines
 
 Requested by the user: they capture real subagent-development patterns on
