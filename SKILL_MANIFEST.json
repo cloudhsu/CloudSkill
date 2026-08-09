@@ -47,7 +47,7 @@
       "name": "developing-skills",
       "description": "Use when creating, editing, splitting, merging, evaluating, releasing, or conversation-mining CloudSkill skills, including turning available prior interactions and user corrections into sanitized routing and behavior evidence or a reviewable replacement package.",
       "path": ".agents/skills/developing-skills/SKILL.md",
-      "file_count": 17
+      "file_count": 16
     },
     {
       "name": "development-process-tailoring",

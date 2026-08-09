@@ -10,6 +10,14 @@ import sys
 import tempfile
 import zipfile
 
+# Loading capture_eval_candidate.py/export_eval_candidate.py below via
+# importlib would otherwise write __pycache__ bytecode cache under
+# .agents/skills/developing-skills/assets/, which validate_pack.py's naive
+# per-skill file_count then picks up on the *next* run (a real drift this
+# validator caught: SKILL_MANIFEST.json oscillated between file_count 16/17
+# depending on run order). Disable bytecode writes for this process only.
+sys.dont_write_bytecode = True
+
 ROOT = Path(__file__).resolve().parents[1]
 errors: list[str] = []
 

@@ -77,17 +77,37 @@ Explicitly NOT done:
 
 CI caught a second real gap in this increment: the pushed `SKILL_MANIFEST.json`
 recorded `developing-skills` `file_count: 17`, but GitHub Actions regenerated
-it from a clean checkout as `16` and failed `git diff --exit-code`. Cause:
-`python3 -m py_compile` on the new `export_eval_candidate.py` asset (run
-locally while smoke-testing) created a gitignored
-`.agents/skills/developing-skills/assets/__pycache__/` directory, and
-`scripts/manage_skill.py refresh --all` counted it before that stray cache
-was removed — `run_all_checks.py` had no reason to catch this since it
-doesn't diff against a clean checkout. Fixed by deleting all `__pycache__`
-directories before refreshing the manifest and committing the corrected
-`file_count: 16`. Lesson for future increments: run `find . -iname
-__pycache__ -exec rm -rf {} +` before `manage_skill.py refresh --all`
-whenever a session compiled or imported new Python modules first.
+it from a clean checkout as `16` and failed `git diff --exit-code`.
+
+First diagnosis (incomplete): a stray `__pycache__/` under
+`.agents/skills/developing-skills/assets/` from a manual `py_compile` smoke
+test inflated the count picked up by `scripts/validate_pack.py` (the actual
+`SKILL_MANIFEST.json` writer; `manage_skill.py refresh --all` does not touch
+`file_count`). Deleting the cache and recommitting `file_count: 16` looked
+like the fix, but the very next `./cloudskill-resume` run silently
+regenerated `17` again and committed it — because the real, recurring source
+was the new drift check in `scripts/validate_interaction_capture.py`, which
+imports `capture_eval_candidate.py`/`export_eval_candidate.py` via
+`importlib` and writes bytecode cache back into that same skill's `assets/`
+directory as a side effect on *every* `run_all_checks.py` run. `validate_pack.py`
+runs first in the check sequence and snapshots whatever is on disk from the
+*previous* run — so the two validators oscillated the manifest between 16
+and 17 depending on run order, and one clean-looking manual fix could not
+hold.
+
+Root-caused and fixed at both ends instead of re-committing the number a
+third time:
+
+- `sys.dont_write_bytecode = True` in `scripts/validate_interaction_capture.py`
+  before its `importlib` calls, so it stops creating the cache in the first
+  place.
+- `scripts/validate_pack.py`'s per-skill `file_count` now excludes
+  `__pycache__`, `.pyc`, and `.DS_Store` defensively, so any *other* future
+  transient artifact cannot cause the same run-order-dependent oscillation.
+
+Confirmed stable by running `run_all_checks.py` twice in a row with no
+cleanup in between and diffing `SKILL_MANIFEST.json` — identical both times,
+and no `__pycache__` reappeared under the skill's `assets/` directory.
 
 ## 2026-08-09 — Claude Code CLI Runtime Eval provider + provider registry
 

@@ -60,7 +60,13 @@ else:
             'name': name,
             'description': description,
             'path': str(skill_file.relative_to(ROOT)).replace('\\','/'),
-            'file_count': sum(1 for path in folder.rglob('*') if path.is_file()),
+            'file_count': sum(
+                1 for path in folder.rglob('*')
+                if path.is_file()
+                and '__pycache__' not in path.parts
+                and path.suffix != '.pyc'
+                and path.name != '.DS_Store'
+            ),
         })
 
 required = [
