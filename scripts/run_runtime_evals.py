@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
 import sys
 import time
 import urllib.error
@@ -158,6 +159,12 @@ def parse_json_object(text: str) -> dict[str, Any]:
         raise RuntimeError("model output JSON is not an object")
     return value
 
+
+def extract_final_deliverable(text: str) -> tuple[str, bool]:
+    matches = re.findall(r"<final>\s*(.*?)\s*</final>", text, re.I | re.S)
+    if not matches:
+        return text.strip(), False
+    return matches[-1].strip(), True
 
 def request_json(
     *,
@@ -752,6 +759,8 @@ def main() -> int:
                         "final_errors": [],
                     },
                     "behavior_output": None,
+                    "behavior_output_raw": None,
+                    "behavior_final_extracted": False,
                     "behavior_status": None,
                     "behavior_usage": {},
                     "error": None,
@@ -833,7 +842,10 @@ def main() -> int:
                             )
                             if not isinstance(behavior_value, str):
                                 raise RuntimeError("behavior model did not return text")
-                            record["behavior_output"] = behavior_raw
+                            behavior_final, final_extracted = extract_final_deliverable(behavior_raw)
+                            record["behavior_output_raw"] = behavior_raw
+                            record["behavior_output"] = behavior_final
+                            record["behavior_final_extracted"] = final_extracted
                             record["behavior_status"] = "completed"
                             record["behavior_usage"] = behavior_metadata.get("usage") or {}
                             record["context"] = {

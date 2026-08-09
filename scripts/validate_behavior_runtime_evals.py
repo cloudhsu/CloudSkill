@@ -8,10 +8,11 @@ ROOT = Path(__file__).resolve().parents[1]
 RUBRICS = ROOT / "evals" / "runtime" / "cases" / "behavior-rubrics.json"
 GRADER = ROOT / "scripts" / "grade_behavior_evals.py"
 COMMON = ROOT / "scripts" / "runtime_eval_common.py"
+RUNNER = ROOT / "scripts" / "run_runtime_evals.py"
 
 errors: list[str] = []
 
-for path in (RUBRICS, GRADER, COMMON):
+for path in (RUBRICS, GRADER, COMMON, RUNNER):
     if not path.exists():
         errors.append(f"missing Behavior Eval file: {path.relative_to(ROOT)}")
 
@@ -76,10 +77,17 @@ if COMMON.exists():
     for marker in (
         "Return the final engineering deliverable only.",
         "Do not expose internal analysis",
-        "Do not mention the router, Eval case ID, selected skill IDs, or SKILL.md.",
+        "The first non-whitespace line must be <final>",
+        "Do not expose internal analysis, planning, chain-of-thought",
     ):
         if marker not in text:
             errors.append(f"Behavior prompt missing marker: {marker}")
+
+if RUNNER.exists():
+    text = RUNNER.read_text(encoding="utf-8")
+    for marker in ("extract_final_deliverable", "behavior_output_raw", "behavior_final_extracted"):
+        if marker not in text:
+            errors.append(f"Behavior runner missing marker: {marker}")
 
 if GRADER.exists():
     text = GRADER.read_text(encoding="utf-8")

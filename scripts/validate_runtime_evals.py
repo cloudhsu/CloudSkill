@@ -83,8 +83,8 @@ cases = suite.get("cases")
 if not isinstance(cases, list):
     errors.append("runtime suite cases must be an array")
     cases = []
-if len(cases) != 8:
-    errors.append(f"Canary Suite must contain exactly 8 cases, found {len(cases)}")
+if len(cases) < 10:
+    errors.append(f"Canary Suite must contain at least 10 cases, found {len(cases)}")
 
 ids: set[str] = set()
 for case in cases:
@@ -152,6 +152,22 @@ for case in cases:
     if primary is None and (expected["required_supporting_skills"] or expected["execution_order"]):
         errors.append(f"{cid}: no-skill case must not select supporting skills")
 
+required_canary_ids = {
+    "R01-networkstream-stale-response",
+    "R02-code-and-command-state",
+    "R03-versioned-multi-audience-report",
+    "R04-greenfield-internal-web",
+    "R05A-component-state-contract",
+    "R05B-recovery-ownership",
+    "R05C-component-and-recovery-composition",
+    "R06-chinese-translation-no-skill",
+    "R07-english-equipment-architecture",
+    "R08-historical-interaction-optimization",
+}
+missing_canary_ids = sorted(required_canary_ids - ids)
+if missing_canary_ids:
+    errors.append(f"Canary Suite is missing required case IDs: {missing_canary_ids}")
+
 # Prove deterministic grading with one synthetic pass and one intentional failure.
 if cases:
     first = cases[0]
@@ -195,6 +211,9 @@ if cases:
 acceptance_ids = {
     "R01-networkstream-stale-response",
     "R03-versioned-multi-audience-report",
+    "R05A-component-state-contract",
+    "R05B-recovery-ownership",
+    "R05C-component-and-recovery-composition",
     "R06-chinese-translation-no-skill",
     "R07-english-equipment-architecture",
 }

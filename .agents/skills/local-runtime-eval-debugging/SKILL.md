@@ -93,6 +93,12 @@ Never overwrite the only copy of the model's first behavior output.
 
 Reject a refinement candidate when it is empty, collapses to a fragment, still exposes internal planning, or lacks minimum task evidence. Preserve the rejected candidate for diagnosis, keep the raw answer as the scored fallback, and report `refinement attempted` separately from `refinement accepted`.
 
+### 5a. Separate raw model text from the final deliverable
+
+When the runtime returns reasoning text and a `<final>...</final>` block together, preserve the complete raw text, extract the last complete final block as the graded deliverable, and retain the raw text for leakage diagnosis. A missing final block remains a final-answer-discipline failure.
+
+Do not expose Router decisions, selected Skill IDs, case IDs, or source paths to the downstream model unless the engineering task requires them.
+
 ### 6. Package one review bundle
 
 Create one ZIP containing the bundle contract in `LOCAL_EVAL_BUNDLE_CONTRACT.md`. Include only the current run and selected source snapshots needed for diagnosis. Exclude credentials, complete transcripts, unrelated `.local` data, `.git`, caches, and machine metadata such as `.DS_Store`.

@@ -207,6 +207,21 @@ Require evidence for:
 - Deployment/update rollback.
 - Trace continuity from wafer/step/recipe phase to device command, sensor readback, and completion decision.
 
+## Minimum distributed ownership/recovery deliverable
+
+For a focused distributed ownership and recovery request, explicitly provide:
+
+1. One authority for chamber physical/readback state, material identity/location/custody, shared-resource reservations, interlocks/readiness, command attempts, and recovery decisions.
+2. A reconnect admission gate that blocks new work until session identity, current readback, reservations, in-flight attempts, and material state are reconciled.
+3. Restart reconstruction from current hardware evidence and durable history, with conflicts marked `Unknown` or `RecoveryRequired`.
+4. Failover fencing using an epoch/term, lease, fencing token, or equivalent single-writer mechanism that rejects commands from the previous or stale owner.
+5. Command ID, attempt ID, idempotency/duplicate policy, timeout as observer state, cancellation, late completion, and reconciliation.
+6. Fresh interlock/readiness revalidation before resuming or issuing safety-sensitive commands.
+7. Concrete disconnect, restart, duplicate/out-of-order message, owner-loss/failover, late-completion, and stale-readback fault-injection scenarios.
+8. Assumptions and unresolved inputs for failover topology, authority store, lease/epoch implementation, clocks, material-identification evidence, and operator recovery.
+
+Do not invent a backup chamber, majority vote, shared state store, timeout duration, or plant-specific topology.
+
 ## Common mistakes and red flags
 
 - “The GUI sent it successfully, so the hardware is already in that state.”

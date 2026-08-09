@@ -177,6 +177,15 @@ Test:
 - Config referencing missing or incompatible IO.
 - Metadata-driven UI and executor using the same catalog contract.
 
+## Component-contract ownership boundary
+
+When the main deliverable is the component-level `Commanded`, `Desired`, `Pending`, `Actual/Readback`, ACK, physical completion, timeout, late readback, and reconciliation contract, this Skill remains primary.
+
+- Use it alone when Sequence/Equipment Service responsibility, shared-resource policy, deployment, and recovery topology are explicitly out of scope.
+- Add `equipment-control-architecture` only when cross-layer timeout, late-completion, interlock, retry, shared-resource, reconnect, restart, or recovery responsibility is separately requested.
+- Do not add `semiconductor-equipment-domain-knowledge` when physical purpose and completion evidence are already supplied.
+- In a combined request, define the component contract first, then allocate cross-layer responsibility.
+
 ## Common mistakes and red flags
 
 - “RF and Valve both have OnOff, so RF inherits Valve.”

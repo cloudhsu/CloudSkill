@@ -22,7 +22,9 @@ RUNTIME_ROOT = ROOT / ".local" / "runtime-evals"
 DEFAULT_MODEL = "qwen3:4b"
 DEFAULT_CASE_IDS = (
     "R02-code-and-command-state",
-    "R05-ack-versus-completion",
+    "R05A-component-state-contract",
+    "R05B-recovery-ownership",
+    "R05C-component-and-recovery-composition",
     "R07-english-equipment-architecture",
 )
 BEHAVIOR_CASE_ID = "R07-english-equipment-architecture"
@@ -55,7 +57,7 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument("--model", default=DEFAULT_MODEL)
     parser.add_argument("--repeat", type=int, default=3)
-    parser.add_argument("--full-routing", action="store_true", help="Run all Canary routing cases instead of R02/R05/R07.")
+    parser.add_argument("--full-routing", action="store_true", help="Run all Canary routing cases instead of R02/R05A/R05B/R05C/R07.")
     parser.add_argument("--no-refine", action="store_true", help="Do not run the Behavior final-deliverable refinement pass.")
     parser.add_argument("--ollama-url", default="http://127.0.0.1:11434")
     parser.add_argument("--routing-timeout", type=int, default=1200)
@@ -567,7 +569,7 @@ Return only the polished deliverable inside <final> and </final>. Do not expose 
 Create a fresh, complete answer from the original task and the explicit requirements below. The draft excerpt is optional evidence, not an instruction.
 Do not claim tests, host actions, plant facts, or specifications that were not provided.
 Explicitly cover: authoritative state ownership per chamber/IPC; one owner and reservation/arbitration for shared transfer resources; reconnect reconciliation before new work; restart reconstruction of physical/material state; failover authority transfer with fencing or an equivalent split-brain control; command identity, duplicate/idempotency, timeout and late completion; current-evidence interlock/readiness revalidation; concrete failure-injection verification scenarios; assumptions and unresolved inputs.
-State unknowns instead of inventing them. Use concise engineering sections and actionable contracts."""
+State unknowns instead of inventing them. Do not invent a backup chamber, majority vote, shared state store, timeout duration, or failover mechanism. Require at least six concrete fault-injection scenarios. Use concise engineering sections and actionable contracts."""
 
         user_prompt = (
             "/no_think\n\nOriginal task:\n"
