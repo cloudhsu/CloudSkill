@@ -126,6 +126,23 @@ First live Claude evidence: `CloudSkill-local-eval-review-local-review-20260809-
     yet — is deferred to Monday (their usage quota resets then). Confirm
     the real repository URL with the user before assuming this path is
     ready; do not silently invent one.
+13. **Eval suite coverage gap (found via analysis, not new work this
+    increment).** The Live Runtime Eval suite that this whole increment's
+    evidence comes from is narrow: 10 routing cases, only 6/19 Skills ever
+    appear as a routing `primary_skill`, 6/19 never appear in any routing
+    case at all (positive or negative) —
+    `architecture-review`/`coding-agent-project-governance`/
+    `cross-platform-engine-architecture`/`framework-design`/
+    `local-runtime-eval-debugging`/`runtime-evaluation-engineering` — and
+    only **1 Behavior case exists** (`R07`, `equipment-control-architecture`
+    only). The separate `evals/behavior/cases/*.json` (96 case contracts)
+    are structurally validated only — `validate_behavior_evals.py` itself
+    states case validation is not a model behavior execution — so they are
+    a test *plan*, not test *results*. Every live-provider score in this
+    document is evidence about `equipment-control-architecture` specifically,
+    not about CloudSkill's 19 Skills broadly. Expanding routing+behavior
+    coverage to the untested Skills is a real, evidence-backed next
+    increment, not yet started.
 
 ## Standard continuation commands
 
