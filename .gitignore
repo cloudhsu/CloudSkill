@@ -5,6 +5,7 @@ __pycache__/
 .cloudskill/config.local.json
 .cloudskill/eval-outbox/
 .cloudskill/.gitignore
+.codex/config.toml
 *.session.jsonl
 *.transcript.md
 *.pyc

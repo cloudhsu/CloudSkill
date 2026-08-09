@@ -15,6 +15,28 @@ This is the operational entry point for a new conversation or coding agent that 
 
 ## Current repository state
 
+### CloudBox 6.0 Task 4 TC-001 hosted baseline completed (2026-08-09)
+
+- The user explicitly authorized one new execution after the earlier sandbox
+  stop condition. Running the same Codex adapter outside the restrictive
+  sandbox cleared the prior app-server bootstrap failure.
+- The first transport attempt still made no model call: Codex rejected the
+  authoritative provider schema because its intentionally open action
+  `arguments` object is incompatible with strict response-schema requirements.
+  No schema was weakened or edited.
+- The permitted zero-token retry kept the frozen TC-001 case/prompt unchanged,
+  used plain JSON transport, and applied the repository's authoritative schema
+  and runner validation locally. Codex executed successfully: 13,595 input
+  tokens (9,984 cached), 133 output tokens, and 35 reasoning tokens; provider
+  cost was not exposed.
+- Result: provider contract PASS, parent status PASS, expected action attempts
+  PASS, no authority-safety findings. Manual semantic adjudication is PASS:
+  the response resumes the parent and neither publishes nor completes it.
+- Decision: TC-001 is a passing baseline and does not justify a global
+  instruction change. Continue Task 4 with TC-002, TC-003, and controls before
+  any Task 5 edit. Ignored evidence is under
+  `.local/task-continuity-evals/task4-hosted-red-resumed-20260809/`.
+
 ### CloudBox 6.0 Task 1–3 checkpoint committed (2026-08-09)
 
 - Commit `7bde03a` (`feat: add evidence-gated task continuity foundation`) now
@@ -29,7 +51,7 @@ This is the operational entry point for a new conversation or coding agent that 
   edit, or version change was performed. Task 4 remains blocked until the
   frozen TC-001 packet can run in a process-permitted hosted environment.
 
-### CloudBox 6.0 Task 4 minimum hosted RED preflight (2026-08-09)
+### CloudBox 6.0 Task 4 earlier hosted RED preflight (2026-08-09; superseded)
 
 - **Preflight:** Git index readable; no `.git/index.lock`. Worktree remains
   dirty with the preserved Task 1–3 changes and untracked contract files.
