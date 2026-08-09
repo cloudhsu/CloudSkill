@@ -16,9 +16,12 @@ This is the operational entry point for a new conversation or coding agent that 
 ## Current repository state
 
 - Repository: `cloudhsu/CloudSkill`
-- **Active development branch: `feat/multimodel-skill-evaluation-20260809`**
-  for the 5.8.0 adaptive multi-model Skill-evaluation increment. Do not move
-  these edits to `main`; finish checks, commit, push, and review this branch.
+- **Released version: 5.8.0.** PR #2 merged to `main` on
+  2026-08-09T10:40:56Z as merge commit `348063d`; both GitHub `validate`
+  checks passed. The official non-draft, non-prerelease GitHub Release is
+  `v5.8.0`, published 2026-08-09T10:41:15Z.
+- The remote feature branch `feat/multimodel-skill-evaluation-20260809` was
+  intentionally retained. Do not delete it without user approval.
 - **Active branch: `main`.** PR #1 (`fix/skill-lifecycle-and-ci-20260809-013048`)
   merged 2026-08-09T08:33:29Z as merge commit `0b73ec2` (regular merge, not
   squashed, so the full 21-commit history and its messages remain
@@ -55,8 +58,9 @@ This is the operational entry point for a new conversation or coding agent that 
   pass. The initial sandboxed `gh auth status` could not read the macOS keyring;
   the user re-authenticated and an escalated preflight confirmed the active
   `cloudhsu` account, `repo`/`workflow` scopes, repository access, and `main` as
-  the default branch. Commit/push/PR/CI/tag/host reload remain pending until
-  recorded below.
+  the default branch. Commit `a869f74` was pushed, PR #2 passed both checks and
+  merged normally, and `v5.8.0` was published. Host/plugin reload outside the
+  smoke-install environment was not performed.
 - Luna/Sol independent judges found semantic risks a deterministic coverage
   score cannot settle. No equipment Skill change is justified by that n=1
   comparison; the process owner is `runtime-evaluation-engineering` plus
