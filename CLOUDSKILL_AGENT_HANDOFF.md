@@ -15,6 +15,20 @@ This is the operational entry point for a new conversation or coding agent that 
 
 ## Current repository state
 
+### CloudBox 6.0 Task 1–3 checkpoint committed (2026-08-09)
+
+- Commit `7bde03a` (`feat: add evidence-gated task continuity foundation`) now
+  preserves the approved 6.0 design/plan, Task 2 host-level contract, Task 3
+  non-mutating runner and cost ledger, and the truthful Task 4 bootstrap-blocked
+  record on branch `feat/cloudbox-6.0-evidence-gated-evolution-20260809`.
+- Three fresh full `python3 scripts/run_all_checks.py` executions in the
+  continuation session exited 0. The final pre-commit run followed a staged
+  whitespace repair; `git diff --cached --check` also exited 0. These are
+  deterministic/static and fixture checks only—host behavior remains `NOT RUN`.
+- The branch has not been pushed and no PR, merge, tag, GitHub Release, Skill
+  edit, or version change was performed. Task 4 remains blocked until the
+  frozen TC-001 packet can run in a process-permitted hosted environment.
+
 ### CloudBox 6.0 Task 4 minimum hosted RED preflight (2026-08-09)
 
 - **Preflight:** Git index readable; no `.git/index.lock`. Worktree remains

@@ -2,6 +2,25 @@
 
 This document records the evolution rationale and evidence chain for work that may span multiple conversations. Git commits and tags remain the authoritative source history.
 
+## 2026-08-09 — CloudBox 6.0 Task 1–3 checkpoint committed
+
+Commit `7bde03a` (`feat: add evidence-gated task continuity foundation`) now
+preserves the approved 6.0 design and plan, Task 2 host-level continuity
+contract, Task 3 non-mutating runner/cost ledger, and the Task 4 hosted
+bootstrap failure record on the existing single-purpose feature branch.
+
+Before the commit, three fresh full `python3 scripts/run_all_checks.py` runs
+exited 0. A staged check found two trailing-space lines in the previously
+untracked design document; those were removed, `git diff --cached --check`
+then exited 0, and the final full suite exited 0. The task-continuity checks
+remain explicitly structure-only/local-fixture evidence with host behavior
+`NOT RUN` and provider cost USD 0.
+
+No push, PR, merge, tag, release, version change, or Skill instruction edit was
+performed. The earliest open failure remains Task 4 hosted execution bootstrap;
+the frozen TC-001 packet must execute in a process-permitted hosted environment
+before a semantic RED/GREEN decision can authorize Task 5.
+
 ## 2026-08-09 — CloudBox 6.0 Task 4 hosted retry remains blocked
 
 The continuation preflight passed: Git index readable with no `index.lock`,
