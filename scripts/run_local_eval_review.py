@@ -73,7 +73,18 @@ def parse_args() -> argparse.Namespace:
         default="",
         help="Optional Claude Code CLI model override. Empty uses the CLI's configured default.",
     )
-    parser.add_argument("--repeat", type=int, default=3)
+    parser.add_argument("--repeat", type=int, default=3, help="Attempts per routing case.")
+    parser.add_argument(
+        "--behavior-repeat",
+        type=int,
+        default=None,
+        help=(
+            "Attempts for the R07 Behavior case. Independent of --repeat (routing "
+            "and Behavior costs differ by an order of magnitude). Default: 1, "
+            "matching prior behavior -- pass e.g. --behavior-repeat 3 to get "
+            "release-grade repeat evidence at the cost of that many extra model calls."
+        ),
+    )
     parser.add_argument("--full-routing", action="store_true", help="Run all Canary routing cases instead of R02/R05A/R05B/R05C/R07.")
     parser.add_argument("--no-refine", action="store_true", help="Do not run the Behavior final-deliverable refinement pass.")
     parser.add_argument("--ollama-url", default="http://127.0.0.1:11434")
@@ -165,6 +176,7 @@ class ReviewRun:
         self.gate_pass: bool | None = None
         self.routing_context: int | None = None
         self.behavior_context: int | None = None
+        self.behavior_repeat: int = 1
         self.refinement_attempted = False
         self.refinement_accepted = False
         self.refinement_applied = False
@@ -271,6 +283,8 @@ class ReviewRun:
             "model": requested_model(self.args),
             "routing_context": self.routing_context,
             "behavior_context": self.behavior_context,
+            "routing_repeat": self.args.repeat,
+            "behavior_repeat": self.behavior_repeat,
             "behavior_refinement_attempted": self.refinement_attempted,
             "behavior_refinement_accepted": self.refinement_accepted,
             "behavior_refinement_applied": self.refinement_applied,
@@ -296,6 +310,8 @@ class ReviewRun:
             f"- Model: `{requested_model(self.args)}`",
             f"- Routing context: `{self.routing_context or 'not selected'}`",
             f"- Behavior context: `{self.behavior_context or 'not selected'}`",
+            f"- Routing repeat: `{self.args.repeat}`",
+            f"- Behavior repeat: `{self.behavior_repeat}`",
         ]
         if error is not None:
             lines.extend(["", "## Pipeline failure", "", f"- `{type(error).__name__}`: {error}"])
@@ -854,6 +870,8 @@ def run_pipeline(args: argparse.Namespace) -> int:
         behavior_raw_report = run.run_dir / "behavior-raw-report.md"
 
         run.set_stage("behavior-execution")
+        behavior_repeat = args.behavior_repeat if args.behavior_repeat is not None else 1
+        run.behavior_repeat = behavior_repeat
         behavior_command = [
                 sys.executable,
                 "scripts/run_runtime_evals.py",
@@ -869,7 +887,7 @@ def run_pipeline(args: argparse.Namespace) -> int:
                 "--case-id",
                 BEHAVIOR_CASE_ID,
                 "--repeat",
-                "1",
+                str(behavior_repeat),
                 "--num-ctx",
                 str(run.behavior_context),
                 "--context-reserve-tokens",

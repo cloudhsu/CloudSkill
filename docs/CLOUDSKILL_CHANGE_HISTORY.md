@@ -2,6 +2,76 @@
 
 This document records the evolution rationale and evidence chain for work that may span multiple conversations. Git commits and tags remain the authoritative source history.
 
+## 2026-08-09 — Provider registry mutation tests + decoupled Behavior repeat count
+
+Requested by the user: after comparing a handoff document exported from an
+earlier ChatGPT/Codex session against this session's actual work, do the
+remaining non-model-call items first — (1) the provider registry lacked the
+positive-propagation/negative-drift-injection mutation test pair that
+document calls the single most valuable pattern in the whole project (it
+already exists for the Behavior output contract, not for the newer provider
+registry), and (2) `run_local_eval_review.py` hard-codes R07 Behavior to
+`--repeat 1`, blocking merge criterion 4 (Behavior repeat>=3) even when the
+top-level `--repeat` flag is set to 3.
+
+Change:
+
+Provider registry mutation tests (`scripts/validate_providers_contract.py`):
+
+- **Positive propagation** (static, not live-execution, because a
+  `--provider` argparse `choices` tuple is baked into the parser once per
+  process — unlike the Behavior contract's prompt text, which re-renders
+  live at runtime and can be compared directly): parse
+  `run_runtime_evals.py`/`run_local_eval_review.py` with `ast` and require
+  every `--provider` `choices=` expression to reference
+  `providers_contract.PROVIDER_IDS` symbolically, not a copied tuple. This
+  is the actual guarantee that adding/removing a provider in `providers.json`
+  propagates without editing either consumer.
+- **Negative drift injection**: scan every `scripts/*.py` (except the two
+  validators that legitimately quote it as a documented anti-pattern
+  string) and `cloudskill-resume`'s case statement for the exact stale
+  literals this session already hand-fixed once —
+  `choices=("ollama", "codex")` and the equivalent 3-provider copy, plus
+  `cloudskill-resume`'s old `ollama|codex)` case pattern.
+- Verified both are real tests, not decorative: extracted the pre-Claude
+  version of `run_local_eval_review.py` (`git show 7d37a53~1:...`) and
+  confirmed the negative-drift check flags it (RED) while the current file
+  passes cleanly (GREEN); confirmed the positive-propagation check's exact
+  extraction function also flags the old file's hand-typed
+  `('ollama', 'codex')` tuple.
+
+Decoupled Behavior repeat count:
+
+- Added `--behavior-repeat N` to `run_local_eval_review.py`, independent of
+  `--repeat` (which only ever threaded to routing). Default stays `1` —
+  identical behavior to every prior run — so this is additive, not a
+  default-cost change.
+- Threaded `--behavior-repeat` through `cloudskill-resume` too, so it is
+  reachable through the safe commit/push path, not only by calling
+  `./cloudskill-eval` directly. Two safety details: (a) rejected in
+  combination with `--provider codex`/`--provider claude`, since those
+  routes go through the intentionally-fixed quota-conscious smoke wrappers;
+  (b) implies `--force-eval`, because the existing source-hash ZIP-reuse
+  check has no way to know a reusable completed ZIP was produced with a
+  different Behavior repeat count, and would otherwise silently reuse stale
+  n=1 evidence.
+- Recorded `routing_repeat`/`behavior_repeat` in `STATUS.json` and
+  `REVIEW_SUMMARY.md` so a future reviewer can see the repeat count a bundle
+  represents without reading `run.log`.
+
+Validation performed:
+
+- `python3 scripts/run_all_checks.py` passes.
+- `./cloudskill-resume --behavior-repeat 3 --provider codex --status` and
+  `--behavior-repeat abc --status` both fail fast with a clear message,
+  before touching any model or the Runtime Eval lock.
+- `./cloudskill-resume --behavior-repeat 3 --status` (default ollama)
+  passes through cleanly and correctly reports the implied `--force-eval`.
+
+Explicitly NOT done this increment: no model was called. The Behavior
+repeat>=3 evidence this unblocks, and the Codex live comparison, are still
+open — see "Latest verified evidence" and Open evolution items.
+
 ## 2026-08-09 — First live Claude/Ollama Runtime Eval confirmation + real adapter bugs found and fixed
 
 Requested by the user: actually run the `ollama` and `claude` providers (not

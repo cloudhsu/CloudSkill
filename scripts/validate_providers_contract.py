@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import ast
 import json
 import re
 import stat
@@ -137,6 +138,97 @@ for provider_id, info in providers.items():
     for marker in (f"--provider {provider_id}", "--repeat 1", "--no-refine"):
         if marker not in text:
             errors.append(f"{launcher_name} missing marker: {marker}")
+
+# --- Mutation tests, mirroring the two categories used for the Behavior
+# output contract in validate_behavior_contract.py: prove a contract edit
+# propagates without touching a consumer (positive), and prove a
+# hand-copied literal that bypasses the registry is caught (negative). The
+# Behavior contract's version can re-render prompt text live at runtime and
+# compare it against the authoritative contract; a --provider argparse
+# `choices` tuple is baked into the parser once per process, so instead of
+# executing a live mutation here, this checks statically (via AST) that each
+# consumer's `choices` expression *is* PROVIDER_IDS rather than a copied
+# tuple -- which is the actual guarantee that a future contract edit
+# propagates without editing this file.
+
+
+def provider_choices_expressions(path: Path) -> list[str]:
+    """Source text of every `choices=` expression attached to a --provider
+    add_argument(...) call in this file."""
+    tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
+    expressions: list[str] = []
+    for node in ast.walk(tree):
+        if not isinstance(node, ast.Call):
+            continue
+        func = node.func
+        if not (isinstance(func, ast.Attribute) and func.attr == "add_argument"):
+            continue
+        is_provider_flag = any(
+            isinstance(arg, ast.Constant) and arg.value == "--provider" for arg in node.args
+        )
+        if not is_provider_flag:
+            continue
+        for keyword in node.keywords:
+            if keyword.arg == "choices":
+                expressions.append(ast.unparse(keyword.value))
+    return expressions
+
+
+# Positive propagation: every Python consumer with a --provider flag must
+# derive its choices from providers_contract.PROVIDER_IDS symbolically.
+for consumer in required_consumers:
+    if not consumer.endswith(".py"):
+        continue
+    path = ROOT / consumer
+    if not path.is_file():
+        continue
+    try:
+        expressions = provider_choices_expressions(path)
+    except SyntaxError as exc:
+        errors.append(f"{consumer}: cannot parse for --provider choices check: {exc}")
+        continue
+    if not expressions:
+        continue  # not every required consumer necessarily exposes --provider itself.
+    if not any("PROVIDER_IDS" in expression for expression in expressions):
+        errors.append(
+            f"{consumer}: --provider choices={expressions!r} does not derive from "
+            "providers_contract.PROVIDER_IDS; a provider added to or removed from "
+            "providers.json would not propagate here automatically"
+        )
+
+# Negative drift injection: a hand-typed provider tuple/case-pattern that
+# bypasses the registry should never reappear. These exact literals were a
+# real regression this validator's own history includes (choices=("ollama",
+# "codex") went stale when "claude" was added and had to be hand-fixed).
+FORBIDDEN_PROVIDER_LITERALS = (
+    'choices=("ollama", "codex")',
+    "choices=('ollama', 'codex')",
+    'choices=("ollama", "codex", "claude")',
+    "choices=('ollama', 'codex', 'claude')",
+)
+SELF_REFERENCING_VALIDATORS = {
+    # These files legitimately quote the forbidden literal as a documented
+    # anti-pattern string to detect it elsewhere, not as a real argparse call.
+    "validate_providers_contract.py",
+    "validate_codex_eval_path.py",
+}
+for path in sorted(SCRIPTS.glob("*.py")):
+    if path.name in SELF_REFERENCING_VALIDATORS:
+        continue
+    source = path.read_text(encoding="utf-8")
+    for literal in FORBIDDEN_PROVIDER_LITERALS:
+        if literal in source:
+            errors.append(
+                f"{path.relative_to(ROOT)}: contains a hand-typed --provider tuple "
+                f"that bypasses the registry: {literal!r}"
+            )
+
+resume_text = (ROOT / "cloudskill-resume").read_text(encoding="utf-8")
+if "ollama|codex)" in resume_text:
+    errors.append(
+        "cloudskill-resume: case statement still matches the pre-Claude "
+        "'ollama|codex' pattern instead of the full registered provider set"
+    )
 
 print(
     f"Validated Runtime Eval provider registry: {len(providers)} provider(s), "

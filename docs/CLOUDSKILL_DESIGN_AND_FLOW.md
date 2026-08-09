@@ -99,6 +99,13 @@ shape, that every registered hosted-agent adapter exports the expected
 adapter's `call_site` function exists, and that every required consumer
 (including the shell-based `cloudskill-resume`, checked by literal scan since
 shell cannot import Python) actually reaches every registered provider ID.
+It also runs the same two mutation-test categories used for the Behavior
+output contract: a positive propagation check (AST-parses each Python
+consumer's `--provider` `choices=` expression and requires it to reference
+`PROVIDER_IDS` symbolically, not a copied tuple, so a contract edit
+propagates without editing the consumer) and a negative drift-injection scan
+(every other script and `cloudskill-resume`'s case statement must not
+contain a hand-typed provider tuple/pattern that bypasses the registry).
 
 Two provider families exist:
 

@@ -12,6 +12,7 @@ SKIP_EVAL=0
 NO_PUSH=0
 NO_WATCH=0
 EVAL_PROVIDER="ollama"
+BEHAVIOR_REPEAT=""
 COMMIT_MESSAGE="feat: continue CloudSkill lifecycle and runtime evaluation"
 
 usage() {
@@ -25,6 +26,10 @@ Options:
   --provider NAME Select local Eval provider: ollama, codex, or claude. Default: ollama.
   --codex        Shortcut for --provider codex.
   --claude       Shortcut for --provider claude.
+  --behavior-repeat N  Attempts for the R07 Behavior case (default 1). Only
+                 valid with the ollama provider -- the codex/claude smoke
+                 wrappers are intentionally fixed at one quota-conscious
+                 attempt each.
   --no-push      Stop after local validation and commit.
   --no-watch     Do not wait for GitHub Actions after creating/finding the PR.
   --message TEXT Override the Git commit subject.
@@ -66,6 +71,12 @@ while [ "$#" -gt 0 ]; do
       EVAL_PROVIDER="claude"
       shift
       ;;
+    --behavior-repeat)
+      [ "$#" -ge 2 ] || { echo "ERROR: --behavior-repeat requires a number." >&2; exit 2; }
+      BEHAVIOR_REPEAT="$2"
+      case "$BEHAVIOR_REPEAT" in ''|*[!0-9]*) echo "ERROR: --behavior-repeat must be a positive integer: $BEHAVIOR_REPEAT" >&2; exit 2 ;; esac
+      shift 2
+      ;;
     --no-push)
       NO_PUSH=1
       shift
@@ -90,6 +101,19 @@ while [ "$#" -gt 0 ]; do
       ;;
   esac
 done
+
+if [ -n "$BEHAVIOR_REPEAT" ] && [ "$EVAL_PROVIDER" != "ollama" ]; then
+  echo "ERROR: --behavior-repeat is only valid with --provider ollama (the codex/claude smoke wrappers are fixed at one attempt)." >&2
+  exit 2
+fi
+if [ -n "$BEHAVIOR_REPEAT" ] && [ "$FORCE_EVAL" -eq 0 ]; then
+  # The source-hash reuse check has no way to know a reusable completed ZIP
+  # was produced with a different --behavior-repeat count, so it could
+  # silently reuse stale n=1 evidence instead of running the requested
+  # repeat count. Force a fresh run whenever a specific repeat count is asked for.
+  FORCE_EVAL=1
+  echo "NOTE: --behavior-repeat implies --force-eval (a reusable ZIP's repeat count cannot be verified from source hashes alone)."
+fi
 
 SCRIPT_DIR="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd -P)"
 ROOT="$(git -C "$PWD" rev-parse --show-toplevel 2>/dev/null || true)"
@@ -398,7 +422,11 @@ else
       ./cloudskill-eval-claude
       ;;
     *)
-      ./cloudskill-eval
+      if [ -n "$BEHAVIOR_REPEAT" ]; then
+        ./cloudskill-eval --behavior-repeat "$BEHAVIOR_REPEAT"
+      else
+        ./cloudskill-eval
+      fi
       ;;
   esac
   REVIEW_ZIP="$(latest_review_zip)"

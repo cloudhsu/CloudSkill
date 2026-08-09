@@ -65,7 +65,7 @@ First live Claude evidence: `CloudSkill-local-eval-review-local-review-20260809-
 1. ~~Restore the R02 `code-review` plus `equipment-domain-modeling` boundary~~ — resolved, confirmed 3/3 in the 20260809-113507 bundle.
 2. ~~Use a structured `{ "final": "..." }` Behavior output contract~~ — resolved; contract ID/fingerprint confirmed consistent across environment.json and both raw/refined JSONL records.
 3. ~~Reject unstructured refinement candidates~~ — resolved; the accepted refined R07 answer passes `final-answer-discipline` (no planning leak) in the latest bundle.
-4. Ollama `--force-eval` run completed: routing repeat=3 is now clean 15/15, but **R07 Behavior is still n=1** — `run_local_eval_review.py`'s `behavior_command` hard-codes `--repeat 1` independent of the top-level `--repeat` flag. Add a decoupled `--behavior-repeat` option (or invoke `run_runtime_evals.py --eval-kind behavior --repeat 3` directly) before merge criterion 4 can actually be satisfied.
+4. ~~R07 Behavior repeat is hard-coded to 1~~ — resolved (tooling only, no model call). `run_local_eval_review.py` now has a `--behavior-repeat N` option decoupled from routing `--repeat`, threaded through `cloudskill-resume --behavior-repeat N` (ollama only; implies `--force-eval` since ZIP-reuse hashing can't detect a repeat-count mismatch). Default stays 1, so no prior behavior changed. **Still open: nobody has actually run `--behavior-repeat 3` yet** — the flag exists and is validated, but real repeat>=3 Behavior evidence still doesn't exist for either provider. That run is the next model-costing step.
 5. Investigate whether the Refiner Prompt should be strengthened to preserve raw's concrete authority identifiers (`ChamberStateAuthority`, `WaferCustodyAuthority`, `FencingToken`, exact `wafer location`/`occupancy` phrasing) instead of paraphrasing them away. Currently n=1 evidence only — do not change the Refiner Prompt until repeat evidence confirms this is systematic, not one sample's variance.
 6. Run the quota-conscious Codex comparison after Codex access is available.
 7. Keep provider results separate; do not average Ollama, Codex, and Claude scores.
@@ -89,6 +89,13 @@ Fresh Ollama evidence:
 
 ```bash
 ./cloudskill-resume --provider ollama --force-eval
+```
+
+Release-grade Ollama R07 Behavior evidence (repeat>=3, ~25+ minutes, costs
+3x the usual Behavior model calls; routing already defaults to repeat=3):
+
+```bash
+./cloudskill-resume --behavior-repeat 3
 ```
 
 Fresh Codex evidence:
