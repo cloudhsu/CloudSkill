@@ -81,6 +81,8 @@ required = [
     'assets/cloudbox.ico', 'assets/cloudbox-icon.png', 'assets/cloudbox-logo.png',
     'docs/CLOUDBOX_PLUGIN.md',
     'scripts/capture_eval_candidate.py', 'scripts/validate_interaction_capture.py',
+    'scripts/import_eval_candidates.py',
+    '.agents/skills/developing-skills/assets/export_eval_candidate.py',
     'config/cloudskill-config.template.json', '.gitignore',
     'evals/README.md', 'evals/skill-routing-cases.csv', 'evals/behavior/README.md',
     'evals/behavior/schema.json', 'evals/behavior/RESULT.template.json',

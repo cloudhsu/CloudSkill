@@ -3,6 +3,8 @@
 __pycache__/
 .cloudskill-backup/
 .cloudskill/config.local.json
+.cloudskill/eval-outbox/
+.cloudskill/.gitignore
 *.session.jsonl
 *.transcript.md
 *.pyc

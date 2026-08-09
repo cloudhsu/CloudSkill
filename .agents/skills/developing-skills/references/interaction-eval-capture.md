@@ -6,9 +6,15 @@ Convert a useful live Codex or Claude Code interaction into a private, reviewabl
 
 ## Candidate lifecycle
 
-`current interaction -> sanitized draft -> candidates | manual-review -> batch review -> formal Eval | rejected -> processed`
+Same-machine session (a reachable CloudSkill repository clone):
 
-The private Inbox is evidence staging. The public `evals/` tree contains only reviewed, generalized, repeatable cases.
+`current interaction -> sanitized draft -> capture_eval_candidate.py -> candidates | manual-review -> batch review -> formal Eval | rejected -> processed`
+
+Disconnected/external session (no reachable CloudSkill repository on this machine):
+
+`current interaction -> sanitized draft -> export_eval_candidate.py -> local eval-outbox + zip -> user transfers zip -> <CloudSkillRepo>/.local/eval-inbox/imports/ -> import_eval_candidates.py -> candidates | manual-review | rejected -> batch review -> formal Eval | rejected -> processed`
+
+The private Inbox is evidence staging in both paths. The public `evals/` tree contains only reviewed, generalized, repeatable cases.
 
 ## Configuration discovery
 
@@ -18,6 +24,43 @@ Use the first valid configuration in this order:
 2. `$HOME/.cloudskill/config.json`
 
 A valid configuration must keep `default_sanitization=true`, `save_raw_transcript=false`, `auto_modify_skills=false`, `auto_commit=false`, and `auto_push=false`. Stop rather than weakening these controls.
+
+## When no configuration resolves: disconnected/external session export
+
+Do not guess a write location and do not silently skip capture when neither
+config path exists or resolves to an unreachable directory (a different
+machine, a cloud sandbox, a project that was never locally configured). Use
+this Skill's own `assets/export_eval_candidate.py` instead:
+
+```bash
+python3 .claude/skills/developing-skills/assets/export_eval_candidate.py \
+  --kind positive --input draft.json
+# or --kind negative
+```
+
+This script:
+
+- performs the same structural validation and sanitization scan as
+  `capture_eval_candidate.py`, with no dependency on the CloudSkill
+  repository (stdlib only, so it works wherever the Skill is installed);
+- writes into a local, config-free `.cloudskill/eval-outbox/{candidates,
+  manual-review}/` folder inside the current project (no CloudSkill
+  repository access required);
+- packages the result into one timestamped
+  `CloudSkill-eval-export-<label>-<timestamp>.zip` in the current directory;
+- without a reachable private `sensitive-terms.local.txt` (pass one with
+  `--sensitive-terms PATH` if one happens to be available on this machine),
+  conservatively routes the candidate to `manual-review` rather than risking
+  an automated `PASS`.
+
+Tell the user the exact zip path and this instruction: copy the zip into
+`<CloudSkillRepo>/.local/eval-inbox/imports/` on the machine that hosts the
+CloudSkill repository, then run `python3 scripts/import_eval_candidates.py`
+there. That import step re-validates every candidate, re-scans it against
+the repository's own private sensitive-terms file, de-duplicates against
+what the Inbox already has, and files it into `candidates/`,
+`manual-review/`, or `rejected/`. It never touches formal `evals/`, Skill
+files, or Git state — the same authority boundary as direct capture.
 
 ## Mandatory sanitization
 

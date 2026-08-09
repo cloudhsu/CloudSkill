@@ -22,6 +22,7 @@ Use:
 - `assets/SKILL_CONTRACT.template.md`
 - `assets/BEHAVIOR_EVAL_CASE.template.json`
 - `assets/INTERACTION_EVAL_CANDIDATE.template.json`
+- `assets/export_eval_candidate.py` when no CloudSkill repository is reachable on this machine.
 - `assets/EVAL_MINING_REPORT.template.md`
 - `assets/SKILL_PROPOSAL.template.md`
 - `assets/SKILL_LIFECYCLE.template.json`
@@ -75,7 +76,7 @@ For either phrase:
 2. Apply mandatory sanitization before writing. Generalize organization, customer, person, project, product, equipment, site, account, address, path, URL, schedule, recipe, safety-limit, and other identifying data.
 3. Distinguish observed skill loading from inferred or unknown routing. Do not claim hidden runtime traces.
 4. Read project `.cloudskill/config.local.json`, then user `~/.cloudskill/config.json`. Do not guess an output path when no valid configuration exists.
-5. Create a draft from `INTERACTION_EVAL_CANDIDATE.template.json` and use the configured local repository's `scripts/capture_eval_candidate.py` helper.
+5. Create a draft from `INTERACTION_EVAL_CANDIDATE.template.json`. If a configuration resolves to a reachable CloudSkill repository, use its `scripts/capture_eval_candidate.py` helper. If none resolves (a disconnected/external session with no reachable CloudSkill repository on this machine), use this Skill's own `assets/export_eval_candidate.py` instead — see `references/interaction-eval-capture.md` for the export/transfer/import flow.
 6. Save a sanitization-safe record to the private candidate queue. Route uncertain records to `manual-review`.
 7. Do not modify formal Evals, skills, commits, tags, branches, or remotes during capture.
 

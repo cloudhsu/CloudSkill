@@ -2,6 +2,79 @@
 
 This document records the evolution rationale and evidence chain for work that may span multiple conversations. Git commits and tags remain the authoritative source history.
 
+## 2026-08-09 — Eval Inbox import path and disconnected-session candidate export
+
+Requested by the user: a unified local folder to drop exported archives from
+external sessions where this Skill set is installed but no CloudSkill
+repository is reachable, a convenient way to collect that data (asked
+whether a new "collect data" Skill was the right shape or something more
+convenient existed), and merge-to-main guidance for the ongoing optimization
+work.
+
+Change:
+
+- Initialized `.local/eval-inbox/` in this repository via the existing,
+  already-validated `scripts/install.sh --config-only` (self-referential:
+  `.cloudskill/config.local.json` points at this repository itself). Added
+  `imports/` and `imports/processed/` to the documented Inbox structure —
+  these two folders complete the `eval-outbox/` concept that
+  `scripts/install.sh`/`scripts/install.ps1` had already reserved in their
+  generated per-project `.gitignore` but never implemented.
+- Added `.agents/skills/developing-skills/assets/export_eval_candidate.py`:
+  a self-contained (stdlib-only, no CloudSkill-repository import) exporter
+  that ships with the installed Skill. It performs the same structural
+  validation and sanitization scan as `scripts/capture_eval_candidate.py`,
+  writes into a config-free `.cloudskill/eval-outbox/` in the current
+  project, and packages the result into one timestamped zip. Chose to
+  extend the existing `developing-skills` capture flow (`整理成正向/負向案例`)
+  with a config-free fallback rather than create a new Skill, per the "do
+  not create a new Skill until an existing owner is ruled out" rule — the
+  user still says the same two phrases in an external session; the only
+  change is which script the Agent picks based on whether a CloudSkill
+  repository config resolves.
+- Added `scripts/import_eval_candidates.py`: scans `<eval_inbox>/imports/`
+  for zips, re-validates every candidate with the same rules as
+  `capture_eval_candidate.py` (imported directly, since this tool only ever
+  runs inside the CloudSkill repository), re-scans against this machine's
+  own private `sensitive-terms.local.txt`, de-duplicates by content hash
+  against everything already in the Inbox, and files each candidate into
+  `candidates/`, `manual-review/`, or `rejected/`. Moves processed zips to
+  `imports/processed/` (never deletes the source archive). Never touches
+  formal `evals/`, Skill files, or Git state.
+- Extended `scripts/validate_interaction_capture.py` with a constant-drift
+  check (`ALLOWED_KINDS`/`PROHIBITED_KEYS`/`SENSITIVE_PATTERNS` must match
+  between `capture_eval_candidate.py` and `export_eval_candidate.py`) and a
+  full export -> zip -> transfer -> import round-trip smoke test, including
+  confirming a no-reachable-terms export conservatively lands in
+  `manual-review/`, and that re-running import with nothing new is a no-op.
+- Updated `.agents/skills/developing-skills/SKILL.md`,
+  `references/interaction-eval-capture.md`, `AGENTS.md`, and `INSTALL.md`
+  (new section 8b) to document the disconnected-session path and where to
+  physically drop the transferred zip.
+- Added an explicit, enumerated "Release / merge-to-main criteria" section
+  to `CLOUDSKILL_AGENT_HANDOFF.md` — this had previously only been referenced
+  as "the current release criteria" without a concrete checklist.
+
+Validation performed:
+
+- Manual end-to-end smoke test (export with no sensitive-terms file ->
+  `MANUAL_REQUIRED`; export with a clean local terms file -> `PASS`; hand-
+  crafted malformed candidate inside a zip -> `rejected/`; re-export of
+  identical content -> detected as a duplicate on import) before encoding it
+  as the permanent automated test in `validate_interaction_capture.py`.
+- `python3 scripts/run_all_checks.py` passes in full.
+- Test candidates/zips created during manual verification were deleted from
+  `.local/eval-inbox/` before commit; the Inbox ships empty and ready for
+  real captures.
+
+Explicitly NOT done:
+
+- No formal `evals/` case was created from this work; the Inbox import path
+  only stages candidates for a later, separate, explicit batch-review.
+- Did not merge PR #1 to `main` — see the new "Release / merge-to-main
+  criteria" section; several criteria (R07 repeat >= 3, Codex/Claude live
+  comparison) are not yet satisfied.
+
 ## 2026-08-09 — Claude Code CLI Runtime Eval provider + provider registry
 
 Requested by the user: run Codex-provider Evals with GPT (already true, via

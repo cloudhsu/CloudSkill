@@ -423,6 +423,7 @@ FORMAL_PATHS=(
   "docs"
   "CLOUDSKILL_AGENT_HANDOFF.md"
   "SKILL_MANIFEST.json"
+  ".gitignore"
   "cloudskill-eval"
   "cloudskill-eval-codex"
   "cloudskill-eval-claude"

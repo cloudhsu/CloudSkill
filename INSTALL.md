@@ -166,6 +166,8 @@ Inbox 結構：
 ├── manual-review/
 ├── processed/
 ├── rejected/
+├── imports/            # 從外部/中斷連線 session 匯出的壓縮檔，放在這裡等待匯入（見第 8b 節）
+│   └── processed/       # 已匯入的壓縮檔（保留供追溯，不會刪除）
 └── sensitive-terms.local.txt
 ```
 
@@ -189,11 +191,41 @@ Agent 應使用 `developing-skills`：
 
 1. 只擷取理解案例所需的相關互動。
 2. 預設去除識別資訊，不保存完整對話。
-3. 產生候選 JSON，並呼叫本機 CloudSkill Repository 的 `scripts/capture_eval_candidate.py`。
+3. 產生候選 JSON。若 `.cloudskill/config.local.json` 或 `~/.cloudskill/config.json` 能解析到本機可存取的 CloudSkill Repository，呼叫其 `scripts/capture_eval_candidate.py`，直接寫入 Eval Inbox。
 4. 安全案例寫入 `candidates/`；有疑慮的案例寫入 `manual-review/`。
 5. 不修改正式 `evals/`、技能、Commit、Tag、Branch 或 Remote。
 
-缺少有效設定時，Agent 應停止並要求重新執行安裝，不得自行猜測寫入位置。
+缺少有效設定、且本機也無法存取任何 CloudSkill Repository 時（例如外部/中斷連線的 session），Agent 不得自行猜測寫入位置，應改用第 8b 節的匯出流程，而不是放棄擷取。
+
+## 8b. 外部／中斷連線 session：匯出後帶回 CloudSkill
+
+當 Agent 只有已安裝的技能、卻沒有本機 CloudSkill Repository 可寫入時，使用這組技能自帶的匯出工具：
+
+```bash
+python3 .claude/skills/developing-skills/assets/export_eval_candidate.py \
+  --kind positive --input draft.json
+```
+
+行為：
+
+- 驗證規則與 `capture_eval_candidate.py` 相同，但不需要任何設定檔（純標準函式庫，跟著技能一起安裝）。
+- 寫入目前專案內、免設定的 `.cloudskill/eval-outbox/{candidates,manual-review}/`。
+- 打包成 `CloudSkill-eval-export-<label>-<timestamp>.zip`，印出確切路徑。
+- 因為通常沒有可用的私人 `sensitive-terms.local.txt`，預設保守地將案例歸類為 `manual-review`（若這台機器剛好有私人詞彙檔，可用 `--sensitive-terms PATH` 傳入）。
+
+接著把印出的壓縮檔手動搬到（USB、雲端硬碟、內部傳檔皆可）：
+
+```text
+<CloudSkillRepo>/.local/eval-inbox/imports/
+```
+
+在 CloudSkill Repository 內執行匯入：
+
+```bash
+python3 scripts/import_eval_candidates.py
+```
+
+匯入時會：重新驗證每筆候選、用 Repository 自己的 `sensitive-terms.local.txt` 再掃描一次、比對已存在的候選去除重複、分別歸類到 `candidates/`、`manual-review/`、或 `rejected/`，並把已處理的壓縮檔移到 `imports/processed/`（不會刪除原始檔）。這一步同樣不修改正式 `evals/`、技能、Commit 或 Remote。
 
 ## 9. 批次整理到 CloudSkill
 
