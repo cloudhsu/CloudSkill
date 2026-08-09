@@ -26,27 +26,25 @@ This is the operational entry point for a new conversation or coding agent that 
 
 ## Latest verified evidence before this increment
 
-Ollama, repeat=3 routing: `CloudSkill-local-eval-review-local-review-20260809-134358.zip`
+**Ollama, repeat=3 routing AND repeat=3 Behavior (release-grade):**
+`CloudSkill-local-eval-review-local-review-20260809-150657.zip`
 
 - Pipeline: SUCCESS, Evaluation gate: PASS
 - Provider/model: Ollama `qwen3:4b`
 - Routing: **15/15 (3 repeats x 5 cases), strict pass 100%, contract validity
-  100%, primary accuracy 100%** — R02/R05A/R05B/R05C/R07 all 3/3. The prior
-  R02 displacement by `equipment-control-architecture` stays resolved across
-  all 3 repeats, not just one sample.
-- Raw R07 Behavior: **78.0/100, gate PASS outright**, no refinement
-  attempted (raw already clears the 75-point threshold) — same score as the
-  live Claude run below, and consistent with the offline re-grade of the
-  prior 74/88 bundle after the grader-precision hotfix.
-- **Caveat found this run, not yet fixed**: `run_local_eval_review.py`'s
-  `behavior_command` hard-codes `--repeat 1` regardless of the top-level
-  `--repeat` flag (which only threads to routing). So Behavior evidence is
-  still n=1 even after a `--force-eval` run explicitly aimed at repeat>=3 —
-  merge criterion 4 is **not yet actually satisfiable** through the standard
-  `cloudskill-eval`/`cloudskill-resume` path as it stands. Either add a
-  decoupled `--behavior-repeat` flag, or invoke `scripts/run_runtime_evals.py
-  --eval-kind behavior --repeat 3` directly (outside the packaged
-  review-bundle format) to get real repeat>=3 Behavior evidence.
+  100%, primary accuracy 100%** — R02/R05A/R05B/R05C/R07 all 3/3.
+- R07 Behavior: **3/3 attempts passed, scores 78.0 / 80.7 / 80.7, average
+  79.8/100, gate PASS**, no refinement attempted (every raw attempt already
+  cleared the 75-point threshold on its own). Produced with the new
+  `--behavior-repeat 3` flag (see below) via
+  `./cloudskill-resume --behavior-repeat 3`. **Merge criterion 4 is now
+  satisfied with real evidence, not just a capable flag.**
+- The earlier `local-review-20260809-134358.zip` bundle (routing repeat=3,
+  Behavior still n=1 at that point) is superseded by this one; the
+  `behavior_command` hard-coded-`--repeat 1` limitation it exposed is fixed
+  (`scripts/run_local_eval_review.py --behavior-repeat N`, threaded through
+  `cloudskill-resume --behavior-repeat N`, forces `--force-eval` since the
+  ZIP-reuse hash check cannot detect a differing repeat count).
 
 First live Claude evidence: `CloudSkill-local-eval-review-local-review-20260809-134008.zip`
 
@@ -65,7 +63,7 @@ First live Claude evidence: `CloudSkill-local-eval-review-local-review-20260809-
 1. ~~Restore the R02 `code-review` plus `equipment-domain-modeling` boundary~~ — resolved, confirmed 3/3 in the 20260809-113507 bundle.
 2. ~~Use a structured `{ "final": "..." }` Behavior output contract~~ — resolved; contract ID/fingerprint confirmed consistent across environment.json and both raw/refined JSONL records.
 3. ~~Reject unstructured refinement candidates~~ — resolved; the accepted refined R07 answer passes `final-answer-discipline` (no planning leak) in the latest bundle.
-4. ~~R07 Behavior repeat is hard-coded to 1~~ — resolved (tooling only, no model call). `run_local_eval_review.py` now has a `--behavior-repeat N` option decoupled from routing `--repeat`, threaded through `cloudskill-resume --behavior-repeat N` (ollama only; implies `--force-eval` since ZIP-reuse hashing can't detect a repeat-count mismatch). Default stays 1, so no prior behavior changed. **Still open: nobody has actually run `--behavior-repeat 3` yet** — the flag exists and is validated, but real repeat>=3 Behavior evidence still doesn't exist for either provider. That run is the next model-costing step.
+4. ~~R07 Behavior repeat is hard-coded to 1~~ — fully resolved, including real evidence. `--behavior-repeat 3` run completed: 3/3 attempts passed (78.0/80.7/80.7, avg 79.8), gate PASS. Claude provider is still n=1 for Behavior (`./cloudskill-eval --provider claude --behavior-repeat 3`, bypassing the fixed-repeat smoke wrapper, would get equivalent evidence there if wanted later).
 5. Investigate whether the Refiner Prompt should be strengthened to preserve raw's concrete authority identifiers (`ChamberStateAuthority`, `WaferCustodyAuthority`, `FencingToken`, exact `wafer location`/`occupancy` phrasing) instead of paraphrasing them away. Currently n=1 evidence only — do not change the Refiner Prompt until repeat evidence confirms this is systematic, not one sample's variance.
 6. Run the quota-conscious Codex comparison after Codex access is available. **Explicit deferral (2026-08-09, user-confirmed): Codex cannot be run today.** This is the recorded reason satisfying merge criterion 5's "OR an explicit, dated reason" clause — do not treat this as silently skipped.
 7. Keep provider results separate; do not average Ollama, Codex, and Claude scores.
