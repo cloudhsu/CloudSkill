@@ -1,0 +1,20 @@
+#!/bin/sh
+# One-command Claude Code CLI Runtime Eval smoke path.
+# Uses saved `claude auth login` authentication.
+
+ROOT="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd -P)"
+
+if ! command -v claude >/dev/null 2>&1 && [ -z "${CLOUDSKILL_CLAUDE:-}" ]; then
+  echo "ERROR: Claude Code CLI was not found."
+  echo "Install Claude Code, run: claude auth login"
+  exit 2
+fi
+
+cd "$ROOT" || exit 2
+
+# Defaults are intentionally quota-conscious. Later arguments override earlier ones.
+exec "$ROOT/cloudskill-eval" \
+  --provider claude \
+  --repeat 1 \
+  --no-refine \
+  "$@"

@@ -425,6 +425,7 @@ FORMAL_PATHS=(
   "SKILL_MANIFEST.json"
   "cloudskill-eval"
   "cloudskill-eval-codex"
+  "cloudskill-eval-claude"
   "cloudskill-resume"
   "README.md"
   "CHANGELOG.md"

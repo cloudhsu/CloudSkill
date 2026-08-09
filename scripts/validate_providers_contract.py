@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import re
 import stat
 import sys
 from pathlib import Path
@@ -89,6 +90,22 @@ for consumer in required_consumers:
         for provider_id in provider_ids:
             if provider_id not in text:
                 errors.append(f"{consumer}: missing provider literal '{provider_id}'")
+        # cloudskill-resume only stages/commits paths listed in its FORMAL_PATHS
+        # array; a hosted-agent provider's smoke launcher that is not listed
+        # there is silently left uncommitted (a real regression this validator
+        # caught: cloudskill-eval-claude was created but never staged).
+        formal_paths_match = re.search(r"FORMAL_PATHS=\((.*?)\)", text, re.S)
+        formal_paths_block = formal_paths_match.group(1) if formal_paths_match else ""
+        for provider_id, info in providers.items():
+            if not isinstance(info, dict) or info.get("family") != "hosted-agent":
+                continue
+            smoke_command = info.get("smoke_command", "")
+            launcher_name = smoke_command.lstrip("./") if smoke_command.startswith("./") else ""
+            if launcher_name and f'"{launcher_name}"' not in formal_paths_block:
+                errors.append(
+                    f"{consumer}: FORMAL_PATHS does not list '{launcher_name}' "
+                    f"(providers.json/{provider_id} smoke_command), so it would never be staged"
+                )
 
 if str(SCRIPTS) not in sys.path:
     sys.path.insert(0, str(SCRIPTS))

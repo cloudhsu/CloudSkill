@@ -85,6 +85,20 @@ Unresolved:
   registry documents the extension shape but does not force a working path to
   move file location without a second local backend actually needing it yet.
 
+CI caught a real gap in this increment: `cloudskill-eval-claude` was created
+but `cloudskill-resume` only stages/commits paths listed in its hardcoded
+`FORMAL_PATHS` array, and `cloudskill-eval-claude` was not added to it, so the
+first push landed without the launcher file and `validate_pack.py` failed in
+GitHub Actions (`missing required file: cloudskill-eval-claude`) even though
+every local `run_all_checks.py` pass had been GREEN — local checks run against
+the working tree, not the committed diff. Fixed by adding
+`"cloudskill-eval-claude"` to `FORMAL_PATHS`, and by extending
+`scripts/validate_providers_contract.py` to parse that array and fail when a
+registered hosted-agent provider's `smoke_command` launcher is absent from
+it — confirmed this check fails against the pre-fix `cloudskill-resume` (RED)
+and passes after (GREEN), so the same class of provider-launcher omission is
+now caught before push, not by CI after.
+
 ## 2026-08-09 — R07 Behavior grader precision hotfix (assumptions/restart false negatives)
 
 Evidence: `CloudSkill-local-eval-review-local-review-20260809-113507.zip`.
