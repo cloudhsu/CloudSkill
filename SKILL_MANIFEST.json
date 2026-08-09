@@ -83,7 +83,7 @@
       "name": "local-runtime-eval-debugging",
       "description": "Use when executing, diagnosing, grading, or packaging local CloudSkill or CloudBox Runtime Evals, especially with Ollama, Python discovery, context-budget overflow, missing reports, routing versus behavior failures, or a request for one reproducible upload bundle.",
       "path": ".agents/skills/local-runtime-eval-debugging/SKILL.md",
-      "file_count": 5
+      "file_count": 6
     },
     {
       "name": "runtime-evaluation-engineering",

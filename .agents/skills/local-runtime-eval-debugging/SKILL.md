@@ -20,6 +20,7 @@ The pipeline must distinguish:
 Read:
 
 - `references/local-eval-troubleshooting.md`
+- `references/codex-runtime-eval.md`
 - `assets/LOCAL_EVAL_BUNDLE_CONTRACT.md`
 
 ## Trigger examples
@@ -143,6 +144,19 @@ Do not infer a later-stage defect when an earlier stage never ran.
 - Deleting old results before the new bundle is confirmed.
 - Replacing the raw behavior output with a polished rewrite and losing evidence.
 - Packaging the entire repository or private transcript history.
+
+## Codex CLI evaluation path
+
+Use the Codex path when a higher-capability authenticated Codex baseline is needed in addition to the local Ollama baseline.
+
+- Run `codex login status` before a long test; use `codex login` when no valid session exists.
+- Use `./cloudskill-eval-codex` for the quota-conscious one-repeat smoke path.
+- Use `./cloudskill-eval-codex --repeat 3` only after the smoke path completes and the expected usage budget is available.
+- Execute Codex non-interactively through `codex exec` with an ephemeral session, read-only sandbox, no approvals, JSONL event capture, and a final-message file.
+- Run the model in an isolated empty Git repository so it cannot silently load extra CloudSkill source beyond the assembled Eval prompt.
+- Keep Codex and Ollama results as separate review bundles. Do not average them into one provider-independent score.
+- A Codex failure caused by authentication or usage limits is an infrastructure/availability result, not a Skill-quality failure.
+- Never package `~/.codex/auth.json`, access tokens, account identifiers, or raw authentication output.
 
 ## Required output
 

@@ -13,10 +13,14 @@ errors: list[str] = []
 
 required = [
     ROOT / "cloudskill-eval",
+    ROOT / "cloudskill-eval-codex",
+    ROOT / "scripts" / "codex_eval_adapter.py",
+    ROOT / "scripts" / "validate_codex_eval_path.py",
     ROOT / "scripts" / "run_local_eval_review.py",
     ROOT / ".agents" / "skills" / "local-runtime-eval-debugging" / "SKILL.md",
     ROOT / ".agents" / "skills" / "local-runtime-eval-debugging" / "agents" / "openai.yaml",
     ROOT / ".agents" / "skills" / "local-runtime-eval-debugging" / "references" / "local-eval-troubleshooting.md",
+    ROOT / ".agents" / "skills" / "local-runtime-eval-debugging" / "references" / "codex-runtime-eval.md",
     ROOT / ".agents" / "skills" / "local-runtime-eval-debugging" / "assets" / "LOCAL_EVAL_BUNDLE_CONTRACT.md",
     ROOT / "evals" / "behavior" / "cases" / "local-runtime-eval-debugging.json",
 ]
@@ -34,6 +38,16 @@ if launcher.is_file():
         if marker not in text:
             errors.append(f"cloudskill-eval missing marker: {marker}")
 
+codex_launcher = ROOT / "cloudskill-eval-codex"
+if codex_launcher.is_file():
+    mode = codex_launcher.stat().st_mode
+    if not (mode & stat.S_IXUSR):
+        errors.append("cloudskill-eval-codex is not executable")
+    text = codex_launcher.read_text(encoding="utf-8")
+    for marker in ("--provider codex", "--repeat 1", "--no-refine", "codex login"):
+        if marker not in text:
+            errors.append(f"cloudskill-eval-codex missing marker: {marker}")
+
 runner = ROOT / "scripts" / "run_local_eval_review.py"
 if runner.is_file():
     text = runner.read_text(encoding="utf-8")
@@ -46,6 +60,8 @@ if runner.is_file():
         "source-snapshot",
         "pipeline_status",
         "evaluation_gate",
+        'choices=("ollama", "codex")',
+        "codex_preflight",
     ):
         if marker not in text:
             errors.append(f"run_local_eval_review.py missing marker: {marker}")
@@ -109,7 +125,7 @@ if runtime_validator.is_file():
     text = runtime_validator.read_text(encoding="utf-8")
     if "found {len(valid_skills)}" in text and "!= 17" in text:
         errors.append("validate_runtime_evals.py still hard-codes 17 skill IDs")
-    if "VALIDATION_NUM_CTX = 8192" not in text:
+    if "VALIDATION_NUM_CTX = 8192" not in text and "ROUTING_VALIDATION_NUM_CTX = 8192" not in text:
         errors.append("validate_runtime_evals.py is missing the updated validation context")
 
 print("Validated one-command local Runtime Eval tooling, review bundle contract, routing cases, and skill coverage")

@@ -14,6 +14,7 @@ commands = [
     [sys.executable, 'scripts/smoke_install.py'],
     [sys.executable, 'scripts/validate_runtime_evals.py'],
     [sys.executable, 'scripts/validate_local_eval_debugging.py'],
+    [sys.executable, 'scripts/validate_codex_eval_path.py'],
     [sys.executable, 'scripts/validate_behavior_runtime_evals.py'],
 ]
 

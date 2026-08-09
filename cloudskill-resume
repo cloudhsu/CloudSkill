@@ -11,6 +11,7 @@ FORCE_EVAL=0
 SKIP_EVAL=0
 NO_PUSH=0
 NO_WATCH=0
+EVAL_PROVIDER="ollama"
 COMMIT_MESSAGE="feat: continue CloudSkill lifecycle and runtime evaluation"
 
 usage() {
@@ -20,7 +21,9 @@ Usage: ./cloudskill-resume [options]
 Options:
   --status       Show the current branch, Eval, ZIP, PR, and stash state only.
   --force-eval   Run a new local Runtime Eval even when a current ZIP is reusable.
-  --skip-eval    Continue validation/commit/push/PR without running Ollama.
+  --skip-eval    Continue validation/commit/push/PR without running a model.
+  --provider NAME Select local Eval provider: ollama or codex. Default: ollama.
+  --codex        Shortcut for --provider codex.
   --no-push      Stop after local validation and commit.
   --no-watch     Do not wait for GitHub Actions after creating/finding the PR.
   --message TEXT Override the Git commit subject.
@@ -46,6 +49,16 @@ while [ "$#" -gt 0 ]; do
       ;;
     --skip-eval)
       SKIP_EVAL=1
+      shift
+      ;;
+    --provider)
+      [ "$#" -ge 2 ] || { echo "ERROR: --provider requires ollama or codex." >&2; exit 2; }
+      EVAL_PROVIDER="$2"
+      case "$EVAL_PROVIDER" in ollama|codex) ;; *) echo "ERROR: invalid provider: $EVAL_PROVIDER" >&2; exit 2 ;; esac
+      shift 2
+      ;;
+    --codex)
+      EVAL_PROVIDER="codex"
       shift
       ;;
     --no-push)
@@ -254,6 +267,7 @@ echo "CloudSkill interruption-safe continuation"
 echo "Repository: $ROOT"
 echo "Branch: $(git branch --show-current)"
 echo "Python: $PYTHON"
+echo "Eval provider: $EVAL_PROVIDER"
 "$PYTHON" --version
 echo "Log: $LOG_FILE"
 
@@ -292,9 +306,10 @@ git diff --check
 
 zip_matches_current_sources() {
   local zip="$1"
+  local expected_provider="$2"
   [ -n "$zip" ] && [ -s "$zip" ] || return 1
 
-  "$PYTHON" - "$zip" "$ROOT" <<'PY'
+  "$PYTHON" - "$zip" "$ROOT" "$expected_provider" <<'PY'
 from __future__ import annotations
 
 import hashlib
@@ -305,6 +320,7 @@ from pathlib import Path
 
 zip_path = Path(sys.argv[1])
 root = Path(sys.argv[2])
+expected_provider = sys.argv[3]
 prefix = "CloudSkill-local-eval-review/"
 
 def digest(path: Path) -> str:
@@ -322,6 +338,9 @@ except (OSError, KeyError, ValueError, zipfile.BadZipFile):
     raise SystemExit(1)
 
 if status.get("pipeline_status") != "SUCCESS":
+    raise SystemExit(1)
+actual_provider = status.get("provider") or "ollama"
+if actual_provider != expected_provider:
     raise SystemExit(1)
 
 checked = 0
@@ -349,7 +368,7 @@ echo
 echo "=== Runtime Eval evidence ==="
 if [ "$SKIP_EVAL" -eq 1 ]; then
   echo "Runtime Eval skipped by --skip-eval."
-elif [ "$FORCE_EVAL" -eq 0 ] && zip_matches_current_sources "$REVIEW_ZIP"; then
+elif [ "$FORCE_EVAL" -eq 0 ] && zip_matches_current_sources "$REVIEW_ZIP" "$EVAL_PROVIDER"; then
   echo "Reusing the completed review ZIP because its source hashes still match:"
   echo "$REVIEW_ZIP"
 else
@@ -357,8 +376,16 @@ else
     echo "ERROR: ./cloudskill-eval is missing or not executable." >&2
     exit 2
   }
-  echo "Starting exactly one foreground Runtime Eval."
-  ./cloudskill-eval
+  echo "Starting exactly one foreground Runtime Eval with provider: $EVAL_PROVIDER"
+  if [ "$EVAL_PROVIDER" = "codex" ]; then
+    [ -x "./cloudskill-eval-codex" ] || {
+      echo "ERROR: ./cloudskill-eval-codex is missing or not executable." >&2
+      exit 2
+    }
+    ./cloudskill-eval-codex
+  else
+    ./cloudskill-eval
+  fi
   REVIEW_ZIP="$(latest_review_zip)"
   [ -n "$REVIEW_ZIP" ] && [ -s "$REVIEW_ZIP" ] || {
     echo "ERROR: Runtime Eval did not produce a valid review ZIP." >&2
@@ -381,6 +408,7 @@ FORMAL_PATHS=(
   "docs"
   "SKILL_MANIFEST.json"
   "cloudskill-eval"
+  "cloudskill-eval-codex"
   "cloudskill-resume"
   "README.md"
   "CHANGELOG.md"
@@ -463,7 +491,8 @@ if command -v gh >/dev/null 2>&1 && gh auth status >/dev/null 2>&1; then
       echo
       echo "- Repository static checks: passed"
       if [ -n "$REVIEW_ZIP" ] && [ -s "$REVIEW_ZIP" ]; then
-        echo "- Local Runtime Eval review bundle: $(basename "$REVIEW_ZIP")"
+        echo "- Local Runtime Eval provider: $EVAL_PROVIDER"
+      echo "- Local Runtime Eval review bundle: $(basename "$REVIEW_ZIP")"
       else
         echo "- Local Runtime Eval: skipped"
       fi

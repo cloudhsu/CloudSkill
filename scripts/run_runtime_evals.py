@@ -31,6 +31,8 @@ from runtime_eval_common import (
     validate_decision_shape,
 )
 
+from codex_eval_adapter import call_codex_cli, codex_preflight
+
 OPENAI_API_URL = "https://api.openai.com/v1/responses"
 DEFAULT_OLLAMA_URL = "http://127.0.0.1:11434"
 
@@ -41,7 +43,7 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--provider",
-        choices=("ollama", "openai"),
+        choices=("ollama", "openai", "codex"),
         default="ollama",
         help="Model runtime. Ollama is local and requires no API key.",
     )
@@ -49,6 +51,11 @@ def parse_args() -> argparse.Namespace:
         "--model",
         default="qwen3:4b",
         help="Ollama model name or exact OpenAI model name. Default: qwen3:4b.",
+    )
+    parser.add_argument(
+        "--codex-model",
+        default="",
+        help="Optional Codex CLI model override. Empty uses the authenticated Codex default.",
     )
     parser.add_argument(
         "--eval-kind",
@@ -160,11 +167,21 @@ def parse_json_object(text: str) -> dict[str, Any]:
     return value
 
 
+MIN_FINAL_DELIVERABLE_CHARACTERS = 500
+
+
 def extract_final_deliverable(text: str) -> tuple[str, bool]:
-    matches = re.findall(r"<final>\s*(.*?)\s*</final>", text, re.I | re.S)
-    if not matches:
-        return text.strip(), False
-    return matches[-1].strip(), True
+    """Extract only a substantive final block that terminates the model response."""
+    matches = list(re.finditer(r"<final>\s*(.*?)\s*</final>", text, re.I | re.S))
+    for match in reversed(matches):
+        candidate = match.group(1).strip()
+        trailing = text[match.end():]
+        if trailing.strip():
+            continue
+        if len(candidate) < MIN_FINAL_DELIVERABLE_CHARACTERS:
+            continue
+        return candidate, True
+    return text.strip(), False
 
 def request_json(
     *,
@@ -378,6 +395,16 @@ def call_model(
             temperature=args.temperature,
             seed=args.seed,
         )
+    if args.provider == "codex":
+        text, metadata = call_codex_cli(
+            model=args.codex_model or None,
+            system_prompt=system_prompt,
+            user_prompt=user_prompt,
+            schema=schema,
+            timeout=args.timeout,
+        )
+        actual: dict[str, Any] | str = parse_json_object(text) if schema is not None else text
+        return actual, text, metadata
     assert api_key is not None
     return call_openai(
         api_key=api_key,
@@ -555,6 +582,18 @@ def prompt_request_payload(
         if schema is not None:
             payload["format"] = schema
         return payload
+    if args.provider == "codex":
+        return {
+            "provider": "codex",
+            "model": args.codex_model or "codex-default",
+            "sandbox": "read-only",
+            "ephemeral": True,
+            "isolated_git_repository": True,
+            "system_prompt": system_prompt,
+            "user_prompt": user_prompt,
+            "output_schema": schema,
+            "max_output_tokens_advisory": max_output_tokens,
+        }
     payload = {
         "model": args.model,
         "instructions": system_prompt,
@@ -623,7 +662,7 @@ def dry_run_plan(
         "cloudbox_version": version,
         "suite": suite["suite"],
         "provider": args.provider,
-        "model": args.model,
+        "model": args.codex_model or "codex-default" if args.provider == "codex" else args.model,
         "eval_kind": args.eval_kind,
         "context_mode": context_mode,
         "contract_repair": args.contract_repair,
@@ -643,6 +682,15 @@ def dry_run_plan(
         else None,
         "openai": {"store": False, "structured_output": True}
         if args.provider == "openai"
+        else None,
+        "codex": {
+            "model": args.codex_model or "codex-default",
+            "sandbox": "read-only",
+            "ephemeral": True,
+            "isolated_git_repository": True,
+            "structured_output": True,
+        }
+        if args.provider == "codex"
         else None,
         "cases": case_plans,
     }
@@ -664,7 +712,8 @@ def main() -> int:
     version = VERSION_FILE.read_text(encoding="utf-8").strip()
     cases = select_cases(suite, args.case_id)
     valid_skills = skill_ids(manifest)
-    output = args.output or default_output(args.provider, args.model, args.eval_kind, context_mode)
+    model_label = args.codex_model or "codex-default" if args.provider == "codex" else args.model
+    output = args.output or default_output(args.provider, model_label, args.eval_kind, context_mode)
 
     preflight_bundles: dict[str, dict[str, Any]] = {}
     try:
@@ -704,7 +753,13 @@ def main() -> int:
     if args.provider == "openai":
         api_key = os.environ.get("OPENAI_API_KEY")
         if not api_key:
-            raise SystemExit("OPENAI_API_KEY is not set; use --provider ollama for local execution")
+            raise SystemExit("OPENAI_API_KEY is not set; use --provider ollama or codex for local execution")
+    elif args.provider == "codex":
+        if not args.skip_model_check:
+            try:
+                codex_preflight(timeout=min(args.timeout, 30.0))
+            except Exception as exc:
+                raise SystemExit(str(exc)) from exc
     elif not args.skip_model_check:
         try:
             installed = ollama_installed_models(args.ollama_url, min(args.timeout, 30.0))
@@ -736,7 +791,7 @@ def main() -> int:
                     "case_id": case["id"],
                     "attempt": attempt,
                     "provider": args.provider,
-                    "model_requested": args.model,
+                    "model_requested": args.codex_model or "codex-default" if args.provider == "codex" else args.model,
                     "eval_kind": args.eval_kind,
                     "context_mode": context_mode,
                     "diagnostic_baseline": context_mode in {"none", "manifest"},

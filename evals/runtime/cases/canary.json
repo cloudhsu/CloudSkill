@@ -119,7 +119,7 @@
     },
     {
       "id": "R05C-component-and-recovery-composition",
-      "prompt": "主要交付物明確是 Valve 的 Commanded、Pending、Actual、Readback、Success ACK、physical completion 與 late readback reconciliation 元件狀態／命令契約；完成元件契約後，再另外分配 Sequence 與 Equipment Service 對 timeout、late completion、interlock 與 recovery 的責任。元件物理目的與完成證據已提供，不需新增 semiconductor domain knowledge。請選擇最小充分的 CloudBox 技能與順序。",
+      "prompt": "這是兩個獨立且都必須完成的交付邊界，不能只選其中一個 Skill。主要交付物是 Valve 的 Commanded、Pending、Actual、Readback、Success ACK、physical completion 與 late readback reconciliation 元件狀態／命令契約；完成元件契約後，還必須另外分配 Sequence 與 Equipment Service 對 timeout、late completion、interlock 與 recovery 的責任。元件物理目的與完成證據已提供，不需新增 semiconductor domain knowledge。請選擇最小充分的 CloudBox 技能與順序。",
       "expected": {
         "primary_skill": "equipment-domain-modeling",
         "required_supporting_skills": [

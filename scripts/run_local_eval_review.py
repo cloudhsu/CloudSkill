@@ -17,6 +17,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Iterable
 
+from codex_eval_adapter import codex_preflight
+
 ROOT = Path(__file__).resolve().parents[1]
 RUNTIME_ROOT = ROOT / ".local" / "runtime-evals"
 DEFAULT_MODEL = "qwen3:4b"
@@ -55,7 +57,13 @@ def parse_args() -> argparse.Namespace:
             "refine behavior output, and produce one uploadable review ZIP."
         )
     )
-    parser.add_argument("--model", default=DEFAULT_MODEL)
+    parser.add_argument("--provider", choices=("ollama", "codex"), default="ollama")
+    parser.add_argument("--model", default=DEFAULT_MODEL, help="Ollama model name.")
+    parser.add_argument(
+        "--codex-model",
+        default="",
+        help="Optional Codex CLI model override. Empty uses the authenticated Codex default.",
+    )
     parser.add_argument("--repeat", type=int, default=3)
     parser.add_argument("--full-routing", action="store_true", help="Run all Canary routing cases instead of R02/R05A/R05B/R05C/R07.")
     parser.add_argument("--no-refine", action="store_true", help="Do not run the Behavior final-deliverable refinement pass.")
@@ -67,6 +75,22 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--package-existing", type=Path, help="Package an existing run directory without executing the model.")
     return parser.parse_args()
 
+
+
+def requested_model(args: argparse.Namespace) -> str:
+    if args.provider == "codex":
+        return args.codex_model or "codex-default"
+    return args.model
+
+
+def runtime_provider_args(args: argparse.Namespace) -> list[str]:
+    values = ["--provider", args.provider]
+    if args.provider == "codex":
+        if args.codex_model:
+            values.extend(["--codex-model", args.codex_model])
+    else:
+        values.extend(["--model", args.model])
+    return values
 
 def sha256_file(path: Path) -> str:
     digest = hashlib.sha256()
@@ -142,7 +166,8 @@ class ReviewRun:
         self.log("CloudSkill local Runtime Eval review")
         self.log(f"Repository: {ROOT}")
         self.log(f"Run directory: {self.run_dir}")
-        self.log(f"Model: {self.args.model}")
+        self.log(f"Provider: {self.args.provider}")
+        self.log(f"Model: {requested_model(self.args)}")
         self.log("Execution mode: foreground")
 
     def log(self, message: str = "") -> None:
@@ -228,7 +253,8 @@ class ReviewRun:
             "finished_at_utc": now_utc(),
             "repository": str(ROOT),
             "run_directory": str(self.run_dir),
-            "model": self.args.model,
+            "provider": self.args.provider,
+            "model": requested_model(self.args),
             "routing_context": self.routing_context,
             "behavior_context": self.behavior_context,
             "behavior_refinement_attempted": self.refinement_attempted,
@@ -252,7 +278,8 @@ class ReviewRun:
             f"- Pipeline: **{'SUCCESS' if self.pipeline_success else 'FAILED'}**",
             f"- Evaluation gate: **{'UNKNOWN' if self.gate_pass is None else ('PASS' if self.gate_pass else 'FAIL')}**",
             f"- Earliest final stage: `{self.stage}`",
-            f"- Model: `{self.args.model}`",
+            f"- Provider: `{self.args.provider}`",
+            f"- Model: `{requested_model(self.args)}`",
             f"- Routing context: `{self.routing_context or 'not selected'}`",
             f"- Behavior context: `{self.behavior_context or 'not selected'}`",
         ]
@@ -305,7 +332,9 @@ class ReviewRun:
             "VERSION",
             "SKILL_MANIFEST.json",
             "cloudskill-eval",
+            "cloudskill-eval-codex",
             "scripts/run_local_eval_review.py",
+            "scripts/codex_eval_adapter.py",
             "scripts/runtime_eval_common.py",
             "scripts/run_runtime_evals.py",
             "scripts/grade_runtime_evals.py",
@@ -320,6 +349,7 @@ class ReviewRun:
             ".agents/skills/equipment-domain-modeling/SKILL.md",
             ".agents/skills/local-runtime-eval-debugging/SKILL.md",
             ".agents/skills/local-runtime-eval-debugging/references/local-eval-troubleshooting.md",
+            ".agents/skills/local-runtime-eval-debugging/references/codex-runtime-eval.md",
             ".agents/skills/runtime-evaluation-engineering/SKILL.md",
             ".agents/skills/runtime-evaluation-engineering/references/evaluation-failure-taxonomy.md",
             ".agents/skills/runtime-evaluation-engineering/references/case-and-grader-design.md",
@@ -391,7 +421,7 @@ def git_output(*args: str) -> str:
     return (result.stdout or result.stderr).strip()
 
 
-def collect_environment(run: ReviewRun, ollama_tags: dict[str, Any]) -> None:
+def collect_environment(run: ReviewRun, runtime_info: dict[str, Any]) -> None:
     payload = {
         "generated_at_utc": now_utc(),
         "python_executable": sys.executable,
@@ -403,8 +433,9 @@ def collect_environment(run: ReviewRun, ollama_tags: dict[str, Any]) -> None:
         "git_branch": git_output("branch", "--show-current"),
         "git_status_short": git_output("status", "--short", "--untracked-files=no"),
         "git_diff_stat": git_output("diff", "--stat"),
-        "model_requested": run.args.model,
-        "ollama_tags": ollama_tags,
+        "provider": run.args.provider,
+        "model_requested": requested_model(run.args),
+        "runtime": runtime_info,
     }
     run.environment_path.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
@@ -500,14 +531,16 @@ _REFINED_EVIDENCE_GROUPS = (
 
 
 def extract_final(text: str) -> str:
-    match = re.search(r"<final>\s*(.*?)\s*</final>", text, re.I | re.S)
-    if match:
-        return match.group(1).strip()
-    stripped = text.strip()
-    for marker in ("Final answer:", "FINAL ANSWER:", "Final deliverable:"):
-        if marker in stripped:
-            return stripped.split(marker, 1)[1].strip()
-    return stripped
+    """Extract only a substantive final block that ends the refiner response."""
+    matches = list(re.finditer(r"<final>\s*(.*?)\s*</final>", text, re.I | re.S))
+    for match in reversed(matches):
+        candidate = match.group(1).strip()
+        if text[match.end():].strip():
+            continue
+        if len(candidate) < MIN_REFINED_CHARACTERS:
+            continue
+        return candidate
+    return text.strip()
 
 
 def compact_draft_evidence(text: str, limit: int = 2600) -> str:
@@ -657,6 +690,8 @@ def run_pipeline(args: argparse.Namespace) -> int:
 
         run.set_stage("environment")
         required = [
+            ROOT / "cloudskill-eval-codex",
+            ROOT / "scripts" / "codex_eval_adapter.py",
             ROOT / "scripts" / "run_runtime_evals.py",
             ROOT / "scripts" / "grade_runtime_evals.py",
             ROOT / "scripts" / "grade_behavior_evals.py",
@@ -666,18 +701,22 @@ def run_pipeline(args: argparse.Namespace) -> int:
         missing = [str(path.relative_to(ROOT)) for path in required if not path.is_file()]
         if missing:
             raise PipelineFailure("missing required files: " + ", ".join(missing))
-        tags = request_json(args.ollama_url.rstrip("/") + "/api/tags", None, timeout=30, method="GET")
-        names = {
-            value
-            for item in tags.get("models", [])
-            if isinstance(item, dict)
-            for key in ("name", "model")
-            for value in [item.get(key)]
-            if isinstance(value, str)
-        }
-        if args.model not in names:
-            raise PipelineFailure(f"Ollama model {args.model!r} not installed; available={sorted(names)}")
-        collect_environment(run, tags)
+        if args.provider == "ollama":
+            tags = request_json(args.ollama_url.rstrip("/") + "/api/tags", None, timeout=30, method="GET")
+            names = {
+                value
+                for item in tags.get("models", [])
+                if isinstance(item, dict)
+                for key in ("name", "model")
+                for value in [item.get(key)]
+                if isinstance(value, str)
+            }
+            if args.model not in names:
+                raise PipelineFailure(f"Ollama model {args.model!r} not installed; available={sorted(names)}")
+            runtime_info = {"ollama_url": args.ollama_url, "tags": tags}
+        else:
+            runtime_info = {"codex": codex_preflight(timeout=30)}
+        collect_environment(run, runtime_info)
 
         run.set_stage("syntax-check")
         run.run_command(
@@ -686,6 +725,7 @@ def run_pipeline(args: argparse.Namespace) -> int:
                 "-m",
                 "py_compile",
                 "scripts/run_local_eval_review.py",
+                "scripts/codex_eval_adapter.py",
                 "scripts/runtime_eval_common.py",
                 "scripts/run_runtime_evals.py",
                 "scripts/grade_runtime_evals.py",
@@ -712,10 +752,7 @@ def run_pipeline(args: argparse.Namespace) -> int:
         routing_command = [
             sys.executable,
             "scripts/run_runtime_evals.py",
-            "--provider",
-            "ollama",
-            "--model",
-            args.model,
+            *runtime_provider_args(args),
             "--eval-kind",
             "routing",
             "--context-mode",
@@ -765,14 +802,10 @@ def run_pipeline(args: argparse.Namespace) -> int:
         behavior_raw_report = run.run_dir / "behavior-raw-report.md"
 
         run.set_stage("behavior-execution")
-        run.run_command(
-            [
+        behavior_command = [
                 sys.executable,
                 "scripts/run_runtime_evals.py",
-                "--provider",
-                "ollama",
-                "--model",
-                args.model,
+                *runtime_provider_args(args),
                 "--eval-kind",
                 "behavior",
                 "--context-mode",
@@ -800,7 +833,7 @@ def run_pipeline(args: argparse.Namespace) -> int:
                 "--output",
                 str(behavior_raw_jsonl),
             ]
-        )
+        run.run_command(behavior_command)
         if not behavior_raw_jsonl.is_file() or behavior_raw_jsonl.stat().st_size == 0:
             raise PipelineFailure("behavior JSONL was not created")
 
@@ -821,7 +854,7 @@ def run_pipeline(args: argparse.Namespace) -> int:
         raw_summary = safe_json(behavior_raw_summary_path)
         final_behavior_summary = raw_summary
 
-        if not args.no_refine and behavior_needs_refinement(behavior_raw_jsonl, raw_summary):
+        if args.provider == "ollama" and not args.no_refine and behavior_needs_refinement(behavior_raw_jsonl, raw_summary):
             run.set_stage("behavior-refinement")
             refined_jsonl = run.run_dir / "behavior-refined.jsonl"
             refined_summary_path = run.run_dir / "behavior-refined-summary.json"

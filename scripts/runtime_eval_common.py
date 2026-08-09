@@ -339,7 +339,7 @@ def _routing_rules(compact: bool = False) -> str:
         return """Mandatory routing check:
 - Output one JSON object only; route by decision/failure boundary, not language or isolated keywords.
 - Pick the primary deliverable owner, then add every independent boundary that materially requires a supporting skill.
-- When the explicit main deliverable is a component Commanded/Pending/Actual/Readback or ACK-versus-physical-completion contract, choose equipment-domain-modeling as primary. Add equipment-control-architecture only for a separate cross-layer timeout, interlock, late-completion, shared-resource, or recovery-ownership boundary.
+- When the explicit main deliverable is a component Commanded/Pending/Actual/Readback or ACK-versus-physical-completion contract, choose equipment-domain-modeling as primary. Add equipment-control-architecture for a separate cross-layer timeout, interlock, late-completion, shared-resource, or recovery-ownership deliverable; do not collapse that explicitly required second deliverable.
 - When the component contract is already defined and the requested deliverable is Sequence/Equipment Service responsibility, shared-resource ownership, reconnect, restart, or failover, choose equipment-control-architecture as primary without equipment-domain-modeling.
 - Do not add semiconductor-equipment-domain-knowledge merely because chamber, valve, transfer, or completion vocabulary appears; add it only when physical purpose, process meaning, readiness criteria, or completion evidence is actually unresolved.
 - execution_order must contain the selected primary/supporting set exactly once and cannot be empty when primary_skill is not null.
@@ -357,7 +357,8 @@ Before returning JSON, perform this checklist:
    - A component Commanded/Pending/Actual/Readback, ACK-versus-physical-completion, or late-readback contract is owned by equipment-domain-modeling.
    - Sequence/Equipment Service responsibility, shared-resource ownership, reconnect, restart, failover, fencing, or recovery architecture is owned by equipment-control-architecture when the component contract is already defined.
 2. Scan the task again for every independent decision boundary that materially changes the work; add only those as supporting_skills.
-   - Add equipment-control-architecture to a component-contract task only when a separate cross-layer responsibility deliverable is explicitly requested.
+   - A separately required Sequence/Equipment Service timeout or recovery deliverable cannot be absorbed into the component state-contract owner.
+   - Add equipment-control-architecture to a component-contract task when that separate cross-layer responsibility deliverable is explicitly requested.
    - Do not add semiconductor-equipment-domain-knowledge when physical purpose and completion evidence are explicitly supplied.
 3. Build execution_order from the selected set: primary_skill plus supporting_skills, each exactly once. If primary_skill is not null, execution_order must not be empty.
 4. Confirm rejected_skills does not overlap the selected set and using-cloudskill is absent downstream.
