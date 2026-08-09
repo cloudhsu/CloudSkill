@@ -133,6 +133,69 @@ First live Claude evidence: `CloudSkill-local-eval-review-local-review-20260809-
 
 ## Open evolution items
 
+### Next conversation: post-5.8.0 interaction candidates
+
+The user changed their global Codex approval configuration and must restart the
+conversation. On the next conversation, read this handoff and continue from
+this section when the user says `繼續 handoff` or asks to continue the post-5.8.0
+optimization. Do not reconstruct the work from chat memory and do not rerun the
+completed 5.8.0 release.
+
+Current repository/release truth:
+
+- `v5.8.0` is already published; PR #2 and the docs-only PR #3 are merged and
+  their GitHub checks passed.
+- Local `main` was synchronized with `origin/main` at docs merge commit
+  `ab0166036847e03c659d636178601fd295e7f9da` before this handoff-only increment.
+- The user's global Codex config change is external host state. It was not
+  edited or verified by this repository and may require a new Codex session to
+  take effect.
+
+Sanitized, not-yet-captured optimization candidates from the current
+interaction, ordered by expected value:
+
+1. **Parent-task continuity across side questions.** A side question received a
+   complete answer while the larger release workflow was still unfinished,
+   making the user ask whether the main task was done. Candidate owner:
+   `agent-development-process`, with repository-governance support only when
+   durable task state is involved. Required pressure: answer the interruption,
+   preserve the parent task state, state whether the overall task is still in
+   progress, then resume safely. Do not treat a local answer as completion of
+   the parent objective.
+2. **Two-phase release evidence.** A release tag cannot contain facts that only
+   become true after the tag is published. Candidate owner:
+   `developing-skills` plus `coding-agent-project-governance`. Separate
+   pre-release evidence from an immutable release artifact and a post-release
+   operational record; do not leave an authoritative handoff claiming
+   commit/push/release are pending after they complete.
+3. **Credential visibility versus authentication validity.** A sandboxed
+   process could not read the host keyring and reported invalid GitHub auth,
+   while a keyring-capable preflight confirmed valid auth. Candidate owner:
+   `local-runtime-eval-debugging` or the specific publishing workflow. Required
+   pressure: classify sandbox/keyring/network/scope/token failures before asking
+   for re-login, and never report inaccessible credentials as proven invalid.
+4. **Executable multi-model orchestration harness.** Version 5.8.0 defines the
+   host-neutral protocol and exercised a real 2x2 qualitative panel, but there
+   is no single executable harness for frozen packet hashes, blind label maps,
+   per-worker results, cost/latency accounting, panel degradation, and
+   adjudication. Candidate owners: `runtime-evaluation-engineering` for the
+   contract and `local-runtime-eval-debugging` for execution/packaging. Do not
+   build it until its authoritative schemas, single-writer boundary, and RED
+   cases are defined.
+
+Evidence status and next action:
+
+- These four items are conversation-derived **candidates**, not formal Eval
+  cases and not evidence that a Skill change is GREEN.
+- No raw transcript is stored. The descriptions above preserve only generalized
+  mechanisms and observed failure boundaries.
+- Next action requires the user's choice: review/deduplicate these candidates,
+  then establish RED evidence for the selected item before changing a Skill.
+- If the user says `整理成負向案例`, follow `developing-skills` interaction
+  capture and write only a sanitized candidate to the configured private Eval
+  Inbox. Do not convert all four directly into formal Evals without explicit
+  batch-review instruction.
+
 1. ~~Restore the R02 `code-review` plus `equipment-domain-modeling` boundary~~ — resolved, confirmed 3/3 in the 20260809-113507 bundle.
 2. ~~Use a structured `{ "final": "..." }` Behavior output contract~~ — resolved; contract ID/fingerprint confirmed consistent across environment.json and both raw/refined JSONL records.
 3. ~~Reject unstructured refinement candidates~~ — resolved; the accepted refined R07 answer passes `final-answer-discipline` (no planning leak) in the latest bundle.
