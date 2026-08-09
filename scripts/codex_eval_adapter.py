@@ -150,8 +150,6 @@ def call_codex_cli(
             "--ephemeral",
             "--sandbox",
             "read-only",
-            "--ask-for-approval",
-            "never",
             "--cd",
             str(root),
             "--ignore-user-config",

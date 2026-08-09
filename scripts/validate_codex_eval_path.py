@@ -66,8 +66,6 @@ if adapter.is_file():
         '"--ephemeral"',
         '"--sandbox"',
         '"read-only"',
-        '"--ask-for-approval"',
-        '"never"',
         '"--ignore-user-config"',
         '"--ignore-rules"',
         '"--json"',
@@ -80,6 +78,12 @@ if adapter.is_file():
             errors.append(f"codex_eval_adapter.py missing marker: {marker}")
     if "auth.json" in text:
         errors.append("codex_eval_adapter.py must not read or package auth.json")
+    if "--ask-for-approval" in text:
+        errors.append(
+            "codex_eval_adapter.py: --ask-for-approval was removed from codex-cli "
+            "0.147.0 (confirmed against a live process: 'unexpected argument "
+            "--ask-for-approval found'); do not reintroduce it"
+        )
 
 runner = SCRIPTS / "run_runtime_evals.py"
 if runner.is_file():
