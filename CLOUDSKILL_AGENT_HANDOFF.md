@@ -26,22 +26,27 @@ This is the operational entry point for a new conversation or coding agent that 
 
 ## Latest verified evidence before this increment
 
-Bundle: `CloudSkill-local-eval-review-local-review-20260809-113507.zip`
+Ollama, repeat=3 routing: `CloudSkill-local-eval-review-local-review-20260809-134358.zip`
 
-- Pipeline: SUCCESS
-- Evaluation gate: PASS
+- Pipeline: SUCCESS, Evaluation gate: PASS
 - Provider/model: Ollama `qwen3:4b`
-- Routing strict pass: 100%, contract validity: 100%, primary accuracy: 100%
-- R02 routing: 3/3 — the prior displacement by `equipment-control-architecture`
-  is resolved; `equipment-domain-modeling` now returns correctly.
-- R05A/R05B/R05C/R07 routing: 3/3 each
-- Raw R07 Behavior: 74/100 (gate FAIL at n=1)
-- Refined R07 Behavior: 88/100, accepted, no planning-leak
-- Re-graded offline (no new model call) after the grader-precision hotfix
-  below: raw 74→78 (now passes standalone), refined 88→100. See
-  `docs/CLOUDSKILL_CHANGE_HISTORY.md` 2026-08-09 "R07 Behavior grader
-  precision hotfix" for full evidence and the regression fixture added to
-  `scripts/validate_behavior_runtime_evals.py`.
+- Routing: **15/15 (3 repeats x 5 cases), strict pass 100%, contract validity
+  100%, primary accuracy 100%** — R02/R05A/R05B/R05C/R07 all 3/3. The prior
+  R02 displacement by `equipment-control-architecture` stays resolved across
+  all 3 repeats, not just one sample.
+- Raw R07 Behavior: **78.0/100, gate PASS outright**, no refinement
+  attempted (raw already clears the 75-point threshold) — same score as the
+  live Claude run below, and consistent with the offline re-grade of the
+  prior 74/88 bundle after the grader-precision hotfix.
+- **Caveat found this run, not yet fixed**: `run_local_eval_review.py`'s
+  `behavior_command` hard-codes `--repeat 1` regardless of the top-level
+  `--repeat` flag (which only threads to routing). So Behavior evidence is
+  still n=1 even after a `--force-eval` run explicitly aimed at repeat>=3 —
+  merge criterion 4 is **not yet actually satisfiable** through the standard
+  `cloudskill-eval`/`cloudskill-resume` path as it stands. Either add a
+  decoupled `--behavior-repeat` flag, or invoke `scripts/run_runtime_evals.py
+  --eval-kind behavior --repeat 3` directly (outside the packaged
+  review-bundle format) to get real repeat>=3 Behavior evidence.
 
 First live Claude evidence: `CloudSkill-local-eval-review-local-review-20260809-134008.zip`
 
@@ -53,14 +58,14 @@ First live Claude evidence: `CloudSkill-local-eval-review-local-review-20260809-
 - Reached only after fixing two real bugs found by this live run — see
   `docs/CLOUDSKILL_CHANGE_HISTORY.md` 2026-08-09 "First live Claude/Ollama
   Runtime Eval confirmation + real adapter bugs found and fixed".
-- A fresh Ollama `--force-eval` run (repeat>=3) was launched immediately after; interpret it here once it completes, it is not yet in this section.
+- Same behavior-repeat caveat as Ollama above: this is n=1, not n=3.
 
 ## Open evolution items
 
 1. ~~Restore the R02 `code-review` plus `equipment-domain-modeling` boundary~~ — resolved, confirmed 3/3 in the 20260809-113507 bundle.
 2. ~~Use a structured `{ "final": "..." }` Behavior output contract~~ — resolved; contract ID/fingerprint confirmed consistent across environment.json and both raw/refined JSONL records.
 3. ~~Reject unstructured refinement candidates~~ — resolved; the accepted refined R07 answer passes `final-answer-discipline` (no planning leak) in the latest bundle.
-4. Ollama `--force-eval` run launched to get >=3 repeat behavior evidence for R07 under the corrected rubric — see "Latest verified evidence" once it completes; this item stays open until that run is interpreted.
+4. Ollama `--force-eval` run completed: routing repeat=3 is now clean 15/15, but **R07 Behavior is still n=1** — `run_local_eval_review.py`'s `behavior_command` hard-codes `--repeat 1` independent of the top-level `--repeat` flag. Add a decoupled `--behavior-repeat` option (or invoke `run_runtime_evals.py --eval-kind behavior --repeat 3` directly) before merge criterion 4 can actually be satisfied.
 5. Investigate whether the Refiner Prompt should be strengthened to preserve raw's concrete authority identifiers (`ChamberStateAuthority`, `WaferCustodyAuthority`, `FencingToken`, exact `wafer location`/`occupancy` phrasing) instead of paraphrasing them away. Currently n=1 evidence only — do not change the Refiner Prompt until repeat evidence confirms this is systematic, not one sample's variance.
 6. Run the quota-conscious Codex comparison after Codex access is available.
 7. Keep provider results separate; do not average Ollama, Codex, and Claude scores.

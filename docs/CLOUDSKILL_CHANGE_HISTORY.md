@@ -60,11 +60,23 @@ Validation performed:
   refuses a second Runtime Eval while one is active); confirmed this
   correctly deferred rather than corrupting either run.
 
+The separately-launched Ollama `--force-eval` run then completed:
+`CloudSkill-local-eval-review-local-review-20260809-134358.zip`. Routing:
+15/15 (3 repeats x 5 cases), strict pass 100%, all four case groups 3/3.
+Raw R07 Behavior: 78.0/100, gate PASS outright, no refinement needed —
+matching the live Claude run's score exactly and consistent with the
+grader-precision hotfix's offline re-grade of the earlier 74/88 bundle.
+
 Unresolved:
 
-- Claude provider evidence above is still a single repeat (n=1), same
-  repetition-policy caveat as Ollama's earlier n=1 evidence. Worth a
-  `--repeat 3` Claude run before treating it as release-grade.
+- Both providers' Behavior evidence above is still n=1, not n=3. Discovered
+  why while pushing for repeat>=3 Ollama evidence: `run_local_eval_review.py`'s
+  `behavior_command` hard-codes `--repeat 1` independent of the top-level
+  `--repeat` flag (which only threads to the routing command). Routing
+  repeat>=3 is real; Behavior repeat>=3 needs a decoupled `--behavior-repeat`
+  option (or a direct `run_runtime_evals.py --eval-kind behavior --repeat 3`
+  invocation outside the packaged bundle format) before merge criterion 4 is
+  actually satisfiable through the standard tooling.
 - The `error_max_structured_output_retries` failure mode is now
   substantially less likely (0 failures in 6 calls after the fix, versus 1
   failure in 11 calls before it) but not proven impossible; keep the error
