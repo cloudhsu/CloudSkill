@@ -1,0 +1,68 @@
+{
+  "schema_version": 1,
+  "skill": "using-cloudskill",
+  "stage": "active",
+  "introduced_version": "unknown",
+  "last_reviewed_version": "5.6.0",
+  "routing_case_ids": [
+    "USE-01",
+    "USE-02",
+    "USE-03",
+    "USE-04",
+    "USE-05",
+    "USE-06",
+    "USE-07",
+    "USE-NEG-01",
+    "USE-NEG-02",
+    "USE-NEG-03"
+  ],
+  "positive_routing_case_ids": [
+    "USE-01",
+    "USE-02",
+    "USE-03",
+    "USE-04",
+    "USE-06",
+    "USE-07"
+  ],
+  "negative_routing_case_ids": [
+    "USE-05",
+    "USE-NEG-01",
+    "USE-NEG-02",
+    "USE-NEG-03"
+  ],
+  "behavior_case_ids": [
+    "USE-BEH-001",
+    "USE-BEH-002",
+    "USE-BEH-003",
+    "USE-BEH-004",
+    "USE-BEH-005",
+    "USE-BEH-006",
+    "USE-BEH-007",
+    "USE-CONV-001",
+    "USE-CONV-002",
+    "USE-CONV-003",
+    "USE-CONV-004",
+    "USE-CONV-005",
+    "USE-CONV-006",
+    "USE-CONV-007",
+    "USE-CONV-008",
+    "USE-CONV-009"
+  ],
+  "behavior_case_types": [
+    "application",
+    "counterexample",
+    "discipline",
+    "recognition"
+  ],
+  "next_review_triggers": [
+    "three repeated contract-valid routing misses with verified context",
+    "a behavior regression on an existing case",
+    "a new adjacent skill creates scope overlap",
+    "the routing reference or selected-skill context no longer fits its supported budget",
+    "a deterministic grader produces a demonstrated false positive or false negative",
+    "a user correction reveals a reusable missing safeguard",
+    "the skill has not been reviewed for two feature releases"
+  ],
+  "replacement_skill": null,
+  "notes": "Baseline lifecycle evidence generated from committed routing and behavior cases."
+}

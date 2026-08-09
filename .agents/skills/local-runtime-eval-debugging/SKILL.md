@@ -91,6 +91,8 @@ The refinement pass must:
 
 Never overwrite the only copy of the model's first behavior output.
 
+Reject a refinement candidate when it is empty, collapses to a fragment, still exposes internal planning, or lacks minimum task evidence. Preserve the rejected candidate for diagnosis, keep the raw answer as the scored fallback, and report `refinement attempted` separately from `refinement accepted`.
+
 ### 6. Package one review bundle
 
 Create one ZIP containing the bundle contract in `LOCAL_EVAL_BUNDLE_CONTRACT.md`. Include only the current run and selected source snapshots needed for diagnosis. Exclude credentials, complete transcripts, unrelated `.local` data, `.git`, caches, and machine metadata such as `.DS_Store`.

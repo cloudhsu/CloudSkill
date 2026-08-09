@@ -8,6 +8,7 @@ commands = [
     [sys.executable, 'scripts/audit_docs.py'],
     [sys.executable, 'scripts/validate_descriptions.py'],
     [sys.executable, 'scripts/validate_behavior_evals.py'],
+    [sys.executable, 'scripts/validate_skill_lifecycle.py'],
     [sys.executable, 'scripts/validate_interaction_capture.py'],
     [sys.executable, 'scripts/validate_plugins.py'],
     [sys.executable, 'scripts/smoke_install.py'],

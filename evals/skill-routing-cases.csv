@@ -89,3 +89,7 @@ USE-07,Review 這段 C# callback ordering timeout late response 與 stale dictio
 LRED-01,請在本機執行 CloudSkill Runtime Eval，自動檢查 Python、Ollama、context budget、Routing與Behavior評分，最後只產生一個可上傳的ZIP。,local-runtime-eval-debugging,true,one-command local Eval execution and review bundle
 LRED-02,Runtime Eval 顯示找不到Python、prompt overflow或report不存在，請依最早失敗stage診斷並保留可上傳證據。,local-runtime-eval-debugging,true,stage-first local Eval diagnosis
 LRED-NEG-01,設計分散式Chamber IPC的共用Robot仲裁、重啟復原與failover。,local-runtime-eval-debugging,false,product recovery belongs to equipment control architecture
+DEVSK-05,建立一套標準化Skill建立與成熟度流程，包含RED/GREEN、相鄰回歸、review trigger與CI驗證。,developing-skills,true,standardized skill lifecycle and continuous evolution
+RTE-01,設計一套可執行的AI Skill評估系統，需區分Case有效性、Context、Runner、deterministic grader、semantic review與release gate。,runtime-evaluation-engineering,true,executable evaluation system design
+RTE-02,同一個contract-valid路由案例連續三次選到另一個合理Skill，請判斷是Case歧義、Grader、模型還是Skill規則問題。,runtime-evaluation-engineering,true,evaluation failure classification and case validity
+RTE-NEG-01,Ollama沒有啟動而且JSONL不存在，請幫我跑本機評分並封裝log。,runtime-evaluation-engineering,false,local execution belongs to local-runtime-eval-debugging

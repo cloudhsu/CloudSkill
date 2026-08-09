@@ -15,6 +15,7 @@ Read:
 - `references/skill-authoring-sources.md` when reviewing external influences or attribution.
 - `references/interaction-eval-capture.md` when converting a live interaction into a private Eval candidate or reviewing an Eval Inbox.
 - `references/conversation-derived-optimization.md` when mining multiple available interactions or producing an optimized overlay, branch, or release candidate.
+- `references/skill-lifecycle-standard.md` when creating, promoting, reviewing, deprecating, or evolving a Skill.
 
 Use:
 
@@ -22,8 +23,46 @@ Use:
 - `assets/BEHAVIOR_EVAL_CASE.template.json`
 - `assets/INTERACTION_EVAL_CANDIDATE.template.json`
 - `assets/EVAL_MINING_REPORT.template.md`
+- `assets/SKILL_PROPOSAL.template.md`
+- `assets/SKILL_LIFECYCLE.template.json`
+- `assets/SKILL_RELEASE_EVIDENCE.template.md`
 
 ## Interaction capture shorthand
+
+## Standardized lifecycle
+
+Use one lifecycle for every Skill:
+
+`draft -> experimental -> active -> stable -> deprecated`
+
+- `draft`: ownership and non-trigger boundaries are still being defined.
+- `experimental`: RED evidence and minimum routing/behavior cases exist, but release evidence is incomplete.
+- `active`: the same cases are GREEN, adjacent regressions pass, and executable evidence exists.
+- `stable`: the Skill has remained unambiguous across releases and its context/maintenance cost is acceptable.
+- `deprecated`: new routing moves to an explicit replacement or ordinary workflow.
+
+Use the repository command rather than hand-building inconsistent folders:
+
+```bash
+python scripts/manage_skill.py new \
+  --name example-skill \
+  --description "Use when ..." \
+  --display-name "Example Skill" \
+  --short-description "..." \
+  --case-prefix EXAMPLE
+```
+
+Before commit:
+
+```bash
+python scripts/manage_skill.py refresh --all
+python scripts/manage_skill.py audit --check
+python scripts/run_all_checks.py
+```
+
+A stage change is a release decision. It requires the gates in
+`references/skill-lifecycle-standard.md`; Markdown validity alone cannot promote a Skill.
+
 
 Treat these user phrases as explicit capture requests:
 

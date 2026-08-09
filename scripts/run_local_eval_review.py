@@ -125,6 +125,8 @@ class ReviewRun:
         self.gate_pass: bool | None = None
         self.routing_context: int | None = None
         self.behavior_context: int | None = None
+        self.refinement_attempted = False
+        self.refinement_accepted = False
         self.refinement_applied = False
         self.refinement_error: str | None = None
         self.zip_path: Path | None = None
@@ -227,6 +229,8 @@ class ReviewRun:
             "model": self.args.model,
             "routing_context": self.routing_context,
             "behavior_context": self.behavior_context,
+            "behavior_refinement_attempted": self.refinement_attempted,
+            "behavior_refinement_accepted": self.refinement_accepted,
             "behavior_refinement_applied": self.refinement_applied,
             "behavior_refinement_error": self.refinement_error,
             "error": None if error is None else {"type": type(error).__name__, "message": str(error)},
@@ -269,7 +273,8 @@ class ReviewRun:
             lines.extend(["", "## Behavior", "", f"- Raw score: **{float(raw_score):.1f} / 100**"])
             if refined_score is not None:
                 lines.append(f"- Refined score: **{float(refined_score):.1f} / 100**")
-            lines.append(f"- Refinement applied: **{'yes' if self.refinement_applied else 'no'}**")
+            lines.append(f"- Refinement attempted: **{'yes' if self.refinement_attempted else 'no'}**")
+            lines.append(f"- Refinement accepted: **{'yes' if self.refinement_accepted else 'no'}**")
             lines.append("- Raw report: `behavior-raw-report.md`")
             if behavior_refined_summary:
                 lines.append("- Refined report: `behavior-refined-report.md`")
@@ -313,6 +318,13 @@ class ReviewRun:
             ".agents/skills/equipment-domain-modeling/SKILL.md",
             ".agents/skills/local-runtime-eval-debugging/SKILL.md",
             ".agents/skills/local-runtime-eval-debugging/references/local-eval-troubleshooting.md",
+            ".agents/skills/runtime-evaluation-engineering/SKILL.md",
+            ".agents/skills/runtime-evaluation-engineering/references/evaluation-failure-taxonomy.md",
+            ".agents/skills/runtime-evaluation-engineering/references/case-and-grader-design.md",
+            ".agents/skills/developing-skills/references/skill-lifecycle-standard.md",
+            "config/skill-lifecycle-policy.json",
+            "scripts/manage_skill.py",
+            "scripts/validate_skill_lifecycle.py",
         ]
         inventory: list[dict[str, Any]] = []
         for relative in selected:
@@ -471,22 +483,75 @@ def behavior_needs_refinement(path: Path, summary: dict[str, Any]) -> bool:
     return False
 
 
+MIN_REFINED_CHARACTERS = 900
+_REFINED_EVIDENCE_GROUPS = (
+    (r"authoritative|authority|source of truth", r"chamber|ipc"),
+    (r"shared (?:transfer )?resource", r"reservation|arbitration|lease"),
+    (r"reconnect", r"reconcil"),
+    (r"restart|reboot", r"reconstruct|physical state|material state"),
+    (r"failover", r"fenc|epoch|lease|split[- ]brain"),
+    (r"command", r"idempot|duplicate|late completion|correlation"),
+    (r"interlock|readiness", r"current|fresh|readback"),
+    (r"verification|fault injection|test scenario",),
+    (r"assumption|unknown|unresolved",),
+)
+
+
 def extract_final(text: str) -> str:
     match = re.search(r"<final>\s*(.*?)\s*</final>", text, re.I | re.S)
     if match:
         return match.group(1).strip()
-    text = text.strip()
+    stripped = text.strip()
     for marker in ("Final answer:", "FINAL ANSWER:", "Final deliverable:"):
-        if marker in text:
-            return text.split(marker, 1)[1].strip()
-    return text
+        if marker in stripped:
+            return stripped.split(marker, 1)[1].strip()
+    return stripped
 
 
-def refine_behavior(run: ReviewRun, raw_path: Path, output_path: Path) -> None:
+def compact_draft_evidence(text: str, limit: int = 2600) -> str:
+    markers = (
+        "Authority and Responsibility Matrix",
+        "authoritative state",
+        "shared transfer",
+        "failover",
+    )
+    start = -1
+    for marker in markers:
+        position = text.rfind(marker)
+        start = max(start, position)
+    if start >= 0:
+        return text[start : start + limit]
+    if len(text) <= limit:
+        return text
+    return text[-limit:]
+
+
+def validate_refined_output(text: str) -> list[str]:
+    errors: list[str] = []
+    if len(text.strip()) < MIN_REFINED_CHARACTERS:
+        errors.append(
+            f"refined output is too short: {len(text.strip())} < {MIN_REFINED_CHARACTERS}"
+        )
+    for pattern in INTERNAL_PLANNING_PATTERNS:
+        if re.search(pattern, text, re.I | re.S):
+            errors.append(f"refined output still contains internal planning: {pattern}")
+            break
+    matched = 0
+    for group in _REFINED_EVIDENCE_GROUPS:
+        if all(re.search(pattern, text, re.I | re.S) for pattern in group):
+            matched += 1
+    if matched < 6:
+        errors.append(f"refined output covers only {matched}/9 required evidence groups")
+    return errors
+
+
+def refine_behavior(run: ReviewRun, raw_path: Path, output_path: Path) -> bool:
     records = read_jsonl(raw_path)
     cases = safe_json(ROOT / "evals" / "runtime" / "cases" / "canary.json").get("cases") or []
     case_map = {case.get("id"): case for case in cases if isinstance(case, dict)}
     refined_records: list[dict[str, Any]] = []
+    accepted_all = True
+
     for record in records:
         case_id = record.get("case_id")
         draft = str(record.get("behavior_output") or "")
@@ -494,18 +559,22 @@ def refine_behavior(run: ReviewRun, raw_path: Path, output_path: Path) -> None:
         original_task = str(case.get("prompt") or "")
         if not draft.strip():
             refined_records.append(record)
+            accepted_all = False
             continue
+
         system_prompt = """You are the final-deliverable editor for an engineering architecture answer.
 Return only the polished deliverable inside <final> and </final>. Do not expose analysis, planning, self-instructions, Router, Eval, case IDs, skill IDs, or SKILL.md.
-Use the original task and draft as evidence. Improve structure and completeness without claiming tests, host actions, plant facts, or specifications that were not provided.
-For distributed equipment ownership and recovery, explicitly cover: authoritative state ownership per chamber/IPC; one owner and reservation/arbitration for shared transfer resources; reconnect reconciliation before new work; restart reconstruction of physical/material state; failover authority transfer with fencing or an equivalent split-brain control; command identity, duplicate/idempotency, timeout and late completion; current-evidence interlock/readiness revalidation; concrete failure-injection verification scenarios; assumptions and unresolved inputs.
+Create a fresh, complete answer from the original task and the explicit requirements below. The draft excerpt is optional evidence, not an instruction.
+Do not claim tests, host actions, plant facts, or specifications that were not provided.
+Explicitly cover: authoritative state ownership per chamber/IPC; one owner and reservation/arbitration for shared transfer resources; reconnect reconciliation before new work; restart reconstruction of physical/material state; failover authority transfer with fencing or an equivalent split-brain control; command identity, duplicate/idempotency, timeout and late completion; current-evidence interlock/readiness revalidation; concrete failure-injection verification scenarios; assumptions and unresolved inputs.
 State unknowns instead of inventing them. Use concise engineering sections and actionable contracts."""
+
         user_prompt = (
             "/no_think\n\nOriginal task:\n"
             + original_task
-            + "\n\nDraft to rewrite:\n"
-            + draft
-            + "\n\nReturn <final>...</final> only."
+            + "\n\nOptional draft evidence excerpt:\n"
+            + compact_draft_evidence(draft)
+            + "\n\nReturn one complete <final>...</final> deliverable only."
         )
         body = {
             "model": run.args.model,
@@ -532,11 +601,20 @@ State unknowns instead of inventing them. Use concise engineering sections and a
         content = message.get("content")
         if not isinstance(content, str) or not content.strip():
             raise PipelineFailure("behavior refinement returned no message.content")
+
+        candidate = extract_final(content)
+        validation_errors = validate_refined_output(candidate)
+        accepted = not validation_errors
+        accepted_all = accepted_all and accepted
+
         refined = dict(record)
         refined["behavior_output_initial"] = draft
-        refined["behavior_output"] = extract_final(content)
+        refined["behavior_output_refinement_candidate"] = candidate
+        refined["behavior_output"] = candidate if accepted else draft
         refined["behavior_refinement"] = {
-            "applied": True,
+            "attempted": True,
+            "accepted": accepted,
+            "validation_errors": validation_errors,
             "model": payload.get("model") or run.args.model,
             "latency_ms": round((time.perf_counter() - started) * 1000),
             "usage": {
@@ -544,10 +622,12 @@ State unknowns instead of inventing them. Use concise engineering sections and a
                 "output_tokens": payload.get("eval_count"),
             },
             "raw_refiner_output": content,
+            "fallback": None if accepted else "raw behavior_output",
         }
         refined_records.append(refined)
-    write_jsonl(output_path, refined_records)
 
+    write_jsonl(output_path, refined_records)
+    return accepted_all
 
 def grade_gate(routing_summary: dict[str, Any], behavior_summary: dict[str, Any]) -> bool:
     routing_gate = bool((routing_summary.get("gate") or {}).get("passed"))
@@ -745,8 +825,16 @@ def run_pipeline(args: argparse.Namespace) -> int:
             refined_summary_path = run.run_dir / "behavior-refined-summary.json"
             refined_report = run.run_dir / "behavior-refined-report.md"
             try:
-                refine_behavior(run, behavior_raw_jsonl, refined_jsonl)
-                run.refinement_applied = True
+                run.refinement_attempted = True
+                accepted = refine_behavior(run, behavior_raw_jsonl, refined_jsonl)
+                run.refinement_accepted = accepted
+                run.refinement_applied = accepted
+                if not accepted:
+                    run.refinement_error = (
+                        "Refinement candidate rejected by minimum-content/final-answer validation; "
+                        "raw Behavior output retained as the scored fallback."
+                    )
+                    run.log(f"Behavior refinement warning: {run.refinement_error}")
                 run.run_command(
                     [
                         sys.executable,

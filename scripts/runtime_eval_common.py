@@ -201,6 +201,11 @@ _ROUTING_CONCEPT_PATTERNS: dict[str, tuple[str, ...]] = {
         r"repository", r"prior interaction", r"historical interaction", r"過去互動",
         r"歷史互動", r"技能優化", r"路由案例", r"覆蓋本機",
     ),
+    "runtime-evaluation-engineering": (
+        r"case validity", r"case ambiguity", r"rubric", r"grader", r"semantic judge",
+        r"false positive", r"false negative", r"evaluation gate", r"release gate",
+        r"評分規則", r"評分器", r"案例歧義", r"案例有效", r"發布門檻",
+    ),
     "local-eval-debugging": (
         r"runtime eval", r"local eval", r"ollama", r"context budget", r"context overflow",
         r"missing report", r"missing jsonl", r"python 3\.1", r"review bundle", r"upload bundle",
@@ -210,6 +215,36 @@ _ROUTING_CONCEPT_PATTERNS: dict[str, tuple[str, ...]] = {
         r"translate", r"translation", r"翻譯", r"譯成", r"翻成",
     ),
 }
+
+
+
+# Stable canonical rows prevent unrelated vocabulary in a new cue from displacing
+# an established acceptance-case boundary. Add one marker when a new concept is added.
+_ROUTING_CANONICAL_CUE_MARKERS: dict[str, str] = {
+    "code-communication": "Duplicate command, stale response, NetworkStream/buffer suspicion",
+    "state-modeling": "Valve/MFC/pump/gauge DTOs",
+    "equipment-architecture": "Sequence versus Equipment Service",
+    "multi-audience-document": "CEO/management versus engineer/training reports",
+    "version-metrics": "Field failures or update success rates must correlate to an actual software version",
+    "web-application": "Small web/client-server system",
+    "native-platform": "Qt/MFC modernization",
+    "agent-product": "AI Agent task contract",
+    "skill-development": "AGENTS.md, coding-agent worktrees",
+    "runtime-evaluation-engineering": "Executable Eval design or review",
+    "local-eval-debugging": "Local Runtime Eval execution or diagnosis",
+}
+
+
+def _canonical_cue_rows(case_concepts: set[str], cue_rows: list[str]) -> list[str]:
+    selected: list[str] = []
+    for concept in sorted(case_concepts):
+        marker = _ROUTING_CANONICAL_CUE_MARKERS.get(concept)
+        if not marker:
+            continue
+        match = next((row for row in cue_rows if marker in row), None)
+        if match is not None and match not in selected:
+            selected.append(match)
+    return selected
 
 
 def _detected_routing_concepts(text: str) -> set[str]:
@@ -254,9 +289,18 @@ def extract_routing_reference(routing_map_text: str, case_prompt: str) -> str:
         key=lambda row: _routing_row_score(case_prompt, row),
         reverse=True,
     )
-    selected_cues = [
-        row for row in ranked_cues if _routing_row_score(case_prompt, row)[1] > 0
-    ][:2]
+    selected_cues = _canonical_cue_rows(case_concepts, cue_rows)
+    cue_limit = max(2, min(4, len(case_concepts)))
+    for row in ranked_cues:
+        if len(selected_cues) >= cue_limit:
+            break
+        if row in selected_cues:
+            continue
+        if _routing_row_score(case_prompt, row)[1] <= 0:
+            continue
+        selected_cues.append(row)
+        if len(selected_cues) >= cue_limit:
+            break
     if not selected_cues:
         selected_cues = ranked_cues[:2]
 
@@ -560,7 +604,7 @@ def _behavior_system_prompt(
     selected = selected_skills(decision)
     sections = [
         "You are executing the actual CloudBox downstream skills selected by the router.",
-        "Return the final engineering deliverable only.",
+        "Return the final engineering deliverable only. Enclose it in <final> and </final>.",
         "Do not expose internal analysis, planning, chain-of-thought, or self-instructions.",
         "Do not mention the router, Eval case ID, selected skill IDs, or SKILL.md.",
         "Apply the supplied downstream instructions to the user task; do not merely repeat their labels.",
@@ -583,10 +627,11 @@ def _behavior_system_prompt(
 
 def _behavior_user_prompt(case: dict[str, Any]) -> str:
     return (
+        "/no_think\n\n"
         f'Case ID: {case["id"]}\n\n'
         "Original user task:\n"
         f'{case["prompt"].strip()}\n\n'
-        "Return the final answer directly. Do not show analysis or discuss the Eval machinery."
+        "Return <final>...</final> only. Do not show analysis or discuss the Eval machinery."
     )
 
 

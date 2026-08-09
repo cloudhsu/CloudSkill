@@ -1,0 +1,49 @@
+{
+  "schema_version": 1,
+  "stages": [
+    "draft",
+    "experimental",
+    "active",
+    "stable",
+    "deprecated"
+  ],
+  "required_behavior_types": [
+    "recognition",
+    "application",
+    "counterexample"
+  ],
+  "promotion_gates": {
+    "draft_to_experimental": [
+      "frontmatter and ownership contract complete",
+      "RED baseline recorded",
+      "positive and counterexample routing evidence present",
+      "recognition, application, and counterexample behavior cases present"
+    ],
+    "experimental_to_active": [
+      "same RED cases pass after the change",
+      "adjacent-skill regressions pass",
+      "local or CI execution evidence is attached",
+      "remaining limitations are explicit"
+    ],
+    "active_to_stable": [
+      "no unresolved repeated routing ambiguity",
+      "behavior evidence remains green across releases",
+      "context cost and maintenance burden remain acceptable",
+      "replacement and deprecation risks are reviewed"
+    ],
+    "deprecated": [
+      "replacement skill or ordinary workflow is named",
+      "migration guidance exists",
+      "new routing no longer selects the deprecated skill"
+    ]
+  },
+  "review_triggers": [
+    "three repeated contract-valid routing misses with verified context",
+    "a behavior regression on an existing case",
+    "a new adjacent skill creates scope overlap",
+    "the routing reference or selected-skill context no longer fits its supported budget",
+    "a deterministic grader produces a demonstrated false positive or false negative",
+    "a user correction reveals a reusable missing safeguard",
+    "the skill has not been reviewed for two feature releases"
+  ]
+}
