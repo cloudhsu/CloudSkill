@@ -2,6 +2,21 @@
 
 This document records the evolution rationale and evidence chain for work that may span multiple conversations. Git commits and tags remain the authoritative source history.
 
+## 2026-08-10 — Corrected panel degraded; Task 8 paused
+
+The corrected panel is schema-valid but degraded: GPT frontier PASS, GPT
+efficient FAIL on a date-context claim contradicted by the authoritative
+session date, Claude Sonnet transport BLOCKED, and Claude Opus
+MANUAL_REQUIRED. Opus identified open evaluator-lineage work around Task 4
+semantic-adjudication citation, mandatory planned identity, and bounded Claude
+fallback validation/hash lineage.
+
+The temporary harness also exceeded the declared 30 hosted-call ceiling by one
+attempt: Sonnet strict failed, a plain fallback was attempted, and Opus still
+started. This is recorded as a governance failure, not normalized away. No
+further hosted call is authorized in the increment. At the user's explicit
+request the work pauses here; Task 9 and every publication action are NOT RUN.
+
 ## 2026-08-10 — First release panel failed and corrected
 
 Codex and Claude provider scoring passed separately, but all four workers in

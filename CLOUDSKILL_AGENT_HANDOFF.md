@@ -15,6 +15,25 @@ This is the operational entry point for a new conversation or coding agent that 
 
 ## Current repository state
 
+### CloudBox 6.0 Task 8 PAUSED — corrected panel degraded (2026-08-10)
+
+- Corrected panel envelope:
+  `.local/multimodel-panels/rc-corrected-20260810/panel.json`, SHA-256
+  `a439ecb3676e3135d645a2787c4d41d697a0c80a15f28778c9c0da8b4a0bcd7c`.
+- Result: GPT frontier PASS; GPT efficient FAIL on an adjudicated date-context
+  error; Claude Sonnet BLOCKED at transport; Claude Opus MANUAL_REQUIRED.
+- Open evidenced work: cite/freeze Task 4 semantic adjudication; require planned
+  identity on every evidence run; locally validate and separately hash Claude
+  plain fallback; resolve remaining Opus findings with RED/GREEN evidence.
+- Hosted attempt count is 31, one over the declared 30 ceiling. The temporary
+  harness attempted Sonnet strict then plain fallback and still started Opus.
+  Do not issue another hosted call without a newly declared scope and ceiling.
+- User explicitly requested pause on timeout. Task 9/version/PR/merge/tag/
+  Release are NOT RUN.
+- Resume read-only with:
+  `python3 -m json.tool .local/multimodel-panels/rc-corrected-20260810/panel.json`
+  and inspect all four sibling worker JSON files before changing code.
+
 ### CloudBox 6.0 Task 8 first-panel correction (2026-08-10)
 
 - Codex and Claude each passed 10/10 routing with zero repairs and passed R07
