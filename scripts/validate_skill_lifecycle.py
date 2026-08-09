@@ -20,6 +20,11 @@ semantic_cases = [
 for payload, current_version, label in semantic_cases:
     if not module.lifecycle_semantic_errors(payload, current_version):
         raise SystemExit(f"lifecycle semantic mutation was accepted: {label}")
+if module.lifecycle_semantic_errors(
+    {"introduced_version": "5.7.0", "last_reviewed_version": "5.8.0", "next_review_triggers": ["the skill has not been reviewed for two feature releases"]},
+    "6.0.0",
+):
+    raise SystemExit("major-version boundary was falsely counted as two known feature releases")
 
 # Mechanical refresh must preserve manually sourced lifecycle truth rather than
 # inventing release/review evidence to make an audit green.

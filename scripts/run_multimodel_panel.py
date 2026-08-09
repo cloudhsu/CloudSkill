@@ -41,6 +41,10 @@ def write_panel(path: Path, record: dict[str, Any]) -> None:
 
 def dry_run(workers_path: Path, output_path: Path) -> dict[str, Any]:
     workers = json.loads(workers_path.read_text(encoding="utf-8"))
-    record = {"schema_version": 1, "panel_id": "fixture-panel", "status": classify_panel(workers), "workers": workers}
+    record = {
+        "schema_version": 1, "panel_id": "fixture-panel", "status": classify_panel(workers),
+        "identity_map_hash": hashlib.sha256(b"fixture-identity-map").hexdigest(),
+        "adjudication_path": "fixture/adjudication.json", "workers": workers,
+    }
     write_panel(output_path, record)
     return record

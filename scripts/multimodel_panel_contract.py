@@ -44,9 +44,26 @@ def validate_panel_record(record: Any, schema_path: Path = CONTRACT_PATH) -> lis
         if identity in identities:
             errors.append("family/role cells must be unique")
         identities.add(identity)
+        if worker.get("blind_label") == worker.get("worker_id"):
+            errors.append("blind label must not expose worker identity")
         status = worker.get("status")
         canonical = worker.get("canonical_model")
         raw_hash = worker.get("raw_output_hash")
+        cost = worker.get("cost")
+        if cost is not None:
+            if not isinstance(cost, dict) or set(cost) - {"kind", "amount", "currency", "estimate_source", "estimate_date"}:
+                errors.append(f"workers[{index}].cost has invalid fields")
+            elif (
+                cost.get("kind") not in {"provider_reported", "estimated", "usage_only"}
+                or not isinstance(cost.get("amount"), (int, float)) or isinstance(cost.get("amount"), bool) or cost.get("amount") < 0
+                or not isinstance(cost.get("currency"), str) or not cost.get("currency").strip()
+            ):
+                errors.append(f"workers[{index}].cost is incomplete")
+            elif cost.get("kind") == "estimated" and (
+                not isinstance(cost.get("estimate_source"), str) or not cost.get("estimate_source", "").strip()
+                or not isinstance(cost.get("estimate_date"), str) or not cost.get("estimate_date", "").strip()
+            ):
+                errors.append(f"workers[{index}].estimated cost lacks provenance")
         if status in {"PASS", "FAIL", "MANUAL_REQUIRED"}:
             if not isinstance(canonical, str) or not canonical.strip():
                 errors.append(f"workers[{index}] completed evidence requires canonical model")

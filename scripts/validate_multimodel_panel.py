@@ -19,7 +19,7 @@ except ModuleNotFoundError as exc:
 
 def worker(label: str, family: str, role: str, *, status: str = "PASS") -> dict:
     return {
-        "worker_id": label,
+        "worker_id": f"worker-{label}",
         "blind_label": label,
         "family": family,
         "role": role,
@@ -31,6 +31,10 @@ def worker(label: str, family: str, role: str, *, status: str = "PASS") -> dict:
         "packet_hash": "1" * 64,
         "prompt_hash": "2" * 64,
         "raw_output_hash": "3" * 64 if status == "PASS" else None,
+        "adapter_version": "fixture-adapter-1", "transport_mode": "fixture",
+        "tokens": {"input": 10, "cache": 2, "output": 3, "reasoning": 1},
+        "latency_ms": 10, "attempts": 1, "retries": 0, "fallback": None,
+        "failure_layer": None, "verdict": status, "findings_path": f"workers/{label}-findings.json",
         "cost": {"kind": "provider_reported", "amount": 0.01, "currency": "USD"} if status == "PASS" else None,
     }
 
@@ -39,7 +43,7 @@ workers = [
     worker("A", "gpt", "efficient"), worker("B", "gpt", "frontier"),
     worker("C", "claude", "efficient"), worker("D", "claude", "frontier"),
 ]
-record = {"schema_version": 1, "panel_id": "panel-1", "status": "COMPLETE_2X2", "workers": workers}
+record = {"schema_version": 1, "panel_id": "panel-1", "status": "COMPLETE_2X2", "identity_map_hash": "4" * 64, "adjudication_path": "panel/adjudication.json", "workers": workers}
 errors = validate_panel_record(record)
 if errors:
     raise SystemExit("valid panel rejected: " + "; ".join(errors))
@@ -51,6 +55,8 @@ mutations = [
     ({**record, "workers": [{**workers[0], "canonical_model": None}, *workers[1:]]}, "canonical model"),
     ({**record, "blind_label_map": {"A": "gpt"}}, "blind label map"),
     ({**record, "aggregate_score": 99.0}, "aggregate score"),
+    ({**record, "workers": [{**workers[0], "blind_label": workers[0]["worker_id"]}, *workers[1:]]}, "unblinded worker identity"),
+    ({**record, "workers": [{**workers[0], "cost": {"amount": 0.01}}, *workers[1:]]}, "unconstrained cost"),
     ({**record, "workers": [*workers[:3], worker("D", "claude", "frontier", status="BLOCKED")]}, "blocked worker"),
 ]
 for mutated, label in mutations:

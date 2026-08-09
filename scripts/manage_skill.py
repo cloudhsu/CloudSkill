@@ -32,7 +32,10 @@ def lifecycle_semantic_errors(payload: dict[str, Any], current_version: str) -> 
     if current_match and reviewed_match and "the skill has not been reviewed for two feature releases" in triggers:
         current_major, current_minor = int(current_match.group(1)), int(current_match.group(2))
         reviewed_major, reviewed_minor = int(reviewed_match.group(1)), int(reviewed_match.group(2))
-        if current_major > reviewed_major or (current_major == reviewed_major and current_minor - reviewed_minor >= 2):
+        # A major boundary does not reveal how many intervening feature
+        # releases occurred. Only enforce the distance that this pair of
+        # semantic versions can prove without inventing release history.
+        if current_major == reviewed_major and current_minor - reviewed_minor >= 2:
             errors.append("last_reviewed_version is at least two feature releases behind")
     return errors
 
