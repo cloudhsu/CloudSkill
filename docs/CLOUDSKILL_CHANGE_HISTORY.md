@@ -2,6 +2,19 @@
 
 This document records the evolution rationale and evidence chain for work that may span multiple conversations. Git commits and tags remain the authoritative source history.
 
+## 2026-08-09 — Post-5.8.0 conversation continuation recorded
+
+The user changed global Codex approval settings and needed to restart the
+conversation. Added an interruption-safe handoff section rather than relying on
+chat memory. It records release truth and four sanitized candidates discovered
+after the 5.8.0 release: parent-task continuity across side questions, two-phase
+release evidence, credential-visibility versus authentication validity, and a
+future executable multi-model orchestration harness.
+
+No raw transcript, credential, formal Eval, Skill change, version bump, tag, or
+new release was created by this record. The candidates require review,
+deduplication, owner confirmation, and RED evidence in a future conversation.
+
 ## 2026-08-09 — Claude repeat=3 import and adaptive 2x2 Skill-evaluation workflow
 
 Continued an interrupted evidence-import session from repository handoff rather
