@@ -43,22 +43,28 @@ Bundle: `CloudSkill-local-eval-review-local-review-20260809-113507.zip`
   precision hotfix" for full evidence and the regression fixture added to
   `scripts/validate_behavior_runtime_evals.py`.
 
+First live Claude evidence: `CloudSkill-local-eval-review-local-review-20260809-134008.zip`
+
+- Pipeline: SUCCESS, Evaluation gate: **PASS**
+- Provider/model: Claude (`claude-default`, Claude Code CLI headless)
+- Routing: 5/5 (100%), contract valid
+- Raw R07 Behavior: **78.0/100, gate PASS outright** (n=1, no refinement needed/attempted)
+- `final-answer-discipline` and `assumptions-unknowns` both full marks — confirms the R07 grader precision hotfix generalizes beyond the Ollama sample it was fixed against.
+- Reached only after fixing two real bugs found by this live run — see
+  `docs/CLOUDSKILL_CHANGE_HISTORY.md` 2026-08-09 "First live Claude/Ollama
+  Runtime Eval confirmation + real adapter bugs found and fixed".
+- A fresh Ollama `--force-eval` run (repeat>=3) was launched immediately after; interpret it here once it completes, it is not yet in this section.
+
 ## Open evolution items
 
 1. ~~Restore the R02 `code-review` plus `equipment-domain-modeling` boundary~~ — resolved, confirmed 3/3 in the 20260809-113507 bundle.
 2. ~~Use a structured `{ "final": "..." }` Behavior output contract~~ — resolved; contract ID/fingerprint confirmed consistent across environment.json and both raw/refined JSONL records.
 3. ~~Reject unstructured refinement candidates~~ — resolved; the accepted refined R07 answer passes `final-answer-discipline` (no planning leak) in the latest bundle.
-4. Run a fresh Ollama Runtime Eval (`--force-eval`) to get ≥3 repeat behavior evidence for R07 under the corrected rubric. Deferred at the user's explicit request for this increment — do not run Ollama until asked.
+4. Ollama `--force-eval` run launched to get >=3 repeat behavior evidence for R07 under the corrected rubric — see "Latest verified evidence" once it completes; this item stays open until that run is interpreted.
 5. Investigate whether the Refiner Prompt should be strengthened to preserve raw's concrete authority identifiers (`ChamberStateAuthority`, `WaferCustodyAuthority`, `FencingToken`, exact `wafer location`/`occupancy` phrasing) instead of paraphrasing them away. Currently n=1 evidence only — do not change the Refiner Prompt until repeat evidence confirms this is systematic, not one sample's variance.
 6. Run the quota-conscious Codex comparison after Codex access is available.
 7. Keep provider results separate; do not average Ollama, Codex, and Claude scores.
-8. A `claude` Runtime Eval provider (Claude Code CLI headless, see
-   `scripts/claude_eval_adapter.py`) was added but has not yet been exercised
-   against a live `claude` process in this repository. Its first real
-   `./cloudskill-eval-claude` smoke run is the point where the `--output-format
-   json` parsing assumption in `_extract_result_text()` is actually confirmed,
-   not assumed. Run it deliberately (it spends Claude usage/quota) before
-   trusting any `claude`-provider evidence.
+8. ~~A `claude` Runtime Eval provider ... has not yet been exercised against a live `claude` process~~ — resolved. First live run hit two real bugs (`/no_think` breaking Claude's stdin slash-command parser; occasional `error_max_structured_output_retries` from an unframed prompt letting the model attempt a disabled tool), both fixed and re-confirmed: routing 5/5, Behavior raw 78.0/100, gate PASS outright, no planning leak. Still n=1 — a `--repeat 3` Claude run is the next step before this counts as release-grade, same repetition-policy caveat as Ollama.
 9. The Eval Inbox import path (`scripts/import_eval_candidates.py` +
    `.agents/skills/developing-skills/assets/export_eval_candidate.py`) has
    only been exercised with synthetic smoke-test candidates, never a real

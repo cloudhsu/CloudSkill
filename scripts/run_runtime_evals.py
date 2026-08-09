@@ -260,6 +260,13 @@ def ollama_installed_models(base_url: str, timeout: float) -> set[str]:
     return names
 
 
+def ollama_user_prompt(user_prompt: str) -> str:
+    """Prepend the Qwen3 thinking-mode directive. Ollama-only: do not reuse for
+    another provider's call path -- Claude Code CLI parses a leading "/word" in
+    piped input as a slash command, not literal prompt text."""
+    return "/no_think\n\n" + user_prompt
+
+
 def call_ollama(
     *,
     base_url: str,
@@ -278,7 +285,7 @@ def call_ollama(
         "model": model,
         "messages": [
             {"role": "system", "content": system_prompt},
-            {"role": "user", "content": user_prompt},
+            {"role": "user", "content": ollama_user_prompt(user_prompt)},
         ],
         "stream": False,
         "think": False,
@@ -601,7 +608,7 @@ def prompt_request_payload(
             "model": args.model,
             "messages": [
                 {"role": "system", "content": system_prompt},
-                {"role": "user", "content": user_prompt},
+                {"role": "user", "content": ollama_user_prompt(user_prompt)},
             ],
             "stream": False,
             "think": False,

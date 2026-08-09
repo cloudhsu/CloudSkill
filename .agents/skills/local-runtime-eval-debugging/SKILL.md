@@ -181,7 +181,7 @@ Use the Claude path when a higher-capability authenticated Claude baseline is ne
 - Run `claude auth status` before a long test; use `claude auth login` when no valid session exists.
 - Use `./cloudskill-eval-claude` for the quota-conscious one-repeat smoke path.
 - Use `./cloudskill-eval-claude --repeat 3` only after the smoke path completes and the expected usage budget is available.
-- Execute Claude Code non-interactively through `claude -p --output-format json` with `--safe-mode` (no CLAUDE.md/Skills/plugins/hooks/MCP auto-loading), `--tools ""` (no tool access), and `--no-session-persistence`.
+- Execute Claude Code non-interactively through `claude -p --output-format json` with `--safe-mode` (no CLAUDE.md/Skills/plugins/hooks/MCP auto-loading), `--tools ""` (no tool access), `--permission-mode acceptEdits` (so a non-interactive session cannot stall on an unanswerable permission prompt; the ephemeral directory has nothing real to protect), and `--no-session-persistence`. Also frame the piped prompt itself with an explicit "do not inspect the workspace, do not use any tool" instruction — confirmed against a real run that omitting this let the model occasionally attempt a tool call anyway and exhaust its structured-output retry budget against a call `--tools ""` had already disabled.
 - Run the model from an isolated empty temporary directory so it cannot silently load extra CloudSkill source beyond the assembled Eval prompt.
 - Keep Claude, Codex, and Ollama results as separate review bundles. Do not average them into one provider-independent score.
 - A Claude failure caused by authentication or usage limits is an infrastructure/availability result, not a Skill-quality failure.

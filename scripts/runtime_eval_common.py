@@ -647,9 +647,14 @@ def _behavior_system_prompt(
 
 
 def _behavior_user_prompt(case: dict[str, Any]) -> str:
+    # Provider-neutral: do not prepend a model-specific directive here (a prior
+    # unconditional "/no_think" Qwen3/Ollama thinking-mode directive was
+    # confirmed to break the Claude Code CLI provider, which parses a leading
+    # "/word" in piped input as a slash command -- "Unknown command: /no_think").
+    # Provider-specific directives belong in that provider's own call path
+    # (see call_ollama in run_runtime_evals.py), not in this shared builder.
     task = str(case.get("behavior_prompt") or case["prompt"]).strip()
     return (
-        "/no_think\n\n"
         "User request:\n"
         + task
         + "\n\nReturn the required JSON object only."

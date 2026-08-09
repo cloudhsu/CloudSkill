@@ -77,7 +77,7 @@ A stage change is an evidence decision, not a Markdown edit. See `.agents/skills
 
 - Ollama `qwen3:4b` tests the local small-model path and is expected to expose prompt and boundary weaknesses.
 - Codex CLI provides a higher-capability GPT comparison using the same cases, prompts, schemas, and graders.
-- Claude Code CLI (`claude -p`, headless/non-interactive) provides a higher-capability Claude comparison through the same harness, isolated with `--safe-mode --tools "" --no-session-persistence --strict-mcp-config` so it sees only the assembled Eval prompt, not this repository's own CloudBox skills.
+- Claude Code CLI (`claude -p`, headless/non-interactive) provides a higher-capability Claude comparison through the same harness, isolated with `--safe-mode --tools "" --permission-mode acceptEdits --no-session-persistence --strict-mcp-config` and an explicit "do not inspect the workspace, do not use any tool" prompt framing, so it sees only the assembled Eval prompt, not this repository's own CloudBox skills. `--permission-mode acceptEdits` avoids the non-interactive session stalling on a permission prompt it cannot answer; the ephemeral empty directory has nothing real for an accepted edit to affect.
 - Results remain provider-specific. A stronger provider must not hide a weak local path, a weak local model must not automatically invalidate deterministic infrastructure work, and Ollama/Codex/Claude scores are never averaged together.
 
 ## Provider registry

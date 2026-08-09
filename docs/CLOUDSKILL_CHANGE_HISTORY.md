@@ -2,6 +2,76 @@
 
 This document records the evolution rationale and evidence chain for work that may span multiple conversations. Git commits and tags remain the authoritative source history.
 
+## 2026-08-09 — First live Claude/Ollama Runtime Eval confirmation + real adapter bugs found and fixed
+
+Requested by the user: actually run the `ollama` and `claude` providers (not
+just static validation) and fix whatever the live evidence surfaces.
+
+Observed and fixed, in order, all against real live processes:
+
+1. **`/no_think` leaked into the Claude behavior prompt.** First live
+   `./cloudskill-eval-claude` run: routing 5/5 passed, but Behavior execution
+   failed with `RuntimeError: model output is not JSON: Unknown command:
+   /no_think`. Root cause: `runtime_eval_common.py::_behavior_user_prompt()`
+   unconditionally prepended `/no_think` (a Qwen3/Ollama thinking-mode
+   directive) to every provider's behavior user prompt. Ollama treats it as
+   literal text; Claude Code CLI's `-p` stdin parser treats a leading
+   `/word` as an attempted slash command, which does not exist, and errors
+   before the real prompt is even read. Fixed by removing the directive from
+   the shared, provider-neutral prompt builder and moving it into a new
+   `ollama_user_prompt()` helper applied only inside `call_ollama()` /
+   `prompt_request_payload()`'s Ollama branch in `run_runtime_evals.py`. The
+   Ollama-only refinement prompt builder in `run_local_eval_review.py` still
+   has its own `/no_think` prefix, unchanged — that path is already
+   Ollama-exclusive via `refinement_default(provider) == "auto"`.
+2. **Occasional `stop_reason: tool_use` / `error_max_structured_output_retries`
+   on Claude.** Second live run (after fix 1): routing 4/5 passed; R05C
+   failed with the Claude CLI reporting `"errors":["Failed to provide valid
+   structured output after 5 attempts"]` after the model attempted a tool
+   call. A same-config retry then passed 5/5 routing + behavior cleanly,
+   confirming it was not a hard block, but the unnecessary tool-call attempt
+   was wasting the CLI's own structured-output retry budget. Root cause:
+   unlike `codex_eval_adapter.py`, `claude_eval_adapter.py` never told the
+   model it was in a no-workspace-access controlled evaluation, so the model
+   occasionally tried a tool anyway even though `--tools ""` had already
+   disabled all built-in tools. Fixed by (a) framing the piped prompt with
+   the same "do not inspect the workspace, do not use any tool" instruction
+   Codex's adapter already uses, and (b) adding `--permission-mode
+   acceptEdits` so a non-interactive session cannot stall/error on a
+   permission prompt it has no way to answer (the ephemeral empty directory
+   has nothing real for an accepted edit to affect).
+
+Validation performed:
+
+- `python3 scripts/run_all_checks.py` passes after each fix.
+- Re-ran `./cloudskill-eval-claude` after the fixes: routing 5/5, Behavior
+  raw score 78.0/100, **gate PASS outright, no refinement needed** —
+  `final-answer-discipline` and `assumptions-unknowns` both scored full
+  marks (the R07 grader precision hotfix from earlier today confirmed
+  correct against a second, independent real model's output, not just
+  Ollama's).
+- Contract ID/fingerprint (`behavior-final-json-v1` /
+  `07fe9878330232f9fa2e85dba40a97860402c2be7d33ad74b33e7c82aedf5166`)
+  confirmed consistent in the Claude run's `environment.json`, matching
+  Ollama/Codex.
+- Ollama `--force-eval` run launched separately (see next entry once it
+  completes) — the two providers cannot run concurrently by design
+  (`run_local_eval_review.py`/`run_runtime_evals.py` process-presence check
+  refuses a second Runtime Eval while one is active); confirmed this
+  correctly deferred rather than corrupting either run.
+
+Unresolved:
+
+- Claude provider evidence above is still a single repeat (n=1), same
+  repetition-policy caveat as Ollama's earlier n=1 evidence. Worth a
+  `--repeat 3` Claude run before treating it as release-grade.
+- The `error_max_structured_output_retries` failure mode is now
+  substantially less likely (0 failures in 6 calls after the fix, versus 1
+  failure in 11 calls before it) but not proven impossible; keep the error
+  message from `claude_eval_adapter.py` distinguishable in future review so
+  a recurrence is classified as provider/CLI reliability, not a
+  Skill/Behavior-contract defect.
+
 ## 2026-08-09 — Eval Inbox import path and disconnected-session candidate export
 
 Requested by the user: a unified local folder to drop exported archives from
