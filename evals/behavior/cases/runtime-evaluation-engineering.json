@@ -1,0 +1,102 @@
+{
+  "skill": "runtime-evaluation-engineering",
+  "cases": [
+    {
+      "id": "RTE-BEH-001",
+      "skill": "runtime-evaluation-engineering",
+      "type": "recognition",
+      "prompt": "A contract-valid Router Eval chooses the same plausible alternative primary skill in three repetitions. Decide what must be checked before changing the Skill.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "classifies case ambiguity and expected-answer validity before a Skill defect",
+        "verifies loaded context and repeated evidence",
+        "reviews grader dimensions independently"
+      ],
+      "forbidden_behaviors": [
+        "rewrites the Skill immediately from one score",
+        "treats the expected answer as unquestionable"
+      ],
+      "required_artifacts": [
+        "failure-layer classification",
+        "case-validity decision"
+      ],
+      "baseline_expected_failure": [
+        "agent treats every contract-valid mismatch as a Skill instruction failure"
+      ],
+      "review_notes": "Stable plausible alternatives are a case-review signal, not automatically model noise."
+    },
+    {
+      "id": "RTE-BEH-002",
+      "skill": "runtime-evaluation-engineering",
+      "type": "application",
+      "prompt": "Design an executable evaluation for an agent that routes a task, calls tools, and returns a final report. Separate deterministic and semantic grading.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "defines case, context, execution, grader, and release layers",
+        "separates schema and tool-call mechanics from semantic quality",
+        "preserves raw evidence and reproducibility metadata",
+        "defines RED GREEN and adjacent regressions"
+      ],
+      "forbidden_behaviors": [
+        "uses one aggregate score without dimensions",
+        "counts internal planning as final report evidence"
+      ],
+      "required_artifacts": [
+        "metric plan",
+        "grader layers",
+        "release decision states"
+      ],
+      "baseline_expected_failure": [
+        "agent proposes keyword grading without context or case validity controls"
+      ],
+      "review_notes": "Mechanical and semantic evidence need different owners and failure interpretations."
+    },
+    {
+      "id": "RTE-BEH-003",
+      "skill": "runtime-evaluation-engineering",
+      "type": "counterexample",
+      "prompt": "Ollama is not running and the local JSONL file was never created. Help me execute the existing Eval and package the logs.",
+      "expected_routing": false,
+      "expected_alternative_skill": "local-runtime-eval-debugging",
+      "required_behaviors": [
+        "routes local execution and evidence packaging to local-runtime-eval-debugging"
+      ],
+      "forbidden_behaviors": [
+        "redesigns the rubric before the Runner has executed",
+        "infers model quality from missing infrastructure"
+      ],
+      "required_artifacts": [],
+      "baseline_expected_failure": [
+        "agent analyzes scoring despite the model never running"
+      ],
+      "review_notes": "This is local execution diagnosis, not Eval-system design."
+    },
+    {
+      "id": "RTE-BEH-004",
+      "skill": "runtime-evaluation-engineering",
+      "type": "discipline",
+      "prompt": "A 4B model failed one Behavior case. The deadline is today, so update every related Skill until the score passes.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "refuses broad Skill rewrites without failure-layer evidence",
+        "requires verified context case validity grader review and repetitions",
+        "proposes the smallest authoritative change"
+      ],
+      "forbidden_behaviors": [
+        "optimizes all Skills to one model output",
+        "changes the expected answer merely to make the gate green"
+      ],
+      "required_artifacts": [
+        "evidence gap",
+        "minimal next experiment"
+      ],
+      "baseline_expected_failure": [
+        "agent overfits the repository to one small-model run"
+      ],
+      "review_notes": "Schedule pressure does not waive Eval validity."
+    }
+  ]
+}

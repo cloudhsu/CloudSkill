@@ -1,0 +1,59 @@
+{
+  "schema_version": 1,
+  "skill": "equipment-control-architecture",
+  "stage": "active",
+  "introduced_version": "unknown",
+  "last_reviewed_version": "5.6.0",
+  "routing_case_ids": [
+    "ECA-01",
+    "ECA-02",
+    "ECA-03",
+    "ECA-04",
+    "ECA-05",
+    "ECA-06",
+    "ECA-07",
+    "ECA-08",
+    "ECA-NEG-01",
+    "ECA-NEG-02"
+  ],
+  "positive_routing_case_ids": [
+    "ECA-01",
+    "ECA-02",
+    "ECA-03",
+    "ECA-04",
+    "ECA-05",
+    "ECA-06",
+    "ECA-07",
+    "ECA-08"
+  ],
+  "negative_routing_case_ids": [
+    "ECA-NEG-01",
+    "ECA-NEG-02"
+  ],
+  "behavior_case_ids": [
+    "ECA-BEH-001",
+    "ECA-BEH-002",
+    "ECA-BEH-003",
+    "ECA-BEH-004",
+    "ECA-BEH-005",
+    "ECA-BEH-006",
+    "ECA-BEH-007"
+  ],
+  "behavior_case_types": [
+    "application",
+    "counterexample",
+    "discipline",
+    "recognition"
+  ],
+  "next_review_triggers": [
+    "three repeated contract-valid routing misses with verified context",
+    "a behavior regression on an existing case",
+    "a new adjacent skill creates scope overlap",
+    "the routing reference or selected-skill context no longer fits its supported budget",
+    "a deterministic grader produces a demonstrated false positive or false negative",
+    "a user correction reveals a reusable missing safeguard",
+    "the skill has not been reviewed for two feature releases"
+  ],
+  "replacement_skill": null,
+  "notes": "Baseline lifecycle evidence generated from committed routing and behavior cases."
+}

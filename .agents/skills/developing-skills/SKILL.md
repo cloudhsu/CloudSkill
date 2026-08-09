@@ -15,28 +15,69 @@ Read:
 - `references/skill-authoring-sources.md` when reviewing external influences or attribution.
 - `references/interaction-eval-capture.md` when converting a live interaction into a private Eval candidate or reviewing an Eval Inbox.
 - `references/conversation-derived-optimization.md` when mining multiple available interactions or producing an optimized overlay, branch, or release candidate.
+- `references/skill-lifecycle-standard.md` when creating, promoting, reviewing, deprecating, or evolving a Skill.
 
 Use:
 
 - `assets/SKILL_CONTRACT.template.md`
 - `assets/BEHAVIOR_EVAL_CASE.template.json`
 - `assets/INTERACTION_EVAL_CANDIDATE.template.json`
+- `assets/export_eval_candidate.py` when no CloudSkill repository is reachable on this machine.
 - `assets/EVAL_MINING_REPORT.template.md`
+- `assets/SKILL_PROPOSAL.template.md`
+- `assets/SKILL_LIFECYCLE.template.json`
+- `assets/SKILL_RELEASE_EVIDENCE.template.md`
 
 ## Interaction capture shorthand
+
+## Standardized lifecycle
+
+Use one lifecycle for every Skill:
+
+`draft -> experimental -> active -> stable -> deprecated`
+
+- `draft`: ownership and non-trigger boundaries are still being defined.
+- `experimental`: RED evidence and minimum routing/behavior cases exist, but release evidence is incomplete.
+- `active`: the same cases are GREEN, adjacent regressions pass, and executable evidence exists.
+- `stable`: the Skill has remained unambiguous across releases and its context/maintenance cost is acceptable.
+- `deprecated`: new routing moves to an explicit replacement or ordinary workflow.
+
+Use the repository command rather than hand-building inconsistent folders:
+
+```bash
+python scripts/manage_skill.py new \
+  --name example-skill \
+  --description "Use when ..." \
+  --display-name "Example Skill" \
+  --short-description "..." \
+  --case-prefix EXAMPLE
+```
+
+Before commit:
+
+```bash
+python scripts/manage_skill.py refresh --all
+python scripts/manage_skill.py audit --check
+python scripts/run_all_checks.py
+```
+
+A stage change is a release decision. It requires the gates in
+`references/skill-lifecycle-standard.md`; Markdown validity alone cannot promote a Skill.
+
 
 Treat these user phrases as explicit capture requests:
 
 - `整理成正向案例` — preserve a successful route and the behaviors that made the result useful.
 - `整理成負向案例` — preserve the observed failure, user correction, and future required/forbidden behavior.
+- `從專案提煉優化案例` — mine the current project's commit history, architecture/design documents, and code (not a live interaction) for reusable engineering pressure. Use `references/conversation-derived-optimization.md` "Project-history mining" for scope-bounding, confidence discipline, and third-party attribution rules; the output pipeline and sanitization rules below still apply.
 
-For either phrase:
+For either interaction-capture phrase:
 
 1. Capture only the turns needed to understand the task, result, and correction; do not save the raw or complete transcript.
 2. Apply mandatory sanitization before writing. Generalize organization, customer, person, project, product, equipment, site, account, address, path, URL, schedule, recipe, safety-limit, and other identifying data.
 3. Distinguish observed skill loading from inferred or unknown routing. Do not claim hidden runtime traces.
 4. Read project `.cloudskill/config.local.json`, then user `~/.cloudskill/config.json`. Do not guess an output path when no valid configuration exists.
-5. Create a draft from `INTERACTION_EVAL_CANDIDATE.template.json` and use the configured local repository's `scripts/capture_eval_candidate.py` helper.
+5. Create a draft from `INTERACTION_EVAL_CANDIDATE.template.json`. If a configuration resolves to a reachable CloudSkill repository, use its `scripts/capture_eval_candidate.py` helper. If none resolves (a disconnected/external session with no reachable CloudSkill repository on this machine), use this Skill's own `assets/export_eval_candidate.py` instead — see `references/interaction-eval-capture.md` for the export/transfer/import flow.
 6. Save a sanitization-safe record to the private candidate queue. Route uncertain records to `manual-review`.
 7. Do not modify formal Evals, skills, commits, tags, branches, or remotes during capture.
 
@@ -127,6 +168,8 @@ Prefer this order:
 
 Keep judgment and decision flow in `SKILL.md`; move heavy reference material and reusable templates to supporting files. Do not duplicate mutable rules across skills, `AGENTS.md`, and documentation.
 
+When the change introduces a new instance of an authoritative-contract pattern (single source + shared adapter + consumer registry, e.g. `behavior-output-contract.json` or `providers.json`), it is not complete until it reaches the same anti-drift rigor as the closest existing instance — including that instance's positive-propagation and negative-drift-injection mutation tests, not just its file layout. Name the closest existing instance and check parity against it explicitly; do not declare the new instance done because it structurally resembles the old one.
+
 ### 6. Verify GREEN behavior
 
 Re-run the same cases after the change and verify:
@@ -160,6 +203,8 @@ Before release:
 - Copying an external methodology without adapting it to CloudSkill's architecture and governance scope.
 - Adding prose for a rule that a validator can enforce deterministically.
 - Declaring behavior tests passed when only schemas or case files were validated.
+- Copying an authoritative-contract pattern's file layout (single source + adapter + consumer registry) without also copying its anti-drift mutation tests, then declaring the new instance complete because it structurally resembles the original.
+- Fixing a defect by adding a new validator or import path without checking whether that fix's own side effects (for example, a new dynamic import writing bytecode cache) can reintroduce the same class of problem it was meant to prevent.
 - Claiming all past conversations were read when only current context or summaries were available.
 - Claiming a GitHub branch or PR was created after a connector returned an authorization error.
 - Embedding a user's local path or organization-specific terms into a reusable global skill.

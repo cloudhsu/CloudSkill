@@ -17,25 +17,33 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Iterable
 
+from behavior_output_contract import (
+    BEHAVIOR_OUTPUT_CONTRACT_FINGERPRINT,
+    BEHAVIOR_OUTPUT_CONTRACT_ID,
+    INTERNAL_PLANNING_PATTERNS,
+    REFINEMENT_DELIVERABLE_SCHEMA,
+    REFINEMENT_MIN_FINAL_CHARACTERS,
+    extract_final_value,
+    first_internal_planning_pattern,
+    render_contract_prompt,
+)
+
+from codex_eval_adapter import codex_preflight
+from claude_eval_adapter import claude_preflight
+from providers_contract import PROVIDER_IDS, refinement_default
+
 ROOT = Path(__file__).resolve().parents[1]
 RUNTIME_ROOT = ROOT / ".local" / "runtime-evals"
 DEFAULT_MODEL = "qwen3:4b"
 DEFAULT_CASE_IDS = (
     "R02-code-and-command-state",
-    "R05-ack-versus-completion",
+    "R05A-component-state-contract",
+    "R05B-recovery-ownership",
+    "R05C-component-and-recovery-composition",
     "R07-english-equipment-architecture",
 )
 BEHAVIOR_CASE_ID = "R07-english-equipment-architecture"
 CONTEXT_CANDIDATES = (4096, 6144, 8192, 12288, 16384, 24576, 32768)
-INTERNAL_PLANNING_PATTERNS = (
-    r"\blet me (?:analyze|think|draft|tackle|structure)",
-    r"\bi need to\b",
-    r"the router (?:has already )?selected",
-    r"\bSKILL\.md\b",
-    r"\bcase id\b",
-    r"selected skill",
-    r"eval machinery",
-)
 
 
 class PipelineFailure(RuntimeError):
@@ -53,9 +61,31 @@ def parse_args() -> argparse.Namespace:
             "refine behavior output, and produce one uploadable review ZIP."
         )
     )
-    parser.add_argument("--model", default=DEFAULT_MODEL)
-    parser.add_argument("--repeat", type=int, default=3)
-    parser.add_argument("--full-routing", action="store_true", help="Run all Canary routing cases instead of R02/R05/R07.")
+    parser.add_argument("--provider", choices=PROVIDER_IDS, default="ollama")
+    parser.add_argument("--model", default=DEFAULT_MODEL, help="Ollama model name.")
+    parser.add_argument(
+        "--codex-model",
+        default="",
+        help="Optional Codex CLI model override. Empty uses the authenticated Codex default.",
+    )
+    parser.add_argument(
+        "--claude-model",
+        default="",
+        help="Optional Claude Code CLI model override. Empty uses the CLI's configured default.",
+    )
+    parser.add_argument("--repeat", type=int, default=3, help="Attempts per routing case.")
+    parser.add_argument(
+        "--behavior-repeat",
+        type=int,
+        default=None,
+        help=(
+            "Attempts for the R07 Behavior case. Independent of --repeat (routing "
+            "and Behavior costs differ by an order of magnitude). Default: 1, "
+            "matching prior behavior -- pass e.g. --behavior-repeat 3 to get "
+            "release-grade repeat evidence at the cost of that many extra model calls."
+        ),
+    )
+    parser.add_argument("--full-routing", action="store_true", help="Run all Canary routing cases instead of R02/R05A/R05B/R05C/R07.")
     parser.add_argument("--no-refine", action="store_true", help="Do not run the Behavior final-deliverable refinement pass.")
     parser.add_argument("--ollama-url", default="http://127.0.0.1:11434")
     parser.add_argument("--routing-timeout", type=int, default=1200)
@@ -65,6 +95,27 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--package-existing", type=Path, help="Package an existing run directory without executing the model.")
     return parser.parse_args()
 
+
+
+def requested_model(args: argparse.Namespace) -> str:
+    if args.provider == "codex":
+        return args.codex_model or "codex-default"
+    if args.provider == "claude":
+        return args.claude_model or "claude-default"
+    return args.model
+
+
+def runtime_provider_args(args: argparse.Namespace) -> list[str]:
+    values = ["--provider", args.provider]
+    if args.provider == "codex":
+        if args.codex_model:
+            values.extend(["--codex-model", args.codex_model])
+    elif args.provider == "claude":
+        if args.claude_model:
+            values.extend(["--claude-model", args.claude_model])
+    else:
+        values.extend(["--model", args.model])
+    return values
 
 def sha256_file(path: Path) -> str:
     digest = hashlib.sha256()
@@ -125,6 +176,9 @@ class ReviewRun:
         self.gate_pass: bool | None = None
         self.routing_context: int | None = None
         self.behavior_context: int | None = None
+        self.behavior_repeat: int = 1
+        self.refinement_attempted = False
+        self.refinement_accepted = False
         self.refinement_applied = False
         self.refinement_error: str | None = None
         self.zip_path: Path | None = None
@@ -138,7 +192,8 @@ class ReviewRun:
         self.log("CloudSkill local Runtime Eval review")
         self.log(f"Repository: {ROOT}")
         self.log(f"Run directory: {self.run_dir}")
-        self.log(f"Model: {self.args.model}")
+        self.log(f"Provider: {self.args.provider}")
+        self.log(f"Model: {requested_model(self.args)}")
         self.log("Execution mode: foreground")
 
     def log(self, message: str = "") -> None:
@@ -224,9 +279,14 @@ class ReviewRun:
             "finished_at_utc": now_utc(),
             "repository": str(ROOT),
             "run_directory": str(self.run_dir),
-            "model": self.args.model,
+            "provider": self.args.provider,
+            "model": requested_model(self.args),
             "routing_context": self.routing_context,
             "behavior_context": self.behavior_context,
+            "routing_repeat": self.args.repeat,
+            "behavior_repeat": self.behavior_repeat,
+            "behavior_refinement_attempted": self.refinement_attempted,
+            "behavior_refinement_accepted": self.refinement_accepted,
             "behavior_refinement_applied": self.refinement_applied,
             "behavior_refinement_error": self.refinement_error,
             "error": None if error is None else {"type": type(error).__name__, "message": str(error)},
@@ -246,9 +306,12 @@ class ReviewRun:
             f"- Pipeline: **{'SUCCESS' if self.pipeline_success else 'FAILED'}**",
             f"- Evaluation gate: **{'UNKNOWN' if self.gate_pass is None else ('PASS' if self.gate_pass else 'FAIL')}**",
             f"- Earliest final stage: `{self.stage}`",
-            f"- Model: `{self.args.model}`",
+            f"- Provider: `{self.args.provider}`",
+            f"- Model: `{requested_model(self.args)}`",
             f"- Routing context: `{self.routing_context or 'not selected'}`",
             f"- Behavior context: `{self.behavior_context or 'not selected'}`",
+            f"- Routing repeat: `{self.args.repeat}`",
+            f"- Behavior repeat: `{self.behavior_repeat}`",
         ]
         if error is not None:
             lines.extend(["", "## Pipeline failure", "", f"- `{type(error).__name__}`: {error}"])
@@ -269,7 +332,8 @@ class ReviewRun:
             lines.extend(["", "## Behavior", "", f"- Raw score: **{float(raw_score):.1f} / 100**"])
             if refined_score is not None:
                 lines.append(f"- Refined score: **{float(refined_score):.1f} / 100**")
-            lines.append(f"- Refinement applied: **{'yes' if self.refinement_applied else 'no'}**")
+            lines.append(f"- Refinement attempted: **{'yes' if self.refinement_attempted else 'no'}**")
+            lines.append(f"- Refinement accepted: **{'yes' if self.refinement_accepted else 'no'}**")
             lines.append("- Raw report: `behavior-raw-report.md`")
             if behavior_refined_summary:
                 lines.append("- Refined report: `behavior-refined-report.md`")
@@ -298,7 +362,13 @@ class ReviewRun:
             "VERSION",
             "SKILL_MANIFEST.json",
             "cloudskill-eval",
+            "cloudskill-eval-codex",
+            "cloudskill-eval-claude",
             "scripts/run_local_eval_review.py",
+            "scripts/codex_eval_adapter.py",
+            "scripts/claude_eval_adapter.py",
+            "scripts/providers_contract.py",
+            "evals/runtime/contracts/providers.json",
             "scripts/runtime_eval_common.py",
             "scripts/run_runtime_evals.py",
             "scripts/grade_runtime_evals.py",
@@ -313,6 +383,22 @@ class ReviewRun:
             ".agents/skills/equipment-domain-modeling/SKILL.md",
             ".agents/skills/local-runtime-eval-debugging/SKILL.md",
             ".agents/skills/local-runtime-eval-debugging/references/local-eval-troubleshooting.md",
+            ".agents/skills/local-runtime-eval-debugging/references/codex-runtime-eval.md",
+            "scripts/validate_providers_contract.py",
+            ".agents/skills/runtime-evaluation-engineering/SKILL.md",
+            ".agents/skills/runtime-evaluation-engineering/references/evaluation-failure-taxonomy.md",
+            ".agents/skills/runtime-evaluation-engineering/references/case-and-grader-design.md",
+            ".agents/skills/developing-skills/references/skill-lifecycle-standard.md",
+            "config/skill-lifecycle-policy.json",
+            "scripts/manage_skill.py",
+            "scripts/validate_skill_lifecycle.py",
+            "CLOUDSKILL_AGENT_HANDOFF.md",
+            "docs/CLOUDSKILL_DESIGN_AND_FLOW.md",
+            "docs/CLOUDSKILL_CHANGE_HISTORY.md",
+            "evals/runtime/contracts/behavior-output-contract.json",
+            "scripts/behavior_output_contract.py",
+            "scripts/validate_behavior_contract.py",
+            "scripts/validate_evolution_handoff.py",
         ]
         inventory: list[dict[str, Any]] = []
         for relative in selected:
@@ -377,7 +463,7 @@ def git_output(*args: str) -> str:
     return (result.stdout or result.stderr).strip()
 
 
-def collect_environment(run: ReviewRun, ollama_tags: dict[str, Any]) -> None:
+def collect_environment(run: ReviewRun, runtime_info: dict[str, Any]) -> None:
     payload = {
         "generated_at_utc": now_utc(),
         "python_executable": sys.executable,
@@ -389,8 +475,13 @@ def collect_environment(run: ReviewRun, ollama_tags: dict[str, Any]) -> None:
         "git_branch": git_output("branch", "--show-current"),
         "git_status_short": git_output("status", "--short", "--untracked-files=no"),
         "git_diff_stat": git_output("diff", "--stat"),
-        "model_requested": run.args.model,
-        "ollama_tags": ollama_tags,
+        "provider": run.args.provider,
+        "model_requested": requested_model(run.args),
+        "runtime": runtime_info,
+        "behavior_output_contract": {
+            "id": BEHAVIOR_OUTPUT_CONTRACT_ID,
+            "fingerprint": BEHAVIOR_OUTPUT_CONTRACT_FINGERPRINT,
+        },
     }
     run.environment_path.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
@@ -466,27 +557,93 @@ def behavior_needs_refinement(path: Path, summary: dict[str, Any]) -> bool:
     records = read_jsonl(path)
     for record in records:
         output = str(record.get("behavior_output") or "")
-        if any(re.search(pattern, output, re.I | re.S) for pattern in INTERNAL_PLANNING_PATTERNS):
+        if first_internal_planning_pattern(output) is not None:
             return True
     return False
 
 
-def extract_final(text: str) -> str:
-    match = re.search(r"<final>\s*(.*?)\s*</final>", text, re.I | re.S)
-    if match:
-        return match.group(1).strip()
-    text = text.strip()
-    for marker in ("Final answer:", "FINAL ANSWER:", "Final deliverable:"):
-        if marker in text:
-            return text.split(marker, 1)[1].strip()
-    return text
+MIN_REFINED_CHARACTERS = REFINEMENT_MIN_FINAL_CHARACTERS
+_REFINED_EVIDENCE_GROUPS = (
+    (r"authoritative|authority|source of truth", r"chamber|ipc"),
+    (r"shared (?:transfer )?resource", r"reservation|arbitration|lease"),
+    (r"reconnect", r"reconcil"),
+    (r"restart|reboot", r"reconstruct|physical state|material state"),
+    (r"failover", r"fenc|epoch|lease|split[- ]brain"),
+    (r"command", r"idempot|duplicate|late completion|correlation"),
+    (r"interlock|readiness", r"current|fresh|readback"),
+    (r"verification|fault injection|test scenario",),
+    (r"assumption|unknown|unresolved",),
+)
 
 
-def refine_behavior(run: ReviewRun, raw_path: Path, output_path: Path) -> None:
+def extract_refined_final(text: str) -> tuple[str, bool, str]:
+    return extract_final_value(
+        text,
+        minimum_characters=REFINEMENT_MIN_FINAL_CHARACTERS,
+        allow_legacy_terminal=True,
+    )
+
+
+def compact_draft_evidence(text: str, limit: int = 2600) -> str:
+    markers = (
+        "Authority and Responsibility Matrix",
+        "authoritative state",
+        "shared transfer",
+        "failover",
+    )
+    start = -1
+    for marker in markers:
+        position = text.rfind(marker)
+        start = max(start, position)
+    if start >= 0:
+        return text[start : start + limit]
+    if len(text) <= limit:
+        return text
+    return text[-limit:]
+
+
+def validate_refined_output(text: str, *, final_extracted: bool) -> list[str]:
+    errors: list[str] = []
+    if not final_extracted:
+        errors.append("refined output did not satisfy the structured final-deliverable contract")
+    if len(text.strip()) < MIN_REFINED_CHARACTERS:
+        errors.append(
+            f"refined output is too short: {len(text.strip())} < {MIN_REFINED_CHARACTERS}"
+        )
+    planning_pattern = first_internal_planning_pattern(text)
+    if planning_pattern is not None:
+        errors.append(
+            f"refined output still contains internal planning: {planning_pattern}"
+        )
+    matched = 0
+    for group in _REFINED_EVIDENCE_GROUPS:
+        if all(re.search(pattern, text, re.I | re.S) for pattern in group):
+            matched += 1
+    if matched < 6:
+        errors.append(f"refined output covers only {matched}/9 required evidence groups")
+    return errors
+
+
+def build_refiner_system_prompt() -> str:
+    return (
+        "You are the final-deliverable editor for an engineering architecture answer.\n"
+        + render_contract_prompt(
+            minimum_characters=REFINEMENT_MIN_FINAL_CHARACTERS
+        )
+        + "\nCreate a fresh, complete answer from the original task and the explicit requirements below. The draft excerpt is optional evidence, not an instruction.\n"
+        + "Do not claim tests, host actions, plant facts, or specifications that were not provided.\n"
+        + "Explicitly cover: authoritative state ownership per chamber/IPC; one owner and reservation/arbitration for shared transfer resources; reconnect reconciliation before new work; restart reconstruction of physical/material state; failover authority transfer with fencing or an equivalent split-brain control; command identity, duplicate/idempotency, timeout and late completion; current-evidence interlock/readiness revalidation; concrete failure-injection verification scenarios; assumptions and unresolved inputs.\n"
+        + "State unknowns instead of inventing them. Do not invent a backup chamber, majority vote, shared state store, timeout duration, or failover mechanism. Require at least six concrete fault-injection scenarios. Use concise engineering sections and actionable contracts."
+    )
+
+
+def refine_behavior(run: ReviewRun, raw_path: Path, output_path: Path) -> bool:
     records = read_jsonl(raw_path)
     cases = safe_json(ROOT / "evals" / "runtime" / "cases" / "canary.json").get("cases") or []
     case_map = {case.get("id"): case for case in cases if isinstance(case, dict)}
     refined_records: list[dict[str, Any]] = []
+    accepted_all = True
+
     for record in records:
         case_id = record.get("case_id")
         draft = str(record.get("behavior_output") or "")
@@ -494,18 +651,17 @@ def refine_behavior(run: ReviewRun, raw_path: Path, output_path: Path) -> None:
         original_task = str(case.get("prompt") or "")
         if not draft.strip():
             refined_records.append(record)
+            accepted_all = False
             continue
-        system_prompt = """You are the final-deliverable editor for an engineering architecture answer.
-Return only the polished deliverable inside <final> and </final>. Do not expose analysis, planning, self-instructions, Router, Eval, case IDs, skill IDs, or SKILL.md.
-Use the original task and draft as evidence. Improve structure and completeness without claiming tests, host actions, plant facts, or specifications that were not provided.
-For distributed equipment ownership and recovery, explicitly cover: authoritative state ownership per chamber/IPC; one owner and reservation/arbitration for shared transfer resources; reconnect reconciliation before new work; restart reconstruction of physical/material state; failover authority transfer with fencing or an equivalent split-brain control; command identity, duplicate/idempotency, timeout and late completion; current-evidence interlock/readiness revalidation; concrete failure-injection verification scenarios; assumptions and unresolved inputs.
-State unknowns instead of inventing them. Use concise engineering sections and actionable contracts."""
+
+        system_prompt = build_refiner_system_prompt()
+
         user_prompt = (
             "/no_think\n\nOriginal task:\n"
             + original_task
-            + "\n\nDraft to rewrite:\n"
-            + draft
-            + "\n\nReturn <final>...</final> only."
+            + "\n\nOptional draft evidence excerpt:\n"
+            + compact_draft_evidence(draft)
+            + "\n\nReturn the required JSON object only."
         )
         body = {
             "model": run.args.model,
@@ -515,10 +671,11 @@ State unknowns instead of inventing them. Use concise engineering sections and a
             ],
             "stream": False,
             "think": False,
+            "format": REFINEMENT_DELIVERABLE_SCHEMA,
             "options": {
                 "temperature": 0,
                 "num_ctx": run.behavior_context or 12288,
-                "num_predict": 1800,
+                "num_predict": 2200,
                 "seed": 42,
             },
         }
@@ -532,11 +689,23 @@ State unknowns instead of inventing them. Use concise engineering sections and a
         content = message.get("content")
         if not isinstance(content, str) or not content.strip():
             raise PipelineFailure("behavior refinement returned no message.content")
+
+        candidate, final_extracted, output_contract = extract_refined_final(content)
+        validation_errors = validate_refined_output(
+            candidate,
+            final_extracted=final_extracted,
+        )
+        accepted = not validation_errors
+        accepted_all = accepted_all and accepted
+
         refined = dict(record)
         refined["behavior_output_initial"] = draft
-        refined["behavior_output"] = extract_final(content)
+        refined["behavior_output_refinement_candidate"] = candidate
+        refined["behavior_output"] = candidate if accepted else draft
         refined["behavior_refinement"] = {
-            "applied": True,
+            "attempted": True,
+            "accepted": accepted,
+            "validation_errors": validation_errors,
             "model": payload.get("model") or run.args.model,
             "latency_ms": round((time.perf_counter() - started) * 1000),
             "usage": {
@@ -544,10 +713,16 @@ State unknowns instead of inventing them. Use concise engineering sections and a
                 "output_tokens": payload.get("eval_count"),
             },
             "raw_refiner_output": content,
+            "final_extracted": final_extracted,
+            "output_contract": output_contract,
+            "output_contract_id": BEHAVIOR_OUTPUT_CONTRACT_ID,
+            "output_contract_fingerprint": BEHAVIOR_OUTPUT_CONTRACT_FINGERPRINT,
+            "fallback": None if accepted else "raw behavior_output",
         }
         refined_records.append(refined)
-    write_jsonl(output_path, refined_records)
 
+    write_jsonl(output_path, refined_records)
+    return accepted_all
 
 def grade_gate(routing_summary: dict[str, Any], behavior_summary: dict[str, Any]) -> bool:
     routing_gate = bool((routing_summary.get("gate") or {}).get("passed"))
@@ -575,6 +750,10 @@ def run_pipeline(args: argparse.Namespace) -> int:
 
         run.set_stage("environment")
         required = [
+            ROOT / "cloudskill-eval-codex",
+            ROOT / "scripts" / "codex_eval_adapter.py",
+            ROOT / "cloudskill-eval-claude",
+            ROOT / "scripts" / "claude_eval_adapter.py",
             ROOT / "scripts" / "run_runtime_evals.py",
             ROOT / "scripts" / "grade_runtime_evals.py",
             ROOT / "scripts" / "grade_behavior_evals.py",
@@ -584,18 +763,26 @@ def run_pipeline(args: argparse.Namespace) -> int:
         missing = [str(path.relative_to(ROOT)) for path in required if not path.is_file()]
         if missing:
             raise PipelineFailure("missing required files: " + ", ".join(missing))
-        tags = request_json(args.ollama_url.rstrip("/") + "/api/tags", None, timeout=30, method="GET")
-        names = {
-            value
-            for item in tags.get("models", [])
-            if isinstance(item, dict)
-            for key in ("name", "model")
-            for value in [item.get(key)]
-            if isinstance(value, str)
-        }
-        if args.model not in names:
-            raise PipelineFailure(f"Ollama model {args.model!r} not installed; available={sorted(names)}")
-        collect_environment(run, tags)
+        if args.provider == "ollama":
+            tags = request_json(args.ollama_url.rstrip("/") + "/api/tags", None, timeout=30, method="GET")
+            names = {
+                value
+                for item in tags.get("models", [])
+                if isinstance(item, dict)
+                for key in ("name", "model")
+                for value in [item.get(key)]
+                if isinstance(value, str)
+            }
+            if args.model not in names:
+                raise PipelineFailure(f"Ollama model {args.model!r} not installed; available={sorted(names)}")
+            runtime_info = {"ollama_url": args.ollama_url, "tags": tags}
+        elif args.provider == "codex":
+            runtime_info = {"codex": codex_preflight(timeout=30)}
+        elif args.provider == "claude":
+            runtime_info = {"claude": claude_preflight(timeout=30)}
+        else:
+            raise PipelineFailure(f"unsupported --provider: {args.provider}")
+        collect_environment(run, runtime_info)
 
         run.set_stage("syntax-check")
         run.run_command(
@@ -604,6 +791,9 @@ def run_pipeline(args: argparse.Namespace) -> int:
                 "-m",
                 "py_compile",
                 "scripts/run_local_eval_review.py",
+                "scripts/codex_eval_adapter.py",
+                "scripts/claude_eval_adapter.py",
+                "scripts/providers_contract.py",
                 "scripts/runtime_eval_common.py",
                 "scripts/run_runtime_evals.py",
                 "scripts/grade_runtime_evals.py",
@@ -630,10 +820,7 @@ def run_pipeline(args: argparse.Namespace) -> int:
         routing_command = [
             sys.executable,
             "scripts/run_runtime_evals.py",
-            "--provider",
-            "ollama",
-            "--model",
-            args.model,
+            *runtime_provider_args(args),
             "--eval-kind",
             "routing",
             "--context-mode",
@@ -683,14 +870,12 @@ def run_pipeline(args: argparse.Namespace) -> int:
         behavior_raw_report = run.run_dir / "behavior-raw-report.md"
 
         run.set_stage("behavior-execution")
-        run.run_command(
-            [
+        behavior_repeat = args.behavior_repeat if args.behavior_repeat is not None else 1
+        run.behavior_repeat = behavior_repeat
+        behavior_command = [
                 sys.executable,
                 "scripts/run_runtime_evals.py",
-                "--provider",
-                "ollama",
-                "--model",
-                args.model,
+                *runtime_provider_args(args),
                 "--eval-kind",
                 "behavior",
                 "--context-mode",
@@ -702,7 +887,7 @@ def run_pipeline(args: argparse.Namespace) -> int:
                 "--case-id",
                 BEHAVIOR_CASE_ID,
                 "--repeat",
-                "1",
+                str(behavior_repeat),
                 "--num-ctx",
                 str(run.behavior_context),
                 "--context-reserve-tokens",
@@ -718,7 +903,7 @@ def run_pipeline(args: argparse.Namespace) -> int:
                 "--output",
                 str(behavior_raw_jsonl),
             ]
-        )
+        run.run_command(behavior_command)
         if not behavior_raw_jsonl.is_file() or behavior_raw_jsonl.stat().st_size == 0:
             raise PipelineFailure("behavior JSONL was not created")
 
@@ -739,14 +924,26 @@ def run_pipeline(args: argparse.Namespace) -> int:
         raw_summary = safe_json(behavior_raw_summary_path)
         final_behavior_summary = raw_summary
 
-        if not args.no_refine and behavior_needs_refinement(behavior_raw_jsonl, raw_summary):
+        if (
+            refinement_default(args.provider) == "auto"
+            and not args.no_refine
+            and behavior_needs_refinement(behavior_raw_jsonl, raw_summary)
+        ):
             run.set_stage("behavior-refinement")
             refined_jsonl = run.run_dir / "behavior-refined.jsonl"
             refined_summary_path = run.run_dir / "behavior-refined-summary.json"
             refined_report = run.run_dir / "behavior-refined-report.md"
             try:
-                refine_behavior(run, behavior_raw_jsonl, refined_jsonl)
-                run.refinement_applied = True
+                run.refinement_attempted = True
+                accepted = refine_behavior(run, behavior_raw_jsonl, refined_jsonl)
+                run.refinement_accepted = accepted
+                run.refinement_applied = accepted
+                if not accepted:
+                    run.refinement_error = (
+                        "Refinement candidate rejected by minimum-content/final-answer validation; "
+                        "raw Behavior output retained as the scored fallback."
+                    )
+                    run.log(f"Behavior refinement warning: {run.refinement_error}")
                 run.run_command(
                     [
                         sys.executable,

@@ -8,11 +8,17 @@ commands = [
     [sys.executable, 'scripts/audit_docs.py'],
     [sys.executable, 'scripts/validate_descriptions.py'],
     [sys.executable, 'scripts/validate_behavior_evals.py'],
+    [sys.executable, 'scripts/validate_skill_lifecycle.py'],
     [sys.executable, 'scripts/validate_interaction_capture.py'],
     [sys.executable, 'scripts/validate_plugins.py'],
     [sys.executable, 'scripts/smoke_install.py'],
     [sys.executable, 'scripts/validate_runtime_evals.py'],
     [sys.executable, 'scripts/validate_local_eval_debugging.py'],
+    [sys.executable, 'scripts/validate_codex_eval_path.py'],
+    [sys.executable, 'scripts/validate_providers_contract.py'],
+    [sys.executable, 'scripts/validate_skill_portability.py'],
+    [sys.executable, 'scripts/validate_behavior_contract.py'],
+    [sys.executable, 'scripts/validate_evolution_handoff.py'],
     [sys.executable, 'scripts/validate_behavior_runtime_evals.py'],
 ]
 

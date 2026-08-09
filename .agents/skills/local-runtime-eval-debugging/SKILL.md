@@ -20,6 +20,7 @@ The pipeline must distinguish:
 Read:
 
 - `references/local-eval-troubleshooting.md`
+- `references/codex-runtime-eval.md`
 - `assets/LOCAL_EVAL_BUNDLE_CONTRACT.md`
 
 ## Trigger examples
@@ -91,11 +92,35 @@ The refinement pass must:
 
 Never overwrite the only copy of the model's first behavior output.
 
+Reject a refinement candidate when it is empty, collapses to a fragment, still exposes internal planning, or lacks minimum task evidence. Preserve the rejected candidate for diagnosis, keep the raw answer as the scored fallback, and report `refinement attempted` separately from `refinement accepted`.
+
+### 5a. Separate raw model text from the final deliverable
+
+Use a structured final-deliverable contract for Behavior execution:
+
+```json
+{"final": "complete engineering deliverable"}
+```
+
+Preserve the complete provider response separately, grade only the validated `final` value, and record the output contract. A strict terminal `<final>...</final>` block may remain as a legacy refinement fallback, but an unstructured planning response must never be accepted merely because it contains enough rubric keywords.
+
+Do not expose Router decisions, selected Skill IDs, case IDs, routing-only wording, or source paths to the downstream model unless the engineering task requires them.
+
 ### 6. Package one review bundle
 
 Create one ZIP containing the bundle contract in `LOCAL_EVAL_BUNDLE_CONTRACT.md`. Include only the current run and selected source snapshots needed for diagnosis. Exclude credentials, complete transcripts, unrelated `.local` data, `.git`, caches, and machine metadata such as `.DS_Store`.
 
 Create a stable pointer such as `LATEST_REVIEW_ZIP.txt`, print the exact ZIP path, and reveal the file in Finder on macOS when possible.
+
+### 6a. Maintain evolution handoff
+
+When the task produces an increment intended for another conversation or coding agent, update:
+
+- `/CLOUDSKILL_AGENT_HANDOFF.md` with current branch/PR, latest verified evidence, open items, commands, and safety constraints;
+- `/docs/CLOUDSKILL_DESIGN_AND_FLOW.md` when the architecture or operating flow changes;
+- `/docs/CLOUDSKILL_CHANGE_HISTORY.md` with the evidence, diagnosed layer, change, result, and unresolved risk.
+
+The handoff must be sufficient to continue from repository files and the newest review ZIP without requiring the previous chat transcript.
 
 ### 7. Report stage truthfully
 
@@ -135,6 +160,33 @@ Do not infer a later-stage defect when an earlier stage never ran.
 - Deleting old results before the new bundle is confirmed.
 - Replacing the raw behavior output with a polished rewrite and losing evidence.
 - Packaging the entire repository or private transcript history.
+
+## Codex CLI evaluation path
+
+Use the Codex path when a higher-capability authenticated Codex baseline is needed in addition to the local Ollama baseline.
+
+- Run `codex login status` before a long test; use `codex login` when no valid session exists.
+- Use `./cloudskill-eval-codex` for the quota-conscious one-repeat smoke path.
+- Use `./cloudskill-eval-codex --repeat 3` only after the smoke path completes and the expected usage budget is available.
+- Execute Codex non-interactively through `codex exec` with an ephemeral session, read-only sandbox, no approvals, JSONL event capture, and a final-message file.
+- Run the model in an isolated empty Git repository so it cannot silently load extra CloudSkill source beyond the assembled Eval prompt.
+- Keep Codex and Ollama results as separate review bundles. Do not average them into one provider-independent score.
+- A Codex failure caused by authentication or usage limits is an infrastructure/availability result, not a Skill-quality failure.
+- Never package `~/.codex/auth.json`, access tokens, account identifiers, or raw authentication output.
+
+## Claude Code CLI evaluation path
+
+Use the Claude path when a higher-capability authenticated Claude baseline is needed alongside the local Ollama baseline and/or the Codex comparison.
+
+- Run `claude auth status` before a long test; use `claude auth login` when no valid session exists.
+- Use `./cloudskill-eval-claude` for the quota-conscious one-repeat smoke path.
+- Use `./cloudskill-eval-claude --repeat 3` only after the smoke path completes and the expected usage budget is available.
+- Execute Claude Code non-interactively through `claude -p --output-format json` with `--safe-mode` (no CLAUDE.md/Skills/plugins/hooks/MCP auto-loading), `--tools ""` (no tool access), `--permission-mode acceptEdits` (so a non-interactive session cannot stall on an unanswerable permission prompt; the ephemeral directory has nothing real to protect), and `--no-session-persistence`. Also frame the piped prompt itself with an explicit "do not inspect the workspace, do not use any tool" instruction — confirmed against a real run that omitting this let the model occasionally attempt a tool call anyway and exhaust its structured-output retry budget against a call `--tools ""` had already disabled.
+- Run the model from an isolated empty temporary directory so it cannot silently load extra CloudSkill source beyond the assembled Eval prompt.
+- Keep Claude, Codex, and Ollama results as separate review bundles. Do not average them into one provider-independent score.
+- A Claude failure caused by authentication or usage limits is an infrastructure/availability result, not a Skill-quality failure.
+- Never package Claude Code credential files, access tokens, account identifiers, or raw authentication output.
+- `scripts/claude_eval_adapter.py`'s `--output-format json` result-field parsing was written from CLI documentation and `--help` output but has not been confirmed against a live process; treat its first real run as the point that assumption is actually verified, not the point it was written.
 
 ## Required output
 

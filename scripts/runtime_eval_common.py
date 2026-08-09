@@ -7,6 +7,14 @@ import re
 from pathlib import Path
 from typing import Any, Iterable
 
+from behavior_output_contract import (
+    BEHAVIOR_DELIVERABLE_SCHEMA,
+    BEHAVIOR_MIN_FINAL_CHARACTERS,
+    BEHAVIOR_OUTPUT_CONTRACT_FINGERPRINT,
+    BEHAVIOR_OUTPUT_CONTRACT_ID,
+    render_contract_prompt,
+)
+
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_CASES = ROOT / "evals" / "runtime" / "cases" / "canary.json"
 DEFAULT_SCHEMA = ROOT / "evals" / "runtime" / "schemas" / "routing-decision.schema.json"
@@ -201,6 +209,11 @@ _ROUTING_CONCEPT_PATTERNS: dict[str, tuple[str, ...]] = {
         r"repository", r"prior interaction", r"historical interaction", r"過去互動",
         r"歷史互動", r"技能優化", r"路由案例", r"覆蓋本機",
     ),
+    "runtime-evaluation-engineering": (
+        r"case validity", r"case ambiguity", r"rubric", r"grader", r"semantic judge",
+        r"false positive", r"false negative", r"evaluation gate", r"release gate",
+        r"評分規則", r"評分器", r"案例歧義", r"案例有效", r"發布門檻",
+    ),
     "local-eval-debugging": (
         r"runtime eval", r"local eval", r"ollama", r"context budget", r"context overflow",
         r"missing report", r"missing jsonl", r"python 3\.1", r"review bundle", r"upload bundle",
@@ -210,6 +223,36 @@ _ROUTING_CONCEPT_PATTERNS: dict[str, tuple[str, ...]] = {
         r"translate", r"translation", r"翻譯", r"譯成", r"翻成",
     ),
 }
+
+
+
+# Stable canonical rows prevent unrelated vocabulary in a new cue from displacing
+# an established acceptance-case boundary. Add one marker when a new concept is added.
+_ROUTING_CANONICAL_CUE_MARKERS: dict[str, str] = {
+    "code-communication": "Duplicate command, stale response, NetworkStream/buffer suspicion",
+    "state-modeling": "Valve/MFC/pump/gauge DTOs",
+    "equipment-architecture": "Sequence versus Equipment Service",
+    "multi-audience-document": "CEO/management versus engineer/training reports",
+    "version-metrics": "Field failures or update success rates must correlate to an actual software version",
+    "web-application": "Small web/client-server system",
+    "native-platform": "Qt/MFC modernization",
+    "agent-product": "AI Agent task contract",
+    "skill-development": "AGENTS.md, coding-agent worktrees",
+    "runtime-evaluation-engineering": "Executable Eval design or review",
+    "local-eval-debugging": "Local Runtime Eval execution or diagnosis",
+}
+
+
+def _canonical_cue_rows(case_concepts: set[str], cue_rows: list[str]) -> list[str]:
+    selected: list[str] = []
+    for concept in sorted(case_concepts):
+        marker = _ROUTING_CANONICAL_CUE_MARKERS.get(concept)
+        if not marker:
+            continue
+        match = next((row for row in cue_rows if marker in row), None)
+        if match is not None and match not in selected:
+            selected.append(match)
+    return selected
 
 
 def _detected_routing_concepts(text: str) -> set[str]:
@@ -254,9 +297,18 @@ def extract_routing_reference(routing_map_text: str, case_prompt: str) -> str:
         key=lambda row: _routing_row_score(case_prompt, row),
         reverse=True,
     )
-    selected_cues = [
-        row for row in ranked_cues if _routing_row_score(case_prompt, row)[1] > 0
-    ][:2]
+    selected_cues = _canonical_cue_rows(case_concepts, cue_rows)
+    cue_limit = max(2, min(4, len(case_concepts)))
+    for row in ranked_cues:
+        if len(selected_cues) >= cue_limit:
+            break
+        if row in selected_cues:
+            continue
+        if _routing_row_score(case_prompt, row)[1] <= 0:
+            continue
+        selected_cues.append(row)
+        if len(selected_cues) >= cue_limit:
+            break
     if not selected_cues:
         selected_cues = ranked_cues[:2]
 
@@ -295,8 +347,10 @@ def _routing_rules(compact: bool = False) -> str:
         return """Mandatory routing check:
 - Output one JSON object only; route by decision/failure boundary, not language or isolated keywords.
 - Pick the primary deliverable owner, then add every independent boundary that materially requires a supporting skill.
-- A component-state task also needs equipment-control-architecture when physical completion, timeout/late completion, interlock, sequence/service boundary, or recovery ownership crosses the component model.
-- Do not add semiconductor-equipment-domain-knowledge merely because chamber or transfer vocabulary appears; add it only when physical process meaning or readiness must be clarified.
+- A concrete communication-code review that also redesigns Commanded/Pending/Actual/Readback or command-attempt timeout/late-response semantics selects code-review as primary and equipment-domain-modeling as supporting. Do not replace that modeling support with equipment-control-architecture unless Sequence/Equipment Service, interlock, shared-resource, reconnect/restart/failover, or physical operation recovery ownership is explicitly requested.
+- When the explicit main deliverable is a component Commanded/Pending/Actual/Readback or ACK-versus-physical-completion contract, choose equipment-domain-modeling as primary. Add equipment-control-architecture for a separate cross-layer timeout, interlock, late-completion, shared-resource, or recovery-ownership deliverable; do not collapse that explicitly required second deliverable.
+- When the component contract is already defined and the requested deliverable is Sequence/Equipment Service responsibility, shared-resource ownership, reconnect, restart, or failover, choose equipment-control-architecture as primary without equipment-domain-modeling.
+- Do not add semiconductor-equipment-domain-knowledge merely because chamber, valve, transfer, or completion vocabulary appears; add it only when physical purpose, process meaning, readiness criteria, or completion evidence is actually unresolved.
 - execution_order must contain the selected primary/supporting set exactly once and cannot be empty when primary_skill is not null.
 - using-cloudskill is the router and must be absent downstream. Translation/simple rewriting/trivial work selects no skill.
 """
@@ -309,7 +363,14 @@ def _routing_rules(compact: bool = False) -> str:
 
 Before returning JSON, perform this checklist:
 1. Choose the one primary_skill that owns the requested deliverable or final decision.
+   - A concrete communication-code correctness review remains owned by code-review even when the same request also redesigns Commanded/Pending/Actual/Readback or command-attempt timeout/late-response semantics; add equipment-domain-modeling as supporting.
+   - Do not use equipment-control-architecture for that code-plus-state task unless Sequence/Equipment Service, interlock, shared-resource, reconnect/restart/failover, or physical operation recovery ownership is explicitly requested.
+   - A component Commanded/Pending/Actual/Readback, ACK-versus-physical-completion, or late-readback contract is owned by equipment-domain-modeling.
+   - Sequence/Equipment Service responsibility, shared-resource ownership, reconnect, restart, failover, fencing, or recovery architecture is owned by equipment-control-architecture when the component contract is already defined.
 2. Scan the task again for every independent decision boundary that materially changes the work; add only those as supporting_skills.
+   - A separately required Sequence/Equipment Service timeout or recovery deliverable cannot be absorbed into the component state-contract owner.
+   - Add equipment-control-architecture to a component-contract task when that separate cross-layer responsibility deliverable is explicitly requested.
+   - Do not add semiconductor-equipment-domain-knowledge when physical purpose and completion evidence are explicitly supplied.
 3. Build execution_order from the selected set: primary_skill plus supporting_skills, each exactly once. If primary_skill is not null, execution_order must not be empty.
 4. Confirm rejected_skills does not overlap the selected set and using-cloudskill is absent downstream.
 
@@ -559,34 +620,44 @@ def _behavior_system_prompt(
 ) -> str:
     selected = selected_skills(decision)
     sections = [
-        "You are executing the actual CloudBox downstream skills selected by the router.",
-        "Return the final engineering deliverable only.",
-        "Do not expose internal analysis, planning, chain-of-thought, or self-instructions.",
-        "Do not mention the router, Eval case ID, selected skill IDs, or SKILL.md.",
-        "Apply the supplied downstream instructions to the user task; do not merely repeat their labels.",
-        "Preserve evidence honesty: distinguish observed facts, assumptions, unresolved questions, and checks that were not actually run.",
-        "Use concise task-relevant sections. For architecture work, prioritize authority, boundaries, failure/recovery behavior, verification, and unresolved inputs.",
-        "Do not include using-cloudskill as a downstream skill.",
-        "Router decision:\n" + json.dumps(decision, ensure_ascii=False, separators=(",", ":")),
-        "Selected downstream skill IDs: " + (", ".join(selected) if selected else "none"),
+        render_contract_prompt(minimum_characters=BEHAVIOR_MIN_FINAL_CHARACTERS),
+        "Use concise task-relevant sections, explicit ownership, state transitions, rejection rules, recovery gates, and verification scenarios.",
     ]
-    for path, text in skill_sections:
+    if "equipment-control-architecture" in selected:
         sections.append(
-            f'<selected-skill source="{path}">\n{text.rstrip()}\n</selected-skill>'
+            "For a distributed ownership/recovery deliverable, explicitly include: "
+            "an authority matrix; one shared-resource owner with reservation/arbitration and owner-loss behavior; "
+            "a reconnect admission gate; restart reconstruction from current physical/material evidence; "
+            "failover authority transfer with epoch/term, lease, fencing token, or equivalent single-writer control that rejects the old owner; "
+            "command ID, attempt ID, idempotency/duplicate handling, timeout and late completion; "
+            "fresh interlock/readiness revalidation; at least six fault-injection scenarios; "
+            "and assumptions/unresolved inputs. Do not invent a backup topology or plant fact."
         )
-    for path, text in reference_sections:
+    if "equipment-domain-modeling" in selected:
         sections.append(
-            f'<selected-skill-reference source="{path}">\n{text.rstrip()}\n</selected-skill-reference>'
+            "For a component command/state contract, explicitly define Commanded, Desired, Pending/InProgress, "
+            "Actual/Readback, Quality/Stale, Error/Uncertain, Reconciled, Success ACK versus physical completion, "
+            "command ID, attempt ID, duplicate/idempotent policy, timeout, late completion/readback, and reconciliation."
         )
+    for _path, instruction_text in skill_sections:
+        sections.append("<instruction-set>\n" + instruction_text.rstrip() + "\n</instruction-set>")
+    for _path, reference_text in reference_sections:
+        sections.append("<reference-material>\n" + reference_text.rstrip() + "\n</reference-material>")
     return "\n\n".join(sections).strip() + "\n"
 
 
 def _behavior_user_prompt(case: dict[str, Any]) -> str:
+    # Provider-neutral: do not prepend a model-specific directive here (a prior
+    # unconditional "/no_think" Qwen3/Ollama thinking-mode directive was
+    # confirmed to break the Claude Code CLI provider, which parses a leading
+    # "/word" in piped input as a slash command -- "Unknown command: /no_think").
+    # Provider-specific directives belong in that provider's own call path
+    # (see call_ollama in run_runtime_evals.py), not in this shared builder.
+    task = str(case.get("behavior_prompt") or case["prompt"]).strip()
     return (
-        f'Case ID: {case["id"]}\n\n'
-        "Original user task:\n"
-        f'{case["prompt"].strip()}\n\n'
-        "Return the final answer directly. Do not show analysis or discuss the Eval machinery."
+        "User request:\n"
+        + task
+        + "\n\nReturn the required JSON object only."
     )
 
 
@@ -635,8 +706,11 @@ def build_selected_skills_prompt(
                 optional_references.append((reference_path, reference_text))
 
     case_source = json.dumps(case, ensure_ascii=False, indent=2)
+    included_case = {"id": case["id"], "prompt": case["prompt"]}
+    if isinstance(case.get("behavior_prompt"), str) and case["behavior_prompt"].strip():
+        included_case["behavior_prompt"] = case["behavior_prompt"]
     case_included = json.dumps(
-        {"id": case["id"], "prompt": case["prompt"]},
+        included_case,
         ensure_ascii=False,
         separators=(",", ":"),
     )

@@ -60,11 +60,18 @@ else:
             'name': name,
             'description': description,
             'path': str(skill_file.relative_to(ROOT)).replace('\\','/'),
-            'file_count': sum(1 for path in folder.rglob('*') if path.is_file()),
+            'file_count': sum(
+                1 for path in folder.rglob('*')
+                if path.is_file()
+                and '__pycache__' not in path.parts
+                and path.suffix != '.pyc'
+                and path.name != '.DS_Store'
+            ),
         })
 
 required = [
     'AGENTS.md', 'CLAUDE.md', 'INSTALL.md', 'PLANS.md', 'README.md', 'CHANGELOG.md', 'VERSION',
+    'CLOUDSKILL_AGENT_HANDOFF.md', 'docs/CLOUDSKILL_DESIGN_AND_FLOW.md', 'docs/CLOUDSKILL_CHANGE_HISTORY.md',
     'docs/README.md', 'docs/profile/ARCHITECT_PROFILE.md',
     'docs/evidence/BENTO_SYSTEM.md', 'docs/evidence/CLOUDBOX_ENGINE.md',
     'docs/evidence/QT_COMPONENT_SUITE.md', 'docs/evidence/SIS_TOUCH_UTILITY.md',
@@ -72,13 +79,18 @@ required = [
     'docs/standards/ENGINEERING_GOVERNANCE.md', 'docs/DOCUMENTATION_AUDIT.md',
     'scripts/install.ps1', 'scripts/install.sh', 'scripts/audit_docs.py',
     'scripts/validate_descriptions.py', 'scripts/validate_behavior_evals.py',
+    'scripts/manage_skill.py', 'scripts/validate_skill_lifecycle.py', 'scripts/validate_evolution_handoff.py',
     'scripts/smoke_install.py', 'scripts/run_all_checks.py', 'scripts/validate_plugins.py',
-    'cloudskill-eval', 'scripts/run_local_eval_review.py', 'scripts/validate_local_eval_debugging.py',
+    'cloudskill-eval', 'cloudskill-eval-codex', 'cloudskill-eval-claude', 'scripts/codex_eval_adapter.py', 'scripts/claude_eval_adapter.py', 'scripts/providers_contract.py', 'evals/runtime/contracts/providers.json', 'scripts/run_local_eval_review.py', 'scripts/validate_local_eval_debugging.py', 'scripts/validate_codex_eval_path.py', 'scripts/validate_providers_contract.py',
     '.codex-plugin/plugin.json', '.claude-plugin/plugin.json',
     '.agents/plugins/marketplace.json', '.claude-plugin/marketplace.json',
     'assets/cloudbox.ico', 'assets/cloudbox-icon.png', 'assets/cloudbox-logo.png',
     'docs/CLOUDBOX_PLUGIN.md',
     'scripts/capture_eval_candidate.py', 'scripts/validate_interaction_capture.py',
+    'scripts/import_eval_candidates.py', 'scripts/sync_eval_exchange.py',
+    '.agents/skills/developing-skills/assets/export_eval_candidate.py',
+    'scripts/package_surface_skills.py', 'scripts/validate_skill_portability.py',
+    'config/skill-portability.json', 'docs/PLATFORM_SUPPORT_MATRIX.md',
     'config/cloudskill-config.template.json', '.gitignore',
     'evals/README.md', 'evals/skill-routing-cases.csv', 'evals/behavior/README.md',
     'evals/behavior/schema.json', 'evals/behavior/RESULT.template.json',
@@ -87,6 +99,17 @@ required = [
     '.agents/skills/developing-skills/references/interaction-eval-capture.md',
     '.agents/skills/developing-skills/assets/INTERACTION_EVAL_CANDIDATE.template.json',
     '.agents/skills/developing-skills/assets/EVAL_MINING_REPORT.template.md',
+    '.agents/skills/developing-skills/references/skill-lifecycle-standard.md',
+    '.agents/skills/developing-skills/assets/SKILL_PROPOSAL.template.md',
+    '.agents/skills/developing-skills/assets/SKILL_LIFECYCLE.template.json',
+    '.agents/skills/developing-skills/assets/SKILL_RELEASE_EVIDENCE.template.md',
+    'config/skill-lifecycle-policy.json',
+    '.agents/skills/local-runtime-eval-debugging/references/codex-runtime-eval.md',
+    '.agents/skills/runtime-evaluation-engineering/SKILL.md',
+    '.agents/skills/runtime-evaluation-engineering/agents/openai.yaml',
+    '.agents/skills/runtime-evaluation-engineering/references/evaluation-failure-taxonomy.md',
+    '.agents/skills/runtime-evaluation-engineering/references/case-and-grader-design.md',
+    '.agents/skills/runtime-evaluation-engineering/assets/EVAL_SYSTEM_REVIEW.template.md',
     '.agents/skills/equipment-control-architecture/SKILL.md',
     '.agents/skills/equipment-domain-modeling/SKILL.md',
     '.agents/skills/semiconductor-equipment-domain-knowledge/SKILL.md',

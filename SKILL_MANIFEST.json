@@ -5,109 +5,115 @@
       "name": "agent-development-process",
       "description": "Use when building or improving an AI-agent product whose task contract, autonomy, tools, context, memory, orchestration, evaluation, guardrails, release, or operations must be designed.",
       "path": ".agents/skills/agent-development-process/SKILL.md",
-      "file_count": 11
+      "file_count": 12
     },
     {
       "name": "application-client-server-architecture",
       "description": "Use when an application crosses client/server, API, persistence, identity, transaction, state-authority, data-history, deployment, or operational boundaries.",
       "path": ".agents/skills/application-client-server-architecture/SKILL.md",
-      "file_count": 5
+      "file_count": 6
     },
     {
       "name": "architecture-review",
       "description": "Use when comparing or assessing architecture decisions, module boundaries, state ownership, distributed design, platform/domain separation, failure behavior, or migration risk.",
       "path": ".agents/skills/architecture-review/SKILL.md",
-      "file_count": 4
+      "file_count": 5
     },
     {
       "name": "code-review",
       "description": "Use when production C, C++, C#, Qt, WinForms, WPF, framework, device-control, communication, or industrial code must be checked for correctness, concurrency, state, lifetime, recovery, maintainability, or boundary violations.",
       "path": ".agents/skills/code-review/SKILL.md",
-      "file_count": 3
+      "file_count": 4
     },
     {
       "name": "coding-agent-project-governance",
       "description": "Use when a repository needs coding-agent instructions, risk routing, worktree rules, multi-agent ownership, test evidence, migration controls, release rules, or truthful handoff.",
       "path": ".agents/skills/coding-agent-project-governance/SKILL.md",
-      "file_count": 10
+      "file_count": 11
     },
     {
       "name": "cross-platform-engine-architecture",
       "description": "Use when a 2D, game, or graphics engine spans director/scene lifecycle, update/render loops, rendering backends, resources, actions/events, input, context loss, or platform adapters.",
       "path": ".agents/skills/cross-platform-engine-architecture/SKILL.md",
-      "file_count": 7
+      "file_count": 8
     },
     {
       "name": "cross-platform-native-architecture",
       "description": "Use when a native or Qt system spans OS-specific lifecycle, HID/USB devices, firmware update, privileged integration, packaging, Designer plug-ins, or Qt build/version migration boundaries.",
       "path": ".agents/skills/cross-platform-native-architecture/SKILL.md",
-      "file_count": 9
+      "file_count": 10
     },
     {
       "name": "developing-skills",
       "description": "Use when creating, editing, splitting, merging, evaluating, releasing, or conversation-mining CloudSkill skills, including turning available prior interactions and user corrections into sanitized routing and behavior evidence or a reviewable replacement package.",
       "path": ".agents/skills/developing-skills/SKILL.md",
-      "file_count": 10
+      "file_count": 16
     },
     {
       "name": "development-process-tailoring",
       "description": "Use when delivery is constrained by unstable requirements, hardware dependencies, release trains, urgent work, field feedback, product variants, stage gates, or competing lifecycle models.",
       "path": ".agents/skills/development-process-tailoring/SKILL.md",
-      "file_count": 8
+      "file_count": 9
     },
     {
       "name": "document-governance",
       "description": "Use when engineering documents disagree on authority, version lineage, audience, approval state, traceability, terminology, source data, or release baseline.",
       "path": ".agents/skills/document-governance/SKILL.md",
-      "file_count": 7
+      "file_count": 8
     },
     {
       "name": "equipment-control-architecture",
       "description": "Use when equipment software coordinates material flow, pump/vent or chamber readiness, wafer/lot sequences, robots, recipes, interlocks, shared physical resources, simulation, or distributed control across equipment modules.",
       "path": ".agents/skills/equipment-control-architecture/SKILL.md",
-      "file_count": 9
+      "file_count": 10
     },
     {
       "name": "equipment-domain-modeling",
       "description": "Use when modeling valves, MFCs, pumps, gauges, heaters, power supplies, robots, chamber snapshots, equipment commands, hardware readback, Actual and Desired values, capabilities, engineering units, or metadata-driven UI.",
       "path": ".agents/skills/equipment-domain-modeling/SKILL.md",
-      "file_count": 8
+      "file_count": 9
     },
     {
       "name": "framework-design",
       "description": "Use when reusable capability must be separated from product or domain behavior through framework, SDK, plug-in, platform, extension-point, state/command, or product-line contracts.",
       "path": ".agents/skills/framework-design/SKILL.md",
-      "file_count": 3
+      "file_count": 4
     },
     {
       "name": "local-runtime-eval-debugging",
       "description": "Use when executing, diagnosing, grading, or packaging local CloudSkill or CloudBox Runtime Evals, especially with Ollama, Python discovery, context-budget overflow, missing reports, routing versus behavior failures, or a request for one reproducible upload bundle.",
       "path": ".agents/skills/local-runtime-eval-debugging/SKILL.md",
-      "file_count": 4
+      "file_count": 6
+    },
+    {
+      "name": "runtime-evaluation-engineering",
+      "description": "Use when designing, reviewing, or debugging an executable AI, agent, model, router, or skill evaluation system involving case validity, context evidence, reproducibility, structured outputs, deterministic grading, semantic judging, score interpretation, regression gates, or release decisions.",
+      "path": ".agents/skills/runtime-evaluation-engineering/SKILL.md",
+      "file_count": 6
     },
     {
       "name": "safe-incremental-refactoring",
       "description": "Use when legacy or brownfield responsibilities must move without breaking behavior, public contracts, data, transaction order, release compatibility, recovery, or test seams.",
       "path": ".agents/skills/safe-incremental-refactoring/SKILL.md",
-      "file_count": 7
+      "file_count": 8
     },
     {
       "name": "semiconductor-equipment-domain-knowledge",
       "description": "Use when a semiconductor-equipment task depends on the physical meaning of EFEM, load ports, loadlocks, transfer chambers, process chambers, vacuum pumps, pressure gauges, gas flow, heaters, power supplies, plasma, sputtering, or process readiness.",
       "path": ".agents/skills/semiconductor-equipment-domain-knowledge/SKILL.md",
-      "file_count": 8
+      "file_count": 9
     },
     {
       "name": "software-quality-iso25010",
       "description": "Use when software quality must be translated into measurable scenarios, acceptance criteria, metrics, evidence, dashboards, release gates, or defect analysis using ISO/IEC 25010.",
       "path": ".agents/skills/software-quality-iso25010/SKILL.md",
-      "file_count": 6
+      "file_count": 7
     },
     {
       "name": "using-cloudskill",
       "description": "Use when a non-trivial engineering task may require one or more CloudBox skills, especially when it refers to prior corrections or interactions, spans architecture, equipment, code, process, quality, documents, or AI agents, or has ambiguous routing and skill composition.",
       "path": ".agents/skills/using-cloudskill/SKILL.md",
-      "file_count": 4
+      "file_count": 5
     }
   ]
 }

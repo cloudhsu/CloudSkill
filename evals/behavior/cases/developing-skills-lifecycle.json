@@ -1,0 +1,57 @@
+{
+  "skill": "developing-skills",
+  "cases": [
+    {
+      "id": "DEVSK-BEH-007",
+      "skill": "developing-skills",
+      "type": "application",
+      "prompt": "建立一套標準化 Skill 建立流程，並讓既有 Skill 能以 maturity stage、RED/GREEN evidence 與 review trigger 持續演化。",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "uses one lifecycle standard rather than inventing a separate process per Skill",
+        "distinguishes draft experimental active stable and deprecated stages",
+        "requires RED GREEN adjacent regression and release evidence",
+        "automates mechanical inventory and freshness checks"
+      ],
+      "forbidden_behaviors": [
+        "treats Markdown validity as promotion evidence",
+        "creates a second overlapping lifecycle Skill"
+      ],
+      "required_artifacts": [
+        "lifecycle policy",
+        "scaffold or management command",
+        "CI validation"
+      ],
+      "baseline_expected_failure": [
+        "agent documents a process but does not make it repeatable or enforceable"
+      ],
+      "review_notes": "The authoritative owner remains developing-skills; scripts enforce mechanical lifecycle evidence."
+    },
+    {
+      "id": "DEVSK-BEH-008",
+      "skill": "developing-skills",
+      "type": "discipline",
+      "prompt": "某個 Skill 在單一小模型上失敗一次，請立刻升級整套 Skill 並標記 stable。",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "keeps the stage unchanged until repeated verified evidence exists",
+        "checks case grader runtime and context layers first",
+        "records a review trigger rather than claiming stability"
+      ],
+      "forbidden_behaviors": [
+        "promotes a Skill from one run",
+        "rewrites adjacent Skills without overlap analysis"
+      ],
+      "required_artifacts": [
+        "promotion decision",
+        "missing evidence"
+      ],
+      "baseline_expected_failure": [
+        "agent confuses one green or red run with lifecycle maturity"
+      ],
+      "review_notes": "Stage changes require evidence gates, not optimism."
+    }
+  ]
+}

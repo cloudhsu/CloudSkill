@@ -12,7 +12,15 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+from behavior_output_contract import (
+    BEHAVIOR_MIN_FINAL_CHARACTERS,
+    BEHAVIOR_OUTPUT_CONTRACT_FINGERPRINT,
+    BEHAVIOR_OUTPUT_CONTRACT_ID,
+    extract_final_value,
+)
+
 from runtime_eval_common import (
+    BEHAVIOR_DELIVERABLE_SCHEMA,
     CONTEXT_MODES,
     DEFAULT_CASES,
     DEFAULT_SCHEMA,
@@ -30,6 +38,10 @@ from runtime_eval_common import (
     validate_decision_shape,
 )
 
+from codex_eval_adapter import call_codex_cli, codex_preflight
+from claude_eval_adapter import call_claude_cli, claude_preflight
+from providers_contract import PROVIDER_IDS
+
 OPENAI_API_URL = "https://api.openai.com/v1/responses"
 DEFAULT_OLLAMA_URL = "http://127.0.0.1:11434"
 
@@ -40,14 +52,30 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--provider",
-        choices=("ollama", "openai"),
+        choices=(*PROVIDER_IDS, "openai"),
         default="ollama",
-        help="Model runtime. Ollama is local and requires no API key.",
+        help=(
+            "Model runtime: ollama (local, no API key), codex (Codex CLI/GPT), "
+            "claude (Claude Code CLI), or the legacy direct-API openai path."
+        ),
     )
     parser.add_argument(
         "--model",
         default="qwen3:4b",
         help="Ollama model name or exact OpenAI model name. Default: qwen3:4b.",
+    )
+    parser.add_argument(
+        "--codex-model",
+        default="",
+        help="Optional Codex CLI model override. Empty uses the authenticated Codex default.",
+    )
+    parser.add_argument(
+        "--claude-model",
+        default="",
+        help=(
+            "Optional Claude Code CLI model override (alias like 'opus'/'sonnet' or a full "
+            "model name). Empty uses the CLI's configured default."
+        ),
     )
     parser.add_argument(
         "--eval-kind",
@@ -159,6 +187,14 @@ def parse_json_object(text: str) -> dict[str, Any]:
     return value
 
 
+def extract_final_deliverable(text: str) -> tuple[str, bool]:
+    value, extracted, _contract = extract_final_value(
+        text,
+        minimum_characters=BEHAVIOR_MIN_FINAL_CHARACTERS,
+        allow_legacy_terminal=True,
+    )
+    return value, extracted
+
 def request_json(
     *,
     url: str,
@@ -224,6 +260,13 @@ def ollama_installed_models(base_url: str, timeout: float) -> set[str]:
     return names
 
 
+def ollama_user_prompt(user_prompt: str) -> str:
+    """Prepend the Qwen3 thinking-mode directive. Ollama-only: do not reuse for
+    another provider's call path -- Claude Code CLI parses a leading "/word" in
+    piped input as a slash command, not literal prompt text."""
+    return "/no_think\n\n" + user_prompt
+
+
 def call_ollama(
     *,
     base_url: str,
@@ -242,7 +285,7 @@ def call_ollama(
         "model": model,
         "messages": [
             {"role": "system", "content": system_prompt},
-            {"role": "user", "content": user_prompt},
+            {"role": "user", "content": ollama_user_prompt(user_prompt)},
         ],
         "stream": False,
         "think": False,
@@ -347,6 +390,15 @@ def call_openai(
     return actual, text, metadata
 
 
+def resolve_model_label(args: argparse.Namespace) -> str:
+    """Return the model identifier to record/label output with, per provider."""
+    if args.provider == "codex":
+        return args.codex_model or "codex-default"
+    if args.provider == "claude":
+        return args.claude_model or "claude-default"
+    return args.model
+
+
 def call_model(
     *,
     args: argparse.Namespace,
@@ -371,18 +423,40 @@ def call_model(
             temperature=args.temperature,
             seed=args.seed,
         )
-    assert api_key is not None
-    return call_openai(
-        api_key=api_key,
-        model=args.model,
-        system_prompt=system_prompt,
-        user_prompt=user_prompt,
-        schema=schema,
-        timeout=args.timeout,
-        max_retries=args.max_retries,
-        max_output_tokens=max_output_tokens,
-        client_request_id=client_request_id,
-    )
+    if args.provider == "codex":
+        text, metadata = call_codex_cli(
+            model=args.codex_model or None,
+            system_prompt=system_prompt,
+            user_prompt=user_prompt,
+            schema=schema,
+            timeout=args.timeout,
+        )
+        actual: dict[str, Any] | str = parse_json_object(text) if schema is not None else text
+        return actual, text, metadata
+    if args.provider == "claude":
+        text, metadata = call_claude_cli(
+            model=args.claude_model or None,
+            system_prompt=system_prompt,
+            user_prompt=user_prompt,
+            schema=schema,
+            timeout=args.timeout,
+        )
+        actual = parse_json_object(text) if schema is not None else text
+        return actual, text, metadata
+    if args.provider == "openai":
+        assert api_key is not None
+        return call_openai(
+            api_key=api_key,
+            model=args.model,
+            system_prompt=system_prompt,
+            user_prompt=user_prompt,
+            schema=schema,
+            timeout=args.timeout,
+            max_retries=args.max_retries,
+            max_output_tokens=max_output_tokens,
+            client_request_id=client_request_id,
+        )
+    raise SystemExit(f"unsupported --provider: {args.provider}")
 
 
 def _dedupe_strings(values: list[str]) -> list[str]:
@@ -534,7 +608,7 @@ def prompt_request_payload(
             "model": args.model,
             "messages": [
                 {"role": "system", "content": system_prompt},
-                {"role": "user", "content": user_prompt},
+                {"role": "user", "content": ollama_user_prompt(user_prompt)},
             ],
             "stream": False,
             "think": False,
@@ -548,6 +622,30 @@ def prompt_request_payload(
         if schema is not None:
             payload["format"] = schema
         return payload
+    if args.provider == "codex":
+        return {
+            "provider": "codex",
+            "model": args.codex_model or "codex-default",
+            "sandbox": "read-only",
+            "ephemeral": True,
+            "isolated_git_repository": True,
+            "system_prompt": system_prompt,
+            "user_prompt": user_prompt,
+            "output_schema": schema,
+            "max_output_tokens_advisory": max_output_tokens,
+        }
+    if args.provider == "claude":
+        return {
+            "provider": "claude",
+            "model": args.claude_model or "claude-default",
+            "safe_mode": True,
+            "tools_disabled": True,
+            "no_session_persistence": True,
+            "system_prompt": system_prompt,
+            "user_prompt": user_prompt,
+            "json_schema": schema,
+            "max_output_tokens_advisory": max_output_tokens,
+        }
     payload = {
         "model": args.model,
         "instructions": system_prompt,
@@ -616,7 +714,7 @@ def dry_run_plan(
         "cloudbox_version": version,
         "suite": suite["suite"],
         "provider": args.provider,
-        "model": args.model,
+        "model": resolve_model_label(args),
         "eval_kind": args.eval_kind,
         "context_mode": context_mode,
         "contract_repair": args.contract_repair,
@@ -636,6 +734,24 @@ def dry_run_plan(
         else None,
         "openai": {"store": False, "structured_output": True}
         if args.provider == "openai"
+        else None,
+        "codex": {
+            "model": args.codex_model or "codex-default",
+            "sandbox": "read-only",
+            "ephemeral": True,
+            "isolated_git_repository": True,
+            "structured_output": True,
+        }
+        if args.provider == "codex"
+        else None,
+        "claude": {
+            "model": args.claude_model or "claude-default",
+            "safe_mode": True,
+            "tools_disabled": True,
+            "no_session_persistence": True,
+            "structured_output": True,
+        }
+        if args.provider == "claude"
         else None,
         "cases": case_plans,
     }
@@ -657,7 +773,8 @@ def main() -> int:
     version = VERSION_FILE.read_text(encoding="utf-8").strip()
     cases = select_cases(suite, args.case_id)
     valid_skills = skill_ids(manifest)
-    output = args.output or default_output(args.provider, args.model, args.eval_kind, context_mode)
+    model_label = resolve_model_label(args)
+    output = args.output or default_output(args.provider, model_label, args.eval_kind, context_mode)
 
     preflight_bundles: dict[str, dict[str, Any]] = {}
     try:
@@ -697,7 +814,19 @@ def main() -> int:
     if args.provider == "openai":
         api_key = os.environ.get("OPENAI_API_KEY")
         if not api_key:
-            raise SystemExit("OPENAI_API_KEY is not set; use --provider ollama for local execution")
+            raise SystemExit("OPENAI_API_KEY is not set; use --provider ollama, codex, or claude for execution without a raw API key")
+    elif args.provider == "codex":
+        if not args.skip_model_check:
+            try:
+                codex_preflight(timeout=min(args.timeout, 30.0))
+            except Exception as exc:
+                raise SystemExit(str(exc)) from exc
+    elif args.provider == "claude":
+        if not args.skip_model_check:
+            try:
+                claude_preflight(timeout=min(args.timeout, 30.0))
+            except Exception as exc:
+                raise SystemExit(str(exc)) from exc
     elif not args.skip_model_check:
         try:
             installed = ollama_installed_models(args.ollama_url, min(args.timeout, 30.0))
@@ -729,7 +858,7 @@ def main() -> int:
                     "case_id": case["id"],
                     "attempt": attempt,
                     "provider": args.provider,
-                    "model_requested": args.model,
+                    "model_requested": resolve_model_label(args),
                     "eval_kind": args.eval_kind,
                     "context_mode": context_mode,
                     "diagnostic_baseline": context_mode in {"none", "manifest"},
@@ -752,6 +881,8 @@ def main() -> int:
                         "final_errors": [],
                     },
                     "behavior_output": None,
+                    "behavior_output_raw": None,
+                    "behavior_final_extracted": False,
                     "behavior_status": None,
                     "behavior_usage": {},
                     "error": None,
@@ -827,13 +958,20 @@ def main() -> int:
                                 api_key=api_key,
                                 system_prompt=behavior_bundle["system_prompt"],
                                 user_prompt=behavior_bundle["user_prompt"],
-                                schema=None,
+                                schema=BEHAVIOR_DELIVERABLE_SCHEMA,
                                 max_output_tokens=args.behavior_max_output_tokens,
                                 client_request_id=behavior_request_id,
                             )
-                            if not isinstance(behavior_value, str):
-                                raise RuntimeError("behavior model did not return text")
-                            record["behavior_output"] = behavior_raw
+                            if not isinstance(behavior_value, dict):
+                                raise RuntimeError("behavior model did not return a structured object")
+                            behavior_final = behavior_value.get("final")
+                            if not isinstance(behavior_final, str) or len(behavior_final.strip()) < BEHAVIOR_MIN_FINAL_CHARACTERS:
+                                raise RuntimeError("behavior model returned an invalid final deliverable")
+                            record["behavior_output_raw"] = behavior_raw
+                            record["behavior_output"] = behavior_final.strip()
+                            record["behavior_final_extracted"] = True
+                            record["behavior_output_contract"] = BEHAVIOR_OUTPUT_CONTRACT_ID
+                            record["behavior_output_contract_fingerprint"] = BEHAVIOR_OUTPUT_CONTRACT_FINGERPRINT
                             record["behavior_status"] = "completed"
                             record["behavior_usage"] = behavior_metadata.get("usage") or {}
                             record["context"] = {

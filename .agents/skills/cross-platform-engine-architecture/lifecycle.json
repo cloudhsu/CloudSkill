@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "skill": "cross-platform-engine-architecture",
+  "stage": "active",
+  "introduced_version": "unknown",
+  "last_reviewed_version": "5.6.0",
+  "routing_case_ids": [
+    "ENG-01",
+    "ENG-02",
+    "ENG-NEG-01"
+  ],
+  "positive_routing_case_ids": [
+    "ENG-01",
+    "ENG-02"
+  ],
+  "negative_routing_case_ids": [
+    "ENG-NEG-01"
+  ],
+  "behavior_case_ids": [
+    "ENG-BEH-001",
+    "ENG-BEH-002",
+    "ENG-BEH-003"
+  ],
+  "behavior_case_types": [
+    "application",
+    "counterexample",
+    "recognition"
+  ],
+  "next_review_triggers": [
+    "three repeated contract-valid routing misses with verified context",
+    "a behavior regression on an existing case",
+    "a new adjacent skill creates scope overlap",
+    "the routing reference or selected-skill context no longer fits its supported budget",
+    "a deterministic grader produces a demonstrated false positive or false negative",
+    "a user correction reveals a reusable missing safeguard",
+    "the skill has not been reviewed for two feature releases"
+  ],
+  "replacement_skill": null,
+  "notes": "Baseline lifecycle evidence generated from committed routing and behavior cases."
+}

@@ -1,0 +1,34 @@
+{
+  "schema_version": 1,
+  "description": "Classifies each Skill's compatibility with sandboxed, non-CLI surfaces (claude.ai web Custom Skills, Claude Desktop Custom Skills, Claude API Skills). CLI surfaces (Codex CLI, Claude Code CLI, Gemini CLI) support every Skill regardless of this classification, since they give the model full local filesystem and subprocess access. scripts/validate_skill_portability.py is the executable adapter for this data.",
+  "tiers": {
+    "portable": "No dependency on scripts/*.py, cloudskill-eval*, .local/, or other CloudSkill-repository-relative tooling. Safe to package as a standalone zip for claude.ai/Desktop/API upload as-is.",
+    "hybrid": "Core judgment/methodology is portable, but some documented workflow steps invoke CloudSkill-repository scripts or assume repository-relative paths that will not function in a sandboxed surface. Package as-is but disclose the non-functional steps; do not silently strip them.",
+    "cli-only": "Assumes filesystem/subprocess access to this repository's own scripts and local state throughout. Do not package for claude.ai/Desktop/API upload."
+  },
+  "skills": {
+    "agent-development-process": "portable",
+    "application-client-server-architecture": "portable",
+    "architecture-review": "portable",
+    "code-review": "portable",
+    "coding-agent-project-governance": "portable",
+    "cross-platform-engine-architecture": "portable",
+    "cross-platform-native-architecture": "portable",
+    "developing-skills": "hybrid",
+    "development-process-tailoring": "portable",
+    "document-governance": "portable",
+    "equipment-control-architecture": "portable",
+    "equipment-domain-modeling": "portable",
+    "framework-design": "portable",
+    "local-runtime-eval-debugging": "cli-only",
+    "runtime-evaluation-engineering": "portable",
+    "safe-incremental-refactoring": "portable",
+    "semiconductor-equipment-domain-knowledge": "portable",
+    "software-quality-iso25010": "portable",
+    "using-cloudskill": "portable"
+  },
+  "deployment_notes": [
+    "A claude.ai/Desktop bundle should exclude local-runtime-eval-debugging entirely rather than package a non-functional Skill.",
+    "using-cloudskill routes to every Skill including local-runtime-eval-debugging; on a sandboxed surface that route is a dead end. This is a deployment/bundle-composition concern, not a defect in using-cloudskill's own content."
+  ]
+}

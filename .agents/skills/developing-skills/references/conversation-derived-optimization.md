@@ -84,3 +84,62 @@ Every delivery must identify:
 - Remaining limitations.
 
 A successful package build is not a successful skill behavior evaluation.
+
+## Project-history mining
+
+Use this path when the evidence source is a project's commit history,
+architecture/design documents, and code -- not a live interaction. Triggered
+by `從專案提煉優化案例` (see `developing-skills/SKILL.md`). Same extraction
+model, sanitization boundary, and delivery modes above; this section covers
+what differs for a whole-project source.
+
+### Auto-bounded scope
+
+Do not read an entire commit history in detail. Identify significant nodes
+first, then read details only for those:
+
+1. Get the cheap overview: total commit count, tags/releases,
+   `CHANGELOG.md`/release notes, `README`/`ARCHITECTURE`/ADR documents if
+   present.
+2. Rank candidate commits by signal: message keywords (refactor, redesign,
+   fix, breaking, deprecate, migrate), large diffstat, or explicit mention in
+   CHANGELOG/release notes/ADRs.
+3. Cap detailed diff reading to a manageable count (a few dozen), prioritized
+   in this order: commits the project's own release notes call out, then
+   most-recent significant commits, then largest remaining diffs until the
+   cap is reached. State the cap and what was excluded rather than silently
+   truncating.
+4. The user may override auto-bounding at any point with an explicit time
+   range, tag range, or subdirectory; honor that instead of the default.
+
+### Confidence discipline
+
+Mark every extracted candidate `inferred` or `unknown` confidence, never
+`observed`. Commit history and diffs show what changed, not what an agent or
+human actually reasoned through, which Skill (if any) was in play, or
+whether the change was even AI-assisted. Do not upgrade confidence based on
+a plausible-sounding commit message alone.
+
+### Third-party project caution
+
+Analyzing someone else's public repository (a downloaded open-source
+project) or the user's own private project both require the same
+sanitization boundary above, plus `skill-authoring-sources.md`'s citation
+rule: extract only the generalized engineering pressure, never copy source
+text, code, or proprietary business logic as a rule. If a finding later
+becomes a formal Skill reference, attribute the source project explicitly
+rather than presenting the pattern as CloudSkill's own original discovery.
+
+### Output
+
+Same pipeline as interaction capture: `scripts/capture_eval_candidate.py`
+when a CloudSkill repository is reachable, or
+`.agents/skills/developing-skills/assets/export_eval_candidate.py` plus a
+zip otherwise. Additionally produce one
+`EVAL_MINING_REPORT.template.md`-based summary per mining pass (not one per
+candidate) covering what was in scope, what was excluded by the cap, and
+the candidate accounting -- bundle it alongside the candidate JSON files in
+the same export. Prefix each candidate's `task_summary` with
+`[project-history]` so a later batch reviewer can immediately distinguish
+project-mined candidates from live-interaction candidates without opening
+every file.

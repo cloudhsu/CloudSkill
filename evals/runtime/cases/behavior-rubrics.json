@@ -14,7 +14,9 @@
             [
               "authoritative state",
               "state authority",
-              "owns? (?:the )?(?:chamber )?state"
+              "owns? (?:the )?(?:chamber )?state",
+              "sole authority",
+              "authority matrix"
             ],
             [
               "\\bIPC\\b",
@@ -74,7 +76,7 @@
               "until.*reconcil"
             ]
           ],
-          "max_span": 800
+          "max_span": 2000
         },
         {
           "id": "restart-reconstruction",
@@ -96,7 +98,7 @@
             [
               "wafer (?:identity|location)",
               "occupancy",
-              "physical state",
+              "physical(?:[/ ])?(?:material )?state",
               "sensor state"
             ]
           ],
@@ -186,7 +188,8 @@
           "all_groups": [
             [
               "(?:test|verify)\\s+(?:that|by|with|using|a|an|the).{0,250}(?:disconnect|restart|duplicate|out[- ]of[- ]order|owner loss|failover|late completion)",
-              "(?:inject|simulate)\\s+(?:a |an )?(?:disconnect|restart|duplicate|out[- ]of[- ]order|owner loss|failover|late completion)"
+              "(?:inject|simulate)\\s+(?:a |an )?(?:disconnect|restart|duplicate|out[- ]of[- ]order|owner loss|failover|late completion)",
+              "\\b\\d{1,2}\\.\\s+[A-Z][a-z]+.{0,200}?\\bExpect\\b"
             ]
           ],
           "max_span": 1000000
@@ -197,9 +200,9 @@
           "weight": 4,
           "all_groups": [
             [
-              "(?:^|\\n)\\s*#{0,3}\\s*(?:assumptions?|unknowns?|unresolved(?: inputs| questions)?)\\b",
-              "\\bassumption\\s*:",
-              "\\bunknown\\s*:",
+              "(?:^|\\n)[ \\t]*(?:[-*#>]{1,3}|\\d{1,2}[.)])?[ \\t]*\\**[ \\t]*(?:assumptions?|unknowns?|unresolved(?: inputs| questions)?)\\b",
+              "\\bassumptions?\\s*:",
+              "\\bunknowns?\\s*:",
               "requires confirmation",
               "not specified"
             ]
@@ -222,7 +225,13 @@
             "\\bSKILL\\.md\\b",
             "\\bcase id\\b",
             "i'll focus on",
-            "let me structure"
+            "let me structure",
+            "\\bwe (?:are given|must|need to|should|will)\\b",
+            "\\bkey requirements\\b",
+            "\\bstructure (?:the|this) deliverable\\b",
+            "\\blet(?:'|’)s draft\\b",
+            "\\bwe are to return\\b",
+            "\\bthe (?:problem|prompt) says\\b"
           ],
           "max_span": 1000000
         }

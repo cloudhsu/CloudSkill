@@ -1,7 +1,7 @@
 {
   "suite": "cloudbox-routing-canary",
   "schema_version": 1,
-  "description": "Eight high-discrimination routing cases for executable model evaluation.",
+  "description": "Ten high-discrimination routing cases for executable model evaluation.",
   "cases": [
     {
       "id": "R01-networkstream-stale-response",
@@ -84,14 +84,49 @@
       }
     },
     {
-      "id": "R05-ack-versus-completion",
-      "prompt": "主要交付物是重新定義 Valve 的 Commanded、Pending、Actual、Readback，以及 Success ACK 與 physical completion 的元件狀態／命令契約；同時還要分配 Sequence 與 Equipment Service 對 timeout、late completion、interlock 與 recovery 的責任。請選擇最小充分的 CloudBox 技能與執行順序。",
+      "id": "R05A-component-state-contract",
+      "prompt": "唯一主要交付物是 Valve 元件層的 Commanded、Pending、Actual、Readback、Success ACK、physical completion 與 late readback reconciliation 契約。Sequence／Equipment Service 的責任分配、共享資源、部署與 recovery topology 不在本題範圍；元件物理目的與完成證據已知，不需補充製程 domain knowledge。請選擇最小充分的 CloudBox 技能。",
+      "expected": {
+        "primary_skill": "equipment-domain-modeling",
+        "required_supporting_skills": [],
+        "forbidden_selected_skills": [
+          "equipment-control-architecture",
+          "semiconductor-equipment-domain-knowledge",
+          "development-process-tailoring"
+        ],
+        "execution_order": [
+          "equipment-domain-modeling"
+        ],
+        "allow_additional_supporting_skills": false
+      }
+    },
+    {
+      "id": "R05B-recovery-ownership",
+      "prompt": "唯一主要交付物是 Sequence 與 Equipment Service 對 timeout、late completion、interlock、retry/recovery、shared transfer resource ownership 的責任與恢復架構。Valve 的 Commanded／Pending／Actual／Readback 元件契約已定義，不需重新建模；物理目的與完成證據也已提供。請選擇最小充分的 CloudBox 技能。",
+      "expected": {
+        "primary_skill": "equipment-control-architecture",
+        "required_supporting_skills": [],
+        "forbidden_selected_skills": [
+          "equipment-domain-modeling",
+          "semiconductor-equipment-domain-knowledge",
+          "development-process-tailoring"
+        ],
+        "execution_order": [
+          "equipment-control-architecture"
+        ],
+        "allow_additional_supporting_skills": false
+      }
+    },
+    {
+      "id": "R05C-component-and-recovery-composition",
+      "prompt": "這是兩個獨立且都必須完成的交付邊界，不能只選其中一個 Skill。主要交付物是 Valve 的 Commanded、Pending、Actual、Readback、Success ACK、physical completion 與 late readback reconciliation 元件狀態／命令契約；完成元件契約後，還必須另外分配 Sequence 與 Equipment Service 對 timeout、late completion、interlock 與 recovery 的責任。元件物理目的與完成證據已提供，不需新增 semiconductor domain knowledge。請選擇最小充分的 CloudBox 技能與順序。",
       "expected": {
         "primary_skill": "equipment-domain-modeling",
         "required_supporting_skills": [
           "equipment-control-architecture"
         ],
         "forbidden_selected_skills": [
+          "semiconductor-equipment-domain-knowledge",
           "development-process-tailoring"
         ],
         "execution_order": [
@@ -128,7 +163,8 @@
           "equipment-control-architecture"
         ],
         "allow_additional_supporting_skills": false
-      }
+      },
+      "behavior_prompt": "Produce a concrete ownership and recovery model for a distributed equipment system where each chamber has an independent IPC and transfer resources are shared. Define authoritative state ownership, shared-resource reservation/arbitration, reconnect admission, restart reconstruction, failover fencing, command identity/idempotency/timeout/late completion, fresh interlock/readiness revalidation, at least six fault-injection verification scenarios, and explicit assumptions and unresolved inputs. Do not select or discuss CloudBox skills."
     },
     {
       "id": "R08-historical-interaction-optimization",

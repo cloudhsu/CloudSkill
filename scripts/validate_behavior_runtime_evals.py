@@ -7,11 +7,11 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 RUBRICS = ROOT / "evals" / "runtime" / "cases" / "behavior-rubrics.json"
 GRADER = ROOT / "scripts" / "grade_behavior_evals.py"
-COMMON = ROOT / "scripts" / "runtime_eval_common.py"
+CONTRACT_VALIDATOR = ROOT / "scripts" / "validate_behavior_contract.py"
 
 errors: list[str] = []
 
-for path in (RUBRICS, GRADER, COMMON):
+for path in (RUBRICS, GRADER, CONTRACT_VALIDATOR):
     if not path.exists():
         errors.append(f"missing Behavior Eval file: {path.relative_to(ROOT)}")
 
@@ -66,20 +66,16 @@ for case_id, rubric in cases.items():
             errors.append(f"{case_id}/{cid}: all_groups must be a non-empty array")
         else:
             for group in groups:
-                if not isinstance(group, list) or not group or any(not isinstance(item, str) or not item for item in group):
-                    errors.append(f"{case_id}/{cid}: each all_groups item must be a non-empty string array")
+                if (
+                    not isinstance(group, list)
+                    or not group
+                    or any(not isinstance(item, str) or not item for item in group)
+                ):
+                    errors.append(
+                        f"{case_id}/{cid}: each all_groups item must be a non-empty string array"
+                    )
     if weight_total != 100:
         errors.append(f"{case_id}: criterion weights must total 100, found {weight_total}")
-
-if COMMON.exists():
-    text = COMMON.read_text(encoding="utf-8")
-    for marker in (
-        "Return the final engineering deliverable only.",
-        "Do not expose internal analysis",
-        "Do not mention the router, Eval case ID, selected skill IDs, or SKILL.md.",
-    ):
-        if marker not in text:
-            errors.append(f"Behavior prompt missing marker: {marker}")
 
 if GRADER.exists():
     text = GRADER.read_text(encoding="utf-8")
@@ -87,8 +83,84 @@ if GRADER.exists():
         if marker not in text:
             errors.append(f"Behavior grader missing marker: {marker}")
 
+# Regression fixture: 2026-08-09 grader-precision hotfixes.
+#
+# Round 1: the R07 "assumptions-unknowns" and "restart-reconstruction"
+# criteria were proven to false-negative against real captured Runtime Eval
+# output (CloudSkill-local-eval-review-local-review-20260809-113507.zip)
+# because the regex patterns did not tolerate common numbered/bulleted
+# heading markers, markdown emphasis, plural "assumptions:", or a
+# "physical/material state" phrasing.
+#
+# Round 2: the first-ever live Codex Runtime Eval
+# (local-review-20260809-155256) scored a genuinely strong answer 78/100
+# because "verification-scenarios" only recognized "test that X"/"inject a
+# X" phrasing (not a numbered "N. <imperative verb> ... Expect ..." style),
+# and "state-authority" only recognized "authoritative state"/"state
+# authority" (not an "Authority matrix"/"sole authority" table). Re-grading
+# the same captured output after the fix (no new model call) raised Codex
+# 78->100, the Ollama repeat=3 bundle 79.8->83.8, and the earlier Claude
+# bundle 78->84 -- consistent across all three providers, confirming this was
+# grader precision, not a content quality gap.
+#
+# Re-run the deterministic grader against representative synthetic text on
+# every check so these precision regressions cannot silently reappear.
+r07 = cases.get("R07-english-equipment-architecture")
+if isinstance(r07, dict) and r07.get("criteria"):
+    sys.path.insert(0, str(GRADER.parent))
+    from grade_behavior_evals import grade_output  # noqa: E402
+
+    def _criterion_passed(report: dict, criterion_id: str) -> bool:
+        for item in report["criteria"]:
+            if item["id"] == criterion_id:
+                return bool(item["passed"])
+        return False
+
+    positive_text = (
+        "Restart Reconstruction\n"
+        "Upon reboot, the controller must reconstruct the physical/material state "
+        "from sensor readback before accepting new commands.\n\n"
+        "9. **Assumptions & Unresolved Inputs**\n"
+        "- Assumptions: sensors report within 100ms.\n"
+        "- Unresolved: fencing token width.\n\n"
+        "Authority matrix\n"
+        "Chamber physical state and sensor quality: sole authority is the chamber IPC service.\n\n"
+        "Fault-injection verification\n"
+        "1. Disconnect a chamber IPC after command acceptance. Expect quarantine on reconnect "
+        "and readback reconciliation before new work is accepted.\n"
+    )
+    negative_text = (
+        "The system restarts and continues processing commands without "
+        "recording any design caveats, open questions, ownership assignment, "
+        "or failure scenarios.\n"
+    )
+
+    positive_report = grade_output(positive_text, r07)
+    negative_report = grade_output(negative_text, r07)
+
+    for criterion_id in (
+        "restart-reconstruction",
+        "assumptions-unknowns",
+        "state-authority",
+        "verification-scenarios",
+    ):
+        if not _criterion_passed(positive_report, criterion_id):
+            errors.append(
+                f"R07-english-equipment-architecture/{criterion_id}: regression fixture "
+                "expected this criterion to match numbered/bulleted real-world phrasing "
+                "but the grader did not detect it"
+            )
+        if _criterion_passed(negative_report, criterion_id):
+            errors.append(
+                f"R07-english-equipment-architecture/{criterion_id}: negative-control "
+                "fixture unexpectedly matched; the pattern may have become too permissive"
+            )
+
 print(f"Validated deterministic Behavior Eval rubrics for {len(cases)} case(s).")
-print("NOTE: rubric validation checks structure and prompt markers; it does not call a model.")
+print(
+    "NOTE: output-contract integration is validated separately by validate_behavior_contract.py; this validator does not copy prompt markers."
+)
+print("NOTE: rubric validation does not call a model.")
 for error in errors:
     print(f"ERROR: {error}")
 sys.exit(1 if errors else 0)
