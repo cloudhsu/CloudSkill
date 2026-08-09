@@ -16,12 +16,16 @@ This is the operational entry point for a new conversation or coding agent that 
 ## Current repository state
 
 - Repository: `cloudhsu/CloudSkill`
-- Active review branch: `fix/skill-lifecycle-and-ci-20260809-013048`
-- Pull request: `#1`
-- Current baseline commit for this increment: `a910b76` (already includes the
-  Behavior contract consumer-registry closure; the grader-precision hotfix
-  below is uncommitted working-tree state on top of it).
-- PR remains Draft until local Runtime Eval evidence is interpreted and accepted.
+- **Active branch: `main`.** PR #1 (`fix/skill-lifecycle-and-ci-20260809-013048`)
+  merged 2026-08-09T08:33:29Z as merge commit `0b73ec2` (regular merge, not
+  squashed, so the full 21-commit history and its messages remain
+  individually inspectable and map 1:1 to `docs/CLOUDSKILL_CHANGE_HISTORY.md`
+  entries). GitHub Actions on `main` at that commit: SUCCESS.
+- The old branch `fix/skill-lifecycle-and-ci-20260809-013048` still exists on
+  the remote (not auto-deleted on merge). Ask the user before deleting it —
+  do not assume it is safe to remove just because the PR merged.
+- Start the next increment from a fresh single-purpose branch off `main`, the
+  same way this one started. Do not keep committing directly to `main`.
 - Local diagnostic bundles live under `.local/runtime-evals/` and must not be committed.
 
 ## Latest verified evidence before this increment
@@ -265,10 +269,12 @@ Copy this into a new conversation or agent task:
 Continue CloudSkill evolution from the repository state described in CLOUDSKILL_AGENT_HANDOFF.md.
 Read AGENTS.md, docs/CLOUDSKILL_DESIGN_AND_FLOW.md, docs/CLOUDSKILL_CHANGE_HISTORY.md,
 and the developing-skills/runtime-evaluation-engineering/local-runtime-eval-debugging Skills.
+PR #1 already merged to main (commit 0b73ec2) -- start this increment from a fresh
+single-purpose branch off main, not from the old merged branch.
 Treat the newest local Runtime Eval ZIP as evidence, classify the earliest failing layer,
 preserve raw outputs and local stashes, make the smallest evidence-driven change,
 run deterministic checks first, and produce an interruption-safe increment plus updated handoff history.
-Do not merge PR #1 or mark it ready until the current release criteria are explicitly satisfied.
+Do not merge this increment's PR or mark it ready until the release criteria are explicitly satisfied.
 ```
 
 ## Eval Inbox import path
@@ -336,15 +342,16 @@ document.
    **Satisfied (2026-08-09, user-confirmed): "我看過diff了" — reviewed, no
    objection raised.**
 
-**Status as of 2026-08-09: all nine criteria satisfied.** Do not treat this
-note as standing authorization for a future increment — re-verify criteria
-1-8 (especially 1/2/8, which drift the moment any further commit lands)
-before merging; criterion 9 needs fresh confirmation if the diff changes
-after this point.
+**PR #1 merged 2026-08-09T08:33:29Z (merge commit `0b73ec2`) after all nine
+criteria were satisfied and the user explicitly confirmed "go" for the merge
+action itself.** This satisfied instance is now historical, not standing
+authorization: the next increment needs its own branch, its own PR, and its
+own fresh pass through all nine criteria before merging again — do not point
+to this section as already-granted permission for a future merge.
 
-When all nine hold, mark the PR ready for review and merge — do not do
-either step silently; confirm with the user first even if the criteria
-above are met, since merging to `main` is not easily reversible.
+When all nine hold for a future increment, mark its PR ready for review and
+merge — do not do either step silently; confirm with the user first even if
+the criteria above are met, since merging to `main` is not easily reversible.
 
 ## Completion criteria for an evolution round
 
