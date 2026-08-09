@@ -163,7 +163,8 @@
           "equipment-control-architecture"
         ],
         "allow_additional_supporting_skills": false
-      }
+      },
+      "behavior_prompt": "Produce a concrete ownership and recovery model for a distributed equipment system where each chamber has an independent IPC and transfer resources are shared. Define authoritative state ownership, shared-resource reservation/arbitration, reconnect admission, restart reconstruction, failover fencing, command identity/idempotency/timeout/late completion, fresh interlock/readiness revalidation, at least six fault-injection verification scenarios, and explicit assumptions and unresolved inputs. Do not select or discuss CloudBox skills."
     },
     {
       "id": "R08-historical-interaction-optimization",

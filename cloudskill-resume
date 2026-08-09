@@ -406,6 +406,7 @@ FORMAL_PATHS=(
   "evals"
   "scripts"
   "docs"
+  "CLOUDSKILL_AGENT_HANDOFF.md"
   "SKILL_MANIFEST.json"
   "cloudskill-eval"
   "cloudskill-eval-codex"

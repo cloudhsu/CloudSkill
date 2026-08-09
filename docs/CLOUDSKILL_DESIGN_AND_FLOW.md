@@ -1,0 +1,159 @@
+# CloudSkill design purpose and evolution flow
+
+## Design purpose
+
+CloudSkill is the repository behind the CloudBox skill set. Its purpose is to make architecture, equipment-control, modeling, quality, documentation, and agent-governance knowledge executable as versioned Skills rather than leaving it as informal prompt advice.
+
+The system is designed so that a user, ChatGPT/Codex session, Claude Code session, or another coding agent can:
+
+- select the smallest sufficient Skill set;
+- load authoritative Skill instructions and declared references;
+- produce an engineering deliverable;
+- evaluate routing and behavior with reproducible evidence;
+- evolve Skills without losing history, safety, or decision boundaries.
+
+## Problems it is intended to solve
+
+### Ambiguous Skill selection
+
+Adjacent Skills overlap in vocabulary. Examples include communication code review versus equipment state modeling, component state/command contracts versus cross-layer recovery, semiconductor domain interpretation versus software architecture, and document transformation versus quality-metric definition.
+
+CloudSkill routes by deliverable ownership and failure boundary rather than by isolated keywords.
+
+### Knowledge that cannot be maintained
+
+Prompt-only guidance becomes duplicated, stale, and difficult to test. CloudSkill gives each concern one authoritative Skill or document owner and validates the repository structure.
+
+### Improvements without evidence
+
+A plausible edit can improve one Eval while regressing another. The repository therefore requires deterministic validators, routing cases, behavior rubrics, local Runtime Eval evidence, and explicit interpretation before claiming improvement.
+
+### Local execution fragility
+
+Python paths, Ollama/Codex availability, context budgets, interrupted model runs, missing reports, and uncommitted work can invalidate an evaluation. The local tooling separates infrastructure failure, context failure, routing failure, behavior failure, refinement failure, and packaging failure.
+
+### Multi-session continuity
+
+Long evolution work can span conversations or agents. Root handoff and history documents preserve current state, open problems, commands, evidence, and safety rules.
+
+## Simple end-to-end flow
+
+```text
+User request
+  -> using-cloudskill routes by decision/failure boundary
+  -> selected Skill instructions and references are loaded
+  -> model produces a structured final deliverable
+  -> deterministic routing and behavior graders evaluate explicit evidence
+  -> local runner packages source hashes, reports, environment, raw output, and status
+  -> reviewer classifies the earliest failing layer
+  -> developing-skills governs the smallest Skill or Eval change
+  -> static checks run
+  -> Ollama and/or Codex Runtime Eval runs
+  -> cloudskill-resume commits, pushes, updates the Draft PR, and watches CI
+  -> handoff and change history are updated
+```
+
+## Skill lifecycle
+
+Every Skill uses:
+
+```text
+draft -> experimental -> active -> stable -> deprecated
+```
+
+A stage change is an evidence decision, not a Markdown edit. See `.agents/skills/developing-skills/references/skill-lifecycle-standard.md`.
+
+## Runtime Eval layers
+
+1. Repository/static layer — file contracts, manifests, lifecycle metadata, prompt assembly, graders, and packaging.
+2. Provider layer — Ollama, Codex CLI, or optional OpenAI execution.
+3. Routing layer — primary owner, supporting boundaries, forbidden Skills, and execution order.
+4. Behavior layer — final engineering deliverable and required evidence.
+5. Refinement layer — optional rewrite that must preserve the raw answer and satisfy a stricter final-output contract.
+6. Review-bundle layer — source inventory, status, reports, raw/refined JSONL, environment, and logs.
+7. Release layer — Draft/ready/merge decision based on stated criteria.
+
+## Provider roles
+
+- Ollama `qwen3:4b` tests the local small-model path and is expected to expose prompt and boundary weaknesses.
+- Codex CLI provides a higher-capability comparison using the same cases, prompts, schemas, and graders.
+- Results remain provider-specific. A stronger provider must not hide a weak local path, and a weak local model must not automatically invalidate deterministic infrastructure work.
+
+## Behavior output contract authority
+
+The authoritative Behavior-output definition is:
+
+```text
+evals/runtime/contracts/behavior-output-contract.json
+```
+
+`scripts/behavior_output_contract.py` is the only executable adapter for that
+data. It supplies:
+
+- contract ID and SHA-256 fingerprint;
+- Behavior and refinement minimum final lengths;
+- JSON schemas;
+- Runtime and Refiner prompt requirements;
+- structured `{ "final": "..." }` extraction;
+- strict terminal `<final>` legacy compatibility;
+- internal-planning detection patterns.
+
+The Runtime Prompt, Refiner Prompt, providers, extractors, and Validators must
+import this adapter. They must not copy individual prompt sentences as separate
+validation contracts.
+
+`scripts/validate_behavior_contract.py` validates the actual assembled Runtime
+and Refiner prompts and the executable extraction behavior. A change to the
+contract therefore propagates through one source instead of requiring synchronized
+manual edits across multiple files.
+
+The Review ZIP records the contract ID and fingerprint so a future conversation
+or agent can determine exactly which output contract produced the evidence.
+
+### Consumer registry
+
+The authoritative contract also owns `required_consumer_paths`. Every listed
+Runtime, Refiner, or Validator module must import
+`scripts/behavior_output_contract.py`.
+
+`scripts/validate_behavior_contract.py` parses each registered Python module and
+checks:
+
+- the module imports the shared adapter;
+- exported contract IDs and fingerprints match;
+- retired function names and Prompt-marker literals are absent;
+- other Validators do not duplicate Behavior-output semantics.
+
+The release package also performs two mutation tests:
+
+1. add a Prompt requirement to the authoritative JSON contract and verify that
+   Runtime and Refiner Prompt assembly still validates without editing either
+   consumer;
+2. inject a retired literal into an adjacent Validator and verify that the
+   anti-drift Validator fails.
+
+This closes the gap between centralizing the contract and proving that every
+consumer actually uses it.
+
+## Evolution rule
+
+Always modify the earliest proven failing layer.
+
+Examples:
+
+- Missing source evidence -> fix the bundle or prompt assembly.
+- Ambiguous case -> fix the case before the Skill.
+- Correct case but repeated wrong boundary -> fix Router/Skill composition.
+- Good raw deliverable but bad extraction -> fix the parser, not the Skill.
+- Good structure but missing engineering evidence -> improve the selected Skill or behavior contract.
+- Authentication/quota failure -> classify as provider availability, not Skill quality.
+
+## Required artifacts per increment
+
+- executable overlay or patch;
+- static validation result;
+- latest Runtime Eval review ZIP, or a clear deferred-run reason;
+- design/flow documentation;
+- reverse-chronological change history;
+- current agent handoff;
+- interruption-safe application and resume command.

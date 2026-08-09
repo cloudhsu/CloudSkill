@@ -97,6 +97,11 @@ for case in cases:
     ids.add(cid)
     if not isinstance(case.get("prompt"), str) or not case["prompt"].strip():
         errors.append(f"{cid}: prompt is empty")
+    if "behavior_prompt" in case and (
+        not isinstance(case.get("behavior_prompt"), str)
+        or not case["behavior_prompt"].strip()
+    ):
+        errors.append(f"{cid}: behavior_prompt must be a non-empty string when present")
     expected = case.get("expected")
     if not isinstance(expected, dict):
         errors.append(f"{cid}: expected must be an object")
@@ -210,6 +215,7 @@ if cases:
 # Rebuild the actual prompts for the four acceptance cases in all diagnostic modes.
 acceptance_ids = {
     "R01-networkstream-stale-response",
+    "R02-code-and-command-state",
     "R03-versioned-multi-audience-report",
     "R05A-component-state-contract",
     "R05B-recovery-ownership",
@@ -273,6 +279,15 @@ for cid in sorted(acceptance_ids):
         errors.append(f"{cid}: manifest baseline unexpectedly contains router SKILL.md")
     if "router" in bundles and "# Using CloudBox" not in bundles["router"]["system_prompt"]:
         errors.append(f"{cid}: router mode omitted full using-cloudskill/SKILL.md")
+    if cid == "R02-code-and-command-state" and "router" in bundles:
+        prompt = bundles["router"]["system_prompt"]
+        for marker in (
+            "code-review",
+            "equipment-domain-modeling",
+            "Do not substitute `equipment-control-architecture`",
+        ):
+            if marker not in prompt:
+                errors.append(f"R02 router excerpt omitted required routing evidence: {marker}")
     if cid == "R03-versioned-multi-audience-report" and "router" in bundles:
         prompt = bundles["router"]["system_prompt"]
         for marker in (
@@ -320,6 +335,12 @@ if r07:
                 errors.append("selected-skills prompt loaded using-cloudskill downstream")
             if behavior["context"]["overflow_tokens"]:
                 errors.append("selected-skills prompt exceeds the behavior validation context with declared references")
+            if "Return exactly one JSON object" not in behavior["system_prompt"]:
+                errors.append("selected-skills prompt omitted the structured final-deliverable contract")
+            if str(r07.get("behavior_prompt") or "") not in behavior["user_prompt"]:
+                errors.append("selected-skills prompt did not use the case behavior_prompt")
+            if "Select the smallest sufficient CloudBox skill set" in behavior["user_prompt"]:
+                errors.append("selected-skills prompt leaked the routing-only instruction into Behavior Eval")
             declared = [item for item in behavior["context"]["loaded_files"] if item["role"] == "selected-skill-declared-reference"]
             if not declared:
                 errors.append("selected-skills prompt did not discover declared references")

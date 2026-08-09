@@ -65,6 +65,7 @@ else:
 
 required = [
     'AGENTS.md', 'CLAUDE.md', 'INSTALL.md', 'PLANS.md', 'README.md', 'CHANGELOG.md', 'VERSION',
+    'CLOUDSKILL_AGENT_HANDOFF.md', 'docs/CLOUDSKILL_DESIGN_AND_FLOW.md', 'docs/CLOUDSKILL_CHANGE_HISTORY.md',
     'docs/README.md', 'docs/profile/ARCHITECT_PROFILE.md',
     'docs/evidence/BENTO_SYSTEM.md', 'docs/evidence/CLOUDBOX_ENGINE.md',
     'docs/evidence/QT_COMPONENT_SUITE.md', 'docs/evidence/SIS_TOUCH_UTILITY.md',
@@ -72,7 +73,7 @@ required = [
     'docs/standards/ENGINEERING_GOVERNANCE.md', 'docs/DOCUMENTATION_AUDIT.md',
     'scripts/install.ps1', 'scripts/install.sh', 'scripts/audit_docs.py',
     'scripts/validate_descriptions.py', 'scripts/validate_behavior_evals.py',
-    'scripts/manage_skill.py', 'scripts/validate_skill_lifecycle.py',
+    'scripts/manage_skill.py', 'scripts/validate_skill_lifecycle.py', 'scripts/validate_evolution_handoff.py',
     'scripts/smoke_install.py', 'scripts/run_all_checks.py', 'scripts/validate_plugins.py',
     'cloudskill-eval', 'cloudskill-eval-codex', 'scripts/codex_eval_adapter.py', 'scripts/run_local_eval_review.py', 'scripts/validate_local_eval_debugging.py', 'scripts/validate_codex_eval_path.py',
     '.codex-plugin/plugin.json', '.claude-plugin/plugin.json',

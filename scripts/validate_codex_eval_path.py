@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import importlib.util
+import json
 import os
 import stat
 import sys
@@ -16,6 +17,7 @@ required = [
     SCRIPTS / "codex_eval_adapter.py",
     SCRIPTS / "run_runtime_evals.py",
     SCRIPTS / "run_local_eval_review.py",
+    SCRIPTS / "validate_behavior_contract.py",
     ROOT
     / ".agents"
     / "skills"
@@ -86,8 +88,8 @@ if runner.is_file():
         '"codex"',
         "--codex-model",
         "call_codex_cli",
-        "MIN_FINAL_DELIVERABLE_CHARACTERS",
-        "trailing.strip()",
+        "BEHAVIOR_OUTPUT_CONTRACT_ID",
+        "BEHAVIOR_OUTPUT_CONTRACT_FINGERPRINT",
     ):
         if marker not in text:
             errors.append(f"run_runtime_evals.py missing Codex/final marker: {marker}")
@@ -108,50 +110,18 @@ if str(SCRIPTS) not in sys.path:
     sys.path.insert(0, str(SCRIPTS))
 
 try:
-    from run_runtime_evals import extract_final_deliverable
-
-    internal_mention = (
-        "Planning text says begin with <final> and ending with </final>, "
-        "then continues with internal analysis."
+    from behavior_output_contract import (
+        BEHAVIOR_OUTPUT_CONTRACT_FINGERPRINT,
+        BEHAVIOR_OUTPUT_CONTRACT_ID,
     )
-    value, extracted = extract_final_deliverable(internal_mention)
-    if extracted or value != internal_mention:
-        errors.append("internal final-tag mention was incorrectly extracted")
-
-    short = "<final>too short</final>"
-    value, extracted = extract_final_deliverable(short)
-    if extracted or value != short:
-        errors.append("short final block was incorrectly accepted")
-
-    candidate = "A" * 650
-    raw = "Internal planning before the deliverable.\n<final>" + candidate + "</final>\n"
-    value, extracted = extract_final_deliverable(raw)
-    if not extracted or value != candidate:
-        errors.append("substantive trailing final block was not extracted")
-
-    trailing = "<final>" + candidate + "</final>\nadditional analysis"
-    value, extracted = extract_final_deliverable(trailing)
-    if extracted or value != trailing:
-        errors.append("non-terminal final block was incorrectly accepted")
 except Exception as exc:
-    errors.append(f"failed synthetic final-extraction checks: {exc}")
-
-try:
-    from run_local_eval_review import extract_final, MIN_REFINED_CHARACTERS
-
-    mention = "Editor says use <final> and then </final>, but keeps planning."
-    if extract_final(mention) != mention:
-        errors.append("refiner extracted a tag mention as the final answer")
-
-    candidate = "B" * (MIN_REFINED_CHARACTERS + 50)
-    raw = "planning\n<final>" + candidate + "</final>"
-    if extract_final(raw) != candidate:
-        errors.append("refiner did not extract a substantive terminal final block")
-except Exception as exc:
-    errors.append(f"failed synthetic refiner extraction checks: {exc}")
+    errors.append(f"cannot load shared Behavior output contract: {exc}")
+else:
+    if not BEHAVIOR_OUTPUT_CONTRACT_ID or len(BEHAVIOR_OUTPUT_CONTRACT_FINGERPRINT) != 64:
+        errors.append("shared Behavior output contract identity is invalid")
 
 print(
-    "Validated Codex CLI Runtime Eval path and strict terminal final-deliverable extraction"
+    "Validated Codex CLI Runtime Eval path; Behavior output-contract consistency is delegated to validate_behavior_contract.py"
 )
 print("NOTE: this validator does not call Codex, Ollama, OpenAI API, or another model.")
 for error in errors:

@@ -7,12 +7,11 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 RUBRICS = ROOT / "evals" / "runtime" / "cases" / "behavior-rubrics.json"
 GRADER = ROOT / "scripts" / "grade_behavior_evals.py"
-COMMON = ROOT / "scripts" / "runtime_eval_common.py"
-RUNNER = ROOT / "scripts" / "run_runtime_evals.py"
+CONTRACT_VALIDATOR = ROOT / "scripts" / "validate_behavior_contract.py"
 
 errors: list[str] = []
 
-for path in (RUBRICS, GRADER, COMMON, RUNNER):
+for path in (RUBRICS, GRADER, CONTRACT_VALIDATOR):
     if not path.exists():
         errors.append(f"missing Behavior Eval file: {path.relative_to(ROOT)}")
 
@@ -67,27 +66,16 @@ for case_id, rubric in cases.items():
             errors.append(f"{case_id}/{cid}: all_groups must be a non-empty array")
         else:
             for group in groups:
-                if not isinstance(group, list) or not group or any(not isinstance(item, str) or not item for item in group):
-                    errors.append(f"{case_id}/{cid}: each all_groups item must be a non-empty string array")
+                if (
+                    not isinstance(group, list)
+                    or not group
+                    or any(not isinstance(item, str) or not item for item in group)
+                ):
+                    errors.append(
+                        f"{case_id}/{cid}: each all_groups item must be a non-empty string array"
+                    )
     if weight_total != 100:
         errors.append(f"{case_id}: criterion weights must total 100, found {weight_total}")
-
-if COMMON.exists():
-    text = COMMON.read_text(encoding="utf-8")
-    for marker in (
-        "Return the final engineering deliverable only.",
-        "Do not expose internal analysis",
-        "The first non-whitespace line must be <final>",
-        "Do not expose internal analysis, planning, chain-of-thought",
-    ):
-        if marker not in text:
-            errors.append(f"Behavior prompt missing marker: {marker}")
-
-if RUNNER.exists():
-    text = RUNNER.read_text(encoding="utf-8")
-    for marker in ("extract_final_deliverable", "behavior_output_raw", "behavior_final_extracted"):
-        if marker not in text:
-            errors.append(f"Behavior runner missing marker: {marker}")
 
 if GRADER.exists():
     text = GRADER.read_text(encoding="utf-8")
@@ -96,7 +84,10 @@ if GRADER.exists():
             errors.append(f"Behavior grader missing marker: {marker}")
 
 print(f"Validated deterministic Behavior Eval rubrics for {len(cases)} case(s).")
-print("NOTE: rubric validation checks structure and prompt markers; it does not call a model.")
+print(
+    "NOTE: output-contract integration is validated separately by validate_behavior_contract.py; this validator does not copy prompt markers."
+)
+print("NOTE: rubric validation does not call a model.")
 for error in errors:
     print(f"ERROR: {error}")
 sys.exit(1 if errors else 0)

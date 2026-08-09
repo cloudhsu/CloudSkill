@@ -3,7 +3,6 @@ from __future__ import annotations
 import argparse
 import json
 import os
-import re
 import sys
 import time
 import urllib.error
@@ -13,7 +12,15 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+from behavior_output_contract import (
+    BEHAVIOR_MIN_FINAL_CHARACTERS,
+    BEHAVIOR_OUTPUT_CONTRACT_FINGERPRINT,
+    BEHAVIOR_OUTPUT_CONTRACT_ID,
+    extract_final_value,
+)
+
 from runtime_eval_common import (
+    BEHAVIOR_DELIVERABLE_SCHEMA,
     CONTEXT_MODES,
     DEFAULT_CASES,
     DEFAULT_SCHEMA,
@@ -167,21 +174,13 @@ def parse_json_object(text: str) -> dict[str, Any]:
     return value
 
 
-MIN_FINAL_DELIVERABLE_CHARACTERS = 500
-
-
 def extract_final_deliverable(text: str) -> tuple[str, bool]:
-    """Extract only a substantive final block that terminates the model response."""
-    matches = list(re.finditer(r"<final>\s*(.*?)\s*</final>", text, re.I | re.S))
-    for match in reversed(matches):
-        candidate = match.group(1).strip()
-        trailing = text[match.end():]
-        if trailing.strip():
-            continue
-        if len(candidate) < MIN_FINAL_DELIVERABLE_CHARACTERS:
-            continue
-        return candidate, True
-    return text.strip(), False
+    value, extracted, _contract = extract_final_value(
+        text,
+        minimum_characters=BEHAVIOR_MIN_FINAL_CHARACTERS,
+        allow_legacy_terminal=True,
+    )
+    return value, extracted
 
 def request_json(
     *,
@@ -891,16 +890,20 @@ def main() -> int:
                                 api_key=api_key,
                                 system_prompt=behavior_bundle["system_prompt"],
                                 user_prompt=behavior_bundle["user_prompt"],
-                                schema=None,
+                                schema=BEHAVIOR_DELIVERABLE_SCHEMA,
                                 max_output_tokens=args.behavior_max_output_tokens,
                                 client_request_id=behavior_request_id,
                             )
-                            if not isinstance(behavior_value, str):
-                                raise RuntimeError("behavior model did not return text")
-                            behavior_final, final_extracted = extract_final_deliverable(behavior_raw)
+                            if not isinstance(behavior_value, dict):
+                                raise RuntimeError("behavior model did not return a structured object")
+                            behavior_final = behavior_value.get("final")
+                            if not isinstance(behavior_final, str) or len(behavior_final.strip()) < BEHAVIOR_MIN_FINAL_CHARACTERS:
+                                raise RuntimeError("behavior model returned an invalid final deliverable")
                             record["behavior_output_raw"] = behavior_raw
-                            record["behavior_output"] = behavior_final
-                            record["behavior_final_extracted"] = final_extracted
+                            record["behavior_output"] = behavior_final.strip()
+                            record["behavior_final_extracted"] = True
+                            record["behavior_output_contract"] = BEHAVIOR_OUTPUT_CONTRACT_ID
+                            record["behavior_output_contract_fingerprint"] = BEHAVIOR_OUTPUT_CONTRACT_FINGERPRINT
                             record["behavior_status"] = "completed"
                             record["behavior_usage"] = behavior_metadata.get("usage") or {}
                             record["context"] = {

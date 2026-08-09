@@ -222,7 +222,13 @@
             "\\bSKILL\\.md\\b",
             "\\bcase id\\b",
             "i'll focus on",
-            "let me structure"
+            "let me structure",
+            "\\bwe (?:are given|must|need to|should|will)\\b",
+            "\\bkey requirements\\b",
+            "\\bstructure (?:the|this) deliverable\\b",
+            "\\blet(?:'|’)s draft\\b",
+            "\\bwe are to return\\b",
+            "\\bthe (?:problem|prompt) says\\b"
           ],
           "max_span": 1000000
         }

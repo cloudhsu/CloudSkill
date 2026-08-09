@@ -69,6 +69,14 @@ CloudSkill/
 
 See [docs/README.md](docs/README.md) for the document ownership map.
 
+## Evolution and handoff
+
+- [Design purpose and flow](docs/CLOUDSKILL_DESIGN_AND_FLOW.md)
+- [Evolution change history](docs/CLOUDSKILL_CHANGE_HISTORY.md)
+- [Current agent/conversation handoff](CLOUDSKILL_AGENT_HANDOFF.md)
+
+Start with the handoff document when continuing an existing multi-session Skill evolution task.
+
 ## Runtime model evaluations
 
 CloudBox includes an executable routing Eval harness in `evals/runtime/`. Static CI validates the suite and grader without calling a model. Local execution defaults to Ollama and requires no API key; OpenAI execution remains optional. Private results are written under `.local/runtime-evals/`.

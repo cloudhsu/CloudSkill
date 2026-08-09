@@ -96,15 +96,31 @@ Reject a refinement candidate when it is empty, collapses to a fragment, still e
 
 ### 5a. Separate raw model text from the final deliverable
 
-When the runtime returns reasoning text and a `<final>...</final>` block together, preserve the complete raw text, extract the last complete final block as the graded deliverable, and retain the raw text for leakage diagnosis. A missing final block remains a final-answer-discipline failure.
+Use a structured final-deliverable contract for Behavior execution:
 
-Do not expose Router decisions, selected Skill IDs, case IDs, or source paths to the downstream model unless the engineering task requires them.
+```json
+{"final": "complete engineering deliverable"}
+```
+
+Preserve the complete provider response separately, grade only the validated `final` value, and record the output contract. A strict terminal `<final>...</final>` block may remain as a legacy refinement fallback, but an unstructured planning response must never be accepted merely because it contains enough rubric keywords.
+
+Do not expose Router decisions, selected Skill IDs, case IDs, routing-only wording, or source paths to the downstream model unless the engineering task requires them.
 
 ### 6. Package one review bundle
 
 Create one ZIP containing the bundle contract in `LOCAL_EVAL_BUNDLE_CONTRACT.md`. Include only the current run and selected source snapshots needed for diagnosis. Exclude credentials, complete transcripts, unrelated `.local` data, `.git`, caches, and machine metadata such as `.DS_Store`.
 
 Create a stable pointer such as `LATEST_REVIEW_ZIP.txt`, print the exact ZIP path, and reveal the file in Finder on macOS when possible.
+
+### 6a. Maintain evolution handoff
+
+When the task produces an increment intended for another conversation or coding agent, update:
+
+- `/CLOUDSKILL_AGENT_HANDOFF.md` with current branch/PR, latest verified evidence, open items, commands, and safety constraints;
+- `/docs/CLOUDSKILL_DESIGN_AND_FLOW.md` when the architecture or operating flow changes;
+- `/docs/CLOUDSKILL_CHANGE_HISTORY.md` with the evidence, diagnosed layer, change, result, and unresolved risk.
+
+The handoff must be sufficient to continue from repository files and the newest review ZIP without requiring the previous chat transcript.
 
 ### 7. Report stage truthfully
 

@@ -40,6 +40,12 @@ Do not force skills onto trivial tasks. An explicitly requested skill takes prio
 
 When CloudBox coexists with Superpowers or another workflow plugin, use one top-level router. Honor an explicit CloudBox-only scope without claiming host settings changed; in hybrid mode assign generic implementation workflow to the other plugin and domain/architecture/modeling/quality responsibilities to CloudBox. Do not load a standalone CloudBox copy together with the CloudBox plugin.
 
+## Multi-session Skill evolution handoff
+
+When continuing an existing CloudSkill evolution, read `CLOUDSKILL_AGENT_HANDOFF.md` before modifying Skills, Evals, graders, or runtime tooling. Then read the design/flow and change-history documents it references.
+
+Update the handoff and change history in the same increment whenever the current evidence, open failure layer, continuation command, provider path, or release decision changes. Repository evidence and the newest review ZIP take precedence over remembered chat context.
+
 ## Core architecture rules
 
 Prioritize:

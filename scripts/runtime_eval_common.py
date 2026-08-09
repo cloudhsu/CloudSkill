@@ -7,6 +7,14 @@ import re
 from pathlib import Path
 from typing import Any, Iterable
 
+from behavior_output_contract import (
+    BEHAVIOR_DELIVERABLE_SCHEMA,
+    BEHAVIOR_MIN_FINAL_CHARACTERS,
+    BEHAVIOR_OUTPUT_CONTRACT_FINGERPRINT,
+    BEHAVIOR_OUTPUT_CONTRACT_ID,
+    render_contract_prompt,
+)
+
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_CASES = ROOT / "evals" / "runtime" / "cases" / "canary.json"
 DEFAULT_SCHEMA = ROOT / "evals" / "runtime" / "schemas" / "routing-decision.schema.json"
@@ -339,6 +347,7 @@ def _routing_rules(compact: bool = False) -> str:
         return """Mandatory routing check:
 - Output one JSON object only; route by decision/failure boundary, not language or isolated keywords.
 - Pick the primary deliverable owner, then add every independent boundary that materially requires a supporting skill.
+- A concrete communication-code review that also redesigns Commanded/Pending/Actual/Readback or command-attempt timeout/late-response semantics selects code-review as primary and equipment-domain-modeling as supporting. Do not replace that modeling support with equipment-control-architecture unless Sequence/Equipment Service, interlock, shared-resource, reconnect/restart/failover, or physical operation recovery ownership is explicitly requested.
 - When the explicit main deliverable is a component Commanded/Pending/Actual/Readback or ACK-versus-physical-completion contract, choose equipment-domain-modeling as primary. Add equipment-control-architecture for a separate cross-layer timeout, interlock, late-completion, shared-resource, or recovery-ownership deliverable; do not collapse that explicitly required second deliverable.
 - When the component contract is already defined and the requested deliverable is Sequence/Equipment Service responsibility, shared-resource ownership, reconnect, restart, or failover, choose equipment-control-architecture as primary without equipment-domain-modeling.
 - Do not add semiconductor-equipment-domain-knowledge merely because chamber, valve, transfer, or completion vocabulary appears; add it only when physical purpose, process meaning, readiness criteria, or completion evidence is actually unresolved.
@@ -354,6 +363,8 @@ def _routing_rules(compact: bool = False) -> str:
 
 Before returning JSON, perform this checklist:
 1. Choose the one primary_skill that owns the requested deliverable or final decision.
+   - A concrete communication-code correctness review remains owned by code-review even when the same request also redesigns Commanded/Pending/Actual/Readback or command-attempt timeout/late-response semantics; add equipment-domain-modeling as supporting.
+   - Do not use equipment-control-architecture for that code-plus-state task unless Sequence/Equipment Service, interlock, shared-resource, reconnect/restart/failover, or physical operation recovery ownership is explicitly requested.
    - A component Commanded/Pending/Actual/Readback, ACK-versus-physical-completion, or late-readback contract is owned by equipment-domain-modeling.
    - Sequence/Equipment Service responsibility, shared-resource ownership, reconnect, restart, failover, fencing, or recovery architecture is owned by equipment-control-architecture when the component contract is already defined.
 2. Scan the task again for every independent decision boundary that materially changes the work; add only those as supporting_skills.
@@ -609,11 +620,7 @@ def _behavior_system_prompt(
 ) -> str:
     selected = selected_skills(decision)
     sections = [
-        "Return the final engineering deliverable only.",
-        "The first non-whitespace line must be <final> and the last non-whitespace line must be </final>. Write nothing before or after that block.",
-        "Do not expose internal analysis, planning, chain-of-thought, self-instructions, Router decisions, Eval machinery, case IDs, skill IDs, file names, or source tags.",
-        "Apply the supplied engineering instructions silently. Do not explain which instructions were selected.",
-        "Preserve evidence honesty: distinguish provided facts, design assumptions, unresolved inputs, and verification that is proposed rather than already executed.",
+        render_contract_prompt(minimum_characters=BEHAVIOR_MIN_FINAL_CHARACTERS),
         "Use concise task-relevant sections, explicit ownership, state transitions, rejection rules, recovery gates, and verification scenarios.",
     ]
     if "equipment-control-architecture" in selected:
@@ -640,11 +647,12 @@ def _behavior_system_prompt(
 
 
 def _behavior_user_prompt(case: dict[str, Any]) -> str:
+    task = str(case.get("behavior_prompt") or case["prompt"]).strip()
     return (
         "/no_think\n\n"
         "User request:\n"
-        f'{case["prompt"].strip()}\n\n'
-        "Begin immediately with <final>. Return one complete engineering deliverable and end with </final>."
+        + task
+        + "\n\nReturn the required JSON object only."
     )
 
 
@@ -693,8 +701,11 @@ def build_selected_skills_prompt(
                 optional_references.append((reference_path, reference_text))
 
     case_source = json.dumps(case, ensure_ascii=False, indent=2)
+    included_case = {"id": case["id"], "prompt": case["prompt"]}
+    if isinstance(case.get("behavior_prompt"), str) and case["behavior_prompt"].strip():
+        included_case["behavior_prompt"] = case["behavior_prompt"]
     case_included = json.dumps(
-        {"id": case["id"], "prompt": case["prompt"]},
+        included_case,
         ensure_ascii=False,
         separators=(",", ":"),
     )
