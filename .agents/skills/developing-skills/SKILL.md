@@ -168,6 +168,8 @@ Prefer this order:
 
 Keep judgment and decision flow in `SKILL.md`; move heavy reference material and reusable templates to supporting files. Do not duplicate mutable rules across skills, `AGENTS.md`, and documentation.
 
+When the change introduces a new instance of an authoritative-contract pattern (single source + shared adapter + consumer registry, e.g. `behavior-output-contract.json` or `providers.json`), it is not complete until it reaches the same anti-drift rigor as the closest existing instance — including that instance's positive-propagation and negative-drift-injection mutation tests, not just its file layout. Name the closest existing instance and check parity against it explicitly; do not declare the new instance done because it structurally resembles the old one.
+
 ### 6. Verify GREEN behavior
 
 Re-run the same cases after the change and verify:
@@ -201,6 +203,8 @@ Before release:
 - Copying an external methodology without adapting it to CloudSkill's architecture and governance scope.
 - Adding prose for a rule that a validator can enforce deterministically.
 - Declaring behavior tests passed when only schemas or case files were validated.
+- Copying an authoritative-contract pattern's file layout (single source + adapter + consumer registry) without also copying its anti-drift mutation tests, then declaring the new instance complete because it structurally resembles the original.
+- Fixing a defect by adding a new validator or import path without checking whether that fix's own side effects (for example, a new dynamic import writing bytecode cache) can reintroduce the same class of problem it was meant to prevent.
 - Claiming all past conversations were read when only current context or summaries were available.
 - Claiming a GitHub branch or PR was created after a connector returned an authorization error.
 - Embedding a user's local path or organization-specific terms into a reusable global skill.

@@ -16,6 +16,7 @@ commands = [
     [sys.executable, 'scripts/validate_local_eval_debugging.py'],
     [sys.executable, 'scripts/validate_codex_eval_path.py'],
     [sys.executable, 'scripts/validate_providers_contract.py'],
+    [sys.executable, 'scripts/validate_skill_portability.py'],
     [sys.executable, 'scripts/validate_behavior_contract.py'],
     [sys.executable, 'scripts/validate_evolution_handoff.py'],
     [sys.executable, 'scripts/validate_behavior_runtime_evals.py'],

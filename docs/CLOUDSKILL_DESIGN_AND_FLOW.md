@@ -191,6 +191,22 @@ Examples:
 - Good structure but missing engineering evidence -> improve the selected Skill or behavior contract.
 - Authentication/quota failure -> classify as provider availability, not Skill quality.
 
+## Platform and surface support
+
+`docs/PLATFORM_SUPPORT_MATRIX.md` is the authoritative record of which
+platform/interface combinations are verified versus documented-but-unverified
+versus not attempted. CLI surfaces (Codex CLI, Claude Code CLI, Gemini CLI on
+Windows/macOS/Linux) give every Skill full local filesystem/subprocess
+access; sandboxed surfaces (claude.ai web, Claude Desktop, Claude API Skills)
+upload one Skill at a time as a zip and have no repository access.
+`config/skill-portability.json` classifies every Skill `portable`, `hybrid`,
+or `cli-only` for the sandboxed case; `scripts/package_surface_skills.py`
+produces the per-Skill zip; `scripts/validate_skill_portability.py` proves
+the classification stays accurate (a `portable`-tier Skill that starts
+referencing repository-relative tooling fails) and that produced zips match
+the required structure. Do not claim a platform/interface combination is
+supported without a corresponding row in that matrix.
+
 ## Required artifacts per increment
 
 - executable overlay or patch;

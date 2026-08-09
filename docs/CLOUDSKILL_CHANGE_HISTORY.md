@@ -2,6 +2,89 @@
 
 This document records the evolution rationale and evidence chain for work that may span multiple conversations. Git commits and tags remain the authoritative source history.
 
+## 2026-08-09 — Platform/surface support matrix, formalized architecture-parity rule
+
+Requested by the user: confirm and formalize CloudSkill's real Windows/Mac +
+Codex/Claude Code CLI install coverage, then treat Claude Desktop/claude.ai
+web upload and Google Gemini as new install targets to design for (Gemini
+verification explicitly deferred at the user's request — "1,2,3 4就不用了").
+
+Investigated before writing anything (not assumed):
+
+- Windows PowerShell + macOS/Linux `install.sh`/`install.ps1`, for both
+  Codex and Claude Code, plugin-marketplace and standalone modes, were
+  already real and documented (INSTALL.md sections 2-6). Nothing to build
+  here, only confirm.
+- Web research (WebSearch/WebFetch against Anthropic's and Google's own
+  docs, not memory) found: claude.ai/Claude Desktop upload custom Skills as
+  one zip at a time via Settings/Customize -> Skills, require the skill
+  folder itself at the zip root (`<skill-name>/SKILL.md`), do **not** sync
+  Skills across claude.ai/API/Claude Code, and run Skills in a sandboxed VM
+  with different filesystem/network access than Claude Code CLI. Confirmed
+  no CloudSkill skill name violates Anthropic's reserved-word (`claude`,
+  `anthropic`) or length constraints. Gemini CLI's own docs state
+  `.agents/skills/` — CloudSkill's existing canonical directory — is a
+  supported interoperable alias referencing the same Agent Skills open
+  standard; not independently verified against a real Gemini CLI session,
+  as the user explicitly deferred that step.
+
+Change:
+
+- Added `config/skill-portability.json`: classifies every Skill `portable`
+  (no CloudSkill-repository dependency), `hybrid` (portable judgment, some
+  CLI-only workflow steps), or `cli-only` (excluded from sandboxed
+  packaging). Only `local-runtime-eval-debugging` is `cli-only`;
+  `developing-skills` is `hybrid` (its interaction-capture/export workflow
+  steps invoke repository scripts); the other 17 are `portable`.
+- Added `scripts/package_surface_skills.py`: packages each eligible Skill as
+  a claude.ai/Desktop-structured zip (skill folder at archive root) into
+  `.local/surface-packages/` (gitignored, matching how every other generated
+  bundle in this repository is treated).
+- Added `scripts/validate_skill_portability.py`: re-scans every
+  `portable`-tier Skill's own files for CloudSkill-repository-relative
+  references and fails if found (the safety-critical direction — a
+  `portable`-tagged Skill must not actually depend on repository tooling);
+  actually runs the packaging script against a temp directory and checks
+  each zip's real internal structure against Anthropic's documented
+  requirement, rather than only validating the classification data;
+  confirms a `cli-only` Skill is never packaged by a default run; confirms
+  every classified Skill is mentioned in the human-readable matrix doc so
+  it cannot silently drift. Confirmed the "portable must not reference CLI
+  tooling" check is real by testing it against a deliberately misclassified
+  `local-runtime-eval-debugging` (correctly flags 3 file hits).
+- Added `docs/PLATFORM_SUPPORT_MATRIX.md`: the authoritative record of what
+  is verified, documented-but-unverified, or not attempted, per
+  platform/interface combination.
+- Added INSTALL.md sections 10b (Claude Desktop/claude.ai) and 10c (Gemini
+  CLI), pointing to the matrix doc rather than duplicating its content.
+- Formalized two of this session's own retrospective principles into
+  `developing-skills/SKILL.md` as an explicit rule and two "common mistakes"
+  entries, so they are enforced going forward rather than only living in
+  chat history and this change log: (1) a new instance of an
+  authoritative-contract pattern is not complete until it reaches the same
+  anti-drift mutation-test rigor as its closest existing sibling; (2) a fix
+  that adds a new validator/import path must be checked for whether its own
+  side effects can reintroduce the class of problem it was meant to
+  prevent.
+
+Validation performed:
+
+- `python3 scripts/run_all_checks.py` passes, including the new validator.
+- Manually packaged a portable, a hybrid, and (with `--include-cli-only`) a
+  cli-only Skill and inspected the resulting zip structure directly with
+  `unzip -l` before trusting the automated structural check.
+- Confirmed the portability-drift check is real (RED against a deliberately
+  misclassified Skill) before relying on it.
+
+Explicitly NOT done:
+
+- Gemini CLI compatibility was not installed or tested — deferred at the
+  user's explicit request this round.
+- No zip produced by `package_surface_skills.py` has been uploaded to a real
+  claude.ai/Desktop account. The structural check proves zip *shape*; it
+  does not prove the Skill *behaves* correctly once loaded into Anthropic's
+  sandboxed VM.
+
 ## 2026-08-09 — Project-history-derived Eval capture
 
 Requested by the user: after a whole-session retrospective (problems

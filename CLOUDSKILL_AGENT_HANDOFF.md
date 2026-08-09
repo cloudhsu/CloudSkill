@@ -81,6 +81,13 @@ First live Claude evidence: `CloudSkill-local-eval-review-local-review-20260809-
     been run against a real project (own or third-party open-source). Its
     first real use is the point the auto-bounded-scope algorithm and
     confidence-discipline guidance actually get tested, not this increment.
+11. `docs/PLATFORM_SUPPORT_MATRIX.md` / `config/skill-portability.json` /
+    `scripts/package_surface_skills.py` are new and only structurally
+    verified (zip shape matches Anthropic's documented requirement). No
+    produced zip has actually been uploaded to a real claude.ai/Desktop
+    account and exercised. Gemini CLI's `.agents/skills/` alias claim is
+    from Gemini's own docs, not independently installed/tested — deferred
+    at the user's explicit request.
 
 ## Standard continuation commands
 

@@ -271,6 +271,23 @@ git pull
 
 回到工作專案後重新執行原安裝命令。安裝器會更新 Skills、Guidance 受管理區塊、本機版本與路徑設定，但不刪除 Inbox 內容或非 CloudSkill 技能。
 
+## 10b. Claude Desktop／claude.ai 網頁版
+
+跟前面的 CLI 安裝不同：claude.ai 網頁版與 Claude Desktop 是「Customize/Settings → Skills → 上傳 zip」，一次一個技能，而且**不會跟 Claude Code CLI 同步**——三個介面要分別上傳管理。zip 結構有硬性規定：技能資料夾本身必須在 zip 根目錄（`<skill-name>/SKILL.md`），不能多包一層。
+
+打包（只會包含 `config/skill-portability.json` 裡標記 `portable`／`hybrid` 的技能；`local-runtime-eval-debugging` 這種依賴本機 Repository 的技能會被排除，因為在沙盒環境裡本來就跑不動）：
+
+```bash
+python3 scripts/package_surface_skills.py
+# 輸出到 .local/surface-packages/<skill-name>.zip
+```
+
+完整支援矩陣、各技能的可攜性分類、目前已知限制，見 [docs/PLATFORM_SUPPORT_MATRIX.md](docs/PLATFORM_SUPPORT_MATRIX.md)。**這個打包腳本只驗證過 zip 結構正確，還沒有人實際上傳到 claude.ai 帳號驗證過會不會動。**
+
+## 10c. Gemini CLI
+
+Gemini CLI 官方文件宣稱原生支援 `.agents/skills/` 這個路徑別名，理論上不用額外打包就能讀到 CloudSkill 的技能——但這只是查證官方文件得到的結論，**還沒有人實際裝一次 Gemini CLI 驗證過**。狀態記錄在 [docs/PLATFORM_SUPPORT_MATRIX.md](docs/PLATFORM_SUPPORT_MATRIX.md)。
+
 ## 11. 驗證
 
 ```bash
