@@ -1,5 +1,44 @@
 # Changelog
 
+## 5.7.0
+
+### Claude Code CLI Runtime Eval provider
+
+- Added `claude` as a third Runtime Eval provider (Claude Code CLI headless, alongside Ollama and Codex CLI), isolated with `--safe-mode --tools "" --permission-mode acceptEdits --no-session-persistence --strict-mcp-config` and explicit workspace-isolation prompt framing.
+- First live run found and fixed two real bugs: a Qwen3/Ollama-only `/no_think` directive leaking into the shared prompt builder and breaking Claude's stdin slash-command parser, and occasional structured-output retry exhaustion from an unframed prompt letting the model attempt a disabled tool.
+- Added `cloudskill-eval-claude`, a quota-conscious one-repeat smoke wrapper.
+
+### Provider registry
+
+- Added `evals/runtime/contracts/providers.json` + `scripts/providers_contract.py` as the single authoritative source for the Runtime Eval provider set, replacing hand-copied `--provider` choices tuples across consumers.
+- Added `scripts/validate_providers_contract.py` with positive-propagation (consumers must derive `--provider` choices from `PROVIDER_IDS`, not a literal tuple) and negative-drift-injection (forbidden hand-typed provider tuples) mutation tests, mirroring the existing Behavior output contract's anti-drift pattern.
+- Added a decoupled `--behavior-repeat N` option to `run_local_eval_review.py`/`cloudskill-resume`, independent of routing `--repeat` (previously hard-coded to 1 regardless of the top-level flag).
+
+### First live Codex evidence
+
+- First-ever live Codex Runtime Eval run in this repository's history; found and fixed a retired CLI flag (`--ask-for-approval`, removed from codex-cli 0.147.0) that had never been caught because the adapter had never actually been executed against a live process before.
+
+### R07 Behavior grader precision (two rounds)
+
+- Fixed false negatives in `assumptions-unknowns` and `restart-reconstruction` (regex too rigid for numbered/bulleted real-world phrasing) and, in a second round found via the first live Codex run, `state-authority` and `verification-scenarios` (regex too narrow for an "Authority matrix" table and numbered imperative fault-injection scenarios) plus a too-tight `reconnect-reconciliation` proximity window.
+- Re-grading already-captured provider output with no new model calls raised scores consistently across all three providers (Codex 78->100, Ollama repeat=3 average 79.8->83.8, Claude 78->84), confirming grader precision rather than a content quality gap.
+- Added executable regression fixtures (RED against the pre-fix rubric, GREEN after) so these precision regressions cannot silently reappear.
+
+### Eval Inbox: disconnected-session export, project-history mining, and Git-based exchange
+
+- Added `.agents/skills/developing-skills/assets/export_eval_candidate.py` (config-free, self-contained) and `scripts/import_eval_candidates.py` for capturing interaction Eval candidates from a session with no reachable CloudSkill repository, transferred as a zip and merged with re-sanitization and de-duplication.
+- Added project-history-derived Eval capture (trigger phrase `從專案提煉優化案例`): mining a project's commit history, architecture/design documents, and code for reusable engineering pressure, with auto-bounded scope, `inferred`/`unknown`-only confidence discipline, and third-party attribution caution.
+- Added `scripts/sync_eval_exchange.py`: Git-based transport of captured candidates between machines through a separate, user-owned private exchange repository, for the case where `.local/eval-inbox/` being gitignored on every machine (by design) strands candidates captured on a second machine even when that machine can also reach the CloudSkill repository.
+
+### Platform and surface support
+
+- Added `docs/PLATFORM_SUPPORT_MATRIX.md`, `config/skill-portability.json`, and `scripts/package_surface_skills.py`/`scripts/validate_skill_portability.py`: classifies every Skill `portable`/`hybrid`/`cli-only` for sandboxed surfaces (claude.ai web, Claude Desktop, Claude API Skills, which upload one Skill at a time as a zip and do not share filesystem access with the CloudSkill repository), and packages eligible Skills into the zip structure those surfaces require.
+- Confirmed existing Windows/macOS Codex CLI and Claude Code CLI install coverage (`install.ps1`/`install.sh`, plugin marketplace and standalone modes) was already real; documented Gemini CLI's own claimed `.agents/skills/` alias support as unverified.
+
+### Skill development discipline
+
+- Formalized two of this release's own retrospective lessons into `developing-skills/SKILL.md` as an explicit rule and "common mistakes" entries: a new instance of an authoritative-contract pattern is not complete until it reaches the same anti-drift mutation-test rigor as its closest existing sibling, and a fix's own side effects (for example, a new dynamic import writing bytecode cache) must be checked for whether they can reintroduce the class of problem they were meant to prevent.
+
 ## 5.6.0
 
 ### Local Ollama execution
