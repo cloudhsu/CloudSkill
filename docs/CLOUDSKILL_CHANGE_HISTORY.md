@@ -2,6 +2,72 @@
 
 This document records the evolution rationale and evidence chain for work that may span multiple conversations. Git commits and tags remain the authoritative source history.
 
+## 2026-08-09 — Project-history-derived Eval capture
+
+Requested by the user: after a whole-session retrospective (problems
+encountered + distilled principles, mirroring the earlier ChatGPT-handoff
+comparison but scoped to this session), design and add a capability where,
+inside any project with CloudBox installed (a downloaded open-source repo or
+the user's own), the user can tell Codex/Claude to analyze commit history,
+architecture, docs, and code, and export the result as skill-optimization
+candidates — the same output pipeline as interaction capture, but sourced
+from a whole project instead of a live interaction.
+
+Design decision (confirmed with the user before implementing): reuse
+`developing-skills`' existing "conversation-derived-optimization" ownership
+rather than create a new Skill — its evidence boundary already explicitly
+listed "connected repository files, issues, pull requests, and release
+history" as an allowed source; this only needed a documented workflow for
+that source, not new architecture or ownership. Two design forks confirmed
+with the user: (1) a new dedicated trigger phrase rather than overloading
+`整理成正向/負向案例` with a source-type parameter; (2) auto-bounded scope by
+default (agent picks significant commits by signal), user-overridable,
+rather than always asking for an explicit range first. Trigger phrase itself
+was iterated live with the user from an initial proposal to
+`從專案提煉優化案例`, converging on grammatical consistency with the existing
+two phrases (imperative, no "幫我", ends in "案例" — the term used everywhere
+else in this pipeline, e.g. `INTERACTION_EVAL_CANDIDATE`) while adopting the
+user's preferred verb.
+
+Change (pure documentation/workflow — no new scripts, no model calls,
+entirely reuses infrastructure already built this session):
+
+- Added "Project-history mining" to
+  `.agents/skills/developing-skills/references/conversation-derived-optimization.md`:
+  auto-bounded scope algorithm (cheap overview first — tags/CHANGELOG/ADRs —
+  then rank commits by signal, cap detailed reading, state what was
+  excluded), confidence discipline (`inferred`/`unknown` only, never
+  `observed` — commit history doesn't reveal actual reasoning), third-party
+  attribution caution (cites `skill-authoring-sources.md`), and output
+  format (same `capture_eval_candidate.py`/`export_eval_candidate.py`
+  pipeline plus one `EVAL_MINING_REPORT.md`-based summary per mining pass,
+  candidates prefixed `[project-history]` for reviewer filtering).
+- Added the trigger phrase and workflow summary to
+  `.agents/skills/developing-skills/SKILL.md` and `AGENTS.md` (the
+  cross-cutting instruction that propagates to every installed project via
+  the managed guidance block).
+- Added INSTALL.md section 8c documenting the trigger and workflow for
+  end-user discoverability, parallel to section 8 (interaction capture) and
+  8b (disconnected-session export).
+- Extended `scripts/validate_interaction_capture.py` to check the trigger
+  phrase and required workflow markers are present in all four files, so
+  this documentation cannot silently drift out of sync the way earlier
+  literal-marker validators did before the shared-contract pattern existed.
+
+Validation performed:
+
+- `python3 scripts/run_all_checks.py` passes.
+- No live mining run was performed — this increment is the documented
+  workflow only; the first real use (against either a downloaded
+  open-source project or the user's own) is what actually confirms it.
+
+Explicitly NOT done: did not add a new candidate JSON schema field to
+formally distinguish project-history-derived candidates from
+interaction-derived ones (the `[project-history]` `task_summary` prefix
+convention was judged sufficient and avoids touching the validated
+`capture_eval_candidate.py`/`export_eval_candidate.py` schema logic for a
+non-enforced distinction).
+
 ## 2026-08-09 — Provider registry mutation tests + decoupled Behavior repeat count
 
 Requested by the user: after comparing a handoff document exported from an

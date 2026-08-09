@@ -63,9 +63,32 @@ for key, expected in {
         fail(f'config template safety mismatch: {key}')
 
 skill_text = (ROOT / '.agents/skills/developing-skills/SKILL.md').read_text(encoding='utf-8')
-for phrase in ('整理成正向案例', '整理成負向案例', 'manual-review', 'raw or complete transcript'):
+for phrase in (
+    '整理成正向案例', '整理成負向案例', '從專案提煉優化案例',
+    'manual-review', 'raw or complete transcript',
+):
     if phrase not in skill_text:
         fail(f'developing-skills is missing interaction capture rule: {phrase}')
+
+mining_reference_path = ROOT / '.agents/skills/developing-skills/references/conversation-derived-optimization.md'
+mining_reference_text = mining_reference_path.read_text(encoding='utf-8') if mining_reference_path.is_file() else ''
+if not mining_reference_text:
+    fail(f'missing conversation-derived-optimization reference: {mining_reference_path.relative_to(ROOT)}')
+for phrase in (
+    'Project-history mining', 'inferred', 'Auto-bounded scope',
+    'skill-authoring-sources.md',
+):
+    if phrase not in mining_reference_text:
+        fail(f'conversation-derived-optimization.md is missing project-history mining rule: {phrase}')
+
+agents_text = (ROOT / 'AGENTS.md').read_text(encoding='utf-8')
+for phrase in ('從專案提煉優化案例', 'Project-history-derived Eval capture'):
+    if phrase not in agents_text:
+        fail(f'AGENTS.md is missing project-history capture rule: {phrase}')
+
+install_text = (ROOT / 'INSTALL.md').read_text(encoding='utf-8')
+if '從專案提煉優化案例' not in install_text:
+    fail('INSTALL.md is missing the project-history mining trigger phrase')
 
 ignore_text = (ROOT / '.gitignore').read_text(encoding='utf-8')
 for pattern in ('.local/', '.cloudskill/config.local.json', '*.session.jsonl', '*.transcript.md'):

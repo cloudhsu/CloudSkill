@@ -75,6 +75,12 @@ First live Claude evidence: `CloudSkill-local-eval-review-local-review-20260809-
    only been exercised with synthetic smoke-test candidates, never a real
    exported-from-an-external-session zip. Its first real use is the point
    that gets confirmed, not this increment.
+10. Project-history-derived Eval capture (trigger phrase `從專案提煉優化案例`,
+    see `references/conversation-derived-optimization.md` "Project-history
+    mining") is documented and statically validated but has never actually
+    been run against a real project (own or third-party open-source). Its
+    first real use is the point the auto-bounded-scope algorithm and
+    confidence-discipline guidance actually get tested, not this increment.
 
 ## Standard continuation commands
 

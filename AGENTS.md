@@ -125,6 +125,15 @@ When the user says `整理成正向案例` or `整理成負向案例`, use `deve
 - When neither config path resolves to a reachable CloudSkill repository (a disconnected/external session), use `developing-skills`' `assets/export_eval_candidate.py` instead of guessing a write location: it writes the same sanitized candidate into a local, config-free `.cloudskill/eval-outbox/` and packages it as a zip for the user to transfer into `<CloudSkillRepo>/.local/eval-inbox/imports/`, where `scripts/import_eval_candidates.py` merges it after re-scanning against the repository's own private terms.
 - Convert candidates into formal routing or behavior Evals only from the CloudSkill repository after explicit batch-review instruction, deduplication, ownership analysis, sensitive-content scanning, and human review of the diff.
 
+## Project-history-derived Eval capture
+
+When the user says `從專案提煉優化案例`, use `developing-skills` (see `references/conversation-derived-optimization.md`, "Project-history mining") to mine the current project's commit history, architecture/design documents, and code for reusable engineering pressure — not a live interaction.
+
+- Auto-bound scope by default: rank commits by signal (refactor/fix/redesign-style messages, large diffs, CHANGELOG/release-note/ADR mentions), cap detailed reading to a manageable count, and state what was excluded. Honor an explicit user-specified range, tag boundary, or subdirectory instead when given.
+- Mark every extracted candidate `inferred` or `unknown` confidence, never `observed` — commit history does not reveal what an agent or human actually reasoned through.
+- Apply the same sanitization rule above, plus the third-party citation rule in `skill-authoring-sources.md` when the project is someone else's public repository: extract only the generalized engineering pressure, never copy source text or proprietary logic as a rule.
+- Same output pipeline and safety constraints as interaction capture above, plus one mining-report summary per pass (not per candidate) bundled into the same export.
+
 ## Brownfield modernization
 
 - Establish characterization and fault-injection tests before moving high-risk responsibility.

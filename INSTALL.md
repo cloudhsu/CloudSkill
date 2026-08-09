@@ -227,6 +227,24 @@ python3 scripts/import_eval_candidates.py
 
 匯入時會：重新驗證每筆候選、用 Repository 自己的 `sensitive-terms.local.txt` 再掃描一次、比對已存在的候選去除重複、分別歸類到 `candidates/`、`manual-review/`、或 `rejected/`，並把已處理的壓縮檔移到 `imports/processed/`（不會刪除原始檔）。這一步同樣不修改正式 `evals/`、技能、Commit 或 Remote。
 
+## 8c. 分析專案歷史匯出優化案例
+
+適用情境：想從一個已裝好 CloudBox 的專案（你自己的專案，或抓下來的開源專案）挖出可遷移的工程原則，而不是從一次即時互動擷取。
+
+在已設定的專案內，對 Codex 或 Claude Code 說：
+
+```text
+從專案提煉優化案例
+```
+
+Agent 應使用 `developing-skills`（見 `references/conversation-derived-optimization.md` 的「Project-history mining」）：
+
+1. 不逐筆讀完整個 commit history。先看 tag/release、`CHANGELOG.md`、架構文件，再依訊號（重構/修復/重設計字眼、大 diff、被 CHANGELOG 或 ADR 提到）挑出有意義的節點，詳細讀取數量有上限，並明講排除了什麼。你可以隨時明確指定時間範圍、tag 區間或子目錄，蓋掉自動界定。
+2. 每筆候選的信心度標記只能是 `inferred` 或 `unknown`，不可以是 `observed`——commit history 看不出真正的推理過程。
+3. 分析別人的開源專案時，只萃取「可遷移的工程壓力」，不複製原始碼或商業邏輯；日後若真的變成正式技能參考，需明確標註來源專案（見 `skill-authoring-sources.md`）。
+4. 輸出走跟第 8/8b 節一樣的管線：本機可連到 CloudSkill Repository 就用 `capture_eval_candidate.py`，連不到就用 `export_eval_candidate.py` 打包 zip；額外產生一份 `EVAL_MINING_REPORT.md` 摘要一起放進 zip。
+5. 不修改正式 `evals/`、技能、Commit、Tag、Branch 或 Remote——這仍然只是證據暫存，正式收斂一樣要走第 9 節的批次審查。
+
 ## 9. 批次整理到 CloudSkill
 
 累積候選案例後，在 CloudSkill Repository 啟動 Agent：

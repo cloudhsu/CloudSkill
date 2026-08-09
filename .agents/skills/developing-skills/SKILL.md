@@ -69,8 +69,9 @@ Treat these user phrases as explicit capture requests:
 
 - `整理成正向案例` — preserve a successful route and the behaviors that made the result useful.
 - `整理成負向案例` — preserve the observed failure, user correction, and future required/forbidden behavior.
+- `從專案提煉優化案例` — mine the current project's commit history, architecture/design documents, and code (not a live interaction) for reusable engineering pressure. Use `references/conversation-derived-optimization.md` "Project-history mining" for scope-bounding, confidence discipline, and third-party attribution rules; the output pipeline and sanitization rules below still apply.
 
-For either phrase:
+For either interaction-capture phrase:
 
 1. Capture only the turns needed to understand the task, result, and correction; do not save the raw or complete transcript.
 2. Apply mandatory sanitization before writing. Generalize organization, customer, person, project, product, equipment, site, account, address, path, URL, schedule, recipe, safety-limit, and other identifying data.
