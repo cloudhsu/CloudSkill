@@ -2,6 +2,19 @@
 
 This document records the evolution rationale and evidence chain for work that may span multiple conversations. Git commits and tags remain the authoritative source history.
 
+## 2026-08-10 — First release panel failed and corrected
+
+Codex and Claude provider scoring passed separately, but all four workers in
+the first release-significant panel returned FAIL. RED mutations reproduced
+three material gaps: contract-invalid output masked recoverable unauthorized
+actions, a major-version boundary invented an unknowable two-feature-release
+distance, and the panel ledger under-constrained blinding, transport, tokens,
+cost, and adjudication lineage. Commit `35aee51` corrects those gaps and the
+full deterministic suite passes. Remote v5.8.0 tag/Release lineage was also
+verified; because the Release has no asset, rollback claims were narrowed.
+The failed panel remains immutable evidence and Task 9 remains gated on a fresh
+corrected panel.
+
 ## 2026-08-10 — Task 8 release-candidate scope frozen
 
 The code/spec candidate is `a83b37f`. Release-candidate evidence is bounded to

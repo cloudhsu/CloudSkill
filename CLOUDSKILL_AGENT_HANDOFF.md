@@ -15,6 +15,17 @@ This is the operational entry point for a new conversation or coding agent that 
 
 ## Current repository state
 
+### CloudBox 6.0 Task 8 first-panel correction (2026-08-10)
+
+- Codex and Claude each passed 10/10 routing with zero repairs and passed R07
+  Behavior at 86 and 85 respectively.
+- The first complete 2x2 returned four FAIL verdicts. Reproduced authority,
+  lifecycle-distance, and panel-ledger weaknesses were corrected at `35aee51`;
+  full checks pass. The corrected panel remains pending.
+- Remote v5.8.0 tag/Release lineage is verified, but the Release has no asset;
+  rollback wording now claims only the verified tag path.
+- Task 9 remains prohibited until the corrected Task 8 panel passes.
+
 ### CloudBox 6.0 Task 8 RC scope (2026-08-10)
 
 - Task 7 is committed at `a83b37f` and its full deterministic suite passed.
