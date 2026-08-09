@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cloudskill.local/evals/agent/contracts/cost-ledger.schema.json",
+  "title": "CloudBox append-only provider cost ledger record",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["record_id", "experiment_id", "run_id", "case_id", "requested_provider", "requested_canonical_model", "provider", "canonical_model", "stage", "attempt", "case_hash", "prompt_hash", "context_hash", "tokens", "cost"],
+  "properties": {
+    "record_id": {"$ref": "#/$defs/nonBlankString"},
+    "experiment_id": {"$ref": "#/$defs/nonBlankString"},
+    "run_id": {"$ref": "#/$defs/nonBlankString"},
+    "case_id": {"type": "string", "pattern": "^TC-[0-9]{3}$"},
+    "requested_provider": {"$ref": "#/$defs/nonBlankString"},
+    "requested_canonical_model": {"$ref": "#/$defs/nonBlankString"},
+    "provider": {"$ref": "#/$defs/nonBlankString"},
+    "canonical_model": {"$ref": "#/$defs/nonBlankString"},
+    "stage": {"$ref": "#/$defs/nonBlankString"},
+    "attempt": {"type": "integer", "minimum": 1},
+    "case_hash": {"type": "string", "pattern": "^[a-f0-9]{64}$"}, "prompt_hash": {"type": "string", "pattern": "^[a-f0-9]{64}$"}, "context_hash": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "tokens": {"$ref": "#/$defs/tokens"},
+    "cost": {"$ref": "#/$defs/cost"}
+  },
+  "$defs": {
+    "nonBlankString": {"type": "string", "minLength": 1, "pattern": ".*\\S.*"},
+    "tokens": {
+      "type": "object", "additionalProperties": false, "required": ["input", "output", "cache"],
+      "properties": {"input": {"type": "integer", "minimum": 0}, "output": {"type": "integer", "minimum": 0}, "cache": {"type": "integer", "minimum": 0}}
+    },
+    "cost": {
+      "type": "object", "additionalProperties": false, "required": ["amount", "currency", "kind"],
+      "properties": {
+        "amount": {"type": "number", "minimum": 0}, "currency": {"$ref": "#/$defs/nonBlankString"},
+        "kind": {"enum": ["provider_reported", "estimated"]},
+        "estimate_source": {"$ref": "#/$defs/nonBlankString"}, "estimate_date": {"type": "string", "format": "date"}
+      }
+    }
+  },
+  "allOf": [{
+    "if": {"properties": {"cost": {"properties": {"kind": {"const": "estimated"}}}}, "required": ["cost"]},
+    "then": {"properties": {"cost": {"required": ["estimate_source", "estimate_date"]}}}
+  }]
+}

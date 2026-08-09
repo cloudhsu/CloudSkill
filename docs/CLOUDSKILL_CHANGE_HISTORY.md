@@ -2,6 +2,428 @@
 
 This document records the evolution rationale and evidence chain for work that may span multiple conversations. Git commits and tags remain the authoritative source history.
 
+## 2026-08-09 — CloudBox 6.0 Task 4 hosted retry remains blocked
+
+The continuation preflight passed: Git index readable with no `index.lock`,
+GitHub CLI authenticated, DNS resolved, and `https://github.com` returned HTTP
+200. One bounded Codex TC-001 retry was then made with a one-call ceiling and
+no transport retry.
+
+The isolated Codex CLI again failed before model execution while initializing
+its in-process app-server: `Operation not permitted`. Classification remains
+`PIPELINE_FAILED / PARTIAL_BUNDLE_CREATED`, result `BLOCKED`, earliest failure
+layer `hosted execution bootstrap`. Tokens, provider-reported cost, model
+output, and semantic RED/PASS are unavailable.
+
+Evidence is retained under the ignored bundle
+`.local/task-continuity-evals/task4-hosted-red-retry-20260809-152011/`. No
+cross-family call, control-case execution, or instruction edit is justified;
+a process-permitted hosted environment is required.
+
+## 2026-08-09 — CloudBox 6.0 Task 4 minimum hosted RED preflight
+
+**Scope.** One low-token Codex hosted attempt was planned for TC-001 only,
+with a one-call ceiling and no local model or second provider. The frozen
+packet and context hash are retained under
+`.local/task-continuity-evals/task4-hosted-red-20260809-231404/` (ignored).
+
+**Preflight evidence.** The Git index was readable and had no `index.lock`;
+the worktree remained dirty with preserved Task 1–3 paths. `gh auth status`
+reported the authenticated `cloudhsu` account with `repo` scope. GitHub DNS and
+HTTP access were blocked in this sandbox (`Could not resolve host: github.com`).
+
+**Hosted execution.** Codex authentication status reported logged in, but the
+single isolated `codex exec` attempt stopped before model execution with
+`CodexCLIError: failed to initialize in-process app-server client: Operation not
+permitted`. No tokens, provider result, semantic RED/PASS, or cost were
+observed. Classification is `PIPELINE_FAILED / PARTIAL_BUNDLE_CREATED`,
+earliest stage `hosted execution bootstrap`; no instruction edit is justified.
+Do not retry automatically in this sandbox; rerun the same frozen packet in a
+credential-capable, process-permitted environment before cross-family or
+control-case execution.
+
+## 2026-08-09 — CloudBox 6.0 Task 1 local baseline captured
+
+**Scope and authority.** This is a local, read-only baseline record for the
+approved CloudBox 6.0 evolution. It preserves pre-existing worktree changes;
+it is not a clean-worktree claim, a commit, a fetch, a release mutation, or a
+fresh remote release assertion.
+
+**Exact commands and local results.** The following commands were captured,
+with their raw output, timestamps, exit state, snapshots, and SHA-256 values
+under `.superpowers/sdd/2026-08-09-cloudbox-6.0-evolution/task-1-evidence/`:
+
+```bash
+git status --short --branch
+git worktree list --porcelain
+git rev-parse HEAD main origin/main
+git show-ref --tags v5.8.0
+git rev-parse v5.8.0^{}
+git merge-base --is-ancestor v5.8.0^{} HEAD
+python3 scripts/run_all_checks.py
+```
+
+- **PASS — local identity/lineage:** feature branch
+  `feat/cloudbox-6.0-evidence-gated-evolution-20260809`, `HEAD`, local `main`,
+  `origin/main`, and `origin/HEAD` were
+  `6356a00b06b1037b41601f2a2509de8fb51d6164`; exactly one worktree was
+  registered. Local lightweight `v5.8.0` resolves to
+  `348063dfe0c8ee7b47d5547aeb550d289d8ba860` and is an ancestor of `HEAD`.
+- **CONCERN — preserved dirty paths:** the worktree already had modifications
+  to `CLOUDSKILL_AGENT_HANDOFF.md` and `docs/CLOUDSKILL_CHANGE_HISTORY.md`,
+  plus untracked approved plan/design files. No unrelated path was normalized
+  or discarded.
+- **PASS — deterministic baseline:** two complete runner captures (runs 3 and
+  4, 2026-08-09T13:05:15Z and 2026-08-09T13:05:42Z) exited 0 and had identical
+  SHA-256 `1dcab4a2ae67698c1f111686bcb661b45967375882ec10bed37c4b87a8c16ade`.
+  The status and ignored-artifact inventories were stable during a separately
+  captured complete run (run 5, exit 0). All 16 declared local validators
+  completed and reported `All CloudSkill checks passed.`
+- **BLOCKED — fresh remote lineage:**
+  `git ls-remote --tags origin v5.8.0 5.8.0 '*5.8.0*'` exited 128 with
+  `Could not resolve host: github.com`. GitHub CLI auth was not retried because
+  sandbox credential visibility is known blocked. The documented GitHub
+  release record remains document-verified local evidence only.
+- **BLOCKED — Git index:** the sandbox cannot create `.git/index.lock`; no
+  index write, commit, push, tag, or release mutation was attempted.
+- **USD 0 — model/API cost:** the static runner and inspected validators do not
+  invoke a model, and no model execution was requested for this task.
+
+Before a 6.0 release base is declared, repeat the remote tag and GitHub Release
+verification in a credential-capable environment with working network access.
+
+## 2026-08-09 — CloudBox 6.0 Task 2 host-level task-continuity case contract
+
+**Scope and authority.** Added a host-level structural contract under
+`evals/agent/`, with no routing CSV entry, CloudBox Skill change, provider
+adapter, version change, or model invocation. The contract contains three
+primary cases (`TC-001` continue without publish authority, `TC-002` ignored
+durable handoff, and `TC-003` side-answer false completion) and seven controls:
+explicit cancellation, explicit pivot, explicit publish authority, promoted
+side question, already completed parent, absent parent/source identity, and
+harmless prose continuation.
+
+**TDD evidence.** The test-first validator was run before its production
+contract existed and exited 1 with the exact output:
+
+```text
+ERROR: cannot load task-continuity contract: No module named 'task_continuity_contract'
+```
+
+The minimal adapter subsequently supplied the public `load_cases(Path)` and
+`validate_case(dict)` API. Its GREEN check exercises a literal TC-001 and
+negative mutations for transcript ordering/roles, authority-set overlap, and a
+missing expected parent status. It also validates all ten canonical fixtures.
+
+```text
+Validated task-continuity contract expectations and canonical cases.
+Behavior execution: NOT RUN (structure-only contract validation).
+```
+
+`scripts/run_all_checks.py` was extended to run that validator and exited 0,
+ending with `All CloudSkill checks passed.` `validate_pack.py` now requires the
+new schemas, fixtures, README, adapter, and validator. The suite is static
+structure evidence only; it must never be claimed as host behavior execution.
+
+**Review repair (round 1/5).** The published case schema is now the single
+structural authority; `task_continuity_contract.py` interprets its declared
+JSON-Schema subset and `x-cloudbox-invariants` instead of maintaining a
+competing field-level contract. Focused mutations cover nested required and
+forbidden outcomes, whitespace, nested fields, ordering/roles, authority and
+outcome intersections, expected attempts, and parent/source identity. A
+temporary nested-schema drift injection proves `validate_case()` observes the
+authoritative schema directly; if that changed constraint were committed, the
+baseline mutation would make the aggregate validator fail.
+
+TC-003 now ends at the side question and requires both answering it and an
+automatic return to the unfinished parent. TC-006 permits a publish attempt
+but keeps the parent `in_progress` and forbids completion or a success claim
+until an authoritative publish result is available. The reusable result schema
+accepts `NOT RUN`, `PASS`, `FAIL`, `BLOCKED`, and `MANUAL REQUIRED`; the static
+validator itself emits only `NOT RUN`.
+
+**Review repair (round 2/5).** The bounded schema interpreter now compares
+JSON values rather than Python values for `const` and `enum`; booleans are
+therefore distinct from numeric values, including the live
+`schema_version: {"const": 1}` contract. Its evidence-result schema declares
+a cross-field matrix: a behavior `PASS` requires structural `PASS` and no
+errors; every `FAIL`, `BLOCKED`, or `MANUAL REQUIRED` behavior result requires
+diagnostics; structural `FAIL` also requires diagnostics and cannot claim a
+behavior `PASS`. Focused fixtures cover every allowed row plus the reviewed
+contradictory combinations.
+
+**Review repair (round 3/5).** Result diagnostics now reference the
+authoritative `nonBlankDiagnostic` schema definition, so an empty or
+whitespace-only array item cannot satisfy the evidence matrix's nonempty
+diagnostic rule. Focused `FAIL` and `BLOCKED` mutations prove the shared schema
+adapter rejects both forms.
+
+**Known concern.** Git index writes remain sandbox-blocked from the documented
+Task 1 baseline. No staging, commit, push, tag, or release mutation was
+attempted for this task. Future host-invariant implementation still needs a
+separate approved execution owner and RED/GREEN behavior evidence.
+
+## 2026-08-09 — CloudBox 6.0 Task 3 non-mutating continuity runner and cost ledger
+
+**Scope and authority.** Added a fixture-only continuity runner beside the
+Task 2 structural contract. Its provider dependency is injected as
+`call(prompt, schema) -> (text, metadata)`; the supplied command accepts only
+a local response fixture and has no model, network, process, Git, deploy, or
+release adapter. This is execution-harness infrastructure, not a live host
+behavior result.
+
+**TDD evidence.** The first focused validator run exited 1 with:
+
+```text
+ERROR: cannot load task-continuity runner: No module named 'task_continuity_runner'
+```
+
+After adding the runner and schema contracts, a second focused RED for the
+fixture-only command exited 1 with:
+
+```text
+ERROR: cannot load task-continuity eval command: No module named 'run_task_continuity_evals'
+```
+
+The focused GREEN output was:
+
+```text
+Validated non-mutating task-continuity runner and cost ledger.
+Behavior execution: NOT RUN (local scripted fixtures only; provider cost USD 0).
+```
+
+The full `python3 scripts/run_all_checks.py` exited 0, including the Task 2
+contract validator and this focused runner validator, and ended with
+`All CloudSkill checks passed.` `validate_pack.py` now requires the runner,
+fixture command, validator, and provider-output/cost-ledger schemas.
+
+**Safety contract.** `execute_requested_actions()` records each request but
+never executes it. It rejects an unauthorized `publish_release` request with
+`attempted: true`, `executed: false`, and
+`reason: outside authority envelope`; authorized publish remains explicitly
+simulated. The AST guard rejects fake-executor source importing or calling
+process, network, or Git capability. Provider output malformed or internally
+contradictory with its own completion state remains contract-invalid
+(`FAIL`/`NOT RUN`) rather than being conflated with a semantic behavior failure.
+
+**Evidence and cost contract.** JSONL records preserve raw output,
+case/prompt/context hashes, requested actions, action trace, required and
+forbidden outcome results, canonical provider/model metadata, tokens/cache,
+latency, cost/currency, and earliest failure layer. The append-only cost ledger
+rejects blank canonical model, negative amount/tokens, duplicate immutable
+record ID, and estimates without source/date. Money is aggregated only by
+provider, canonical model, and stage; it never becomes a quality score.
+
+**Known concern.** No provider was called and no behavior verdict is claimed;
+the local fixtures cost USD 0. A later Task 4 baseline needs explicit authority
+for bounded provider execution and must keep provider costs independent from
+quality or semantic adjudication. Git index writes remain unavailable; no
+staging, commit, push, tag, or release mutation was attempted.
+
+### Review repair round 1/5 — contracts, provenance, and non-mutation boundary
+
+The Task 3 review found a genuine data-loss path: `--output` and
+`--cost-ledger` could name the same file, allowing result publication to replace
+the just-appended ledger. It also found that the original runner bypassed Task
+2's public case/result contracts, trusted provider-supplied outcome labels,
+duplicated schema rules in Python, collided attempt records, merged estimated
+and reported totals, and claimed more static fake-executor safety than its
+blacklist established.
+
+The repair chooses the smaller compatible authority: a dedicated
+`task-continuity-execution-result.schema.json` with a mandatory Task 2 base
+result projection. Each emitted row is validated both by that execution schema
+and by Task 2 `validate_result()` over `{case_id, contract_validation,
+behavior_execution, errors}`. Task 2's authoritative case suite remains
+unchanged and is loaded only through `load_cases()`.
+
+Before callbacks, the runner rejects equal, resolved-alias, and same-file
+output/ledger paths. Results are written to a same-directory temporary then
+renamed atomically. Fixture response maps are keyed by and self-identify their
+Task 2 `case_id`; missing, extra, duplicate, or mismatched identities fail.
+
+Provider outcome labels are no longer pass evidence. Parent status and expected
+tool attempts are mechanically checked from validated provider output and the
+simulated trace. Required/forbidden outcomes are explicitly `MANUAL REQUIRED`
+until independently judged. Authority-external requests remain separate safety
+findings and outrank semantic/manual dimensions at the evaluation-layer level.
+
+The provider, cost, and execution contracts now use one explicit Task 3 shared
+schema interpreter, while the base projection continues through Task 2's public
+result validator. Its supported subset includes standard `allOf`, `if`/`then`,
+and `contains`, finite-number rejection, calendar-date validation, and
+schema-valued `additionalProperties`; Task 2 remains unmodified and its focused
+checks remain green. The published provider schema includes every Task 2 parent
+status, and portable conditionals require completed state for a completion
+request and source/date for estimated cost.
+
+Ledger records now carry immutable experiment/run/case/provider/canonical-model
+/stage/attempt identity plus case/prompt/context hashes. Duplicate attempt
+identity is rejected even if a different record ID is supplied. Aggregation
+retains cost kind below each provider/model/stage/currency key; estimated result
+rows also retain source/date.
+
+The fake executor is a closed pure-data AST boundary rather than a capability
+blacklist. The focused review validator's fixtures reject import/dynamic/helper
+indirection and filesystem/process/network/Git/messaging/deploy examples. Its
+targeted initial RED, before the new runner interface existed, exited 1 with
+`TypeError: run_cases() got an unexpected keyword argument 'experiment_id'`;
+the expanded fixtures then passed after the contracts and runner were repaired.
+A second targeted RED proved JSON duplicate fixture keys were silently accepted:
+`ERROR: duplicate fixture response case_id: invalid operation was accepted`.
+The fixture parser now rejects duplicate object keys before response-map
+identity validation.
+
+Focused Task 2, Task 3, and package checks, `git diff --check`, and the full
+`python3 scripts/run_all_checks.py` all exited 0. No model, provider, network,
+Git, deploy, release, or external action was called; local fixture provider
+cost is USD 0. This remains infrastructure evidence, not a host behavior PASS.
+
+### Review repair round 2/5 — failure-evidence and ledger batch boundary
+
+The round-1 re-review found three follow-on issues. A contract-invalid provider
+field could make extended-result validation abort before a failure row was
+written. The keyed fixture adapter recovered case identity by parsing the
+rendered prompt delimiter. Finally, one-at-a-time ledger append allowed a late
+duplicate/write failure after completed callbacks, leaving unmarked partial
+cost history and no corresponding result file.
+
+Execution rows now preserve exact raw provider text and explicit
+`provider_output_contract_errors`, while normalizing only the typed convenience
+projection used by the execution schema. Missing/wrong required fields, invalid
+action members, extra fields, and completion contradictions all emit
+schema-valid Task 2 base projection `FAIL` / `NOT RUN` rows at
+`provider_output_contract`; they no longer abort the runner.
+
+The round-two callback-signature change was superseded in review round three:
+the approved public contract remains `call(prompt, schema)`. The fixture adapter
+uses a private closure over the authoritative case sequence and never parses
+prompt presentation text. Focused delimiter-rich contexts with multiple
+`Case:` fragments and JSON-looking content remain correctly bound.
+
+Cost-ledger runs require a planned provider/model identity. The complete batch
+of immutable attempt identities is checked against the existing ledger and
+against itself before the first callback. Publication then atomically appends
+the full batch through one writer. If that final boundary fails after callbacks,
+all result rows are retained as `BLOCKED` with
+`cost_ledger_publication: FAILED_BEFORE_PUBLICATION` and a failure diagnostic;
+the ledger remains unchanged. Focused fixtures seed duplicates at first,
+middle, and final batch positions and prove zero callbacks/zero writes.
+
+Independent temporary mutation RED probes preserved exact mechanisms:
+
+```text
+RED R1-I-1: generated execution result violates its declared contracts: parent_status must have type string or null
+RED R1-I-2: JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+RED R1-I-3: sequential mutation left ledger_rows=4 completed_callbacks=10
+```
+
+These mutations were scoped to temporary local data and restored before the
+focused GREEN checks. They made no provider/model, network, Git, deploy,
+release, or external call. The repaired focused validators, package check, and
+full repository suite subsequently passed; behavior evidence remains `NOT RUN`.
+
+### Review repair round 3/5 — compatibility, identity reconciliation, and JSONL framing
+
+Round three restores the approved provider callback interface
+`call(prompt, schema) -> (text, metadata)`. The fixture adapter resolves its
+validated response map into a closure ordered by authoritative Task 2 cases;
+case identity is never recovered from rendered prompt text.
+
+Requested provider/model is now distinct from returned canonical provider/model
+in execution and ledger evidence. A completed fallback, alias resolution, or
+identity mismatch retains raw output, tokens, latency, cost, and both identities
+with `MISMATCH_BLOCKED` reconciliation diagnostics. It is evidence blocking,
+not a discarded callback or a fabricated returned identity.
+
+Atomic ledger append inserts exactly one JSONL delimiter when a valid existing
+ledger ends without a newline. Ledger-publication failure is now orthogonal to
+contract, behavior, mechanical, and authority grading: it adds a publication
+flag/diagnostic and changes earliest layer only if no earlier layer exists.
+Duplicate provider JSON keys are rejected at every nesting depth through the
+provider-boundary object-pairs hook, while raw text is preserved as contract
+failure evidence.
+
+The review's independent original-mechanism RED evidence remains preserved in
+`task-3-review.md` alongside the round-one and round-two mutation records; it
+is not replaced by later GREEN output. Fresh round-three mutation RED output:
+
+```text
+RED R2-I-1: <lambda>() takes 2 positional arguments but 3 were given
+RED R2-I-5: ordinary parser selected parent_status='in_progress'
+RED R2-I-3: Extra data
+RED R2-I-4: old ledger marker overwrote=('BLOCKED', 'cost_ledger_publication')
+RED R2-I-2: old identity check would discard returned canonical model after callback
+```
+
+All probes use local temporary data only. No provider/model, network, Git,
+deploy, release, or external action was invoked; host behavior remains `NOT RUN`.
+
+### Review repair round 4/5 — durable ambiguity, evidence matrix, and result reconciliation
+
+The focused RED accepted duplicate keys throughout existing ledger records,
+accepted contradictory identity/evidence/publication claims, consumed all ten
+callbacks and ledger rows for deterministically invalid output destinations,
+and lost the coordinator result after an injected late result-publication
+failure. A separate six-line mutation run now preserves concrete M-1 RED output
+for same-path safety, Task 2 composition, self-asserted grading, schema drift,
+provider/run provenance, and transitive AST capability in the Task 3 report.
+
+Ledger reads now reject duplicate members recursively before any append. The
+execution schema owns portable relational rules and an explicit matrix consumed
+by the Python validator, which adds sibling requested/returned equality. Result
+destinations and reconciliation conflicts preflight before callbacks; a late
+atomic publication failure writes every completed row to a durable
+reconciliation JSONL with an exact `cost_record_id` link to published ledger
+evidence. Contract/behavior grading and earlier failure-layer evidence remain
+orthogonal. Local fixtures only; behavior `NOT RUN`, provider cost USD 0.
+
+## 2026-08-09 — Task-continuity ownership analyzed and preserved for restart
+
+The user asked whether locating a continuation point should itself be a Skill
+and requested independent multi-model analysis. Luna, Terra, and Sol reviewed
+the same sanitized packet independently. They converged on extending
+`agent-development-process`, not creating a standalone Skill, while Sol exposed
+a separate routing concern: ordinary continuation turns may never load that
+Skill. The resulting candidate is therefore two-layered: a global agent
+continuity invariant plus an owner-specific method for task state, authority,
+reconciliation, and evaluation.
+
+Claude Code was initially invoked three times but the sandbox could not see the
+host credential after the user logged in. Each invocation stopped before
+inference with zero model tokens. After the user logged in again from the same
+repository directory, `claude auth status` returned `loggedIn: true` and a
+no-tools, no-session-persistence headless probe returned exactly
+`CLAUDE_LOGIN_OK` without tool calls or permission denials. The provider
+credential-visibility block is cleared for this session; this probe is not a
+Claude semantic vote and the full Runtime Eval was not rerun.
+
+No formal RED/GREEN case, Skill instruction, release artifact, or model score
+was created during the initial analysis. That session could not create a branch
+because it lacked `.git/refs` write access. After the user approved the 6.0
+evolution design, a later session successfully created
+`feat/cloudbox-6.0-evidence-gated-evolution-20260809` and preserved the handoff,
+history, and approved design there instead of committing them directly to
+`main`.
+
+After credential visibility was restored, Claude Sonnet 5 and Claude Opus 5
+independently reviewed the same bounded task-continuity judge prompt. Both
+returned `MANUAL_REQUIRED`: the two-layer ownership direction is coherent, but
+the proposed RED items are not yet reproducible baseline cases, and no edit is
+justified. Opus separated likely global-continuity cases from specialist or
+existing-policy cases and identified `continue -> publish authority` as the
+highest-value first baseline, with added over-trigger controls for explicit
+pivot, explicit ship authority, and a side question becoming the new parent.
+
+The original GPT judge packet was not persisted, so the Claude comparison is
+semantically aligned rather than byte-identical. A reconstructed full packet
+was persisted locally, but Claude CLI's long-prompt and `--json-schema` paths
+returned misleading pre-inference `Not logged in` failures with zero tokens;
+bounded plain-output Sonnet/Opus calls succeeded with tools disabled and no
+permission denials. Evidence and the adjudicated summary are stored under
+`.local/task-continuity-claude-review-20260809/`. No formal Eval, Skill edit,
+GREEN claim, commit, push, PR, or release was produced.
+
 ## 2026-08-09 — Post-5.8.0 conversation continuation recorded
 
 The user changed global Codex approval settings and needed to restart the

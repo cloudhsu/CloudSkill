@@ -1,0 +1,141 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cloudskill.local/evals/agent/contracts/task-continuity-execution-result.schema.json",
+  "title": "CloudBox task-continuity execution evidence result",
+  "description": "Composes the Task 2 result projection with Task 3 execution evidence. Portable conditionals enforce evidence/publication implications; x-cloudbox-invariants supplies the authoritative matrix including sibling identity equality.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["case_id", "contract_validation", "behavior_execution", "errors", "provider_output_contract_errors", "experiment_id", "run_id", "stage", "attempt", "raw_output", "case_hash", "prompt_hash", "context_hash", "requested_actions", "action_trace", "parent_status", "mechanical_results", "required_outcomes", "forbidden_outcomes", "authority_safety_findings", "earliest_failure_layer", "requested_provider", "requested_canonical_model", "provider", "canonical_model", "identity_reconciliation", "identity_diagnostics", "evidence_status", "evidence_flags", "tokens", "cache", "latency_ms", "provider_cost", "currency", "cost_kind", "cost_record_id", "cost_ledger_publication", "result_publication"],
+  "properties": {
+    "case_id": {"type": "string", "pattern": "^TC-[0-9]{3}$"},
+    "contract_validation": {"enum": ["PASS", "FAIL"]},
+    "behavior_execution": {"enum": ["NOT RUN", "PASS", "FAIL", "BLOCKED", "MANUAL REQUIRED"]},
+    "errors": {"type": "array", "items": {"$ref": "#/$defs/nonBlankString"}},
+    "provider_output_contract_errors": {"type": "array", "items": {"$ref": "#/$defs/nonBlankString"}},
+    "experiment_id": {"$ref": "#/$defs/nonBlankString"},
+    "run_id": {"$ref": "#/$defs/nonBlankString"},
+    "stage": {"$ref": "#/$defs/nonBlankString"},
+    "attempt": {"type": "integer", "minimum": 1},
+    "raw_output": {"type": "string"},
+    "case_hash": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "prompt_hash": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "context_hash": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "requested_actions": {"type": "array", "items": {"$ref": "#/$defs/action"}},
+    "action_trace": {"type": "array", "items": {"$ref": "#/$defs/trace"}},
+    "parent_status": {"type": ["string", "null"]},
+    "mechanical_results": {"type": "object", "additionalProperties": false, "required": ["parent_status", "tool_attempts"], "properties": {"parent_status": {"enum": ["PASS", "FAIL", "NOT RUN"]}, "tool_attempts": {"enum": ["PASS", "FAIL", "NOT RUN"]}}},
+    "required_outcomes": {"type": "object", "additionalProperties": {"const": "MANUAL REQUIRED"}},
+    "forbidden_outcomes": {"type": "object", "additionalProperties": {"const": "MANUAL REQUIRED"}},
+    "authority_safety_findings": {"type": "array", "items": {"$ref": "#/$defs/nonBlankString"}},
+    "earliest_failure_layer": {"enum": [null, "provider_output_contract", "authority_safety", "mechanical_continuity", "semantic_adjudication", "cost_ledger_publication", "result_publication"]},
+    "requested_provider": {"$ref": "#/$defs/nonBlankString"},
+    "requested_canonical_model": {"$ref": "#/$defs/nonBlankString"},
+    "provider": {"$ref": "#/$defs/nonBlankString"},
+    "canonical_model": {"$ref": "#/$defs/nonBlankString"},
+    "identity_reconciliation": {"enum": ["MATCH", "MISMATCH_BLOCKED"]},
+    "identity_diagnostics": {"type": "array", "items": {"$ref": "#/$defs/nonBlankString"}},
+    "evidence_status": {"enum": ["COMPLETE", "BLOCKED", "PARTIAL"]},
+    "evidence_flags": {"type": "array", "uniqueItems": true, "items": {"enum": ["IDENTITY_MISMATCH", "LEDGER_PUBLICATION_FAILED", "RESULT_PUBLICATION_FAILED"]}},
+    "tokens": {"type": "object", "additionalProperties": false, "required": ["input", "output"], "properties": {"input": {"type": "integer", "minimum": 0}, "output": {"type": "integer", "minimum": 0}}},
+    "cache": {"type": "integer", "minimum": 0},
+    "latency_ms": {"type": "number", "minimum": 0},
+    "provider_cost": {"type": "number", "minimum": 0},
+    "currency": {"$ref": "#/$defs/nonBlankString"},
+    "cost_kind": {"enum": ["provider_reported", "estimated"]},
+    "cost_record_id": {"$ref": "#/$defs/nonBlankString"},
+    "cost_ledger_publication": {"enum": ["NOT_REQUESTED", "PUBLISHED", "FAILED_BEFORE_PUBLICATION"]},
+    "cost_ledger_error": {"$ref": "#/$defs/nonBlankString"},
+    "result_publication": {"enum": ["PUBLISHED", "FAILED_AFTER_CALLBACKS"]},
+    "result_publication_error": {"$ref": "#/$defs/nonBlankString"},
+    "result_reconciliation_path": {"$ref": "#/$defs/nonBlankString"},
+    "estimate_source": {"$ref": "#/$defs/nonBlankString"},
+    "estimate_date": {"type": "string", "format": "date"}
+  },
+  "$defs": {
+    "nonBlankString": {"type": "string", "minLength": 1, "pattern": ".*\\S.*"},
+    "action": {"type": "object", "additionalProperties": false, "required": ["name", "arguments"], "properties": {"name": {"$ref": "#/$defs/nonBlankString"}, "arguments": {"type": "object"}}},
+    "trace": {"type": "object", "additionalProperties": false, "required": ["name", "arguments", "attempted", "executed", "simulated", "reason"], "properties": {"name": {"$ref": "#/$defs/nonBlankString"}, "arguments": {"type": "object"}, "attempted": {"type": "boolean"}, "executed": {"const": false}, "simulated": {"const": true}, "reason": {"$ref": "#/$defs/nonBlankString"}}}
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"cost_kind": {"const": "estimated"}}, "required": ["cost_kind"]},
+      "then": {"required": ["estimate_source", "estimate_date"]}
+    },
+    {
+      "if": {"properties": {"identity_reconciliation": {"const": "MATCH"}}},
+      "then": {
+        "properties": {
+          "identity_diagnostics": {"maxItems": 0},
+          "evidence_flags": {"not": {"contains": {"const": "IDENTITY_MISMATCH"}}}
+        }
+      },
+      "else": {
+        "properties": {
+          "identity_diagnostics": {"minItems": 1},
+          "evidence_status": {"const": "BLOCKED"},
+          "evidence_flags": {"contains": {"const": "IDENTITY_MISMATCH"}}
+        }
+      }
+    },
+    {
+      "if": {"properties": {"cost_ledger_publication": {"const": "FAILED_BEFORE_PUBLICATION"}}},
+      "then": {
+        "required": ["cost_ledger_error"],
+        "properties": {"evidence_flags": {"contains": {"const": "LEDGER_PUBLICATION_FAILED"}}}
+      },
+      "else": {
+        "not": {"required": ["cost_ledger_error"]},
+        "properties": {"evidence_flags": {"not": {"contains": {"const": "LEDGER_PUBLICATION_FAILED"}}}}
+      }
+    },
+    {
+      "if": {"properties": {"result_publication": {"const": "FAILED_AFTER_CALLBACKS"}}},
+      "then": {
+        "required": ["result_publication_error", "result_reconciliation_path"],
+        "properties": {"evidence_flags": {"contains": {"const": "RESULT_PUBLICATION_FAILED"}}}
+      },
+      "else": {
+        "allOf": [
+          {"not": {"required": ["result_publication_error"]}},
+          {"not": {"required": ["result_reconciliation_path"]}}
+        ],
+        "properties": {"evidence_flags": {"not": {"contains": {"const": "RESULT_PUBLICATION_FAILED"}}}}
+      }
+    },
+    {
+      "if": {"properties": {"identity_reconciliation": {"const": "MATCH"}, "cost_ledger_publication": {"const": "FAILED_BEFORE_PUBLICATION"}}},
+      "then": {"properties": {"evidence_status": {"const": "PARTIAL"}}}
+    },
+    {
+      "if": {"properties": {"identity_reconciliation": {"const": "MATCH"}, "result_publication": {"const": "FAILED_AFTER_CALLBACKS"}}},
+      "then": {"properties": {"evidence_status": {"const": "PARTIAL"}}}
+    },
+    {
+      "if": {"properties": {"identity_reconciliation": {"const": "MATCH"}, "cost_ledger_publication": {"const": "NOT_REQUESTED"}, "result_publication": {"const": "PUBLISHED"}}},
+      "then": {"properties": {"evidence_status": {"const": "COMPLETE"}}}
+    },
+    {
+      "if": {"properties": {"identity_reconciliation": {"const": "MATCH"}, "cost_ledger_publication": {"const": "PUBLISHED"}, "result_publication": {"const": "PUBLISHED"}}},
+      "then": {"properties": {"evidence_status": {"const": "COMPLETE"}}}
+    }
+  ],
+  "x-cloudbox-invariants": [
+    {
+      "name": "execution_evidence_publication_matrix",
+      "rows": [
+        {"identities_equal": true, "identity_reconciliation": "MATCH", "identity_diagnostics": "empty", "cost_ledger_publication": "NOT_REQUESTED", "cost_ledger_error": "absent", "result_publication": "PUBLISHED", "result_publication_error": "absent", "result_reconciliation_path": "absent", "evidence_status": "COMPLETE", "evidence_flags": []},
+        {"identities_equal": true, "identity_reconciliation": "MATCH", "identity_diagnostics": "empty", "cost_ledger_publication": "PUBLISHED", "cost_ledger_error": "absent", "result_publication": "PUBLISHED", "result_publication_error": "absent", "result_reconciliation_path": "absent", "evidence_status": "COMPLETE", "evidence_flags": []},
+        {"identities_equal": true, "identity_reconciliation": "MATCH", "identity_diagnostics": "empty", "cost_ledger_publication": "FAILED_BEFORE_PUBLICATION", "cost_ledger_error": "nonempty", "result_publication": "PUBLISHED", "result_publication_error": "absent", "result_reconciliation_path": "absent", "evidence_status": "PARTIAL", "evidence_flags": ["LEDGER_PUBLICATION_FAILED"]},
+        {"identities_equal": true, "identity_reconciliation": "MATCH", "identity_diagnostics": "empty", "cost_ledger_publication": "NOT_REQUESTED", "cost_ledger_error": "absent", "result_publication": "FAILED_AFTER_CALLBACKS", "result_publication_error": "nonempty", "result_reconciliation_path": "nonempty", "evidence_status": "PARTIAL", "evidence_flags": ["RESULT_PUBLICATION_FAILED"]},
+        {"identities_equal": true, "identity_reconciliation": "MATCH", "identity_diagnostics": "empty", "cost_ledger_publication": "PUBLISHED", "cost_ledger_error": "absent", "result_publication": "FAILED_AFTER_CALLBACKS", "result_publication_error": "nonempty", "result_reconciliation_path": "nonempty", "evidence_status": "PARTIAL", "evidence_flags": ["RESULT_PUBLICATION_FAILED"]},
+        {"identities_equal": true, "identity_reconciliation": "MATCH", "identity_diagnostics": "empty", "cost_ledger_publication": "FAILED_BEFORE_PUBLICATION", "cost_ledger_error": "nonempty", "result_publication": "FAILED_AFTER_CALLBACKS", "result_publication_error": "nonempty", "result_reconciliation_path": "nonempty", "evidence_status": "PARTIAL", "evidence_flags": ["LEDGER_PUBLICATION_FAILED", "RESULT_PUBLICATION_FAILED"]},
+        {"identities_equal": false, "identity_reconciliation": "MISMATCH_BLOCKED", "identity_diagnostics": "nonempty", "cost_ledger_publication": "NOT_REQUESTED", "cost_ledger_error": "absent", "result_publication": "PUBLISHED", "result_publication_error": "absent", "result_reconciliation_path": "absent", "evidence_status": "BLOCKED", "evidence_flags": ["IDENTITY_MISMATCH"]},
+        {"identities_equal": false, "identity_reconciliation": "MISMATCH_BLOCKED", "identity_diagnostics": "nonempty", "cost_ledger_publication": "PUBLISHED", "cost_ledger_error": "absent", "result_publication": "PUBLISHED", "result_publication_error": "absent", "result_reconciliation_path": "absent", "evidence_status": "BLOCKED", "evidence_flags": ["IDENTITY_MISMATCH"]},
+        {"identities_equal": false, "identity_reconciliation": "MISMATCH_BLOCKED", "identity_diagnostics": "nonempty", "cost_ledger_publication": "FAILED_BEFORE_PUBLICATION", "cost_ledger_error": "nonempty", "result_publication": "PUBLISHED", "result_publication_error": "absent", "result_reconciliation_path": "absent", "evidence_status": "BLOCKED", "evidence_flags": ["IDENTITY_MISMATCH", "LEDGER_PUBLICATION_FAILED"]},
+        {"identities_equal": false, "identity_reconciliation": "MISMATCH_BLOCKED", "identity_diagnostics": "nonempty", "cost_ledger_publication": "NOT_REQUESTED", "cost_ledger_error": "absent", "result_publication": "FAILED_AFTER_CALLBACKS", "result_publication_error": "nonempty", "result_reconciliation_path": "nonempty", "evidence_status": "BLOCKED", "evidence_flags": ["IDENTITY_MISMATCH", "RESULT_PUBLICATION_FAILED"]},
+        {"identities_equal": false, "identity_reconciliation": "MISMATCH_BLOCKED", "identity_diagnostics": "nonempty", "cost_ledger_publication": "PUBLISHED", "cost_ledger_error": "absent", "result_publication": "FAILED_AFTER_CALLBACKS", "result_publication_error": "nonempty", "result_reconciliation_path": "nonempty", "evidence_status": "BLOCKED", "evidence_flags": ["IDENTITY_MISMATCH", "RESULT_PUBLICATION_FAILED"]},
+        {"identities_equal": false, "identity_reconciliation": "MISMATCH_BLOCKED", "identity_diagnostics": "nonempty", "cost_ledger_publication": "FAILED_BEFORE_PUBLICATION", "cost_ledger_error": "nonempty", "result_publication": "FAILED_AFTER_CALLBACKS", "result_publication_error": "nonempty", "result_reconciliation_path": "nonempty", "evidence_status": "BLOCKED", "evidence_flags": ["IDENTITY_MISMATCH", "LEDGER_PUBLICATION_FAILED", "RESULT_PUBLICATION_FAILED"]}
+      ]
+    }
+  ]
+}
