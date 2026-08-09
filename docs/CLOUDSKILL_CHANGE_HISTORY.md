@@ -2,6 +2,16 @@
 
 This document records the evolution rationale and evidence chain for work that may span multiple conversations. Git commits and tags remain the authoritative source history.
 
+## 2026-08-10 — Task 8 release-candidate scope frozen
+
+The code/spec candidate is `a83b37f`. Release-candidate evidence is bounded to
+provider-separated Codex and Claude full routing plus the executable R07
+Behavior control, one release-significant blinded four-cell panel for the new
+authority/evidence/lineage contracts, and at most two read-only review calls.
+The ceiling is 30 hosted calls including bounded Claude fallback. Ollama and a
+whole-corpus frontier Behavior claim are excluded; versioning and publication
+remain gated on a Task 8 PASS.
+
 ## 2026-08-09 — Task 7 lifecycle truth and 6.0 compatibility boundary
 
 Lifecycle semantic tests first failed because production validation lacked an

@@ -15,6 +15,16 @@ This is the operational entry point for a new conversation or coding agent that 
 
 ## Current repository state
 
+### CloudBox 6.0 Task 8 RC scope (2026-08-10)
+
+- Task 7 is committed at `a83b37f` and its full deterministic suite passed.
+- Task 8 is bounded to Codex and Claude full routing plus R07 Behavior, one
+  release-significant blinded 2x2, and at most two independent review calls.
+- The Task 8 ceiling is 30 hosted calls including bounded Claude fallback;
+  Ollama and whole-corpus frontier Behavior are excluded.
+- Version synchronization and every publication action remain gated on Task 8
+  PASS.
+
 ### CloudBox 6.0 Task 7 lifecycle and compatibility decision (2026-08-09)
 
 - Lifecycle semantic RED detected all 19 declared two-feature-release review
