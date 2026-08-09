@@ -15,6 +15,19 @@ This is the operational entry point for a new conversation or coding agent that 
 
 ## Current repository state
 
+### CloudBox 6.0 Task 6 executable panel foundation (2026-08-09)
+
+- Added an authoritative multi-model panel schema, shared validator/aggregator,
+  single-writer fixture coordinator, and bounded Claude strict-to-plain fallback.
+- Focused RED first failed because `multimodel_panel_contract` did not exist. A
+  second RED removed the dry-run publication API and failed on its missing
+  import. Both focused GREEN runs passed after the minimum implementations.
+- Mutations reject duplicate worker outputs, missing returned model identity,
+  exposed blind-label maps, provider score averaging, and a blocked worker
+  mislabeled as a complete 2x2. Costs remain separated by provider/model/kind.
+- Package validation and the full repository suite exited 0. This is fixture
+  evidence only; no live 2x2 was run because Task 5 made no behavior change.
+
 ### CloudBox 6.0 Task 4 complete; Task 5 closed without edits (2026-08-09)
 
 - Codex executed TC-002 through TC-010 once each using the same plain-JSON

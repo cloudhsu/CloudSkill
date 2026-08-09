@@ -2,6 +2,25 @@
 
 This document records the evolution rationale and evidence chain for work that may span multiple conversations. Git commits and tags remain the authoritative source history.
 
+## 2026-08-09 — Task 6 reproducible multi-model panel foundation
+
+Added `multimodel-panel.schema.json`, a shared panel contract/validator and cost
+aggregator, a single-writer fixture coordinator, and a bounded Claude request
+boundary that permits only one zero-token strict-to-plain fallback after a
+successful authentication preflight.
+
+TDD preserved two focused REDs: the first failed with missing
+`multimodel_panel_contract`; the second intentionally removed `dry_run` and
+failed on that missing production API. GREEN mutations reject duplicate output
+paths, missing canonical returned models, exposed blind-label maps, averaged
+provider scores, and a blocked worker mislabeled as a complete 2x2. A real
+four-worker fixture dry run publishes once and rejects overwrite; provider
+costs remain separate by provider, model, currency, and evidence kind.
+
+Focused validation, package validation, and the full repository suite exited
+0. No live panel call was made because Task 5 produced no instruction change;
+this remains executable fixture evidence, not a hosted 2x2 result.
+
 ## 2026-08-09 — Task 4 full baseline PASS; Task 5 no-change decision
 
 Codex executed TC-002 through TC-010 once each through plain JSON transport
