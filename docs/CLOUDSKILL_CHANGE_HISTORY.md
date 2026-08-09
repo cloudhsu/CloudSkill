@@ -77,6 +77,12 @@ Focused validation performed before the full release suite:
   reported an invalid token. The user re-authenticated; keyring-capable preflight
   then confirmed the active account, required scopes, repository access, and
   default branch. No failed preflight was misreported as a push or PR.
+- Commit `a869f74` was pushed to
+  `feat/multimodel-skill-evaluation-20260809`; PR #2 passed both GitHub
+  `validate` checks and merged normally as `348063d`. The official
+  non-draft/non-prerelease `v5.8.0` GitHub Release was published from `main` at
+  2026-08-09T10:41:15Z. The remote feature branch remains intentionally
+  undeleted.
 
 ## 2026-08-09 — First live Codex evidence, retired CLI flag fixed, second-round grader precision hotfix
 
