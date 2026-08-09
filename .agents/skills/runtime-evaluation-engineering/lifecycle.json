@@ -20,7 +20,9 @@
     "RTE-BEH-001",
     "RTE-BEH-002",
     "RTE-BEH-003",
-    "RTE-BEH-004"
+    "RTE-BEH-004",
+    "RTE-BEH-005",
+    "RTE-BEH-006"
   ],
   "behavior_case_types": [
     "application",

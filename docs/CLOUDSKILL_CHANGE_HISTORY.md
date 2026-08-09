@@ -2,6 +2,82 @@
 
 This document records the evolution rationale and evidence chain for work that may span multiple conversations. Git commits and tags remain the authoritative source history.
 
+## 2026-08-09 — Claude repeat=3 import and adaptive 2x2 Skill-evaluation workflow
+
+Continued an interrupted evidence-import session from repository handoff rather
+than chat memory. A sub-agent executed
+`./cloudskill-eval --provider claude --behavior-repeat 3` and wrote the normal
+fixed artifact `.local/runtime-evals/CloudSkill-local-eval-review-latest.zip`
+plus timestamp bundle
+`CloudSkill-local-eval-review-local-review-20260809-180816.zip` (both SHA-256
+`815370cd6b233437299c916629a4a010332d8018c58ff38b2578141046e362bb`).
+Pipeline SUCCESS, evaluation gate PASS, routing 15/15; R07 Behavior 3/3 PASS at
+archived scores 82.7/85.0/92.0 (average 86.6), no refinement.
+
+**RED 1 — demonstrated grader false negative.** All three Claude outputs had
+numbered bold Markdown fault-injection scenarios with `Expected:` outcomes, but
+`verification-scenarios` scored 0/8 on all three. The regex recognized plain
+numbered imperative scenarios but not this equally valid format. Added the exact
+format family and a negative control to the existing precision regression
+fixture. Re-grading preserved raw evidence, without a new model call, now yields
+90.7/93.0/100.0 (average 94.6).
+
+**RED 2 — semantic safety is not deterministic coverage.** Independent Luna and
+Sol judges agreed that current keyword/proximity grading cannot determine whether
+an epoch issuer really prevents split brain, a late completion can overwrite a
+newer attempt, physical evidence is valid, or a generic topology was over-assumed.
+They differed on Claude's release label (`MANUAL_REQUIRED` versus semantic
+`FAIL`), which is itself evidence for explicit adjudication rather than score
+averaging. No equipment Skill was changed: its existing contract already owns
+these safeguards, and one n=1 answer is not proof of a Skill defect.
+
+**RED 3 — multi-model process was implicit.** `developing-skills` and
+`runtime-evaluation-engineering` mentioned second-model/semantic review but did
+not specify blinded evidence packets, role separation, adaptive 2x2 escalation,
+safety vetoes, disagreement capture, or stop conditions. Added behavior cases
+that reproduce this gap, an adaptive role-separated workflow, and a review
+template section. The protocol uses independent sanitized extraction, RED and
+owner selection, one minimal patch, blinded judges and adjacent controls, then
+mechanism-level adjudication. Multi-model agreement alone is never GREEN.
+
+**Evidence lineage.** Behavior reports now persist input and rubric SHA-256
+values. This prevents archived 78-point reports and later 100/84 offline regrades
+from being reported as new model behavior. Provider results remain separate and
+all comparative conclusions are limited to R07, the only live Behavior case.
+
+**Claude-led symmetry.** The user required the same process to work when Claude
+is the coordinator. Added a host-neutral execution contract: Claude Code may
+launch Codex CLI judges/extractors and Codex may launch Claude CLI workers, with
+least capability, an immutable allowlisted packet, unique per-worker outputs,
+canonical returned-model evidence, and truthful `BLOCKED`/degraded-panel states.
+Only read-only work is parallel; the stable Runtime Eval ZIP and repository or
+release mutations retain one owner. This capability is not claimed for
+claude.ai/Desktop or another surface without subprocess evidence.
+
+The live 2x2 experiment used Luna, Sol, Claude Sonnet 5, and Claude Opus 5.
+All four found Codex's R07 output stronger or free of a blocking semantic defect,
+and all found Claude's cross-host local epoch-store assumption at least
+ambiguous. Sonnet returned Claude PASS while Luna/Opus required manual review
+and Sol treated it as semantic failure. The adjudicated result is
+`MANUAL_REQUIRED` for Claude n=1 semantic safety despite deterministic coverage
+PASS; disagreement is preserved rather than averaged away.
+
+Focused validation performed before the full release suite:
+
+- `scripts/validate_behavior_runtime_evals.py`: PASS.
+- `scripts/validate_behavior_evals.py`: 98 contracts / 19 Skills, PASS; this is
+  structural case validation, not model behavior execution.
+- Claude preserved raw regrade: 3/3 PASS, average 94.6, input/rubric hashes
+  recorded under `/tmp`; no new provider call.
+- Full repository and install checks are recorded separately in the 5.8.0
+  release evidence: `scripts/run_all_checks.py` PASS, including lifecycle,
+  packaging, Codex/Claude smoke install, provider/contract, portability,
+  handoff, and interaction-capture validation.
+- The first sandboxed publish preflight could not read the macOS keyring and
+  reported an invalid token. The user re-authenticated; keyring-capable preflight
+  then confirmed the active account, required scopes, repository access, and
+  default branch. No failed preflight was misreported as a push or PR.
+
 ## 2026-08-09 — First live Codex evidence, retired CLI flag fixed, second-round grader precision hotfix
 
 First-ever live Codex Runtime Eval in this repository's history (confirmed

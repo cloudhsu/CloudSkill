@@ -67,6 +67,47 @@ Prefer this order:
 
 Do not copy the same mutable rule into the router, domain skill, quality skill, and repository guidance. Put the full rule in its authoritative owner and keep routing cues concise.
 
+## Multi-model extraction and Skill-change evaluation
+
+Use multiple models to reduce correlated omissions, not to manufacture
+confidence through repeated prose.
+
+1. **Extract independently.** Give two extractors the same sanitized evidence
+   inventory. They produce candidates only: reusable pressure, owner, required
+   and forbidden behavior, confidence, and a proposed counterexample. They do
+   not edit Skills.
+2. **Deduplicate and establish RED.** The coordinator clusters equivalent
+   candidates, rejects project-only preferences, selects the authoritative
+   owner, and runs or records a repeatable failure before any Skill edit.
+3. **Create one minimal patch.** One patch author changes the smallest owner.
+   Do not create four competing Skill rewrites and select the most eloquent.
+4. **Blind the evaluation.** Judges receive randomized before/after outputs,
+   the same case and rubric, and no other judge verdict. Include adjacent and
+   negative controls so a candidate cannot win by triggering broadly.
+5. **Use a diverse 2x2 panel only when warranted.** One efficient and one
+   frontier model from each of two model families is appropriate for safety,
+   authority, routing ownership, or release-significant changes. Routine inbox
+   triage should use a cheaper path and escalate only on disagreement or risk.
+6. **Adjudicate mechanisms.** Aggregate recurring pressure, unique findings,
+   and dimension-level agreement. Safety, privacy, authority, unsupported
+   claims, and evidence-lineage objections require explicit resolution; they
+   are not outvoted.
+7. **Release on behavior evidence.** Require the same RED case to turn GREEN,
+   adjacent regressions to remain GREEN, and evidence cost to stay reasonable.
+   Multi-model approval without executable before/after evidence is
+   `MANUAL_REQUIRED`, not proof of improvement.
+
+Record model/version, roles, prompt and source hashes, independent verdicts,
+disagreements, adjudication, token/latency cost when available, and the stop
+reason. Stop when new judges add no decision-relevant findings.
+
+The coordinator role is host-neutral. Codex may coordinate Claude CLI workers;
+Claude Code may coordinate Codex CLI workers. Follow
+`runtime-evaluation-engineering/references/cross-agent-multimodel-orchestration.md`
+for least-capability invocation, canonical model identity, unique worker output,
+panel degradation, and the distinction between CLI hosts and sandboxed surfaces
+without subprocess access.
+
 ## Delivery modes
 
 - **Writable repository:** single-purpose branch, commit, and draft PR.

@@ -189,7 +189,8 @@
             [
               "(?:test|verify)\\s+(?:that|by|with|using|a|an|the).{0,250}(?:disconnect|restart|duplicate|out[- ]of[- ]order|owner loss|failover|late completion)",
               "(?:inject|simulate)\\s+(?:a |an )?(?:disconnect|restart|duplicate|out[- ]of[- ]order|owner loss|failover|late completion)",
-              "\\b\\d{1,2}\\.\\s+[A-Z][a-z]+.{0,200}?\\bExpect\\b"
+              "\\b\\d{1,2}\\.\\s+[A-Z][a-z]+.{0,200}?\\bExpect\\b",
+              "\\b\\d{1,2}\\.\\s+\\*{0,2}[A-Z][^\\n]{2,200}\\*{0,2}.{0,500}?\\bExpected?\\s*:"
             ]
           ],
           "max_span": 1000000

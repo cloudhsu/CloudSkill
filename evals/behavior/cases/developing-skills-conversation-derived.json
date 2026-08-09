@@ -109,6 +109,39 @@
         "agent interprets every skill-related question as authorization to edit skills"
       ],
       "review_notes": "Skill explanation alone is not skill development."
+    },
+    {
+      "id": "DEVSK-CONV-005",
+      "skill": "developing-skills",
+      "type": "application",
+      "prompt": "Use multiple models to distill recurring corrections into a Skill improvement, but keep cost bounded and prove the improvement rather than selecting the most persuasive rewrite.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "uses independent sanitized extraction to produce candidates without editing Skills",
+        "deduplicates candidates locates the authoritative owner and establishes RED before patching",
+        "creates one minimal patch and blinds before-after evaluation",
+        "uses adjacent negative controls and cross-family judges",
+        "escalates to a 2x2 panel for safety authority routing-owner or release risk and stops when findings saturate",
+        "requires adjudication of safety privacy authority unsupported-claim and evidence-lineage objections"
+      ],
+      "forbidden_behaviors": [
+        "asks every model to rewrite the Skill and chooses by eloquence or majority vote",
+        "stores raw unsanitized interactions in judge prompts or artifacts",
+        "claims multi-model agreement proves GREEN without rerunning the RED case",
+        "runs the full expensive panel for every routine inbox candidate"
+      ],
+      "required_artifacts": [
+        "sanitized candidate clusters",
+        "RED case",
+        "minimal patch",
+        "blind judge and adjudication record",
+        "GREEN and adjacent regression result"
+      ],
+      "baseline_expected_failure": [
+        "the existing workflow defines extraction and RED GREEN but has no repeatable role-separated blind adaptive multi-model protocol"
+      ],
+      "review_notes": "Multi-model agreement is supporting evidence; executable behavior change remains authoritative."
     }
   ]
 }
