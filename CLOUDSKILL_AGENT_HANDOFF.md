@@ -15,6 +15,17 @@ This is the operational entry point for a new conversation or coding agent that 
 
 ## Current repository state
 
+### CloudBox 6.2.0 published and remotely verified (2026-08-11)
+
+- PR `#10` merged as `6be22cd`; annotated tag `v6.2.0` peels to that
+  merge commit and the GitHub Release is published, non-draft, and
+  non-prerelease.
+- Main-push run `31412451585` and tag-push run `31412503124` both passed.
+- Exact identifiers and rollback notes are in
+  `docs/releases/6.2.0-post-release-record.md`.
+- The public Core/private Evolution Pack split and controlled external tool
+  adapters remain future work. No private repository was created or uploaded.
+
 ### CloudBox 6.2.0 release candidate approved (2026-08-11)
 
 - Source candidate `a364cea`, tree `ba76a24`, passes the complete deterministic

@@ -2,6 +2,14 @@
 
 This document records the evolution rationale and evidence chain for work that may span multiple conversations. Git commits and tags remain the authoritative source history.
 
+## 2026-08-11 — CloudBox 6.2.0 publication verified
+
+PR `#10` merged the reviewed 6.2 work into `main` as `6be22cd`. Annotated tag
+`v6.2.0` peels to that commit; both main-push and tag-push validation passed,
+and the GitHub Release is published as non-draft/non-prerelease. Immutable
+identifiers, run links, scope boundaries, and rollback notes are recorded in
+`docs/releases/6.2.0-post-release-record.md`.
+
 ## 2026-08-11 — CloudBox 6.2 adaptive lifecycle release candidate
 
 CloudBox 6.2 adds risk-selected Review Assurance and a composable, resumable
