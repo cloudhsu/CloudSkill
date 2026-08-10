@@ -2,6 +2,21 @@
 
 This document records the evolution rationale and evidence chain for work that may span multiple conversations. Git commits and tags remain the authoritative source history.
 
+## 2026-08-10 — CloudBox 6.0.0 publication verified
+
+PR `#5` merged reviewed candidate `28aa7dc` into `main` as `6dcecff` after
+exact-tip validation passed. Annotated tag `v6.0.0` peels to that merge commit;
+the GitHub Release is published, non-draft, and non-prerelease, and the merge
+commit's push validation passed. The immutable pre-release evidence was not
+rewritten. Publication facts, evidence hashes, rollback limits, and explicitly
+unperformed downstream operations are captured separately in
+`docs/releases/6.0.0-post-release-record.md`.
+
+Post-6 automatic Git/NAS source synchronization and private connectivity
+configuration are tracked in issue `#6`. The public repository remains a Skill
+control plane; actual URLs, credentials, raw candidates, and transfer state
+remain external private configuration/storage and are not part of Skills.
+
 ## 2026-08-10 — Task 9 release candidate version synchronization
 
 After the bounded four-cell Task 8 PASS, authoritative package version surfaces

@@ -15,6 +15,18 @@ This is the operational entry point for a new conversation or coding agent that 
 
 ## Current repository state
 
+### CloudBox 6.0.0 published and remotely verified (2026-08-10)
+
+- PR `#5` merged reviewed head `28aa7dc` into `main` as `6dcecff` after both
+  exact-tip checks passed. The merge-commit push check also passed.
+- Annotated `v6.0.0` tag object `f418eec` peels to `6dcecff`. The GitHub Release
+  is published, non-draft, and non-prerelease.
+- Immutable release details and artifact hashes are recorded in
+  `docs/releases/6.0.0-post-release-record.md`.
+- Post-6 Git/NAS source synchronization, private URL/credential resolution,
+  trigger phrases, open-source boundary, and operator/README documentation are
+  tracked in GitHub issue `#6`; they were not added to the 6.0.0 tag.
+
 ### CloudBox 6.0 Task 9 release candidate preparation (2026-08-10)
 
 - Task 8 remains PASS. Authoritative version surfaces have been synchronized
