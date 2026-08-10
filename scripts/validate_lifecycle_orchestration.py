@@ -61,15 +61,22 @@ with tempfile.TemporaryDirectory() as name:
     except ValueError as exc: assert "attempt" in str(exc)
     else: raise AssertionError("exhausted retry state was accepted")
     grant={"authorizer":"user","authorized_at":"2026-08-11T00:00:00Z","source_hash":"a"*64,"plan_revision":1,"added_actions":["publish"]}
-    granted={**widened,"authority":{**widened["authority"],"grant":grant}}
+    granted={**widened,"authority":{**widened["authority"],"grants":[grant]}}
     granted_saved=save_state_atomic(path,granted,2,owner_id="owner-b",fencing_token=newer["lease"]["fencing_token"])
     assert "publish" in granted_saved["authority"]["approved_actions"]
-    dropped_grant={**granted_saved,"authority":{key:value for key,value in granted_saved["authority"].items() if key!="grant"}}
+    dropped_grant={**granted_saved,"authority":{key:value for key,value in granted_saved["authority"].items() if key!="grants"}}
     try: save_state_atomic(path,dropped_grant,3,owner_id="owner-b",fencing_token=newer["lease"]["fencing_token"])
     except ValueError as exc: assert "grant" in str(exc)
     else: raise AssertionError("durable authority grant evidence was dropped")
     preserved_grant=save_state_atomic(path,granted_saved,3,owner_id="owner-b",fencing_token=newer["lease"]["fencing_token"])
-    assert preserved_grant["authority"]["grant"]==grant
+    assert preserved_grant["authority"]["grants"]==[grant]
+    grant2={"authorizer":"user","authorized_at":"2026-08-11T00:10:00Z","source_hash":"b"*64,"plan_revision":1,"added_actions":["deploy"]}
+    expanded_again={**preserved_grant,"authority":{**preserved_grant["authority"],"approved_actions":["inspect","publish","deploy"],"grants":[grant,grant2]}}
+    expanded_again=save_state_atomic(path,expanded_again,4,owner_id="owner-b",fencing_token=newer["lease"]["fencing_token"])
+    assert expanded_again["authority"]["grants"]==[grant,grant2]
+    revoked={**expanded_again,"current_action":None,"authority":{**expanded_again["authority"],"approved_actions":["inspect"]}}
+    revoked=save_state_atomic(path,revoked,5,owner_id="owner-b",fencing_token=newer["lease"]["fencing_token"])
+    assert revoked["authority"]["grants"]==[grant,grant2]
     assert reconcile_action(newer,lambda action:{"state":"completed"})=="ALREADY_COMPLETED"
     assert reconcile_action(newer,lambda action:{"state":"unknown"})=="RECONCILIATION_REQUIRED"
     at_limit={**newer,"current_action":{**newer["current_action"],"attempt":2,"max_attempts":2}}
