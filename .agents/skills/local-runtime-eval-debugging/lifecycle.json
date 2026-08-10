@@ -3,7 +3,7 @@
   "skill": "local-runtime-eval-debugging",
   "stage": "active",
   "introduced_version": "unknown",
-  "last_reviewed_version": "5.6.0",
+  "last_reviewed_version": "5.8.0",
   "routing_case_ids": [
     "LRED-01",
     "LRED-02",

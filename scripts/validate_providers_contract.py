@@ -122,6 +122,40 @@ else:
             "evals/runtime/contracts/providers.json"
         )
 
+try:
+    from claude_eval_adapter import canonical_returned_model, model_identity_metadata as claude_identity_metadata
+except (ImportError, AttributeError) as exc:
+    errors.append(f"Claude adapter lacks canonical returned-model extraction: {exc}")
+else:
+    if canonical_returned_model({"modelUsage": {"claude-sonnet-4-6": {}}}, "sonnet") != "claude-sonnet-4-6":
+        errors.append("Claude adapter did not use the one canonical modelUsage identity")
+    if canonical_returned_model({"modelUsage": {}}, "sonnet") is not None:
+        errors.append("Claude adapter self-certified a requested alias without returned identity")
+    if canonical_returned_model({"modelUsage": {"model-a": {}, "model-b": {}}}, "sonnet") is not None:
+        errors.append("Claude adapter guessed canonical identity from a multi-model response")
+    if claude_identity_metadata("sonnet", None).get("canonical_model") is not None:
+        errors.append("Claude adapter treated an alias as explicit model evidence")
+    if claude_identity_metadata("claude-sonnet-4-6", None).get("model_identity_evidence") != "explicit_selection":
+        errors.append("Claude adapter did not preserve a fully pinned CLI model selection")
+    returned_identity = claude_identity_metadata("sonnet", "claude-sonnet-4-6")
+    if returned_identity.get("canonical_model") != "claude-sonnet-4-6" or returned_identity.get("model_identity_evidence") != "provider_returned":
+        errors.append("Claude adapter did not prefer provider-returned identity")
+
+try:
+    from codex_eval_adapter import model_identity_metadata as codex_identity_metadata
+except (ImportError, AttributeError) as exc:
+    errors.append(f"Codex adapter lacks identity provenance extraction: {exc}")
+else:
+    if codex_identity_metadata("default", None).get("canonical_model") is not None:
+        errors.append("Codex adapter self-certified a default alias")
+    pinned_identity = codex_identity_metadata("gpt-5.4", None)
+    if pinned_identity.get("canonical_model") != "gpt-5.4" or pinned_identity.get("model_identity_evidence") != "explicit_selection":
+        errors.append("Codex adapter did not preserve a fully pinned CLI model selection")
+
+claude_adapter_text = (SCRIPTS / "claude_eval_adapter.py").read_text(encoding="utf-8")
+if '"acceptEdits"' in claude_adapter_text or '"dontAsk"' not in claude_adapter_text:
+    errors.append("Claude evaluation adapter must deny unapproved tool actions instead of auto-accepting edits")
+
 # cloudskill-eval-<provider> smoke wrappers for every hosted-agent provider.
 for provider_id, info in providers.items():
     if not isinstance(info, dict) or info.get("family") != "hosted-agent":

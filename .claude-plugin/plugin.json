@@ -1,7 +1,7 @@
 {
   "name": "cloudbox",
   "displayName": "CloudBox",
-  "version": "5.8.0",
+  "version": "6.0.0",
   "description": "Architecture, equipment-domain, quality, governance, refactoring, and Eval workflows for Claude Code.",
   "author": {
     "name": "CloudBox"

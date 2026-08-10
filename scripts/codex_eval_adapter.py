@@ -13,6 +13,28 @@ class CodexCLIError(RuntimeError):
     """Raised when the Codex CLI cannot complete an Eval request."""
 
 
+def model_identity_metadata(selected_model: str | None, provider_returned_model: str | None) -> dict[str, Any]:
+    """Separate CLI selection from provider-returned identity without alias guessing."""
+    selected = (selected_model or "").strip() or "codex-default"
+    returned = (provider_returned_model or "").strip() or None
+    aliases = {"default", "codex-default"}
+    if returned is not None:
+        canonical = returned
+        evidence = "provider_returned"
+    elif selected not in aliases:
+        canonical = selected
+        evidence = "explicit_selection"
+    else:
+        canonical = None
+        evidence = None
+    return {
+        "selected_model": selected,
+        "provider_returned_model": returned,
+        "canonical_model": canonical,
+        "model_identity_evidence": evidence,
+    }
+
+
 def codex_executable() -> str:
     configured = os.environ.get("CLOUDSKILL_CODEX")
     if configured:
@@ -203,8 +225,10 @@ def call_codex_cli(
         if not final_text:
             raise CodexCLIError("Codex CLI completed without a final message")
 
+        identity = model_identity_metadata(normalized_model or "codex-default", None)
         metadata = {
-            "model_returned": normalized_model or "codex-default",
+            "model_returned": identity["provider_returned_model"],
+            **identity,
             "response_id": event_meta.get("thread_id"),
             "request_id": None,
             "done_reason": "completed",

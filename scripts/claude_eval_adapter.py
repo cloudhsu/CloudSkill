@@ -13,6 +13,28 @@ class ClaudeCLIError(RuntimeError):
     """Raised when the Claude Code CLI cannot complete an Eval request."""
 
 
+def model_identity_metadata(selected_model: str | None, provider_returned_model: str | None) -> dict[str, Any]:
+    """Separate CLI selection from provider-returned identity without alias guessing."""
+    selected = (selected_model or "").strip() or "claude-default"
+    returned = (provider_returned_model or "").strip() or None
+    aliases = {"default", "claude-default", "sonnet", "opus"}
+    if returned is not None:
+        canonical = returned
+        evidence = "provider_returned"
+    elif selected not in aliases:
+        canonical = selected
+        evidence = "explicit_selection"
+    else:
+        canonical = None
+        evidence = None
+    return {
+        "selected_model": selected,
+        "provider_returned_model": returned,
+        "canonical_model": canonical,
+        "model_identity_evidence": evidence,
+    }
+
+
 def claude_executable() -> str:
     configured = os.environ.get("CLOUDSKILL_CLAUDE")
     if configured:
@@ -73,10 +95,9 @@ def _extract_result_text(stdout: str) -> tuple[str, dict[str, Any]]:
     string field plus usage/cost metadata. This parser is defensive: an
     unexpected shape raises ClaudeCLIError instead of silently guessing, so a
     format change surfaces as an infrastructure failure rather than a
-    fabricated Behavior/Routing answer. This adapter has not yet been
-    exercised against a live `claude` process in this repository; the first
-    `./cloudskill-eval-claude` smoke run is the point where this parsing is
-    actually confirmed, not assumed.
+    fabricated Behavior/Routing answer. Live Claude runs are recorded in the
+    release evidence; this parser still treats format drift as infrastructure
+    failure rather than inferring missing fields.
     """
 
     stripped = stdout.strip()
@@ -102,6 +123,18 @@ def _extract_result_text(stdout: str) -> tuple[str, dict[str, Any]]:
     return result.strip(), payload
 
 
+def canonical_returned_model(payload: dict[str, Any], requested_model: str | None) -> str | None:
+    """Return the single model identity reported by Claude, never the requested alias."""
+    model_usage = payload.get("modelUsage")
+    if not isinstance(model_usage, dict):
+        model_usage = payload.get("model_usage")
+    if isinstance(model_usage, dict):
+        identities = [name for name in model_usage if isinstance(name, str) and name.strip()]
+        if len(identities) == 1:
+            return identities[0]
+    return None
+
+
 def call_claude_cli(
     *,
     model: str | None,
@@ -116,10 +149,9 @@ def call_claude_cli(
     Runs from a fresh empty temporary directory with --safe-mode (no CLAUDE.md,
     Skills, plugins, hooks, or MCP auto-loading) and --tools "" (no built-in
     tool access), so the model sees only the supplied Eval prompt, not this
-    repository's own CloudBox skills or files. --permission-mode acceptEdits
-    avoids the non-interactive session stalling/erroring on a permission
-    prompt it cannot answer; the temporary directory has nothing real to
-    protect, so an auto-accepted edit there is harmless. Confirmed against a
+    repository's own CloudBox skills or files. --permission-mode dontAsk
+    rejects any action that would require interactive approval instead of
+    auto-accepting edits. Confirmed against a
     real run: without an explicit "do not use tools" framing in the prompt
     itself, the model occasionally attempted a tool call anyway (observed
     stop_reason="tool_use", subtype="error_max_structured_output_retries")
@@ -149,7 +181,7 @@ def call_claude_cli(
             "--tools",
             "",
             "--permission-mode",
-            "acceptEdits",
+            "dontAsk",
             "--no-session-persistence",
             "--strict-mcp-config",
             "--system-prompt",
@@ -188,8 +220,11 @@ def call_claude_cli(
 
         final_text, payload = _extract_result_text(process.stdout)
 
+        returned_model = canonical_returned_model(payload, normalized_model or "claude-default")
+        identity = model_identity_metadata(normalized_model or "claude-default", returned_model)
         metadata = {
-            "model_returned": normalized_model or "claude-default",
+            "model_returned": identity["provider_returned_model"],
+            **identity,
             "response_id": payload.get("session_id"),
             "request_id": None,
             "done_reason": "completed",
@@ -198,7 +233,7 @@ def call_claude_cli(
                 "version": info["version"],
                 "safe_mode": True,
                 "tools_disabled": True,
-                "permission_mode": "acceptEdits",
+                "permission_mode": "dontAsk",
                 "no_session_persistence": True,
                 "strict_mcp_config": True,
                 "num_turns": payload.get("num_turns"),

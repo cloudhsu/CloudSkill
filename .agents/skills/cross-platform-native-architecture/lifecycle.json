@@ -3,7 +3,7 @@
   "skill": "cross-platform-native-architecture",
   "stage": "active",
   "introduced_version": "unknown",
-  "last_reviewed_version": "5.6.0",
+  "last_reviewed_version": "5.8.0",
   "routing_case_ids": [
     "XPLAT-01",
     "XPLAT-02",

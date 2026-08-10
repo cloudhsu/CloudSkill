@@ -20,6 +20,9 @@ commands = [
     [sys.executable, 'scripts/validate_behavior_contract.py'],
     [sys.executable, 'scripts/validate_evolution_handoff.py'],
     [sys.executable, 'scripts/validate_behavior_runtime_evals.py'],
+    [sys.executable, 'scripts/validate_task_continuity_evals.py'],
+    [sys.executable, 'scripts/validate_task_continuity_runner.py'],
+    [sys.executable, 'scripts/validate_multimodel_panel.py'],
 ]
 
 for command in commands:

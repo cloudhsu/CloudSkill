@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cloudskill.local/evals/agent/contracts/provider-output.schema.json",
+  "title": "CloudBox task-continuity provider output",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["final", "parent_status", "requested_actions"],
+  "properties": {
+    "final": {"type": "string", "minLength": 1, "pattern": ".*\\S.*"},
+    "parent_status": {"enum": ["in_progress", "awaiting_decision", "blocked", "cancelled", "obsolete", "completed", "unknown"]},
+    "requested_actions": {"type": "array", "items": {"$ref": "#/$defs/action"}},
+    "outcomes": {"type": "array", "uniqueItems": true, "items": {"$ref": "#/$defs/nonBlankString"}}
+  },
+  "$defs": {
+    "nonBlankString": {"type": "string", "minLength": 1, "pattern": ".*\\S.*"},
+    "action": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "arguments"],
+      "properties": {"name": {"$ref": "#/$defs/nonBlankString"}, "arguments": {"type": "object"}}
+    },
+    "completionAction": {"type": "object", "required": ["name"], "properties": {"name": {"const": "complete_parent"}}}
+  },
+  "allOf": [{
+    "if": {"properties": {"requested_actions": {"contains": {"$ref": "#/$defs/completionAction"}}}},
+    "then": {"properties": {"parent_status": {"const": "completed"}}}
+  }]
+}
