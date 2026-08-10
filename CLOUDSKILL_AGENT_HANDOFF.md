@@ -23,8 +23,10 @@ This is the operational entry point for a new conversation or coding agent that 
 - Main-push run `31412451585` and tag-push run `31412503124` both passed.
 - Exact identifiers and rollback notes are in
   `docs/releases/6.2.0-post-release-record.md`.
-- The public Core/private Evolution Pack split and controlled external tool
-  adapters remain future work. No private repository was created or uploaded.
+- The public Core/private Evolution Pack split is explicitly deferred until
+  CloudBox is mature enough for deliberate marketing and the user resumes it.
+  Continue with one repository/package; do not create, move, or upload a
+  private pack meanwhile. Controlled external tool adapters remain future work.
 
 ### CloudBox 6.2.0 release candidate approved (2026-08-11)
 

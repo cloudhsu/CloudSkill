@@ -2,6 +2,17 @@
 
 This document records the evolution rationale and evidence chain for work that may span multiple conversations. Git commits and tags remain the authoritative source history.
 
+## 2026-08-11 — Public/private package split deferred
+
+The user retained the public Core/private Evolution Pack design but explicitly
+deferred execution. CloudBox will continue evolving as one repository/package
+while active marketing is out of scope. Repository splitting, private GitHub
+creation, Skill moves, and packaging changes may resume only when CloudBox is
+considered sufficiently mature for deliberate marketing and the user
+explicitly authorizes the work. The future design remains at
+`docs/future/PUBLIC_PRIVATE_PACKAGE_SPLIT.md` and must be reassessed against the
+then-current product rather than executed mechanically.
+
 ## 2026-08-11 — CloudBox 6.2.0 publication verified
 
 PR `#10` merged the reviewed 6.2 work into `main` as `6be22cd`. Annotated tag
