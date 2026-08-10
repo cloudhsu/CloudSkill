@@ -22,7 +22,11 @@ def _validate_authority(state:dict[str,Any],current:dict[str,Any]|None)->None:
     if approved & prohibited: raise ValueError("approved authority overlaps prohibited authority")
     if current is not None:
         prior=set((current.get("authority") or {}).get("approved_actions",[]))
-        if not approved<=prior: raise ValueError("resumed writer cannot expand authority")
+        added=approved-prior
+        if added:
+            grant=authority.get("grant")
+            valid=isinstance(grant,dict) and set(grant)=={"authorizer","authorized_at","source_hash","plan_revision","added_actions"} and grant.get("plan_revision")==state.get("plan_revision") and set(grant.get("added_actions",[]))==added and all(isinstance(grant.get(key),str) and grant[key] for key in ("authorizer","authorized_at")) and isinstance(grant.get("source_hash"),str) and len(grant["source_hash"])==64 and all(char in "0123456789abcdef" for char in grant["source_hash"])
+            if not valid: raise ValueError("resumed writer cannot expand authority without exact grant evidence")
     action=state.get("current_action")
     if not action:return
     requested=action.get("authority_scope")

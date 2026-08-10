@@ -60,6 +60,10 @@ with tempfile.TemporaryDirectory() as name:
     try: save_state_atomic(path,exhausted,2,owner_id="owner-b",fencing_token=newer["lease"]["fencing_token"])
     except ValueError as exc: assert "attempt" in str(exc)
     else: raise AssertionError("exhausted retry state was accepted")
+    grant={"authorizer":"user","authorized_at":"2026-08-11T00:00:00Z","source_hash":"a"*64,"plan_revision":1,"added_actions":["publish"]}
+    granted={**widened,"authority":{**widened["authority"],"grant":grant}}
+    granted_saved=save_state_atomic(path,granted,2,owner_id="owner-b",fencing_token=newer["lease"]["fencing_token"])
+    assert "publish" in granted_saved["authority"]["approved_actions"]
     assert reconcile_action(newer,lambda action:{"state":"completed"})=="ALREADY_COMPLETED"
     assert reconcile_action(newer,lambda action:{"state":"unknown"})=="RECONCILIATION_REQUIRED"
     at_limit={**newer,"current_action":{**newer["current_action"],"attempt":2,"max_attempts":2}}
@@ -76,10 +80,14 @@ for invalid_amount in (-1,0,True,float("inf"),float("nan")):
     else: raise AssertionError("invalid budget amount accepted")
 review=plan_review({"review":{"required_level":"L3_SINGLE_FAMILY_PAIR"},"budgets":{"provider_calls":{"limit":2,"used":0}}},{"workers":[],"blocking_findings":[]})
 assert len(review["next_cells"])==2 and review["achieved_level"]=="L0_NONE"
-context={"source_hash":"1"*64,"contract_hash":"2"*64,"packet_hash":"3"*64,"rubric_hash":"4"*64,"risk_class":"high"}
+assert review["evidence_reused"] is False
+context={"review_scope":"release","source_hash":"1"*64,"contract_hash":"2"*64,"packet_hash":"3"*64,"rubric_hash":"4"*64,"risk_class":"high"}
 stale={**context,"source_hash":"9"*64,"workers":[{"family":"gpt","canonical_model":"a","status":"PASS","model_identity_evidence":"provider_returned"}],"blocking_findings":[]}
 review=plan_review({"review":{"required_level":"L0_SINGLE_REVIEW","evidence_context":context},"budgets":{"provider_calls":{"limit":1,"used":0}}},stale)
 assert review["achieved_level"]=="L0_NONE" and review["evidence_reused"] is False and len(review["next_cells"])==1
+fresh={**context,"workers":[{"family":"gpt","canonical_model":"a","status":"PASS","model_identity_evidence":"provider_returned"}],"blocking_findings":[]}
+review=plan_review({"review":{"required_level":"L0_SINGLE_REVIEW","evidence_context":context},"budgets":{"provider_calls":{"limit":1,"used":0}}},fresh)
+assert review["achieved_level"]=="L0_SINGLE_REVIEW" and review["evidence_reused"] is True
 assert deployment_decision({"status":"deployed"},{"observation_complete":False})=="HOLD"
 assert deployment_decision({"status":"observing"},{"observation_complete":True,"hard_gate_breached":True})=="ROLLBACK"
 assert deployment_decision({"status":"observing"},{"observation_complete":True,"hard_gate_breached":False})=="ADVANCE"
