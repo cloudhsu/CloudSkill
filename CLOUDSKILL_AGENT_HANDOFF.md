@@ -15,6 +15,18 @@ This is the operational entry point for a new conversation or coding agent that 
 
 ## Current repository state
 
+### CloudBox 6.0 Task 8 PASS; Task 9 authorized (2026-08-10)
+
+- The affected GPT-efficient lineage cell passed in one of one replacement
+  attempts after `docs/releases/6.0.0-candidate-lineage.json` was frozen.
+- Combined with the three immutable PASS cells, the final record is
+  `COMPLETE_2X2`, Task 8 `PASS`, with no veto/major finding or contract error.
+  Formal evidence is
+  `docs/releases/evidence/6.0.0-task8-pass-evidence.json`, SHA-256
+  `1a582c4fdd5a2d30df450ec25955870895d6bc67a7fabf710238a2ecac91b304`.
+- Task 9 is authorized. Version sync, push/PR, merge, tag, GitHub Release, and
+  post-release verification remain NOT RUN at this checkpoint.
+
 ### CloudBox 6.0 final-panel correction increment (2026-08-10)
 
 - Post-recheck correction source candidate is `e352e08`, tree `96de9e5`.

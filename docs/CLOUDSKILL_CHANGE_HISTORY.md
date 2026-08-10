@@ -2,6 +2,17 @@
 
 This document records the evolution rationale and evidence chain for work that may span multiple conversations. Git commits and tags remain the authoritative source history.
 
+## 2026-08-10 — Task 8 PASS after bounded lineage-cell replacement
+
+The lineage manifest proved the scope declaration is the direct evidence-only
+child of the corrected source candidate. Only the affected GPT-efficient cell
+was re-run, with a hard one-attempt budget; it returned PASS. The prior FAIL
+remains immutable. Combining the replacement with the frozen GPT-frontier and
+two Claude PASS cells yields `COMPLETE_2X2`, Task 8 `PASS`, no unresolved
+veto/major finding, and no panel-contract error. Formal sanitized evidence is
+committed at `docs/releases/evidence/6.0.0-task8-pass-evidence.json`. Task 9 is
+authorized but no publication action occurred at this checkpoint.
+
 ## 2026-08-10 — Final-panel findings reproduced and corrected deterministically
 
 The final panel's actionable findings were classified before modification.
