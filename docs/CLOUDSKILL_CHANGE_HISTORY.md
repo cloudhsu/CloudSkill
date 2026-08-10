@@ -44,6 +44,12 @@ diagnostics, and clarifying Task 4 transport/independence and cross-major review
 currency. Task 8 remains STOP pending independent confirmation; no Task 9
 action occurred.
 
+The post-recheck correction candidate is `e352e08`, tree `96de9e5`. The final
+confirmation rubric now states the existing gate mechanically: no unresolved
+veto or major finding is required for PASS; minor observations remain visible
+but do not become MANUAL_REQUIRED merely by accumulation. The same four pinned
+model IDs and six-attempt durable ceiling apply.
+
 ## 2026-08-10 — Final Task 8 panel stopped release progression
 
 The newly declared final panel executed all four required cells in four hosted

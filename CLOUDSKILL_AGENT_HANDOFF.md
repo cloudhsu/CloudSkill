@@ -17,6 +17,10 @@ This is the operational entry point for a new conversation or coding agent that 
 
 ### CloudBox 6.0 final-panel correction increment (2026-08-10)
 
+- Post-recheck correction source candidate is `e352e08`, tree `96de9e5`.
+  Focused and full deterministic checks pass. A final four-cell confirmation
+  uses the same pinned IDs and six-attempt durable ceiling; minor-only findings
+  do not block PASS, while any veto/major/non-PASS/contract failure stops Task 9.
 - Deterministic correction source candidate is
   `5bf6a8af9608cbc2ed3d6584b63e751c63fea5d0`, tree
   `f88280ae074c0003a51ac7ba3fc42de4504ac1e3`; its full repository suite passed
