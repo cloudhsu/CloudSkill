@@ -9,6 +9,13 @@ description: Use when designing, reviewing, or debugging an executable AI, agent
 
 An Eval result is trustworthy only when the case, context, execution, grader, and release interpretation are independently valid. A low score does not automatically prove a Skill defect.
 
+For architecture, development, document, security, migration, Skill/Eval, or
+release review, use the authoritative Review Assurance contract and policy.
+Record required and achieved levels separately. A blocked provider does not
+count, an exception does not upgrade evidence, and deterministic checks precede
+hosted review. Stop when the required level is complete or a blocking finding
+requires correction; do not spend tokens to fill unnecessary cells.
+
 Read:
 
 - `references/evaluation-failure-taxonomy.md`

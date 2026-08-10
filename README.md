@@ -4,6 +4,10 @@
 
 **Current version: 6.1.0**
 
+The next evolution increment defines risk-based Review Assurance and resumable,
+adaptive lifecycle planning. See `docs/REVIEW_ASSURANCE_LEVELS.md` and
+`docs/RESUMABLE_LIFECYCLE_ORCHESTRATION.md`.
+
 CloudBox is the user-facing plugin brand for the `CloudSkill` repository: a portable set of software/system architecture skills and operating guidance for **OpenAI Codex**, **ChatGPT**, and **Claude Code**.
 
 The same canonical `.agents/skills/` directories are used by both plugin manifests and by the standalone installers. Existing skill IDs remain stable.

@@ -5,6 +5,13 @@ description: Use when a repository needs coding-agent instructions, risk routing
 
 # Coding-agent Project Governance
 
+When executing a lifecycle plan, require the current authoritative plan
+revision, declared task/artifact ownership, dependency-complete entry, explicit
+authority, and completion evidence. A stale agent or worker result cannot
+advance the plan. Repository actions remain bounded by worktree, test, commit,
+PR, migration, and release controls even when another plugin generated the
+detailed task steps.
+
 Read:
 
 - `references/instruction-architecture.md`
