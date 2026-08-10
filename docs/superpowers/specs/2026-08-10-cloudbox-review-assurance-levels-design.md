@@ -53,12 +53,30 @@ does not silently lower the required level.
 ## Review scope
 
 The assurance level is reusable across `architecture`, `code`, `migration`,
-`skill`, `eval`, `security`, and `release` review. Every record separates
+`skill`, `eval`, `document_governance`, `security`, and `release` review. Every record separates
 `review_scope` from reviewer composition. Architecture review uses the same
 level vocabulary but judges authority, lifecycle, state, failure/recovery,
 migration, security, deployment, and operational evidence rather than code
 style. Review assurance does not replace compilation, tests, fault injection,
 device evidence, CI, or required human safety approval.
+
+Document-governance review distinguishes a semantic baseline change from a
+presentation-only edit:
+
+| Document change | Default minimum |
+|---|---|
+| Authority source, approval status, regulatory/safety meaning, release baseline, or version lineage | `L1_CROSS_FAMILY_2X2` |
+| Cross-document contract, need-design-test traceability, or audience-transformation rule | `L2_SINGLE_FAMILY_QUAD` |
+| One engineering document's structure, terminology, ownership, or version correction | `L3_SINGLE_FAMILY_PAIR` |
+| Spelling, formatting, generated index, or link repair with proven zero semantic change | Deterministic checks only |
+
+Document review checks authoritative ownership, version and approval state,
+scope, duplicated mutable facts, traceability, audience views, replacement and
+retention rules, private-data exposure, and whether inference is mislabeled as
+verified fact. It starts with link, schema, version, duplication, traceability,
+and semantic-diff checks. Review packets contain only changed passages,
+authoritative sources, and affected contracts; the whole document corpus is
+not sent merely because it exists.
 
 ## Token-efficiency policy
 
@@ -163,6 +181,7 @@ Included in the future implementation:
 - authoritative assurance-level contract;
 - deterministic calculation and anti-drift validation;
 - risk/minimum policy and exception state;
+- architecture, development, document-governance, and release scope profiles;
 - migration of future panel and release records;
 - documentation of truthful degraded outcomes.
 
