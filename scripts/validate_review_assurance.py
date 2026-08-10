@@ -19,8 +19,8 @@ assert required_level("architecture","high",policy)=="L1_CROSS_FAMILY_2X2"
 assert required_level("document_governance","presentation_only",policy)=="L0_NONE"
 blocked=decide_review("L1_CROSS_FAMILY_2X2","L0_SINGLE_REVIEW",[],None)
 assert blocked["decision"]=="BLOCKED"
-exception={"authorizer":"user","authorized_at":"2026-08-11T00:00:00Z","scope":"release","source_hash":"1"*64,"required_level":"L1_CROSS_FAMILY_2X2","achieved_level":"L0_SINGLE_REVIEW","remaining_risk":"single-family evidence only"}
-assert decide_review("L1_CROSS_FAMILY_2X2","L0_SINGLE_REVIEW",[],exception)["decision"]=="PASS_WITH_EXCEPTION"
+exception={"authorizer":"user","authorized_at":"2026-08-11T00:00:00Z","scope":"release","source_hash":"1"*64,"contract_hash":"2"*64,"packet_hash":"3"*64,"rubric_hash":"4"*64,"risk_class":"high","required_level":"L1_CROSS_FAMILY_2X2","achieved_level":"L0_SINGLE_REVIEW","remaining_risk":"single-family evidence only"}
+assert decide_review("L1_CROSS_FAMILY_2X2","L0_SINGLE_REVIEW",[],exception,evidence_context=exception)["decision"]=="PASS_WITH_EXCEPTION"
 assert decide_review("L3_SINGLE_FAMILY_PAIR","L2_SINGLE_FAMILY_QUAD",[{"severity":"High"}],None)["decision"]=="BLOCKED"
 record={"source_hash":"1"*64,"contract_hash":"2"*64,"packet_hash":"3"*64,"rubric_hash":"4"*64,"risk_class":"low","workers":[w("gpt","a")]}
 assert evidence_applicable(record,source_hash="1"*64,contract_hash="2"*64,packet_hash="3"*64,rubric_hash="4"*64,risk_class="low")
@@ -32,6 +32,8 @@ assert "achieved_level does not match workers" in validate_review_record(persist
 persisted["achieved_level"]="L0_SINGLE_REVIEW"
 persisted["decision"]="BLOCKED"
 assert validate_review_record(persisted)==[]
+forged={**persisted,"decision":"PASS_WITH_EXCEPTION","exception":{**exception,"source_hash":"9"*64}}
+assert "decision does not match review evidence" in validate_review_record(forged)
 failed={**persisted,"workers":[w("gpt","a","FAIL")],"decision":"PASS"}
 assert "decision does not match review evidence" in validate_review_record(failed)
 print("Validated risk-based review assurance, degradation, evidence reuse, and token-aware scheduling")

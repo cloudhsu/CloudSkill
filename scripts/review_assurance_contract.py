@@ -7,7 +7,8 @@ from typing import Any
 LEVELS = ("L0_NONE","L0_SINGLE_REVIEW","L3_SINGLE_FAMILY_PAIR","L2_SINGLE_FAMILY_QUAD","L1_CROSS_FAMILY_2X2")
 COMPLETED = {"PASS","FAIL","MANUAL_REQUIRED"}
 BLOCKING_SEVERITIES = {"Critical","High"}
-EXCEPTION_FIELDS = {"authorizer","authorized_at","scope","source_hash","required_level","achieved_level","remaining_risk"}
+LINEAGE_FIELDS = {"source_hash","contract_hash","packet_hash","rubric_hash","risk_class"}
+EXCEPTION_FIELDS = {"authorizer","authorized_at","scope","required_level","achieved_level","remaining_risk"} | LINEAGE_FIELDS
 
 
 def canonical_independent_cells(workers: list[dict[str, Any]]) -> set[tuple[str,str]]:
@@ -56,17 +57,18 @@ def required_level(scope: str, risk_class: str, policy: dict[str,Any]) -> str:
     return level
 
 
-def _valid_exception(exception: Any, required: str, achieved: str) -> bool:
-    return isinstance(exception,dict) and set(exception)==EXCEPTION_FIELDS and exception.get("required_level")==required and exception.get("achieved_level")==achieved and all(isinstance(exception.get(key),str) and exception[key].strip() for key in EXCEPTION_FIELDS) and len(exception["source_hash"])==64
+def _valid_exception(exception: Any, required: str, achieved: str, evidence_context: dict[str,Any] | None) -> bool:
+    hashes={"source_hash","contract_hash","packet_hash","rubric_hash"}
+    return isinstance(exception,dict) and set(exception)==EXCEPTION_FIELDS and exception.get("required_level")==required and exception.get("achieved_level")==achieved and all(isinstance(exception.get(key),str) and exception[key].strip() for key in EXCEPTION_FIELDS) and all(len(exception[key])==64 and all(char in "0123456789abcdef" for char in exception[key]) for key in hashes) and evidence_context is not None and all(exception.get(key)==evidence_context.get(key) for key in LINEAGE_FIELDS)
 
 
-def decide_review(required: str, achieved: str, findings: list[dict[str,Any]], exception: dict[str,Any] | None, workers: list[dict[str,Any]] | None=None) -> dict[str,Any]:
+def decide_review(required: str, achieved: str, findings: list[dict[str,Any]], exception: dict[str,Any] | None, workers: list[dict[str,Any]] | None=None, evidence_context: dict[str,Any] | None=None) -> dict[str,Any]:
     unresolved_worker=workers is not None and any(item.get("status")!="PASS" for item in workers)
     if unresolved_worker or any(item.get("severity") in BLOCKING_SEVERITIES or item.get("veto") is True for item in findings):
         decision="BLOCKED"
     elif level_rank(achieved)>=level_rank(required):
         decision="PASS"
-    elif _valid_exception(exception,required,achieved):
+    elif _valid_exception(exception,required,achieved,evidence_context):
         decision="PASS_WITH_EXCEPTION"
     else:
         decision="BLOCKED"
@@ -80,7 +82,7 @@ def validate_review_record(record: dict[str,Any]) -> list[str]:
     if not isinstance(findings,list): return ["blocking_findings must be an array"]
     computed=achieved_level(workers)
     if record.get("achieved_level")!=computed: errors.append("achieved_level does not match workers")
-    try: decision=decide_review(record.get("required_level"),computed,findings,record.get("exception"),workers)["decision"]
+    try: decision=decide_review(record.get("required_level"),computed,findings,record.get("exception"),workers,record)["decision"]
     except (TypeError,ValueError): errors.append("review levels are invalid")
     else:
         if record.get("decision")!=decision: errors.append("decision does not match review evidence")

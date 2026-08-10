@@ -5,6 +5,7 @@ ROOT=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT/"scripts"))
 from lifecycle_orchestration_contract import classify_failure, deployment_decision, load_profiles, select_profiles
 from lifecycle_plan_contract import create_plan, replan
+import lifecycle_state_store
 from lifecycle_state_store import load_state, save_state_atomic
 from lifecycle_reconciliation import acquire_lease, assert_fence, cancel_work, reconcile_action
 from lifecycle_review_adapter import consume_budget, plan_review
@@ -25,6 +26,12 @@ with tempfile.TemporaryDirectory() as name:
     state={"schema_version":1,"work_id":"W1","revision":0,"plan_id":plan["plan_id"],"plan_revision":1,"status":"interrupted","stage":"verify","profiles":["iterative_incremental"],"authority":{"approved_actions":["inspect"]},"current_action":{"action_id":"A1","deduplication_key":"push:one","plan_revision":1,"authority_scope":["inspect"],"attempt":1,"max_attempts":2,"state":"uncertain"},"review":{},"budgets":{"provider_calls":0}}
     saved=save_state_atomic(path,state,0)
     assert saved["revision"]==1 and load_state(path)["revision"]==1
+    durable=[]
+    original_sync=lifecycle_state_store._fsync_directory
+    lifecycle_state_store._fsync_directory=lambda directory: durable.append(directory)
+    save_state_atomic(Path(name)/"durable.json",state,0)
+    lifecycle_state_store._fsync_directory=original_sync
+    assert durable==[Path(name)]
     try: save_state_atomic(path,state,0)
     except ValueError: pass
     else: raise AssertionError("stale revision accepted")

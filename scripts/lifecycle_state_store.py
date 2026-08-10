@@ -1,5 +1,5 @@
 from __future__ import annotations
-import json,os
+import errno,json,os
 from pathlib import Path
 from typing import Any
 
@@ -23,6 +23,16 @@ def _validate_authority(state:dict[str,Any])->None:
     if not isinstance(requested,list) or any(not isinstance(item,str) or not item for item in requested) or not set(requested)<=approved:
         raise ValueError("current action exceeds approved authority")
 
+def _fsync_directory(directory:Path)->None:
+    try: descriptor=os.open(str(directory),os.O_RDONLY)
+    except OSError as exc:
+        if exc.errno in {errno.EINVAL,errno.ENOTSUP,errno.EISDIR}: return
+        raise
+    try: os.fsync(descriptor)
+    except OSError as exc:
+        if exc.errno not in {errno.EINVAL,errno.ENOTSUP}: raise
+    finally: os.close(descriptor)
+
 def save_state_atomic(path:Path,state:dict[str,Any],expected_revision:int,*,owner_id:str|None=None,fencing_token:int|None=None,now:int|None=None)->dict[str,Any]:
     current=load_state(path) if path.is_file() else None
     actual=current["revision"] if current else 0
@@ -43,4 +53,5 @@ def save_state_atomic(path:Path,state:dict[str,Any],expected_revision:int,*,owne
     with tmp.open("w",encoding="utf-8") as stream:
         json.dump(value,stream,sort_keys=True,indent=2); stream.write("\n"); stream.flush(); os.fsync(stream.fileno())
     tmp.replace(path)
+    _fsync_directory(path.parent)
     return value
