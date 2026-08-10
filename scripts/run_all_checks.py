@@ -26,6 +26,7 @@ commands = [
     [sys.executable, 'scripts/validate_task_continuity_runner.py'],
     [sys.executable, 'scripts/validate_multimodel_panel.py'],
     [sys.executable, 'scripts/validate_review_assurance.py'],
+    [sys.executable, 'scripts/validate_lifecycle_orchestration.py'],
 ]
 
 for command in commands:

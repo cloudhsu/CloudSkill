@@ -1,0 +1,15 @@
+{
+  "schema_version":1,
+  "profiles":{
+    "iterative_incremental":{"stages":["analyze","architect","design","implement","verify","release","operate","learn"]},
+    "eval_driven_evolution":{"stages":["analyze","verify","implement","verify","release","learn"]},
+    "stage_gated":{"stages":["explore","analyze","architect","design","implement","verify","release"]},
+    "agile_incremental":{"stages":["analyze","design","implement","verify","release","learn"]},
+    "discovery_spike":{"stages":["explore","analyze","verify"]},
+    "hybrid_hardware_software":{"stages":["analyze","architect","design","implement","verify","release"]},
+    "hotfix":{"stages":["analyze","implement","verify","release","learn"]},
+    "brownfield_migration":{"stages":["analyze","architect","design","implement","verify","release"]},
+    "lightweight_change":{"stages":["analyze","implement","verify"]}
+  }
+}
+

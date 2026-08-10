@@ -1,0 +1,13 @@
+{
+  "$schema":"https://json-schema.org/draft/2020-12/schema",
+  "type":"object","additionalProperties":false,
+  "required":["schema_version","work_id","revision","plan_id","plan_revision","status","stage","profiles","authority","current_action","review","budgets"],
+  "properties":{
+    "schema_version":{"const":1},"work_id":{"type":"string","minLength":1},"revision":{"type":"integer","minimum":0},
+    "plan_id":{"type":"string","minLength":1},"plan_revision":{"type":"integer","minimum":1},
+    "status":{"enum":["active","paused","interrupted","blocked","deferred","failed","complete"]},
+    "stage":{"type":"string"},"profiles":{"type":"array"},"authority":{"type":"object"},"current_action":{"type":["object","null"]},
+    "review":{"type":"object"},"budgets":{"type":"object"}
+  }
+}
+
