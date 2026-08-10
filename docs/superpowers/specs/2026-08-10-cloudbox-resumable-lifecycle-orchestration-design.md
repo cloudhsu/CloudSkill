@@ -40,10 +40,57 @@ The authoritative process owner must:
 8. Request the minimum Review Assurance Level required by current risk.
 9. Distinguish implemented, verified, released, deployed, and operationally
    confirmed states.
+10. Create, version, and adapt lifecycle and execution plans as risk and
+    evidence change.
 
 `development-process-tailoring` is the semantic owner for profile selection and
 recomposition. `using-cloudskill` remains the Skill router. Repository-agent
 permissions and worktree rules remain with `coding-agent-project-governance`.
+
+## Lifecycle planning ownership
+
+`development-process-tailoring` owns three connected planning views:
+
+1. **Lifecycle plan:** selected profiles, capabilities, gates, feedback loops,
+   and workstream topology.
+2. **Execution plan:** dependency-ordered tasks with owner, inputs, outputs,
+   risk, evidence, review level, checkpoint, rollback, and authority.
+3. **Replan record:** the evidence or risk trigger, affected tasks, invalidated
+   evidence, reusable work, changed gates, and required new authority.
+
+The plan is durable versioned state:
+
+```yaml
+plan_id: stable-identifier
+revision: 4
+based_on_revision: 3
+change_trigger: authority_boundary_changed
+source_hash: sha256
+risk_baseline: {}
+tasks_added: []
+tasks_removed: []
+tasks_invalidated: []
+evidence_reused: []
+authority_required: []
+```
+
+Each execution task declares `task_id`, technical owner, dependencies, inputs,
+outputs, risk class, required evidence, review level, checkpoint, retry rule,
+and rollback or compensation. The process owner does not invent technical
+content; architecture, domain, implementation, quality, and document owners
+provide their decisions and work products through this contract.
+
+Replanning is triggered by changed risk, requirement, architecture boundary,
+test evidence, external dependency, budget/provider availability, incident, or
+user pivot. It recalculates risk and review level, invalidates only affected
+downstream work, preserves hash-valid completed evidence, and requests explicit
+authority when scope or side effects expand. A stale agent cannot execute an
+older plan revision after a newer revision is authoritative.
+
+In hybrid installations, a generic planning plugin may generate the detailed
+task steps, but its output must conform to this CloudBox plan contract. It is a
+plan producer, not a second lifecycle owner. CloudBox standalone therefore
+retains complete planning and replanning semantics.
 
 ## Lifecycle profiles
 
@@ -271,6 +318,10 @@ unknown. `blocked` means a dependency or decision prevents progress. `deferred`
 moves work to a later horizon. `failed` records a confirmed failed action; none
 of these states automatically erase prior valid evidence.
 
+Resume validates both work-state revision and authoritative plan revision.
+`SAFE_TO_RESUME` is prohibited when the pending action belongs to a superseded
+plan or when its risk/review assumptions no longer match the current baseline.
+
 ## Resumable review integration
 
 Each review cell records the frozen packet/source/contract hashes, requested
@@ -347,6 +398,10 @@ Implementation must first preserve RED fixtures for:
 14. An exhausted token/cost budget is reported as PASS.
 15. A newer runtime partially reads an unsupported state schema.
 16. Deployment command success is reported as target-environment verification.
+17. A risk increase leaves the old task graph and review level unchanged.
+18. A stale agent executes a superseded plan revision.
+19. Replanning discards unrelated completed evidence.
+20. A plan generator silently becomes a second process authority.
 
 GREEN requires correct classification, transition, evidence invalidation/reuse,
 idempotent recovery, and adjacent regressions for the existing development and
@@ -377,6 +432,7 @@ Every completion report distinguishes:
 Included in future implementation:
 
 - profile contract and selection rules;
+- versioned lifecycle/execution plans and evidence-driven replanning;
 - default development and Skill-evolution profiles;
 - stage, transition, re-entry, and evidence-invalidation contracts;
 - durable work state, checkpoints, resume, and reconciliation;
