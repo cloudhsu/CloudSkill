@@ -64,6 +64,12 @@ with tempfile.TemporaryDirectory() as name:
     granted={**widened,"authority":{**widened["authority"],"grant":grant}}
     granted_saved=save_state_atomic(path,granted,2,owner_id="owner-b",fencing_token=newer["lease"]["fencing_token"])
     assert "publish" in granted_saved["authority"]["approved_actions"]
+    dropped_grant={**granted_saved,"authority":{key:value for key,value in granted_saved["authority"].items() if key!="grant"}}
+    try: save_state_atomic(path,dropped_grant,3,owner_id="owner-b",fencing_token=newer["lease"]["fencing_token"])
+    except ValueError as exc: assert "grant" in str(exc)
+    else: raise AssertionError("durable authority grant evidence was dropped")
+    preserved_grant=save_state_atomic(path,granted_saved,3,owner_id="owner-b",fencing_token=newer["lease"]["fencing_token"])
+    assert preserved_grant["authority"]["grant"]==grant
     assert reconcile_action(newer,lambda action:{"state":"completed"})=="ALREADY_COMPLETED"
     assert reconcile_action(newer,lambda action:{"state":"unknown"})=="RECONCILIATION_REQUIRED"
     at_limit={**newer,"current_action":{**newer["current_action"],"attempt":2,"max_attempts":2}}

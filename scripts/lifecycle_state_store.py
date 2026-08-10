@@ -21,12 +21,21 @@ def _validate_authority(state:dict[str,Any],current:dict[str,Any]|None)->None:
     prohibited=set(authority.get("prohibited_actions",[]))
     if approved & prohibited: raise ValueError("approved authority overlaps prohibited authority")
     if current is not None:
-        prior=set((current.get("authority") or {}).get("approved_actions",[]))
+        current_authority=current.get("authority") or {}
+        prior=set(current_authority.get("approved_actions",[]))
+        prior_grant=current_authority.get("grant")
         added=approved-prior
+        retained_granted=set((prior_grant or {}).get("added_actions",[])) & approved
+        if retained_granted and authority.get("grant")!=prior_grant:
+            raise ValueError("durable authority grant evidence must be preserved")
+        if prior_grant is not None and added:
+            raise ValueError("additional authority expansion requires a grant-history contract")
         if added:
             grant=authority.get("grant")
             valid=isinstance(grant,dict) and set(grant)=={"authorizer","authorized_at","source_hash","plan_revision","added_actions"} and grant.get("plan_revision")==state.get("plan_revision") and set(grant.get("added_actions",[]))==added and all(isinstance(grant.get(key),str) and grant[key] for key in ("authorizer","authorized_at")) and isinstance(grant.get("source_hash"),str) and len(grant["source_hash"])==64 and all(char in "0123456789abcdef" for char in grant["source_hash"])
             if not valid: raise ValueError("resumed writer cannot expand authority without exact grant evidence")
+        elif authority.get("grant") is not None and prior_grant is None:
+            raise ValueError("authority grant cannot be introduced without expansion")
     action=state.get("current_action")
     if not action:return
     requested=action.get("authority_scope")
