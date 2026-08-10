@@ -59,7 +59,7 @@ def required_level(scope: str, risk_class: str, policy: dict[str,Any]) -> str:
 
 def _valid_exception(exception: Any, required: str, achieved: str, evidence_context: dict[str,Any] | None) -> bool:
     hashes={"source_hash","contract_hash","packet_hash","rubric_hash"}
-    return isinstance(exception,dict) and set(exception)==EXCEPTION_FIELDS and exception.get("required_level")==required and exception.get("achieved_level")==achieved and all(isinstance(exception.get(key),str) and exception[key].strip() for key in EXCEPTION_FIELDS) and all(len(exception[key])==64 and all(char in "0123456789abcdef" for char in exception[key]) for key in hashes) and evidence_context is not None and all(exception.get(key)==evidence_context.get(key) for key in LINEAGE_FIELDS)
+    return isinstance(exception,dict) and set(exception)==EXCEPTION_FIELDS and exception.get("required_level")==required and exception.get("achieved_level")==achieved and all(isinstance(exception.get(key),str) and exception[key].strip() for key in EXCEPTION_FIELDS) and all(len(exception[key])==64 and all(char in "0123456789abcdef" for char in exception[key]) for key in hashes) and evidence_context is not None and exception.get("scope")==evidence_context.get("review_scope") and all(exception.get(key)==evidence_context.get(key) for key in LINEAGE_FIELDS)
 
 
 def decide_review(required: str, achieved: str, findings: list[dict[str,Any]], exception: dict[str,Any] | None, workers: list[dict[str,Any]] | None=None, evidence_context: dict[str,Any] | None=None) -> dict[str,Any]:
@@ -100,6 +100,11 @@ def next_review_cells(record: dict[str,Any], required: str, budget: dict[str,Any
     current=achieved_level(record.get("workers",[]))
     if level_rank(current)>=level_rank(required):
         return []
-    targets={"L0_SINGLE_REVIEW":1,"L3_SINGLE_FAMILY_PAIR":2,"L2_SINGLE_FAMILY_QUAD":4,"L1_CROSS_FAMILY_2X2":4}
-    missing=max(0,targets[required]-len(canonical_independent_cells(record.get("workers",[]))))
+    cells=canonical_independent_cells(record.get("workers",[]))
+    targets={"L0_SINGLE_REVIEW":1,"L3_SINGLE_FAMILY_PAIR":2,"L2_SINGLE_FAMILY_QUAD":4}
+    if required=="L1_CROSS_FAMILY_2X2":
+        counts={family:sum(1 for item_family,_ in cells if item_family==family) for family,_ in cells}
+        strongest=sorted((min(2,count) for count in counts.values()),reverse=True)[:2]
+        missing=4-sum(strongest)
+    else: missing=max(0,targets[required]-len(cells))
     return [{"role":"efficient" if index==0 else "frontier","family":"diverse" if required=="L1_CROSS_FAMILY_2X2" else "single"} for index in range(min(missing,int(budget["provider_calls"])))]

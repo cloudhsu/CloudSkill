@@ -23,7 +23,7 @@ changed=replan(plan,{"kind":"authority_boundary_changed","evidence_hash":"b"*64}
 assert changed["revision"]==2 and changed["tasks_invalidated"]==["T1"] and changed["required_review_level"]=="L1_CROSS_FAMILY_2X2"
 with tempfile.TemporaryDirectory() as name:
     path=Path(name)/"state.json"
-    state={"schema_version":1,"work_id":"W1","revision":0,"plan_id":plan["plan_id"],"plan_revision":1,"status":"interrupted","stage":"verify","profiles":["iterative_incremental"],"authority":{"approved_actions":["inspect"]},"current_action":{"action_id":"A1","deduplication_key":"push:one","plan_revision":1,"authority_scope":["inspect"],"attempt":1,"max_attempts":2,"state":"uncertain"},"review":{},"budgets":{"provider_calls":0}}
+    state={"schema_version":1,"work_id":"W1","revision":0,"plan_id":plan["plan_id"],"plan_revision":1,"status":"interrupted","stage":"verify","profiles":["iterative_incremental"],"authority":{"approved_actions":["inspect"]},"current_action":{"action_id":"A1","deduplication_key":"push:one","plan_revision":1,"authority_scope":["inspect"],"attempt":1,"max_attempts":2,"state":"uncertain"},"review":{},"budgets":{"provider_calls":{"limit":2,"used":0}}}
     saved=save_state_atomic(path,state,0)
     assert saved["revision"]==1 and load_state(path)["revision"]==1
     durable=[]
@@ -48,16 +48,38 @@ with tempfile.TemporaryDirectory() as name:
     try: save_state_atomic(path,over_authorized,2,owner_id="owner-b",fencing_token=newer["lease"]["fencing_token"])
     except ValueError as exc: assert "authority" in str(exc)
     else: raise AssertionError("persistence boundary accepted expanded authority")
+    widened={**newer,"authority":{"approved_actions":["inspect","publish"]},"current_action":{**newer["current_action"],"authority_scope":["publish"]}}
+    try: save_state_atomic(path,widened,2,owner_id="owner-b",fencing_token=newer["lease"]["fencing_token"])
+    except ValueError as exc: assert "authority" in str(exc)
+    else: raise AssertionError("resumed writer widened its own authority")
+    prohibited={**newer,"authority":{"approved_actions":["inspect"],"prohibited_actions":["inspect"]}}
+    try: save_state_atomic(path,prohibited,2,owner_id="owner-b",fencing_token=newer["lease"]["fencing_token"])
+    except ValueError as exc: assert "prohibited" in str(exc)
+    else: raise AssertionError("explicitly prohibited action was accepted")
+    exhausted={**newer,"current_action":{**newer["current_action"],"attempt":3,"max_attempts":2}}
+    try: save_state_atomic(path,exhausted,2,owner_id="owner-b",fencing_token=newer["lease"]["fencing_token"])
+    except ValueError as exc: assert "attempt" in str(exc)
+    else: raise AssertionError("exhausted retry state was accepted")
     assert reconcile_action(newer,lambda action:{"state":"completed"})=="ALREADY_COMPLETED"
     assert reconcile_action(newer,lambda action:{"state":"unknown"})=="RECONCILIATION_REQUIRED"
+    at_limit={**newer,"current_action":{**newer["current_action"],"attempt":2,"max_attempts":2}}
+    assert reconcile_action(at_limit,lambda action:{"state":"failed"})=="ATTEMPTS_EXHAUSTED"
     cancelled=cancel_work(newer,"user pivot",lambda action:{"state":"completed"})
     assert cancelled["status"]=="paused" and cancelled["current_action"] is None and cancelled["completed_steps"][-1]["deduplication_key"]=="push:one"
     missing_revision={**newer,"current_action":{key:value for key,value in newer["current_action"].items() if key!="plan_revision"}}
     assert reconcile_action(missing_revision,lambda action:{"state":"completed"})=="STALE_BASELINE"
 budgeted=consume_budget({"status":"active","budgets":{"tokens":{"limit":10,"used":8}}},"tokens",3)
 assert budgeted["status"]=="paused" and budgeted["budgets"]["tokens"]["used"]==8 and budgeted["budget_rejection"]["amount"]==3
+for invalid_amount in (-1,0,True,float("inf"),float("nan")):
+    try: consume_budget({"status":"active","budgets":{"tokens":{"limit":10,"used":1}}},"tokens",invalid_amount)
+    except ValueError: pass
+    else: raise AssertionError("invalid budget amount accepted")
 review=plan_review({"review":{"required_level":"L3_SINGLE_FAMILY_PAIR"},"budgets":{"provider_calls":{"limit":2,"used":0}}},{"workers":[],"blocking_findings":[]})
 assert len(review["next_cells"])==2 and review["achieved_level"]=="L0_NONE"
+context={"source_hash":"1"*64,"contract_hash":"2"*64,"packet_hash":"3"*64,"rubric_hash":"4"*64,"risk_class":"high"}
+stale={**context,"source_hash":"9"*64,"workers":[{"family":"gpt","canonical_model":"a","status":"PASS","model_identity_evidence":"provider_returned"}],"blocking_findings":[]}
+review=plan_review({"review":{"required_level":"L0_SINGLE_REVIEW","evidence_context":context},"budgets":{"provider_calls":{"limit":1,"used":0}}},stale)
+assert review["achieved_level"]=="L0_NONE" and review["evidence_reused"] is False and len(review["next_cells"])==1
 assert deployment_decision({"status":"deployed"},{"observation_complete":False})=="HOLD"
 assert deployment_decision({"status":"observing"},{"observation_complete":True,"hard_gate_breached":True})=="ROLLBACK"
 assert deployment_decision({"status":"observing"},{"observation_complete":True,"hard_gate_breached":False})=="ADVANCE"

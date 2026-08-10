@@ -15,12 +15,21 @@ def load_state(path:Path)->dict[str,Any]:
     if value.get("schema_version")!=1: raise ValueError("MIGRATION_REQUIRED")
     return value
 
-def _validate_authority(state:dict[str,Any])->None:
+def _validate_authority(state:dict[str,Any],current:dict[str,Any]|None)->None:
+    authority=state.get("authority") or {}
+    approved=set(authority.get("approved_actions",[]))
+    prohibited=set(authority.get("prohibited_actions",[]))
+    if approved & prohibited: raise ValueError("approved authority overlaps prohibited authority")
+    if current is not None:
+        prior=set((current.get("authority") or {}).get("approved_actions",[]))
+        if not approved<=prior: raise ValueError("resumed writer cannot expand authority")
     action=state.get("current_action")
     if not action:return
-    approved=set((state.get("authority") or {}).get("approved_actions",[]))
     requested=action.get("authority_scope")
-    if not isinstance(requested,list) or any(not isinstance(item,str) or not item for item in requested) or not set(requested)<=approved:
+    attempt=action.get("attempt"); maximum=action.get("max_attempts")
+    if not isinstance(attempt,int) or isinstance(attempt,bool) or not isinstance(maximum,int) or isinstance(maximum,bool) or attempt<1 or maximum<1 or attempt>maximum:
+        raise ValueError("current action attempt exceeds retry bound")
+    if not isinstance(requested,list) or any(not isinstance(item,str) or not item for item in requested) or not set(requested)<=approved or set(requested)&prohibited:
         raise ValueError("current action exceeds approved authority")
 
 def _fsync_directory(directory:Path)->None:
@@ -46,7 +55,7 @@ def save_state_atomic(path:Path,state:dict[str,Any],expected_revision:int,*,owne
         raise ValueError("stale lifecycle fencing token")
     value=json.loads(json.dumps(state))
     if value.get("schema_version")!=1: raise ValueError("MIGRATION_REQUIRED")
-    _validate_authority(value)
+    _validate_authority(value,current)
     value["revision"]=actual+1
     path.parent.mkdir(parents=True,exist_ok=True)
     tmp=path.with_suffix(path.suffix+".tmp")

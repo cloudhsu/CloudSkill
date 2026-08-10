@@ -9,6 +9,7 @@
 - Hardened lifecycle persistence with revision checks, fencing-token lease turnover, authority-scope enforcement, atomic replacement, and directory durability synchronization.
 - Added executable contracts, behavior cases, documentation, and repository-wide deterministic validation for the new lifecycle and review mechanisms.
 - Recorded controlled external CLI/MCP adapters as a post-6.2 evolution discussion; no new external execution authority is introduced by this release.
+- Recorded the approved post-6.2 split into a public development Core and a locally installable private Evolution Pack; no repository split or private upload is part of 6.2.
 
 ## 6.1.0
 

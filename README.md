@@ -9,6 +9,9 @@ lifecycle planning. See `docs/REVIEW_ASSURANCE_LEVELS.md` and
 `docs/RESUMABLE_LIFECYCLE_ORCHESTRATION.md`. A later-version discussion for
 controlled CLI/MCP integration is recorded in
 `docs/future/CONTROLLED_EXTERNAL_TOOL_ADAPTERS.md`.
+The approved later split between the public development package and a locally
+installable private evolution package is recorded in
+`docs/future/PUBLIC_PRIVATE_PACKAGE_SPLIT.md`.
 
 CloudBox is the user-facing plugin brand for the `CloudSkill` repository: a portable set of software/system architecture skills and operating guidance for **OpenAI Codex**, **ChatGPT**, and **Claude Code**.
 

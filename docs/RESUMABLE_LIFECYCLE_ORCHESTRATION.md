@@ -12,7 +12,6 @@ The lifecycle planning owner is development-process-tailoring. It owns:
 
 Technical Skills still own architecture, domain, design, code, quality and document decisions. A generic planning plugin may produce detailed steps only through the CloudBox plan contract.
 
-A resumed task first reconciles durable state, authoritative plan revision, hashes, external effects and authority. It returns SAFE_TO_RESUME, ALREADY_COMPLETED, RETRY_REQUIRED, RECONCILIATION_REQUIRED, STALE_BASELINE or AUTHORITY_REQUIRED. Timeout alone never proves failure.
+A resumed task first reconciles durable state, authoritative plan revision, hashes, external effects and authority. It returns SAFE_TO_RESUME, ALREADY_COMPLETED, RETRY_REQUIRED, ATTEMPTS_EXHAUSTED, RECONCILIATION_REQUIRED, STALE_BASELINE or AUTHORITY_REQUIRED. Timeout alone never proves failure.
 
 One coordinator owns state transitions through a lease/fencing token. Actions carry stable identity and deduplication keys. Risk changes produce a new plan revision, invalidate affected downstream work, preserve unrelated evidence and recalculate review assurance. Release, deployment, target verification and operational confirmation remain separate states.
-

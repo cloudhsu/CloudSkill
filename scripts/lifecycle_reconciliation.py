@@ -19,7 +19,8 @@ def reconcile_action(state:dict[str,Any],inspector:Callable[[dict[str,Any]],dict
     result=inspector(action)
     external=result.get("state")
     if external=="completed":return "ALREADY_COMPLETED"
-    if external=="failed":return "RETRY_REQUIRED"
+    if external=="failed":
+        return "ATTEMPTS_EXHAUSTED" if action.get("attempt",0)>=action.get("max_attempts",0) else "RETRY_REQUIRED"
     if external=="authority_required":return "AUTHORITY_REQUIRED"
     return "RECONCILIATION_REQUIRED"
 

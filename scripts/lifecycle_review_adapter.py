@@ -1,9 +1,12 @@
 from __future__ import annotations
 import copy
+import math
 from typing import Any
-from review_assurance_contract import achieved_level,next_review_cells
+from review_assurance_contract import achieved_level,evidence_applicable,next_review_cells
 
 def consume_budget(state:dict[str,Any],kind:str,amount:int|float)->dict[str,Any]:
+    if isinstance(amount,bool) or not isinstance(amount,(int,float)) or not math.isfinite(amount) or amount<=0:
+        raise ValueError("budget amount must be finite and positive")
     value=copy.deepcopy(state); budget=value.setdefault("budgets",{}).get(kind)
     if not isinstance(budget,dict): raise ValueError("unknown lifecycle budget")
     proposed=budget.get("used",0)+amount
@@ -17,5 +20,9 @@ def consume_budget(state:dict[str,Any],kind:str,amount:int|float)->dict[str,Any]
 def plan_review(state:dict[str,Any],record:dict[str,Any])->dict[str,Any]:
     required=state.get("review",{}).get("required_level","L0_NONE")
     budget=state.get("budgets",{}).get("provider_calls",{"limit":0,"used":0})
+    if not isinstance(budget,dict): raise ValueError("invalid provider_calls budget")
     remaining=max(0,int(budget.get("limit",0)-budget.get("used",0)))
-    return {"required_level":required,"achieved_level":achieved_level(record.get("workers",[])),"next_cells":next_review_cells(record,required,{"provider_calls":remaining})}
+    context=state.get("review",{}).get("evidence_context")
+    reusable=context is None or (isinstance(context,dict) and evidence_applicable(record,**context))
+    effective=record if reusable else {"workers":[],"blocking_findings":[]}
+    return {"required_level":required,"achieved_level":achieved_level(effective.get("workers",[])),"evidence_reused":reusable,"next_cells":next_review_cells(effective,required,{"provider_calls":remaining})}
