@@ -2,6 +2,15 @@
 
 This document records the evolution rationale and evidence chain for work that may span multiple conversations. Git commits and tags remain the authoritative source history.
 
+## 2026-08-10 — CloudBox 6.1.0 publication verified
+
+PR `#8` merged the reviewed 6.1 candidate into `main` as `4da337f`.
+Annotated tag `v6.1.0` peels to that merge commit, the GitHub Release is
+published as non-draft/non-prerelease, and both main-push and tag-push GitHub
+Actions validation passed. The exact identifiers, evidence limitations, and
+rollback baseline are recorded in
+`docs/releases/6.1.0-post-release-record.md`.
+
 ## 2026-08-10 — CloudBox 6.1 Git-first implementation candidate
 
 The approved post-6 design is implemented as two bounded workstreams: a shared
