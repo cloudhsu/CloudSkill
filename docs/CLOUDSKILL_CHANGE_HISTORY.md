@@ -2,6 +2,27 @@
 
 This document records the evolution rationale and evidence chain for work that may span multiple conversations. Git commits and tags remain the authoritative source history.
 
+## 2026-08-10 — CloudBox 6.1 Git-first implementation candidate
+
+The approved post-6 design is implemented as two bounded workstreams: a shared
+architecture decision-elicitation reference with RED behavior contracts, and a
+versioned manual/Git-first private candidate path. Bundle metadata now exposes
+the exporting CloudBox/host/agent/project alias and collision-resistant time
+identity. Unknown legacy bundles are retained as unsupported until explicit
+deletion. Git discovery records no URL or credential, is idempotent for an
+unchanged commit, and reports zero model calls. Release-significant behavior
+execution and publication remain gated and are not implied by deterministic
+fixtures.
+
+Independent review then exposed and corrected five release blockers across
+three rounds: ephemeral Actions Exchange state, undeclared bundle members,
+label schema drift, private remote logging, interrupted-checkpoint duplication,
+missing cross-Skill Runtime Eval reference loading, and stale-outbox packaging.
+Claude review was attempted but blocked by provider quota; that attempt is not
+represented as behavior evidence. Version surfaces now target 6.1.0 and the
+full deterministic suite passes pending final GPT recheck and remote release
+gates.
+
 ## 2026-08-10 — CloudBox 6.0.0 publication verified
 
 PR `#5` merged reviewed candidate `28aa7dc` into `main` as `6dcecff` after

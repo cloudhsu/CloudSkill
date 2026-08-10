@@ -39,6 +39,7 @@ from capture_eval_candidate import (  # noqa: E402
     scan_sensitive,
     validate_candidate,
 )
+from eval_bundle_contract import validate_bundle_manifest  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -118,18 +119,35 @@ def write_candidate(inbox: Path, queue: str, candidate: dict[str, Any], dry_run:
 
 
 def import_zip(zip_path: Path, inbox: Path, terms: list[str], seen_keys: set[str], dry_run: bool) -> dict[str, int]:
-    counts = {"candidates": 0, "manual_review": 0, "rejected": 0, "duplicate": 0, "skipped": 0}
+    counts = {"candidates": 0, "manual_review": 0, "rejected": 0, "duplicate": 0, "skipped": 0, "unsupported": 0}
     with tempfile.TemporaryDirectory(prefix="cloudskill-import-") as tmp_name:
         tmp = Path(tmp_name)
         try:
             with zipfile.ZipFile(zip_path) as archive:
+                names = archive.namelist()
+                if "manifest.json" not in names:
+                    counts["unsupported"] = 1
+                    return counts
+                if len(names) != len(set(names)) or any(Path(name).is_absolute() or ".." in Path(name).parts for name in names):
+                    raise ValueError("unsafe or duplicate archive member")
+                manifest = json.loads(archive.read("manifest.json"))
+                if not isinstance(manifest, dict) or validate_bundle_manifest(manifest):
+                    counts["unsupported"] = 1
+                    return counts
+                if set(names) != {"manifest.json", *manifest["payload_hashes"].keys()}:
+                    raise ValueError("archive contains undeclared or missing payload members")
+                for name, digest in manifest["payload_hashes"].items():
+                    if name not in names or hashlib.sha256(archive.read(name)).hexdigest() != digest:
+                        raise ValueError("payload hash mismatch")
                 archive.extractall(tmp)
-        except zipfile.BadZipFile:
+        except (zipfile.BadZipFile, ValueError, json.JSONDecodeError):
             print(f"ERROR: {zip_path.name}: not a valid zip archive; leaving in imports/ for manual review")
             counts["skipped"] += 1
             return counts
 
         for candidate_path in sorted(tmp.rglob("*.json")):
+            if candidate_path.name == "manifest.json":
+                continue
             try:
                 candidate = json.loads(candidate_path.read_text(encoding="utf-8"))
             except (OSError, json.JSONDecodeError):
@@ -182,8 +200,9 @@ def main() -> int:
     inbox, terms = resolve_inbox(args)
     imports_dir = inbox / "imports"
     processed_dir = imports_dir / "processed"
+    unsupported_dir = imports_dir / "unsupported"
     if not args.dry_run:
-        for folder in ("candidates", "manual-review", "rejected", "imports", "imports/processed"):
+        for folder in ("candidates", "manual-review", "rejected", "imports", "imports/processed", "imports/unsupported"):
             (inbox / folder).mkdir(parents=True, exist_ok=True)
 
     zips = sorted(p for p in imports_dir.glob("*.zip") if p.is_file()) if imports_dir.is_dir() else []
@@ -197,23 +216,29 @@ def main() -> int:
         )
 
     seen_keys = existing_content_keys(inbox)
-    totals = {"candidates": 0, "manual_review": 0, "rejected": 0, "duplicate": 0, "skipped": 0}
+    totals = {"candidates": 0, "manual_review": 0, "rejected": 0, "duplicate": 0, "skipped": 0, "unsupported": 0}
     for zip_path in zips:
         counts = import_zip(zip_path, inbox, terms, seen_keys, args.dry_run)
         for key, value in counts.items():
             totals[key] += value
         print(
             f"{zip_path.name}: candidates={counts['candidates']} manual_review={counts['manual_review']} "
-            f"rejected={counts['rejected']} duplicate={counts['duplicate']} skipped={counts['skipped']}"
+            f"rejected={counts['rejected']} duplicate={counts['duplicate']} skipped={counts['skipped']} unsupported={counts['unsupported']}"
         )
-        if not args.dry_run and not counts["skipped"]:
+        if not args.dry_run and counts["unsupported"]:
+            unsupported_dir.mkdir(parents=True, exist_ok=True)
+            target = unsupported_dir / zip_path.name
+            shutil.move(str(zip_path), str(target))
+            sidecar = target.with_suffix(target.suffix + ".status.json")
+            sidecar.write_text(json.dumps({"bundle_id": hashlib.sha256(target.read_bytes()).hexdigest()[:16], "status": "UNSUPPORTED", "archive": target.name}, indent=2) + "\n", encoding="utf-8")
+        elif not args.dry_run and not counts["skipped"]:
             processed_dir.mkdir(parents=True, exist_ok=True)
             shutil.move(str(zip_path), str(processed_dir / zip_path.name))
 
     print(
         f"TOTAL: {len(zips)} archive(s); candidates={totals['candidates']} "
         f"manual_review={totals['manual_review']} rejected={totals['rejected']} "
-        f"duplicate={totals['duplicate']} skipped={totals['skipped']}"
+        f"duplicate={totals['duplicate']} skipped={totals['skipped']} unsupported={totals['unsupported']}"
     )
     if args.dry_run:
         print("DRY RUN: no files were written or moved.")

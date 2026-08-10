@@ -5,6 +5,10 @@ description: Use when a 2D, game, or graphics engine spans director/scene lifecy
 
 # Cross-platform Engine Architecture
 
+When a missing material architecture decision would change the design, follow
+`../architecture-review/references/architecture-decision-elicitation.md`; this
+Skill remains the owning route for engine design.
+
 Read:
 
 - `references/engine-core.md`

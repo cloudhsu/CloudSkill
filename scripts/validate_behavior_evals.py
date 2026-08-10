@@ -8,6 +8,7 @@ CASES = ROOT / 'evals' / 'behavior' / 'cases'
 errors = []
 warnings = []
 ids = set()
+items_by_id = {}
 valid_types = {'recognition','application','counterexample','discipline','reference'}
 skill_names = {p.parent.name for p in SKILLS.glob('*/SKILL.md')}
 coverage = {name: set() for name in skill_names}
@@ -40,6 +41,7 @@ else:
             if cid in ids:
                 errors.append(f'duplicate behavior case ID: {cid}')
             ids.add(cid)
+            items_by_id[cid] = item
             skill = item['skill']
             typ = item['type']
             if skill != file_skill:
@@ -68,6 +70,36 @@ for skill in sorted(skill_names):
     missing = {'recognition','application','counterexample'} - coverage.get(skill, set())
     if missing:
         errors.append(f'{skill}: missing behavior case types {sorted(missing)}')
+
+for cid in {'AR-BEH-004', 'AR-BEH-005', 'AR-BEH-006', 'ENG-BEH-004'}:
+    item = items_by_id.get(cid)
+    if not item:
+        errors.append(f'missing architecture elicitation behavior contract: {cid}')
+        continue
+    joined = ' '.join(item['required_behaviors'] + item['forbidden_behaviors']).lower()
+    if cid in {'AR-BEH-004', 'ENG-BEH-004'}:
+        for phrase in ('exactly one', 'mutually exclusive', 'recommended'):
+            if phrase not in joined:
+                errors.append(f'{cid}: elicitation contract missing {phrase!r}')
+    elif 'without' not in joined and 'directly' not in joined:
+        errors.append(f'{cid}: no-question control is not explicit')
+
+elicitation_reference = SKILLS / 'architecture-review' / 'references' / 'architecture-decision-elicitation.md'
+if not elicitation_reference.is_file():
+    errors.append('missing authoritative architecture decision elicitation reference')
+else:
+    elicitation_text = elicitation_reference.read_text(encoding='utf-8').lower()
+    for phrase in ('exactly one', 'mutually exclusive', 'recommended option first', 'do not ask'):
+        if phrase not in elicitation_text:
+            errors.append(f'architecture elicitation reference missing rule: {phrase}')
+    for consumer in (
+        'architecture-review', 'application-client-server-architecture',
+        'cross-platform-engine-architecture', 'cross-platform-native-architecture',
+        'equipment-control-architecture', 'framework-design',
+    ):
+        consumer_text = (SKILLS / consumer / 'SKILL.md').read_text(encoding='utf-8')
+        if 'architecture-decision-elicitation.md' not in consumer_text:
+            errors.append(f'{consumer}: missing architecture elicitation reference link')
 
 print(f'Validated {case_count} behavior case contracts for {len(skill_names)} skills')
 print('NOTE: case validation is not a model behavior execution.')

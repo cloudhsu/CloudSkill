@@ -603,9 +603,10 @@ def _skill_entry_map(manifest: dict[str, Any]) -> dict[str, dict[str, Any]]:
 def discover_declared_references(skill_path: Path, skill_text: str) -> list[Path]:
     references: list[Path] = []
     seen: set[Path] = set()
-    for match in re.finditer(r"(?:`|\$)?(references/[A-Za-z0-9_.\-/]+\.md)(?:`)?", skill_text):
+    skills_root = (ROOT / ".agents" / "skills").resolve()
+    for match in re.finditer(r"`((?:\.\./)*[A-Za-z0-9_.\-/]+\.md)`", skill_text):
         candidate = (skill_path.parent / match.group(1)).resolve()
-        if candidate in seen or not candidate.is_file():
+        if skills_root not in candidate.parents or candidate in seen or not candidate.is_file():
             continue
         seen.add(candidate)
         references.append(candidate)
@@ -942,4 +943,3 @@ def grade_decision(
         "errors": errors,
         "contract_errors": shape_errors,
     }
-

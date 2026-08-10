@@ -2,7 +2,7 @@
 
 <p align="center"><img src="assets/cloudbox-logo.png" width="160" alt="CloudBox logo"></p>
 
-**Current version: 6.0.0**
+**Current version: 6.1.0**
 
 CloudBox is the user-facing plugin brand for the `CloudSkill` repository: a portable set of software/system architecture skills and operating guidance for **OpenAI Codex**, **ChatGPT**, and **Claude Code**.
 
@@ -16,6 +16,12 @@ CloudBox supports Codex/ChatGPT and Claude Code plugins, plus the existing stand
 ## Interaction-derived Eval capture
 
 A local CloudSkill clone can be registered during installation. The installer stores only local paths and safe defaults; it does not store credentials. After configuration, the phrases `整理成正向案例` and `整理成負向案例` create sanitized candidates under the private Eval Inbox. Candidates do not modify formal Evals, skills, commits, or remote branches until a separate review/import task is explicitly requested.
+
+CloudBox 6.1 also provides versioned manual bundles and token-free Git source
+discovery. Use `從專案提煉優化案例` for an initial bounded pass and
+`同步優化來源` for incremental discovery. Actual URLs, credentials,
+candidates, and provenance remain in ignored/private storage; see
+[CloudBox evolution sources](docs/AUTOMATIC_EVOLUTION_SOURCES.md).
 
 ## Skills
 

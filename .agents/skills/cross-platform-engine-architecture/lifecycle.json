@@ -19,11 +19,13 @@
   "behavior_case_ids": [
     "ENG-BEH-001",
     "ENG-BEH-002",
-    "ENG-BEH-003"
+    "ENG-BEH-003",
+    "ENG-BEH-004"
   ],
   "behavior_case_types": [
     "application",
     "counterexample",
+    "discipline",
     "recognition"
   ],
   "next_review_triggers": [

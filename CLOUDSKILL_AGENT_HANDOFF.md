@@ -15,6 +15,23 @@ This is the operational entry point for a new conversation or coding agent that 
 
 ## Current repository state
 
+### CloudBox 6.1 Git-first implementation candidate (2026-08-10)
+
+- Approved design and implementation plan are committed on
+  `feat/cloudbox-6.1-git-first-evolution`.
+- Shared architecture elicitation, versioned bundle/manual exchange, and a
+  portable token-free Git source sync vertical slice are implemented with
+  deterministic fixtures. Three independent GPT review rounds drove fixes for
+  Exchange persistence, archive integrity, label normalization, redaction,
+  partial-write recovery, cross-Skill Runtime Eval context, and stale outbox
+  packaging. Claude review was attempted but provider-blocked by session quota.
+- Version surfaces are synchronized to 6.1.0 and the complete deterministic
+  suite passes locally. GPT-5.4 exact-tip review of `b161dad` returned PASS
+  without High/Medium findings. PR/CI, merge, tag, and Release remain the
+  continuation path; do not claim provider-family diversity.
+- Operator and compatibility documentation preserves private URL/credential
+  boundaries and unsupported legacy-bundle behavior.
+
 ### CloudBox 6.0.0 published and remotely verified (2026-08-10)
 
 - PR `#5` merged reviewed head `28aa7dc` into `main` as `6dcecff` after both

@@ -63,6 +63,25 @@
         "agent over-applies engine architecture"
       ],
       "review_notes": "Review semantic relationships, evidence, and omissions; keyword presence alone is insufficient."
+    },
+    {
+      "id": "ENG-BEH-004",
+      "skill": "cross-platform-engine-architecture",
+      "type": "discipline",
+      "prompt": "Design a new portable rendering engine, but the product has not decided whether scenes survive native surface recreation or are rebuilt from durable scene descriptions.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "asks exactly one lifecycle-authority question through the engine architecture route",
+        "offers mutually exclusive choices with a recommended option first and explains recovery consequences"
+      ],
+      "forbidden_behaviors": [
+        "routes every engine design through architecture-review",
+        "assumes scene persistence semantics without asking"
+      ],
+      "required_artifacts": ["one decision question"],
+      "baseline_expected_failure": ["agent invents surface-recreation semantics"],
+      "review_notes": "Domain architecture remains primary while using the shared elicitation protocol."
     }
   ]
 }

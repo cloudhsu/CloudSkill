@@ -1,5 +1,15 @@
 # Changelog
 
+## 6.1.0
+
+### Git-first evolution intake and architecture elicitation
+
+- Added a token-free, private Git source synchronization path with bounded source scopes, secret-reference configuration, durable Exchange state, idempotent partial-write recovery, and zero-model no-change runs.
+- Added versioned Eval export bundles with integrity manifests, normalized project/host/agent filenames, explicit unsupported-bundle handling, and preserved manual import/export operation.
+- Added a shared architecture decision elicitation protocol that asks only material boundary questions, records assumptions, and allows reversible progress when answers are unavailable.
+- Documented the 6.1 operational boundary: background automation may stage private evidence, but Skill modification, formal Eval promotion, PR, merge, and release remain separately authorized and evidence-gated.
+- Added deterministic validators and independent release review for secrecy, archive integrity, recovery, workflow persistence, and the new architecture behavior contracts.
+
 ## 6.0.0
 
 ### Evidence-gated Skill evolution

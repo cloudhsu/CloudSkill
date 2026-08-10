@@ -321,6 +321,19 @@ Gemini CLI 官方文件宣稱原生支援 `.agents/skills/` 這個路徑別名�
 
 ## 11. 驗證
 
+## 10d. 版本化匯出與 Git 優化來源
+
+CloudBox 6.1 的手動匯出包含版本 manifest，檔名為
+`<project>-<host>-<agent>-<UTC時間>-<短ID>.zip`。第一次匯出詢問專案輸出名稱並
+保存於不提交的 `.cloudskill/config.local.json`。舊的未匯入 bundle 不自動轉換或
+刪除；新版 importer 會移到 `imports/unsupported/` 供人工檢查。
+
+`同步優化來源` 使用可攜 CLI 比對 Git commit/content；沒有變更時不呼叫模型。
+實際 URL 與帳密只能由 secret reference 注入。完整操作見
+[docs/AUTOMATIC_EVOLUTION_SOURCES.md](docs/AUTOMATIC_EVOLUTION_SOURCES.md)。
+
+## 11. 驗證
+
 ```bash
 python scripts/run_all_checks.py
 ```
