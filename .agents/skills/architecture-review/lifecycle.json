@@ -17,11 +17,15 @@
   "behavior_case_ids": [
     "AR-BEH-001",
     "AR-BEH-002",
-    "AR-BEH-003"
+    "AR-BEH-003",
+    "AR-BEH-004",
+    "AR-BEH-005",
+    "AR-BEH-006"
   ],
   "behavior_case_types": [
     "application",
     "counterexample",
+    "discipline",
     "recognition"
   ],
   "next_review_triggers": [

@@ -17,6 +17,8 @@ Read these references when relevant:
 
 - `references/architect-context.md`
 - `references/review-checklist.md`
+- `references/architecture-decision-elicitation.md` when a missing material
+  decision can change the review conclusion.
 
 ## Workflow
 

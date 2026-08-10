@@ -5,6 +5,9 @@ description: Use when an application crosses client/server, API, persistence, id
 
 # Application and Client/Server Architecture
 
+When a missing material architecture decision would change the design, follow
+`../architecture-review/references/architecture-decision-elicitation.md`.
+
 Read:
 
 - `references/full-stack-boundaries.md`

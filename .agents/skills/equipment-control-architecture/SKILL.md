@@ -5,6 +5,9 @@ description: Use when equipment software coordinates material flow, pump/vent or
 
 # Equipment Control Architecture
 
+When a missing material architecture decision would change the design, follow
+`../architecture-review/references/architecture-decision-elicitation.md`.
+
 ## Core principle
 
 Separate process intent from device execution without losing physical-state authority, safety, resource ownership, process readiness, or restart recovery. A distributed topology is not complete until normal, partial-failure, and reconstruction behavior are explicit.

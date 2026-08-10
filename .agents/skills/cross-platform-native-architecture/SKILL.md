@@ -5,6 +5,9 @@ description: Use when a native or Qt system spans OS-specific lifecycle, HID/USB
 
 # Cross-platform Native Architecture
 
+When a missing material architecture decision would change the design, follow
+`../architecture-review/references/architecture-decision-elicitation.md`.
+
 Read:
 
 - `references/platform-boundary-principles.md`

@@ -84,6 +84,23 @@ for cid in {'AR-BEH-004', 'AR-BEH-005', 'AR-BEH-006', 'ENG-BEH-004'}:
     elif 'without' not in joined and 'directly' not in joined:
         errors.append(f'{cid}: no-question control is not explicit')
 
+elicitation_reference = SKILLS / 'architecture-review' / 'references' / 'architecture-decision-elicitation.md'
+if not elicitation_reference.is_file():
+    errors.append('missing authoritative architecture decision elicitation reference')
+else:
+    elicitation_text = elicitation_reference.read_text(encoding='utf-8').lower()
+    for phrase in ('exactly one', 'mutually exclusive', 'recommended option first', 'do not ask'):
+        if phrase not in elicitation_text:
+            errors.append(f'architecture elicitation reference missing rule: {phrase}')
+    for consumer in (
+        'architecture-review', 'application-client-server-architecture',
+        'cross-platform-engine-architecture', 'cross-platform-native-architecture',
+        'equipment-control-architecture', 'framework-design',
+    ):
+        consumer_text = (SKILLS / consumer / 'SKILL.md').read_text(encoding='utf-8')
+        if 'architecture-decision-elicitation.md' not in consumer_text:
+            errors.append(f'{consumer}: missing architecture elicitation reference link')
+
 print(f'Validated {case_count} behavior case contracts for {len(skill_names)} skills')
 print('NOTE: case validation is not a model behavior execution.')
 for warning in warnings:

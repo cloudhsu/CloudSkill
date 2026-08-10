@@ -5,6 +5,9 @@ description: Use when reusable capability must be separated from product or doma
 
 # Framework Design
 
+When a missing material architecture decision would change the design, follow
+`../architecture-review/references/architecture-decision-elicitation.md`.
+
 Design a framework only when there is a demonstrated reuse, variation, replacement, lifecycle, or platform boundary.
 
 Read `references/framework-principles.md` before making recommendations.
