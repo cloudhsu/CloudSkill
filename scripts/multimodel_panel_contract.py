@@ -52,6 +52,15 @@ def validate_panel_record(record: Any, schema_path: Path = CONTRACT_PATH) -> lis
         canonical = worker.get("canonical_model")
         raw_hash = worker.get("raw_output_hash")
         cost = worker.get("cost")
+        fallback = worker.get("fallback")
+        fallback_hash = worker.get("fallback_prompt_hash")
+        if fallback is None and fallback_hash is not None:
+            errors.append(f"workers[{index}] no-fallback evidence cannot carry a fallback prompt hash")
+        if fallback is not None and (
+            not isinstance(fallback_hash, str) or len(fallback_hash) != 64
+            or fallback_hash == worker.get("prompt_hash")
+        ):
+            errors.append(f"workers[{index}] fallback requires a distinct prompt hash")
         if cost is not None:
             if not isinstance(cost, dict) or set(cost) - {"kind", "amount", "currency", "estimate_source", "estimate_date"}:
                 errors.append(f"workers[{index}].cost has invalid fields")

@@ -33,6 +33,9 @@ This is the operational entry point for a new conversation or coding agent that 
   blocked evidence, unresolved veto, or ceiling exhaustion.
 - Claude canonical returned identity now comes from the single CLI
   `modelUsage` key; a requested alias cannot self-certify the returned model.
+- Every worker now carries nullable `fallback_prompt_hash` lineage. A used
+  fallback requires a distinct 64-character hash; unused fallback evidence
+  cannot carry one.
 
 ### CloudBox 6.0 Task 8 PAUSED — corrected panel degraded (2026-08-10)
 

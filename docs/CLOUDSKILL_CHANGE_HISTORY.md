@@ -21,7 +21,9 @@ The fallback gate subsequently tightened from zero-or-unknown to verified
 numeric zero only; unknown and boolean token evidence now stop without retry.
 Claude returned-model lineage now uses the CLI's single `modelUsage` identity;
 missing or multi-model identity is unreconciled rather than replaced by the
-requested alias.
+requested alias. The panel schema now makes `fallback_prompt_hash` a required
+nullable field and the semantic validator requires it to be a distinct
+64-character hash whenever fallback is used.
 
 ## 2026-08-10 — Corrected panel degraded; Task 8 paused
 

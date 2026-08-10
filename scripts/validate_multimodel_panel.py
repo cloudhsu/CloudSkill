@@ -34,6 +34,7 @@ def worker(label: str, family: str, role: str, *, status: str = "PASS") -> dict:
         "adapter_version": "fixture-adapter-1", "transport_mode": "fixture",
         "tokens": {"input": 10, "cache": 2, "output": 3, "reasoning": 1},
         "latency_ms": 10, "attempts": 1, "retries": 0, "fallback": None,
+        "fallback_prompt_hash": None,
         "failure_layer": None, "verdict": status, "findings_path": f"workers/{label}-findings.json",
         "cost": {"kind": "provider_reported", "amount": 0.01, "currency": "USD"} if status == "PASS" else None,
     }
@@ -57,6 +58,7 @@ mutations = [
     ({**record, "aggregate_score": 99.0}, "aggregate score"),
     ({**record, "workers": [{**workers[0], "blind_label": workers[0]["worker_id"]}, *workers[1:]]}, "unblinded worker identity"),
     ({**record, "workers": [{**workers[0], "cost": {"amount": 0.01}}, *workers[1:]]}, "unconstrained cost"),
+    ({**record, "workers": [{**workers[0], "fallback": "bounded_plain_output", "attempts": 2, "retries": 1}, *workers[1:]]}, "fallback without separate prompt hash"),
     ({**record, "status": "DEGRADED", "workers": [*workers[:3], {**worker("D", "claude", "frontier", status="BLOCKED"), "cost": {"kind": "usage_only", "amount": 1, "currency": "tokens"}}]}, "blocked worker cost without canonical identity"),
     ({**record, "workers": [*workers[:3], worker("D", "claude", "frontier", status="BLOCKED")]}, "blocked worker"),
 ]
