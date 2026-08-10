@@ -212,6 +212,46 @@ Every consequential action has:
 An external timeout is not proof of failure. A retry is prohibited until the
 process owner checks whether the external action completed late.
 
+## Concurrency, cancellation, and replanning
+
+One durable work item has one state-transition writer at a time. Parallel
+agents may own independent actions, but each action declares its artifact and
+state ownership, dependency edges, merge point, and conflict policy. A lease or
+equivalent fencing value prevents a stale agent from advancing state after a
+new coordinator takes ownership. Worker completion cannot directly publish,
+merge, release, or mark the parent complete unless that authority was granted.
+
+Cancellation and user pivots are first-class transitions. They stop issuance
+of new actions, preserve completed evidence, reconcile already-started external
+effects, and classify unfinished work as cancelled, reusable, or unsafe. A
+side question does not silently replace the parent task; a true pivot records
+which prior objective was superseded.
+
+Recomposition uses hysteresis: one weak signal may open a risk or uncertainty,
+but the process does not oscillate repeatedly between profiles without new
+decision-relevant evidence. Every profile change records its trigger, old and
+new topology, invalidated evidence, and exit condition.
+
+## Budget, retention, and schema evolution
+
+Every long-running work item may declare time, token, provider-call, cost, and
+retry budgets. Budget exhaustion causes a truthful pause or degraded decision;
+it never converts incomplete evidence into PASS. Deterministic no-change and
+reconciliation paths consume no hosted-review budget.
+
+Durable state has an explicit schema version and forward migration path. A new
+runtime must either migrate a copied state atomically, read the old version in
+compatibility mode, or stop with `MIGRATION_REQUIRED`; it must not partially
+interpret unknown state. Checkpoints, evidence, logs, and temporary artifacts
+have retention classes. Garbage collection preserves release, authority,
+incident, audit, and rollback evidence and never deletes the only recovery
+source.
+
+Observability records transition, action, latency, retry, cost, and failure
+category without logging credentials, private URLs, raw prompts/transcripts,
+or sensitive payloads. Clock timestamps aid audit but stable IDs and hashes,
+not wall-clock order alone, determine identity and deduplication.
+
 ## Resume and reconciliation
 
 Resume begins with read-only reconciliation, never blind continuation:
@@ -272,6 +312,21 @@ token/cost record
 Token savings never justify skipped authority, fabricated completion,
 misclassified assurance, or reuse of stale evidence.
 
+## Deployment and operational closure
+
+Release, deployment, and target verification are separate transitions.
+High-impact changes support staged rollout, canary/bounded pilot, health gates,
+automatic or authorized rollback, and stop-the-line criteria. A successful
+deployment command is not operational success; the process closes only after
+the required observation window and evidence are satisfied or explicitly
+deferred with an owner.
+
+Operational incidents and field evidence enter the same classifier as test
+failures and may return work to Explore, Analyze, Architect, Design, Implement,
+or the verification system. Hotfix completion includes merge-forward/backport,
+regression preservation, document/release baseline repair, and a decision on
+whether the default lifecycle or architecture must change.
+
 ## RED and GREEN evidence
 
 Implementation must first preserve RED fixtures for:
@@ -286,6 +341,12 @@ Implementation must first preserve RED fixtures for:
 8. A modified candidate incorrectly reuses its old review verdict.
 9. A paused task is mislabeled blocked or complete.
 10. Resume silently expands previously granted authority.
+11. Two coordinators advance one work item without fencing.
+12. Cancellation loses evidence or repeats a late external side effect.
+13. Profile selection oscillates without new evidence.
+14. An exhausted token/cost budget is reported as PASS.
+15. A newer runtime partially reads an unsupported state schema.
+16. Deployment command success is reported as target-environment verification.
 
 GREEN requires correct classification, transition, evidence invalidation/reuse,
 idempotent recovery, and adjacent regressions for the existing development and
@@ -322,6 +383,8 @@ Included in future implementation:
 - Review Assurance integration;
 - deterministic anti-drift and interruption fixtures;
 - truthful derived handoff and status views.
+- concurrency fencing, cancellation/pivot, budget, retention, schema migration,
+  staged deployment, and operational-closure contracts;
 
 Excluded:
 

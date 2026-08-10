@@ -107,6 +107,21 @@ Token savings may reduce unnecessary execution, context, repetition, or model
 cost. They may not mislabel the achieved assurance level, omit a risk-required
 cell, conceal degraded evidence, or automatically authorize an exception.
 
+## Evidence validity and reviewer drift
+
+Completed review evidence is reusable only while the reviewed source,
+governing contract, review packet, rubric, and relevant risk classification
+remain hash-equivalent. Provider aliases do not prove stable model identity.
+A materially changed canonical model, retired model, changed rubric, newly
+discovered risk, or expired organizational policy triggers reassessment even
+when the source diff is unchanged.
+
+The coordinator records evidence age and validity reason but does not impose a
+universal time expiry. Safety, security, privacy, dependency, and deployment
+reviews may define shorter validity windows than ordinary design review. Stop
+review expansion when findings saturate and the required level is complete;
+additional reviewers are not collected merely to increase a count.
+
 ## Degradation and exceptional authorization
 
 A release record must persist:
@@ -184,6 +199,7 @@ Included in the future implementation:
 - architecture, development, document-governance, and release scope profiles;
 - migration of future panel and release records;
 - documentation of truthful degraded outcomes.
+- evidence-validity, model-drift, saturation-stop, and review-budget rules;
 
 Excluded:
 
