@@ -15,6 +15,24 @@ This is the operational entry point for a new conversation or coding agent that 
 
 ## Current repository state
 
+### CloudBox 6.0 final Task 8 panel STOP (2026-08-10)
+
+- The newly scoped four-cell panel completed all cells in four of six allowed
+  hosted attempts; no fallback was used. Its immutable local panel is
+  `.local/multimodel-panels/cloudbox-6.0-rc-final-20260810/panel.json`
+  (SHA-256 `05f0dc4895c94494b9971d2730374188e2443648ea8859ccd7be9c2a558d8c8e`).
+- GPT efficient/frontier returned `FAIL`; Claude efficient/frontier returned
+  model judgments but could not supply canonical returned-model identity, so
+  the authoritative record marks both `MANUAL_REQUIRED`. The panel contract
+  therefore also reports two completed-evidence identity errors.
+- Material open findings include Codex requested-model self-certification,
+  unconstrained completed `raw_output_hash`, stale Claude adapter evidence,
+  malformed-action authority recovery, non-repository raw evidence, and a
+  prose-only hosted-call ceiling. These require a new RED/GREEN correction
+  increment, not release adjudication.
+- Task 8 is `STOP`. Task 9, version synchronization, push/PR, merge, tag, and
+  GitHub Release remain NOT RUN.
+
 ### CloudBox 6.0 Task 8 resumed corrections (2026-08-10)
 
 - User explicitly resumed through push and Release, still gated on every

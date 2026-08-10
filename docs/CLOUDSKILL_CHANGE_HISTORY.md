@@ -2,6 +2,25 @@
 
 This document records the evolution rationale and evidence chain for work that may span multiple conversations. Git commits and tags remain the authoritative source history.
 
+## 2026-08-10 — Final Task 8 panel stopped release progression
+
+The newly declared final panel executed all four required cells in four hosted
+attempts, below its six-attempt ceiling and without fallback. GPT efficient and
+frontier each returned `FAIL`. Claude efficient and frontier returned usable
+schema-valid judgments, but the CLI output did not expose a single canonical
+returned-model identity; they are therefore `MANUAL_REQUIRED`, and the panel
+record itself correctly fails completed-evidence identity validation.
+
+The independent findings reproduced material evaluator and lineage gaps,
+including Codex requested-model self-certification, a missing cryptographic
+constraint on completed raw-output hashes, stale live-adapter documentation,
+malformed-action authority recovery, ignored raw evidence that a repository
+reviewer cannot inspect, and a hosted-call ceiling enforced only by the
+temporary coordinator. The evidence gate is `STOP`; Task 9 and all publication
+actions remain prohibited rather than being normalized into a release PASS.
+The local panel SHA-256 is
+`05f0dc4895c94494b9971d2730374188e2443648ea8859ccd7be9c2a558d8c8e`.
+
 ## 2026-08-10 — Task 8 resumed with bounded evaluator corrections
 
 The user resumed the release path. New failing mutations reproduced the open
