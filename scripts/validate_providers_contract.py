@@ -122,6 +122,18 @@ else:
             "evals/runtime/contracts/providers.json"
         )
 
+try:
+    from claude_eval_adapter import canonical_returned_model
+except (ImportError, AttributeError) as exc:
+    errors.append(f"Claude adapter lacks canonical returned-model extraction: {exc}")
+else:
+    if canonical_returned_model({"modelUsage": {"claude-sonnet-4-6": {}}}, "sonnet") != "claude-sonnet-4-6":
+        errors.append("Claude adapter did not use the one canonical modelUsage identity")
+    if canonical_returned_model({"modelUsage": {}}, "sonnet") is not None:
+        errors.append("Claude adapter self-certified a requested alias without returned identity")
+    if canonical_returned_model({"modelUsage": {"model-a": {}, "model-b": {}}}, "sonnet") is not None:
+        errors.append("Claude adapter guessed canonical identity from a multi-model response")
+
 # cloudskill-eval-<provider> smoke wrappers for every hosted-agent provider.
 for provider_id, info in providers.items():
     if not isinstance(info, dict) or info.get("family") != "hosted-agent":

@@ -31,6 +31,8 @@ This is the operational entry point for a new conversation or coding agent that 
 - New hosted ceiling: four required cells, at most two Claude zero-token
   fallbacks, six attempts total. Stop before Task 9 on incomplete/degraded/
   blocked evidence, unresolved veto, or ceiling exhaustion.
+- Claude canonical returned identity now comes from the single CLI
+  `modelUsage` key; a requested alias cannot self-certify the returned model.
 
 ### CloudBox 6.0 Task 8 PAUSED — corrected panel degraded (2026-08-10)
 

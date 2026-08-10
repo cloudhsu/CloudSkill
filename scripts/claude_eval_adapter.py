@@ -102,6 +102,18 @@ def _extract_result_text(stdout: str) -> tuple[str, dict[str, Any]]:
     return result.strip(), payload
 
 
+def canonical_returned_model(payload: dict[str, Any], requested_model: str | None) -> str | None:
+    """Return the single model identity reported by Claude, never the requested alias."""
+    model_usage = payload.get("modelUsage")
+    if not isinstance(model_usage, dict):
+        model_usage = payload.get("model_usage")
+    if isinstance(model_usage, dict):
+        identities = [name for name in model_usage if isinstance(name, str) and name.strip()]
+        if len(identities) == 1:
+            return identities[0]
+    return None
+
+
 def call_claude_cli(
     *,
     model: str | None,
@@ -189,7 +201,7 @@ def call_claude_cli(
         final_text, payload = _extract_result_text(process.stdout)
 
         metadata = {
-            "model_returned": normalized_model or "claude-default",
+            "model_returned": canonical_returned_model(payload, normalized_model or "claude-default"),
             "response_id": payload.get("session_id"),
             "request_id": None,
             "done_reason": "completed",

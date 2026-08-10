@@ -19,6 +19,9 @@ required cells plus at most two zero-token Claude fallbacks, with a hard ceiling
 of six attempts and no permission to enter Task 9 on degraded or vetoed output.
 The fallback gate subsequently tightened from zero-or-unknown to verified
 numeric zero only; unknown and boolean token evidence now stop without retry.
+Claude returned-model lineage now uses the CLI's single `modelUsage` identity;
+missing or multi-model identity is unreconciled rather than replaced by the
+requested alias.
 
 ## 2026-08-10 — Corrected panel degraded; Task 8 paused
 
