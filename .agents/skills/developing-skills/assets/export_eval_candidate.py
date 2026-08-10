@@ -211,10 +211,10 @@ def resolve_project_name(args: argparse.Namespace) -> str:
     return name
 
 
-def package_outbox(outbox: Path, project_name: str, host: str, agent_name: str, cloudbox_version: str) -> Path:
+def package_outbox(outbox: Path, payload: Path, project_name: str, host: str, agent_name: str, cloudbox_version: str) -> Path:
     stamp = datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ')
     bundle_id = uuid.uuid4().hex
-    payloads = sorted(outbox.rglob('*.json'))
+    payloads = [payload]
     payload_hashes = {str(path.relative_to(outbox)): hashlib.sha256(path.read_bytes()).hexdigest() for path in payloads}
     manifest = {
         'bundle_format_version': BUNDLE_FORMAT_VERSION,
@@ -290,7 +290,7 @@ def main() -> int:
         if not args.no_zip:
             project_name = resolve_project_name(args)
             agent_name = safe_component(args.agent_name or ('claude-code' if args.host == 'claude' else 'codex')).replace('_', '-').lower()
-            zip_path = package_outbox(outbox, project_name, args.host, agent_name, str(candidate['cloudskill_version']))
+            zip_path = package_outbox(outbox, output, project_name, args.host, agent_name, str(candidate['cloudskill_version']))
             print(f'Exported archive: {zip_path}')
             print(
                 'Copy this file into <CloudSkillRepo>/.local/eval-inbox/imports/ on your '

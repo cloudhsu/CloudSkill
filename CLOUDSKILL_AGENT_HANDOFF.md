@@ -21,8 +21,13 @@ This is the operational entry point for a new conversation or coding agent that 
   `feat/cloudbox-6.1-git-first-evolution`.
 - Shared architecture elicitation, versioned bundle/manual exchange, and a
   portable token-free Git source sync vertical slice are implemented with
-  deterministic fixtures. Hosted behavior gate, version sync, PR, tag, and
-  Release remain NOT RUN.
+  deterministic fixtures. Three independent GPT review rounds drove fixes for
+  Exchange persistence, archive integrity, label normalization, redaction,
+  partial-write recovery, cross-Skill Runtime Eval context, and stale outbox
+  packaging. Claude review was attempted but provider-blocked by session quota.
+- Version surfaces are synchronized to 6.1.0 and the complete deterministic
+  suite passes locally. Final GPT recheck, PR/CI, merge, tag, and Release remain
+  the continuation path; do not claim provider-family diversity.
 - Operator and compatibility documentation preserves private URL/credential
   boundaries and unsupported legacy-bundle behavior.
 

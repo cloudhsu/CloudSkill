@@ -228,6 +228,9 @@ if export_script_path.is_file():
         draft['prompt_sanitized'] = 'A device accepts a command but the hardware readback has not reached the requested value.'
         draft_path = tmp / 'export-positive.json'
         draft_path.write_text(json.dumps(draft, ensure_ascii=False, indent=2), encoding='utf-8')
+        stale = external_project / '.cloudskill/eval-outbox/manual-review/INT-stale-negative.json'
+        stale.parent.mkdir(parents=True, exist_ok=True)
+        stale.write_text('{}\n', encoding='utf-8')
 
         export_result = run([
             sys.executable, str(export_script_path), '--kind', 'positive',
@@ -248,6 +251,8 @@ if export_script_path.is_file():
                 fail('export bundle is missing format version 2.0')
             if manifest.get('export_project_name') != 'validator-smoke':
                 fail('export bundle did not preserve configured project name')
+            if len(manifest.get('payload_hashes', {})) != 1 or 'INT-stale-negative.json' in manifest.get('payload_hashes', {}):
+                fail('single-candidate export included stale outbox candidates')
 
         if exported_zips:
             (repo_inbox / 'imports').mkdir(parents=True, exist_ok=True)

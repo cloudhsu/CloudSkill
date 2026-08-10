@@ -16,6 +16,7 @@ from runtime_eval_common import (
     assert_router_context,
     build_routing_prompt,
     build_selected_skills_prompt,
+    discover_declared_references,
     grade_decision,
     load_cases,
     load_manifest,
@@ -300,6 +301,12 @@ for cid in sorted(acceptance_ids):
                 errors.append(f"R03 router excerpt omitted required routing evidence: {marker}")
 
 # Prove selected-skills mode loads the actual downstream SKILL.md and does not load the router downstream.
+engine_skill_path = ROOT / ".agents/skills/cross-platform-engine-architecture/SKILL.md"
+engine_references = discover_declared_references(engine_skill_path, engine_skill_path.read_text(encoding="utf-8"))
+shared_elicitation = ROOT / ".agents/skills/architecture-review/references/architecture-decision-elicitation.md"
+if shared_elicitation.resolve() not in engine_references:
+    errors.append("cross-skill architecture elicitation reference was not discovered")
+
 r07 = case_map.get("R07-english-equipment-architecture")
 if r07:
     decision = {
