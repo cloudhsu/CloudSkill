@@ -1,8 +1,28 @@
-# Public Core and private Evolution Pack — approved future direction
+# Public Core and private Evolution Pack — deferred future direction
 
-Status: approved direction for an increment after CloudBox 6.2.0. No repository
-split, remote creation, history rewrite, or private upload is performed by the
-6.2 release.
+Status: direction retained, execution explicitly deferred. Continue improving
+CloudBox as one repository/package. Do not split repositories, create a private
+remote, move Skills, or change packaging until the user decides the product is
+ready for marketing or broader external promotion and explicitly resumes this
+work.
+
+The current public repository is acceptable during the capability-maturation
+period because active marketing is not in scope. This document preserves the
+future design so the split can be evaluated before a later promotion campaign;
+it is not a current roadmap commitment.
+
+## Resume trigger
+
+Reopen this design only when both conditions hold:
+
+1. CloudBox is considered sufficiently complete and stable for deliberate
+   marketing or broader external distribution.
+2. The user explicitly authorizes the public/private packaging work.
+
+At that time, reassess the repository content, licensing, install experience,
+product positioning, support boundary, and which evolution capabilities still
+need to remain private. Do not assume today's proposed ownership map remains
+correct after further evolution.
 
 ## Target products
 
@@ -21,6 +41,8 @@ private paths, endpoints, credentials, candidates, provenance, and
 evolution-only files; hiding an entry behind a flag is not sufficient.
 
 ## Local-first Git and GitHub sequence
+
+The following sequence is dormant until the resume trigger above is met.
 
 1. Define the file/Skill/contract ownership map and characterize current
    install, Eval, release, and manual import behavior.
