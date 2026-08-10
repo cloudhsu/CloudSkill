@@ -42,6 +42,10 @@ This is the operational entry point for a new conversation or coding agent that 
   model IDs, at most six durable-budget attempts, and no other model calls.
   Task 9 remains gated on four independent PASS verdicts without veto/major
   findings or contract errors.
+- Confirmation result is three PASS cells plus one GPT-efficient lineage FAIL.
+  `docs/releases/6.0.0-candidate-lineage.json` proves `57f26f9` is the direct
+  evidence-only child of `e352e08`. Only the affected GPT-efficient cell may be
+  re-run, once; the other three PASS artifacts remain frozen.
 - The recheck used four strict attempts, no fallback, and produced GPT
   efficient FAIL, GPT frontier PASS, Claude efficient/frontier MANUAL_REQUIRED.
   Its raw evidence is formalized at

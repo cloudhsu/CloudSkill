@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "artifact_id": "cloudbox-6.0-candidate-lineage",
+  "source_candidate": {
+    "commit": "e352e08e3c4c5ed1d84022209fc34e4a80a9a8e9",
+    "tree": "96de9e5093386686dde9cbd0d38e102014ad19d3"
+  },
+  "scope_declaration": {
+    "commit": "57f26f913f9cb598a498ecc14346b9743739104a",
+    "tree": "3bb5d0869f32972d9bdc9ceae98bd54f38120697",
+    "parent": "e352e08e3c4c5ed1d84022209fc34e4a80a9a8e9"
+  },
+  "relationship": {
+    "kind": "direct evidence-only child",
+    "source_changed_by_scope_commit": false,
+    "verified_command": "git merge-base --is-ancestor e352e08e3c4c5ed1d84022209fc34e4a80a9a8e9 57f26f913f9cb598a498ecc14346b9743739104a",
+    "verified_exit_code": 0
+  },
+  "interpretation": "The scope declaration is the direct child of the source candidate. It adds only release-evidence documentation and does not redefine the evaluated source tree. This separate manifest avoids requiring a Git commit to contain its own not-yet-computable hash."
+}

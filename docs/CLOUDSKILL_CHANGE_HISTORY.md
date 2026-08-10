@@ -50,6 +50,15 @@ veto or major finding is required for PASS; minor observations remain visible
 but do not become MANUAL_REQUIRED merely by accumulation. The same four pinned
 model IDs and six-attempt durable ceiling apply.
 
+The confirmation returned GPT frontier and both Claude cells PASS. GPT
+efficient alone vetoed because the supplied documents did not name the exact
+`57f26f9` scope continuation for source `e352e08`. Git proves that scope commit
+is the direct child of the source candidate and changes only evidence
+documentation. A separate lineage manifest now records both commits, trees,
+the parent relation, and successful ancestry command without asking a commit to
+self-reference its own future hash. Only the affected cell receives one
+bounded replacement attempt; the three PASS cells remain immutable.
+
 ## 2026-08-10 — Final Task 8 panel stopped release progression
 
 The newly declared final panel executed all four required cells in four hosted
