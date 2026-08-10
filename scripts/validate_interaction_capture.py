@@ -232,15 +232,22 @@ if export_script_path.is_file():
         export_result = run([
             sys.executable, str(export_script_path), '--kind', 'positive',
             '--input', str(draft_path), '--outbox', str(external_project / '.cloudskill/eval-outbox'),
-            '--label', 'validator-smoke',
+            '--project-name', 'validator-smoke', '--non-interactive',
         ], cwd=external_project)
-        exported_zips = list(external_project.glob('CloudSkill-eval-export-*.zip'))
+        exported_zips = list(external_project.glob('validator-smoke-codex-codex-*.zip'))
         if len(exported_zips) != 1:
             fail('export_eval_candidate.py did not produce exactly one zip archive')
         elif not zipfile.is_zipfile(exported_zips[0]):
             fail('export_eval_candidate.py produced an invalid zip archive')
         if 'MANUAL_REQUIRED' not in export_result.stdout:
             fail('export without a reachable sensitive-terms file did not conservatively route to manual-review')
+        if exported_zips:
+            with zipfile.ZipFile(exported_zips[0]) as archive:
+                manifest = json.loads(archive.read('manifest.json'))
+            if manifest.get('bundle_format_version') != '2.0':
+                fail('export bundle is missing format version 2.0')
+            if manifest.get('export_project_name') != 'validator-smoke':
+                fail('export bundle did not preserve configured project name')
 
         if exported_zips:
             (repo_inbox / 'imports').mkdir(parents=True, exist_ok=True)

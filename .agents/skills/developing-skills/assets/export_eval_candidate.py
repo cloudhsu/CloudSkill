@@ -33,6 +33,7 @@ import hashlib
 import json
 import re
 import sys
+import uuid
 import zipfile
 from datetime import datetime, timezone
 from pathlib import Path
@@ -55,6 +56,8 @@ SENSITIVE_PATTERNS = {
 }
 
 DEFAULT_OUTBOX = str(Path('.cloudskill') / 'eval-outbox')
+BUNDLE_FORMAT_VERSION = '2.0'
+EXPORTER_VERSION = '2.0'
 
 
 def parse_args() -> argparse.Namespace:
@@ -72,7 +75,11 @@ def parse_args() -> argparse.Namespace:
         '--sensitive-terms',
         help='Optional local private-terms file (one term per line) if one happens to be reachable on this machine.',
     )
-    parser.add_argument('--label', help='Short label for the zip filename. Default: current directory name.')
+    parser.add_argument('--project-name', help='Private export project name; stored in project-local ignored config.')
+    parser.add_argument('--host', choices=('codex', 'claude'), default='codex')
+    parser.add_argument('--agent-name', help='Agent filename label. Defaults to host or claude-code.')
+    parser.add_argument('--project-path', default='.', help='Project containing .cloudskill/config.local.json.')
+    parser.add_argument('--non-interactive', action='store_true')
     parser.add_argument('--no-zip', action='store_true', help='Write the candidate JSON only; skip packaging a zip.')
     parser.add_argument('--dry-run', action='store_true')
     return parser.parse_args()
@@ -175,12 +182,56 @@ def scan_sensitive(candidate: dict[str, Any], terms: list[str]) -> list[str]:
     return sorted(set(findings))
 
 
-def package_outbox(outbox: Path, label: str | None) -> Path:
-    safe_label = ''.join(ch if ch.isalnum() or ch in '-_' else '-' for ch in (label or Path.cwd().name or 'cloudskill-export'))
-    stamp = datetime.now(timezone.utc).strftime('%Y%m%d-%H%M%S')
-    zip_path = Path.cwd() / f'CloudSkill-eval-export-{safe_label}-{stamp}.zip'
+def safe_component(value: str) -> str:
+    result = re.sub(r'[^A-Za-z0-9_-]+', '-', value.strip()).strip('-_')
+    if not result:
+        raise ValueError('export project/agent name is empty or unsafe')
+    return result
+
+
+def resolve_project_name(args: argparse.Namespace) -> str:
+    config_path = Path(args.project_path).expanduser().resolve() / '.cloudskill' / 'config.local.json'
+    config: dict[str, Any] = {}
+    if config_path.is_file():
+        value = json.loads(config_path.read_text(encoding='utf-8'))
+        if isinstance(value, dict):
+            config = value
+    name = args.project_name or config.get('export_project_name')
+    if not name:
+        if args.non_interactive or not sys.stdin.isatty():
+            raise ValueError('export_project_name is missing; run interactively with --project-name NAME once')
+        name = input('Export project name: ').strip()
+    name = safe_component(str(name))
+    if config.get('export_project_name') != name:
+        config['export_project_name'] = name
+        config_path.parent.mkdir(parents=True, exist_ok=True)
+        tmp = config_path.with_suffix('.json.tmp')
+        tmp.write_text(json.dumps(config, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+        tmp.replace(config_path)
+    return name
+
+
+def package_outbox(outbox: Path, project_name: str, host: str, agent_name: str, cloudbox_version: str) -> Path:
+    stamp = datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ')
+    bundle_id = uuid.uuid4().hex
+    payloads = sorted(outbox.rglob('*.json'))
+    payload_hashes = {str(path.relative_to(outbox)): hashlib.sha256(path.read_bytes()).hexdigest() for path in payloads}
+    manifest = {
+        'bundle_format_version': BUNDLE_FORMAT_VERSION,
+        'cloudbox_version': cloudbox_version,
+        'exporter_version': EXPORTER_VERSION,
+        'candidate_schema_version': '1.0',
+        'host': safe_component(host).lower(),
+        'agent_name': safe_component(agent_name).lower(),
+        'export_project_name': project_name,
+        'created_at_utc': stamp,
+        'bundle_id': bundle_id,
+        'payload_hashes': payload_hashes,
+    }
+    zip_path = Path.cwd() / f'{project_name}-{host}-{agent_name}-{stamp}-{bundle_id[:8]}.zip'
     with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as archive:
-        for path in sorted(outbox.rglob('*.json')):
+        archive.writestr('manifest.json', json.dumps(manifest, ensure_ascii=False, indent=2) + '\n')
+        for path in payloads:
             archive.write(path, arcname=path.relative_to(outbox))
     return zip_path
 
@@ -237,7 +288,9 @@ def main() -> int:
         print(f'{sanitization["status"]}: {output}')
 
         if not args.no_zip:
-            zip_path = package_outbox(outbox, args.label)
+            project_name = resolve_project_name(args)
+            agent_name = safe_component(args.agent_name or ('claude-code' if args.host == 'claude' else 'codex'))
+            zip_path = package_outbox(outbox, project_name, args.host, agent_name, str(candidate['cloudskill_version']))
             print(f'Exported archive: {zip_path}')
             print(
                 'Copy this file into <CloudSkillRepo>/.local/eval-inbox/imports/ on your '
