@@ -15,6 +15,17 @@ This is the operational entry point for a new conversation or coding agent that 
 
 ## Current repository state
 
+### CloudBox 6.1.0 published and remotely verified (2026-08-10)
+
+- PR `#8` merged reviewed head `bad4438` into `main` as `4da337f`.
+- Annotated tag `v6.1.0` peels to `4da337f`; the GitHub Release is published,
+  non-draft, and non-prerelease.
+- Main-push and tag-push validation both passed. Exact publication evidence is
+  in `docs/releases/6.1.0-post-release-record.md`.
+- NAS polling and autonomous model-backed evolution remain deferred beyond
+  6.1; Claude review was provider-blocked and cross-family agreement is not
+  claimed.
+
 ### CloudBox 6.1 Git-first implementation candidate (2026-08-10)
 
 - Approved design and implementation plan are committed on
