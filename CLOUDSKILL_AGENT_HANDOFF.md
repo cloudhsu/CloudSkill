@@ -15,6 +15,17 @@ This is the operational entry point for a new conversation or coding agent that 
 
 ## Current repository state
 
+### CloudBox 6.1 Git-first implementation candidate (2026-08-10)
+
+- Approved design and implementation plan are committed on
+  `feat/cloudbox-6.1-git-first-evolution`.
+- Shared architecture elicitation, versioned bundle/manual exchange, and a
+  portable token-free Git source sync vertical slice are implemented with
+  deterministic fixtures. Hosted behavior gate, version sync, PR, tag, and
+  Release remain NOT RUN.
+- Operator and compatibility documentation preserves private URL/credential
+  boundaries and unsupported legacy-bundle behavior.
+
 ### CloudBox 6.0.0 published and remotely verified (2026-08-10)
 
 - PR `#5` merged reviewed head `28aa7dc` into `main` as `6dcecff` after both

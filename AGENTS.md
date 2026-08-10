@@ -128,6 +128,14 @@ When the user says `整理成正向案例` or `整理成負向案例`, use `deve
 
 ## Project-history-derived Eval capture
 
+When the user says `同步優化來源`, use `developing-skills` and the versioned
+Git evolution-source workflow. Background synchronization may persist only
+sanitized private candidates, provenance, and checkpoints. It must make zero
+model calls when unchanged and may not modify Skills, commit, push, create a
+PR, or release. Actual source/destination URLs and credentials are private
+secret references and must not appear in repository files, logs, bundles, or
+prompts.
+
 When the user says `從專案提煉優化案例`, use `developing-skills` (see `references/conversation-derived-optimization.md`, "Project-history mining") to mine the current project's commit history, architecture/design documents, and code for reusable engineering pressure — not a live interaction.
 
 - Auto-bound scope by default: rank commits by signal (refactor/fix/redesign-style messages, large diffs, CHANGELOG/release-note/ADR mentions), cap detailed reading to a manageable count, and state what was excluded. Honor an explicit user-specified range, tag boundary, or subdirectory instead when given.
