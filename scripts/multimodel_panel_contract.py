@@ -6,9 +6,15 @@ from pathlib import Path
 from typing import Any
 
 import task_continuity_runner as schema_runtime
+from review_assurance_contract import achieved_level
 
 ROOT = Path(__file__).resolve().parents[1]
 CONTRACT_PATH = ROOT / "evals/runtime/contracts/multimodel-panel.schema.json"
+
+
+def classify_assurance(workers: list[dict[str, Any]]) -> str:
+    """Map panel cells to the authoritative cross-workflow assurance levels."""
+    return achieved_level(workers)
 
 
 def classify_panel(workers: list[dict[str, Any]]) -> str:

@@ -15,6 +15,21 @@ This is the operational entry point for a new conversation or coding agent that 
 
 ## Current repository state
 
+### CloudBox 6.2.0 release candidate approved (2026-08-11)
+
+- Source candidate `a364cea`, tree `ba76a24`, passes the complete deterministic
+  suite and an exact-tip L1 cross-family 2x2 review with GPT-5.4, GPT-5.5,
+  Claude Sonnet, and Claude Opus all PASS and no High/Medium finding.
+- Risk-based Review Assurance and resumable adaptive lifecycle orchestration
+  are implemented with fail-closed lineage, authority, retry, budget, lease,
+  fencing, persistence, and grant-history boundaries.
+- The approved future public Core/private Evolution Pack split is documented;
+  the private pack will be locally installable before it receives a private
+  GitHub remote. No split or private upload is part of 6.2.0.
+- Pre-release evidence is in `docs/releases/6.2.0-pre-release-evidence.md`.
+  Push, PR/CI, merge, tag, Release, and post-release verification remain the
+  continuation path and are not yet claimed by this checkpoint.
+
 ### CloudBox 6.1.0 published and remotely verified (2026-08-10)
 
 - PR `#8` merged reviewed head `bad4438` into `main` as `4da337f`.

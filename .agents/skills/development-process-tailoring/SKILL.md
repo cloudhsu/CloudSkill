@@ -7,6 +7,18 @@ description: Use when delivery is constrained by unstable requirements, hardware
 
 Assume the user is already familiar with waterfall, iterative development, agile development, and XP. Focus on process fit, control points, evidence, product evolution, and trade-offs rather than introductory methodology explanations.
 
+Own the lifecycle plan, execution-plan contract, and risk/evidence-driven
+replanning. Default software development to iterative/incremental delivery and
+Skill evolution to Eval-driven evolution, then compose stage-gated, agile,
+spike, hybrid hardware/software, hotfix, brownfield, or lightweight profiles
+when actual pressure requires them. A generic planning plugin may generate
+detailed steps, but it does not become a second process authority.
+
+Long-running work must persist plan/work revisions, checkpoints, authority,
+action identity, budgets, evidence lineage, and Review Assurance state. Resume
+read-only: reconcile late external completion, reject stale plan/lease writers,
+and continue from the first unproven step without expanding authority.
+
 Read:
 
 - `references/process-selection.md`
@@ -149,6 +161,13 @@ Specify:
 - Installer/deployment feedback.
 - Field/support/incident feedback.
 - Management decision cadence.
+
+Classify feedback at the earliest failed layer: verification-system defects
+return to the test/Eval owner; implementation defects to development; component
+interface/data/algorithm defects to design; authority, persistence, deployment,
+or recovery defects to architecture; acceptance defects to analysis; and wrong
+problem context to exploration. Replan only affected downstream work and
+preserve hash-valid unrelated evidence.
 
 ### 8. Manage release and product-line evolution
 

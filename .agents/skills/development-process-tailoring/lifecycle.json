@@ -24,11 +24,15 @@
     "PROC-BEH-001",
     "PROC-BEH-002",
     "PROC-BEH-003",
-    "PROC-BEH-004"
+    "PROC-BEH-004",
+    "PROC-BEH-005",
+    "PROC-BEH-006",
+    "PROC-BEH-007"
   ],
   "behavior_case_types": [
     "application",
     "counterexample",
+    "discipline",
     "recognition"
   ],
   "next_review_triggers": [

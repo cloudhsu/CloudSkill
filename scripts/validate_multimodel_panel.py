@@ -12,7 +12,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 
 try:
-    from multimodel_panel_contract import aggregate_costs, classify_panel, validate_panel_record
+    from multimodel_panel_contract import aggregate_costs, classify_assurance, classify_panel, validate_panel_record
     from run_multimodel_panel import HostedAttemptBudget, bounded_claude_request, dry_run
 except ModuleNotFoundError as exc:
     print(f"ERROR: cannot load multi-model panel contract: {exc}")
@@ -56,6 +56,14 @@ if errors:
     raise SystemExit("valid panel rejected: " + "; ".join(errors))
 if classify_panel(workers) != "COMPLETE_2X2":
     raise SystemExit("complete 2x2 panel was not classified complete")
+assurance = classify_assurance(workers)
+if assurance != "L1_CROSS_FAMILY_2X2":
+    raise SystemExit(f"complete 2x2 did not map to L1: {assurance}")
+four_gpt = [worker(label, "gpt", role) for label, role in (("A","efficient"),("B","frontier"),("C","efficient-2"),("D","frontier-2"))]
+for index, item in enumerate(four_gpt):
+    item["canonical_model"] = item["provider_returned_model"] = f"gpt-independent-{index}"
+if classify_assurance(four_gpt) != "L2_SINGLE_FAMILY_QUAD":
+    raise SystemExit("four independent same-family models did not map to L2")
 unresolved = [{**workers[0], "status": "FAIL", "verdict": "FAIL"}, *workers[1:]]
 if classify_panel(unresolved) != "COMPLETE_UNRESOLVED":
     raise SystemExit("structurally complete unresolved panel was mislabeled release-complete")

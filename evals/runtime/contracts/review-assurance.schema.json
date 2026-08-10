@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "CloudBox review assurance record",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version","review_id","review_scope","risk_class","required_level","achieved_level","decision","source_hash","contract_hash","packet_hash","rubric_hash","workers","blocking_findings","exception"],
+  "properties": {
+    "schema_version":{"const":1},"review_id":{"type":"string","minLength":1},
+    "review_scope":{"enum":["architecture","code","migration","skill","eval","document_governance","security","release"]},
+    "risk_class":{"enum":["presentation_only","diagnostic","low","medium","high"]},
+    "required_level":{"enum":["L0_NONE","L0_SINGLE_REVIEW","L3_SINGLE_FAMILY_PAIR","L2_SINGLE_FAMILY_QUAD","L1_CROSS_FAMILY_2X2"]},
+    "achieved_level":{"enum":["L0_NONE","L0_SINGLE_REVIEW","L3_SINGLE_FAMILY_PAIR","L2_SINGLE_FAMILY_QUAD","L1_CROSS_FAMILY_2X2"]},
+    "decision":{"enum":["PASS","PASS_WITH_EXCEPTION","BLOCKED"]},
+    "source_hash":{"type":"string","pattern":"^[0-9a-f]{64}$"},"contract_hash":{"type":"string","pattern":"^[0-9a-f]{64}$"},
+    "packet_hash":{"type":"string","pattern":"^[0-9a-f]{64}$"},"rubric_hash":{"type":"string","pattern":"^[0-9a-f]{64}$"},
+    "workers":{"type":"array","items":{"type":"object","additionalProperties":true,"required":["family","canonical_model","status","model_identity_evidence"],"properties":{"family":{"type":"string","minLength":1},"canonical_model":{"type":"string","minLength":1},"status":{"enum":["PASS","FAIL","MANUAL_REQUIRED","BLOCKED","INVALID"]},"model_identity_evidence":{"type":["string","null"]}}}},
+    "blocking_findings":{"type":"array","items":{"type":"object","required":["severity"],"properties":{"severity":{"enum":["Info","Low","Medium","High","Critical"]},"veto":{"type":"boolean"}}}},
+    "exception":{"oneOf":[{"type":"null"},{"type":"object","additionalProperties":false,"required":["authorizer","authorized_at","scope","source_hash","contract_hash","packet_hash","rubric_hash","risk_class","required_level","achieved_level","remaining_risk"],"properties":{"authorizer":{"type":"string","minLength":1},"authorized_at":{"type":"string","minLength":1},"scope":{"type":"string","minLength":1},"source_hash":{"type":"string","pattern":"^[0-9a-f]{64}$"},"contract_hash":{"type":"string","pattern":"^[0-9a-f]{64}$"},"packet_hash":{"type":"string","pattern":"^[0-9a-f]{64}$"},"rubric_hash":{"type":"string","pattern":"^[0-9a-f]{64}$"},"risk_class":{"enum":["presentation_only","diagnostic","low","medium","high"]},"required_level":{"enum":["L0_NONE","L0_SINGLE_REVIEW","L3_SINGLE_FAMILY_PAIR","L2_SINGLE_FAMILY_QUAD","L1_CROSS_FAMILY_2X2"]},"achieved_level":{"enum":["L0_NONE","L0_SINGLE_REVIEW","L3_SINGLE_FAMILY_PAIR","L2_SINGLE_FAMILY_QUAD","L1_CROSS_FAMILY_2X2"]},"remaining_risk":{"type":"string","minLength":1}}}]}
+  }
+}

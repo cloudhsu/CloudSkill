@@ -16,3 +16,4 @@ evals/runtime/results/
 evals/runtime/reports/generated/
 artifacts/runtime-eval*.jsonl
 artifacts/runtime-eval*.json
+.worktrees/

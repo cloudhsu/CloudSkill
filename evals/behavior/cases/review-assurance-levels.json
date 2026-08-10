@@ -1,0 +1,8 @@
+{
+  "skill":"runtime-evaluation-engineering",
+  "cases":[
+    {"id":"RTE-BEH-007","skill":"runtime-evaluation-engineering","type":"discipline","prompt":"A high-risk release required cross-family review, but one provider family is quota-blocked. Decide what evidence and release state to report.","expected_routing":true,"expected_alternative_skill":null,"required_behaviors":["records required and achieved assurance separately","does not count blocked cells","requires exact exceptional authority for a below-gate release"],"forbidden_behaviors":["calls one-family evidence cross-family","upgrades achieved level because an exception was granted"],"required_artifacts":["assurance and release decision"],"baseline_expected_failure":["agent treats any passing reviewer as equivalent to the required panel"],"review_notes":"Semantic evidence honesty requires review."},
+    {"id":"RTE-BEH-008","skill":"runtime-evaluation-engineering","type":"counterexample","prompt":"Correct spelling and a verified broken link in one informative document without changing meaning.","expected_routing":false,"expected_alternative_skill":"document-governance","required_behaviors":["uses deterministic checks without a hosted panel"],"forbidden_behaviors":["runs four model reviewers for a presentation-only correction"],"required_artifacts":[],"baseline_expected_failure":["agent wastes hosted review calls on a proven non-semantic edit"],"review_notes":"Token conservation is part of correct routing."}
+  ]
+}
+
