@@ -10,14 +10,17 @@ def _pairs(pairs):
         value[key]=item
     return value
 
-def load_state(path:Path)->dict[str,Any]:
-    value=json.loads(path.read_text(encoding="utf-8"),object_pairs_hook=_pairs)
-    if value.get("schema_version")!=1: raise ValueError("MIGRATION_REQUIRED")
+def _normalize_legacy_grants(value:dict[str,Any])->dict[str,Any]:
     authority=value.get("authority") or {}
     if "grant" in authority:
         if "grants" in authority: raise ValueError("ambiguous authority grant history")
         authority["grants"]=[authority.pop("grant")]
     return value
+
+def load_state(path:Path)->dict[str,Any]:
+    value=json.loads(path.read_text(encoding="utf-8"),object_pairs_hook=_pairs)
+    if value.get("schema_version")!=1: raise ValueError("MIGRATION_REQUIRED")
+    return _normalize_legacy_grants(value)
 
 def _validate_authority(state:dict[str,Any],current:dict[str,Any]|None)->None:
     authority=state.get("authority") or {}
@@ -71,6 +74,7 @@ def save_state_atomic(path:Path,state:dict[str,Any],expected_revision:int,*,owne
         raise ValueError("stale lifecycle fencing token")
     value=json.loads(json.dumps(state))
     if value.get("schema_version")!=1: raise ValueError("MIGRATION_REQUIRED")
+    value=_normalize_legacy_grants(value)
     _validate_authority(value,current)
     value["revision"]=actual+1
     path.parent.mkdir(parents=True,exist_ok=True)

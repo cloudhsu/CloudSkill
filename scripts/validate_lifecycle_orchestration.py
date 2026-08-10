@@ -40,6 +40,10 @@ with tempfile.TemporaryDirectory() as name:
     migrated["authority"]["approved_actions"]=["inspect"]
     migrated=save_state_atomic(legacy_path,migrated,1)
     assert len(migrated["authority"]["grants"])==1
+    ambiguous={**migrated,"authority":{**migrated["authority"],"grant":migrated["authority"]["grants"][0]}}
+    try: save_state_atomic(legacy_path,ambiguous,2)
+    except ValueError as exc: assert "ambiguous" in str(exc)
+    else: raise AssertionError("ambiguous grant shape was persisted")
     try: save_state_atomic(path,state,0)
     except ValueError: pass
     else: raise AssertionError("stale revision accepted")
