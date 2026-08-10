@@ -15,7 +15,7 @@ def assert_fence(state:dict[str,Any],owner_id:str,fencing_token:int)->None:
 def reconcile_action(state:dict[str,Any],inspector:Callable[[dict[str,Any]],dict[str,Any]])->str:
     action=state.get("current_action")
     if not action:return "SAFE_TO_RESUME"
-    if action.get("plan_revision") not in {None,state.get("plan_revision")}:return "STALE_BASELINE"
+    if action.get("plan_revision") != state.get("plan_revision"):return "STALE_BASELINE"
     result=inspector(action)
     external=result.get("state")
     if external=="completed":return "ALREADY_COMPLETED"
@@ -27,6 +27,6 @@ def cancel_work(state:dict[str,Any],reason:str,inspector:Callable[[dict[str,Any]
     value=copy.deepcopy(state); action=value.get("current_action")
     if action:
         result=inspector(action)
-        value.setdefault("completed_steps",[]).append({"action_id":action.get("action_id"),"reconciled_state":result.get("state")})
+        value.setdefault("completed_steps",[]).append({"action_id":action.get("action_id"),"deduplication_key":action.get("deduplication_key"),"reconciled_state":result.get("state")})
     value["current_action"]=None; value["status"]="paused"; value["pause_reason"]=reason
     return value

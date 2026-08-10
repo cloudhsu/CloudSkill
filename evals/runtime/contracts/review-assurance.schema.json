@@ -7,7 +7,7 @@
   "properties": {
     "schema_version":{"const":1},"review_id":{"type":"string","minLength":1},
     "review_scope":{"enum":["architecture","code","migration","skill","eval","document_governance","security","release"]},
-    "risk_class":{"enum":["diagnostic","low","medium","high"]},
+    "risk_class":{"enum":["presentation_only","diagnostic","low","medium","high"]},
     "required_level":{"enum":["L0_NONE","L0_SINGLE_REVIEW","L3_SINGLE_FAMILY_PAIR","L2_SINGLE_FAMILY_QUAD","L1_CROSS_FAMILY_2X2"]},
     "achieved_level":{"enum":["L0_NONE","L0_SINGLE_REVIEW","L3_SINGLE_FAMILY_PAIR","L2_SINGLE_FAMILY_QUAD","L1_CROSS_FAMILY_2X2"]},
     "decision":{"enum":["PASS","PASS_WITH_EXCEPTION","BLOCKED"]},
@@ -16,4 +16,3 @@
     "workers":{"type":"array"},"blocking_findings":{"type":"array"},"exception":{"type":["object","null"]}
   }
 }
-

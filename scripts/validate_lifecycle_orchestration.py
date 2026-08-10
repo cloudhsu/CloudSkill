@@ -22,7 +22,7 @@ changed=replan(plan,{"kind":"authority_boundary_changed","evidence_hash":"b"*64}
 assert changed["revision"]==2 and changed["tasks_invalidated"]==["T1"] and changed["required_review_level"]=="L1_CROSS_FAMILY_2X2"
 with tempfile.TemporaryDirectory() as name:
     path=Path(name)/"state.json"
-    state={"schema_version":1,"work_id":"W1","revision":0,"plan_id":plan["plan_id"],"plan_revision":1,"status":"interrupted","stage":"verify","profiles":["iterative_incremental"],"authority":{"approved_actions":["inspect"]},"current_action":{"action_id":"A1","deduplication_key":"push:one","state":"uncertain"},"review":{},"budgets":{"provider_calls":0}}
+    state={"schema_version":1,"work_id":"W1","revision":0,"plan_id":plan["plan_id"],"plan_revision":1,"status":"interrupted","stage":"verify","profiles":["iterative_incremental"],"authority":{"approved_actions":["inspect"]},"current_action":{"action_id":"A1","deduplication_key":"push:one","plan_revision":1,"authority_scope":["inspect"],"attempt":1,"max_attempts":2,"state":"uncertain"},"review":{},"budgets":{"provider_calls":0}}
     saved=save_state_atomic(path,state,0)
     assert saved["revision"]==1 and load_state(path)["revision"]==1
     try: save_state_atomic(path,state,0)
@@ -33,12 +33,18 @@ with tempfile.TemporaryDirectory() as name:
     try: assert_fence(newer,"owner-a",leased["lease"]["fencing_token"])
     except ValueError: pass
     else: raise AssertionError("stale owner accepted")
+    save_state_atomic(path,newer,1,owner_id="owner-b",fencing_token=newer["lease"]["fencing_token"])
+    try: save_state_atomic(path,newer,2,owner_id="owner-a",fencing_token=leased["lease"]["fencing_token"])
+    except ValueError: pass
+    else: raise AssertionError("persistence boundary accepted stale fence")
     assert reconcile_action(newer,lambda action:{"state":"completed"})=="ALREADY_COMPLETED"
     assert reconcile_action(newer,lambda action:{"state":"unknown"})=="RECONCILIATION_REQUIRED"
     cancelled=cancel_work(newer,"user pivot",lambda action:{"state":"completed"})
-    assert cancelled["status"]=="paused" and cancelled["current_action"] is None
+    assert cancelled["status"]=="paused" and cancelled["current_action"] is None and cancelled["completed_steps"][-1]["deduplication_key"]=="push:one"
+    missing_revision={**newer,"current_action":{key:value for key,value in newer["current_action"].items() if key!="plan_revision"}}
+    assert reconcile_action(missing_revision,lambda action:{"state":"completed"})=="STALE_BASELINE"
 budgeted=consume_budget({"status":"active","budgets":{"tokens":{"limit":10,"used":8}}},"tokens",3)
-assert budgeted["status"]=="paused" and budgeted["budgets"]["tokens"]["used"]==11
+assert budgeted["status"]=="paused" and budgeted["budgets"]["tokens"]["used"]==8 and budgeted["budget_rejection"]["amount"]==3
 review=plan_review({"review":{"required_level":"L3_SINGLE_FAMILY_PAIR"},"budgets":{"provider_calls":{"limit":2,"used":0}}},{"workers":[],"blocking_findings":[]})
 assert len(review["next_cells"])==2 and review["achieved_level"]=="L0_NONE"
 assert deployment_decision({"status":"deployed"},{"observation_complete":False})=="HOLD"
