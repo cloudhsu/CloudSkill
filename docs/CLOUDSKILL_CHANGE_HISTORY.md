@@ -2,6 +2,27 @@
 
 This document records the evolution rationale and evidence chain for work that may span multiple conversations. Git commits and tags remain the authoritative source history.
 
+## 2026-08-10 — Final-panel findings reproduced and corrected deterministically
+
+The final panel's actionable findings were classified before modification.
+Focused REDs proved that arbitrary 64-character raw hashes passed, malformed
+consequential actions lost their recognizable authority intent, requested
+aliases lacked explicit identity provenance, and the six-attempt ceiling lived
+only in the temporary coordinator. Additional repository review reproduced
+that Task 4 and final-panel raw evidence were available only under ignored
+`.local` paths.
+
+Minimum GREEN changes require lowercase SHA-256 raw hashes; grade recognizable
+outside-authority action names before rejecting malformed arguments; separate
+requested, selected, provider-returned, and canonical model identity with an
+evidence kind; reject default/Sonnet/Opus aliases as explicit selection proof;
+and reserve every hosted attempt in a durable ledger before invoking its
+callback. Sanitized formal bundles now preserve Task 4 raw outputs and all four
+final-panel judgments without provider request/response identifiers or local
+paths. The prior date dispute is no longer described as an independent
+adjudication, and lifecycle compatibility discloses the exact major-boundary
+behavior. No new hosted inference or Task 9 action occurred in this increment.
+
 ## 2026-08-10 — Final Task 8 panel stopped release progression
 
 The newly declared final panel executed all four required cells in four hosted

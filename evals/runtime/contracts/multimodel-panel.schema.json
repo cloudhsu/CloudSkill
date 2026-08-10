@@ -17,7 +17,7 @@
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["worker_id", "blind_label", "family", "role", "provider", "requested_model", "canonical_model", "status", "output_path", "packet_hash", "prompt_hash", "raw_output_hash", "adapter_version", "transport_mode", "tokens", "latency_ms", "attempts", "retries", "fallback", "fallback_prompt_hash", "failure_layer", "verdict", "findings_path", "cost"],
+        "required": ["worker_id", "blind_label", "family", "role", "provider", "requested_model", "selected_model", "provider_returned_model", "model_identity_evidence", "canonical_model", "status", "output_path", "packet_hash", "prompt_hash", "raw_output_hash", "adapter_version", "transport_mode", "tokens", "latency_ms", "attempts", "retries", "fallback", "fallback_prompt_hash", "failure_layer", "verdict", "findings_path", "cost"],
         "properties": {
           "worker_id": {"type": "string", "minLength": 1},
           "blind_label": {"type": "string", "minLength": 1},
@@ -25,12 +25,15 @@
           "role": {"enum": ["efficient", "frontier"]},
           "provider": {"type": "string", "minLength": 1},
           "requested_model": {"type": "string", "minLength": 1},
+          "selected_model": {"type": "string", "minLength": 1},
+          "provider_returned_model": {"type": ["string", "null"]},
+          "model_identity_evidence": {"enum": ["provider_returned", "explicit_selection", null]},
           "canonical_model": {"type": ["string", "null"]},
           "status": {"enum": ["PASS", "FAIL", "BLOCKED", "MANUAL_REQUIRED"]},
           "output_path": {"type": "string", "minLength": 1},
           "packet_hash": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
           "prompt_hash": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
-          "raw_output_hash": {"type": ["string", "null"]},
+          "raw_output_hash": {"type": ["string", "null"], "pattern": "^[0-9a-f]{64}$"},
           "adapter_version": {"type": "string", "minLength": 1},
           "transport_mode": {"type": "string", "minLength": 1},
           "tokens": {

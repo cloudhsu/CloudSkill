@@ -50,6 +50,9 @@ def validate_panel_record(record: Any, schema_path: Path = CONTRACT_PATH) -> lis
             errors.append("blind label must not expose worker identity")
         status = worker.get("status")
         canonical = worker.get("canonical_model")
+        selected = worker.get("selected_model")
+        returned = worker.get("provider_returned_model")
+        identity_evidence = worker.get("model_identity_evidence")
         raw_hash = worker.get("raw_output_hash")
         cost = worker.get("cost")
         fallback = worker.get("fallback")
@@ -80,6 +83,15 @@ def validate_panel_record(record: Any, schema_path: Path = CONTRACT_PATH) -> lis
                 errors.append(f"workers[{index}] completed evidence requires canonical model")
             if not isinstance(raw_hash, str) or len(raw_hash) != 64:
                 errors.append(f"workers[{index}] completed evidence requires raw output hash")
+            if identity_evidence == "provider_returned":
+                if not isinstance(returned, str) or not returned.strip() or canonical != returned:
+                    errors.append(f"workers[{index}] provider-returned identity must equal canonical model")
+            elif identity_evidence == "explicit_selection":
+                aliases = {"default", "codex-default", "claude-default", "sonnet", "opus"}
+                if canonical != selected or worker.get("requested_model") != selected or selected in aliases or returned is not None:
+                    errors.append(f"workers[{index}] explicit selection requires one fully pinned non-alias model")
+            else:
+                errors.append(f"workers[{index}] completed evidence requires model identity provenance")
         if status == "BLOCKED" and (canonical is not None or raw_hash is not None or cost is not None):
             errors.append(f"workers[{index}] blocked evidence cannot fabricate returned identity/output/cost")
     classified = classify_panel(workers)

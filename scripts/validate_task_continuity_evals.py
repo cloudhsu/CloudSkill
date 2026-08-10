@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import copy
+import hashlib
 import json
 import sys
 import tempfile
@@ -239,6 +240,28 @@ for schema_path, required_properties in (
         errors.append(f"{schema_path.name} required fields differ from the contract")
     if set(schema.get("properties", {})) != required_properties:
         errors.append(f"{schema_path.name} properties differ from the contract")
+
+# Release-gating semantic evidence must be present in the reviewable source
+# tree, not represented only by hashes of ignored local artifacts.
+adjudication_path = ROOT / "docs" / "releases" / "6.0.0-task-continuity-adjudication.json"
+try:
+    adjudication = json.loads(adjudication_path.read_text(encoding="utf-8"))
+except (OSError, json.JSONDecodeError) as exc:
+    errors.append(f"cannot read Task 4 adjudication evidence: {exc}")
+else:
+    formal_prefix = "docs/releases/evidence/"
+    for artifact in adjudication.get("source_artifacts", []):
+        relative = artifact.get("path", "") if isinstance(artifact, dict) else ""
+        if not isinstance(relative, str) or not relative.startswith(formal_prefix):
+            errors.append("Task 4 source evidence must use a reviewable docs/releases/evidence path")
+            continue
+        source = ROOT / relative
+        if not source.is_file():
+            errors.append(f"Task 4 source evidence is missing: {relative}")
+            continue
+        actual_hash = hashlib.sha256(source.read_bytes()).hexdigest()
+        if actual_hash != artifact.get("sha256"):
+            errors.append(f"Task 4 source evidence hash mismatch: {relative}")
 
 try:
     result_schema = json.loads(result_schema_path.read_text(encoding="utf-8"))

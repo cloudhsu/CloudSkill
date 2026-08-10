@@ -11,7 +11,7 @@ sys.path.insert(0, str(ROOT / "scripts"))
 
 try:
     from multimodel_panel_contract import aggregate_costs, classify_panel, validate_panel_record
-    from run_multimodel_panel import bounded_claude_request, dry_run
+    from run_multimodel_panel import HostedAttemptBudget, bounded_claude_request, dry_run
 except ModuleNotFoundError as exc:
     print(f"ERROR: cannot load multi-model panel contract: {exc}")
     raise SystemExit(1)
@@ -25,6 +25,9 @@ def worker(label: str, family: str, role: str, *, status: str = "PASS") -> dict:
         "role": role,
         "provider": family,
         "requested_model": role,
+        "selected_model": f"{family}-{role}",
+        "provider_returned_model": f"{family}-{role}" if status == "PASS" else None,
+        "model_identity_evidence": "provider_returned" if status == "PASS" else None,
         "canonical_model": f"{family}-{role}" if status == "PASS" else None,
         "status": status,
         "output_path": f"workers/{label}.json",
@@ -54,6 +57,9 @@ if classify_panel(workers) != "COMPLETE_2X2":
 mutations = [
     ({**record, "workers": [workers[0], {**workers[1], "output_path": workers[0]["output_path"]}, *workers[2:]]}, "duplicate output path"),
     ({**record, "workers": [{**workers[0], "canonical_model": None}, *workers[1:]]}, "canonical model"),
+    ({**record, "workers": [{**workers[0], "provider_returned_model": None}, *workers[1:]]}, "missing provider-returned identity"),
+    ({**record, "workers": [{**workers[0], "requested_model": "default", "selected_model": "default", "provider_returned_model": None, "canonical_model": "default", "model_identity_evidence": "explicit_selection"}, *workers[1:]]}, "alias self-certified as explicit selection"),
+    ({**record, "workers": [{**workers[0], "raw_output_hash": "z" * 64}, *workers[1:]]}, "non-SHA-256 raw output hash"),
     ({**record, "blind_label_map": {"A": "gpt"}}, "blind label map"),
     ({**record, "aggregate_score": 99.0}, "aggregate score"),
     ({**record, "workers": [{**workers[0], "blind_label": workers[0]["worker_id"]}, *workers[1:]]}, "unblinded worker identity"),
@@ -140,5 +146,21 @@ with tempfile.TemporaryDirectory(prefix="cloudbox-panel-test-") as temp:
         pass
     else:
         raise SystemExit("single-writer panel publication allowed overwrite")
+
+with tempfile.TemporaryDirectory(prefix="cloudbox-attempt-budget-") as temp:
+    ledger = Path(temp) / "attempts.json"
+    budget = HostedAttemptBudget(2, ledger)
+    executed: list[str] = []
+    budget.run("worker-a", "strict", lambda: executed.append("a") or "a")
+    budget.run("worker-b", "strict", lambda: executed.append("b") or "b")
+    try:
+        budget.run("worker-c", "strict", lambda: executed.append("c") or "c")
+    except RuntimeError:
+        pass
+    else:
+        raise SystemExit("hosted attempt ceiling allowed an extra callback")
+    attempts = json.loads(ledger.read_text(encoding="utf-8"))
+    if executed != ["a", "b"] or len(attempts) != 2 or any(row.get("state") != "completed" for row in attempts):
+        raise SystemExit("hosted attempt budget did not durably gate callbacks")
 
 print("Validated reproducible multi-model panel contract, degradation, cost separation, and bounded Claude fallback.")

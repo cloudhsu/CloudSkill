@@ -15,6 +15,23 @@ This is the operational entry point for a new conversation or coding agent that 
 
 ## Current repository state
 
+### CloudBox 6.0 final-panel correction increment (2026-08-10)
+
+- Final-panel raw judgments and Task 4 raw provider evidence are now sanitized,
+  reviewable repository artifacts under `docs/releases/evidence/`; validators
+  reject Task 4 release evidence that points only to ignored `.local` files.
+- RED/GREEN fixes preserve recognizable unauthorized intent from malformed
+  actions, require cryptographic raw-output hashes, separate requested/
+  selected/provider-returned model identity with provenance, reject aliases as
+  self-certifying identity, and durably gate every hosted callback before it
+  can exceed the declared attempt ceiling.
+- The prior date objection is recorded as an integrator challenge rather than
+  a silently overturned judge verdict. Compatibility text now discloses that
+  two-feature lifecycle enforcement is active but does not expire the 5.8.0
+  reviews at the 6.0.0 major boundary.
+- No new hosted call is authorized until full deterministic verification and
+  exact candidate/evidence commits are frozen. Task 9 remains NOT RUN.
+
 ### CloudBox 6.0 final Task 8 panel STOP (2026-08-10)
 
 - The newly scoped four-cell panel completed all cells in four of six allowed

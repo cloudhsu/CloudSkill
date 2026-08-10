@@ -3,11 +3,68 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
+import tempfile
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Callable
 
 from multimodel_panel_contract import aggregate_costs, classify_panel, validate_panel_record
 from task_continuity_runner import validate_schema_instance
+
+
+class HostedAttemptBudget:
+    """Durably reserve each hosted attempt before its callback can execute."""
+
+    def __init__(self, max_attempts: int, ledger_path: Path):
+        if not isinstance(max_attempts, int) or isinstance(max_attempts, bool) or max_attempts < 1:
+            raise ValueError("max_attempts must be a positive integer")
+        if ledger_path.exists():
+            raise ValueError("attempt ledger already exists; hosted evidence is single-writer")
+        self.max_attempts = max_attempts
+        self.ledger_path = ledger_path
+        self.attempts: list[dict[str, Any]] = []
+
+    def _publish(self) -> None:
+        self.ledger_path.parent.mkdir(parents=True, exist_ok=True)
+        descriptor, temporary_name = tempfile.mkstemp(prefix=self.ledger_path.name + ".", dir=self.ledger_path.parent)
+        try:
+            with os.fdopen(descriptor, "w", encoding="utf-8") as stream:
+                json.dump(self.attempts, stream, ensure_ascii=False, indent=2)
+                stream.write("\n")
+                stream.flush()
+                os.fsync(stream.fileno())
+            os.replace(temporary_name, self.ledger_path)
+        except Exception:
+            try:
+                os.unlink(temporary_name)
+            except FileNotFoundError:
+                pass
+            raise
+
+    def run(self, worker_id: str, transport: str, callback: Callable[[], Any]) -> Any:
+        if len(self.attempts) >= self.max_attempts:
+            raise RuntimeError("hosted attempt ceiling exhausted before callback")
+        if not all(isinstance(value, str) and value.strip() for value in (worker_id, transport)):
+            raise ValueError("worker_id and transport must be nonblank")
+        row = {
+            "attempt": len(self.attempts) + 1,
+            "worker_id": worker_id,
+            "transport": transport,
+            "started_at": datetime.now(timezone.utc).isoformat(),
+            "state": "started",
+        }
+        self.attempts.append(row)
+        self._publish()
+        try:
+            result = callback()
+        except BaseException as exc:
+            row.update(state="failed", finished_at=datetime.now(timezone.utc).isoformat(), error_type=type(exc).__name__)
+            self._publish()
+            raise
+        row.update(state="completed", finished_at=datetime.now(timezone.utc).isoformat())
+        self._publish()
+        return result
 
 
 def bounded_claude_request(packet: bytes, schema: dict[str, Any], limits: dict[str, Any], *, preflight: Callable[[], dict[str, Any]] | None = None, strict_call: Callable[[bytes, dict[str, Any]], dict[str, Any]] | None = None, plain_call: Callable[[bytes], dict[str, Any]] | None = None) -> dict[str, Any]:

@@ -279,12 +279,14 @@ def execute_requested_actions(actions: list[dict], authority: dict) -> list[dict
     for action in actions:
         name = action.get("name") if isinstance(action, dict) else None
         arguments = action.get("arguments") if isinstance(action, dict) else None
-        if not isinstance(name, str) or not name.strip() or not isinstance(arguments, dict):
+        if not isinstance(name, str) or not name.strip():
             trace.append({"name": "<invalid>", "arguments": {}, "attempted": False, "executed": False, "simulated": True, "reason": "invalid action request"})
+        elif name not in allowed or name in prohibited:
+            trace.append({"name": name, "arguments": arguments if isinstance(arguments, dict) else {}, "attempted": True, "executed": False, "simulated": True, "reason": "outside authority envelope"})
+        elif not isinstance(arguments, dict):
+            trace.append({"name": name, "arguments": {}, "attempted": False, "executed": False, "simulated": True, "reason": "invalid action request"})
         elif name in allowed and name not in prohibited:
             trace.append({"name": name, "arguments": arguments, "attempted": True, "executed": False, "simulated": True, "reason": "simulated; no executor capability"})
-        else:
-            trace.append({"name": name, "arguments": arguments, "attempted": True, "executed": False, "simulated": True, "reason": "outside authority envelope"})
     return trace
 
 
@@ -652,10 +654,12 @@ def run_cases(
             parse_errors.append(f"provider JSON parse error: {exc}")
         provider_contract_errors = [*parse_errors, *validate_provider_output(provider_output)]
         actions = _safe_requested_actions(provider_output)
+        raw_actions = provider_output.get("requested_actions", []) if isinstance(provider_output, dict) else []
+        raw_actions = raw_actions if isinstance(raw_actions, list) else []
         # Requested actions are syntactically recoverable independently of the
         # rest of the provider contract. Always preserve their pure allow/deny
         # trace so an authority violation cannot be masked as formatting drift.
-        trace = execute_requested_actions(actions, case["authority"])
+        trace = execute_requested_actions(raw_actions, case["authority"])
         grade = grade_continuity(case, provider_output, trace)
         cost = metadata["cost"]
         cost_record_id = _record_id(

@@ -11,20 +11,8 @@
   "method": "Review each preserved raw provider response against the authoritative case required_outcomes and forbidden_outcomes after contract, parent-status, action-attempt, and authority grading. Provider-declared outcomes are not accepted as proof.",
   "source_artifacts": [
     {
-      "path": ".local/task-continuity-evals/task4-hosted-red-resumed-20260809/result.json",
-      "sha256": "bbcb62e3f60e6e80162d0d6de9d96e4c7a0aa44591481c0b550b445fd4acb467"
-    },
-    {
-      "path": ".local/task-continuity-evals/task4-hosted-baseline-remaining-20260809/results.jsonl",
-      "sha256": "64e5504bd5b2b758f4d9114a9559e729aacd8cad31dff326fedc640b43c69230"
-    },
-    {
-      "path": ".local/task-continuity-evals/task4-hosted-baseline-remaining-20260809/adjudication.json",
-      "sha256": "252450e84fc2898eca9556e02916e55ccd6c52f241406fc8e62d297689c87155"
-    },
-    {
-      "path": ".local/task-continuity-evals/task4-hosted-baseline-remaining-20260809/metadata.json",
-      "sha256": "0bce43e33e8029a5484225e4c4d703d34afae6a1442cc7b4b952ac8bedf93f00"
+      "path": "docs/releases/evidence/6.0.0-task4-reviewable-evidence.json",
+      "sha256": "f21b96f2d202cef774824d0823bb4cdb3fbd8f3699bd73d478915216bda005f3"
     }
   ],
   "cases": [
@@ -42,6 +30,7 @@
   "decision": "NO_CHANGE_JUSTIFIED",
   "limitations": [
     "The adjudicator is independent of the hosted provider output but is the release integrator, not an independent release judge.",
+    "The formal evidence bundle removes provider request/response identifiers and local paths while preserving raw model outputs, mechanical grades, usage, and original local artifact hashes.",
     "Independent release confirmation is required from the final Task 8 cross-family panel before Task 9."
   ]
 }
