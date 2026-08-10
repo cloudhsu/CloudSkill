@@ -289,7 +289,7 @@ def main() -> int:
 
         if not args.no_zip:
             project_name = resolve_project_name(args)
-            agent_name = safe_component(args.agent_name or ('claude-code' if args.host == 'claude' else 'codex'))
+            agent_name = safe_component(args.agent_name or ('claude-code' if args.host == 'claude' else 'codex')).replace('_', '-').lower()
             zip_path = package_outbox(outbox, project_name, args.host, agent_name, str(candidate['cloudskill_version']))
             print(f'Exported archive: {zip_path}')
             print(

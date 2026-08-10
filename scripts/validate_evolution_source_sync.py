@@ -36,5 +36,7 @@ for marker in ('explicit --approve is required', '"execution": "MANUAL_REQUIRED"
     if marker not in controller: errors.append(f"controller missing authority marker: {marker}")
 if "permissions:\n  contents: read" not in workflow: errors.append("source workflow is not read-only")
 if "OPENAI_API_KEY" in workflow: errors.append("source workflow must not receive a model API key")
+for marker in ('git clone --quiet "$EVOLUTION_EXCHANGE_URL"', 'git -C .local/private-evolution-exchange push', 'secrets.EVOLUTION_SOURCE_ID'):
+    if marker not in workflow: errors.append(f"source workflow does not persist private Exchange state: {marker}")
 for error in errors: print(f"ERROR: {error}")
 raise SystemExit(1 if errors else 0)

@@ -134,6 +134,8 @@ def import_zip(zip_path: Path, inbox: Path, terms: list[str], seen_keys: set[str
                 if not isinstance(manifest, dict) or validate_bundle_manifest(manifest):
                     counts["unsupported"] = 1
                     return counts
+                if set(names) != {"manifest.json", *manifest["payload_hashes"].keys()}:
+                    raise ValueError("archive contains undeclared or missing payload members")
                 for name, digest in manifest["payload_hashes"].items():
                     if name not in names or hashlib.sha256(archive.read(name)).hexdigest() != digest:
                         raise ValueError("payload hash mismatch")
