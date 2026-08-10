@@ -13,6 +13,10 @@ def _pairs(pairs):
 def load_state(path:Path)->dict[str,Any]:
     value=json.loads(path.read_text(encoding="utf-8"),object_pairs_hook=_pairs)
     if value.get("schema_version")!=1: raise ValueError("MIGRATION_REQUIRED")
+    authority=value.get("authority") or {}
+    if "grant" in authority:
+        if "grants" in authority: raise ValueError("ambiguous authority grant history")
+        authority["grants"]=[authority.pop("grant")]
     return value
 
 def _validate_authority(state:dict[str,Any],current:dict[str,Any]|None)->None:

@@ -32,6 +32,14 @@ with tempfile.TemporaryDirectory() as name:
     save_state_atomic(Path(name)/"durable.json",state,0)
     lifecycle_state_store._fsync_directory=original_sync
     assert durable==[Path(name)]
+    legacy_path=Path(name)/"legacy-grant.json"
+    legacy={**saved,"authority":{"approved_actions":["inspect","publish"],"grant":{"authorizer":"user","authorized_at":"2026-08-11T00:00:00Z","source_hash":"a"*64,"plan_revision":1,"added_actions":["publish"]}},"current_action":None}
+    legacy_path.write_text(json.dumps(legacy),encoding="utf-8")
+    migrated=load_state(legacy_path)
+    assert "grant" not in migrated["authority"] and len(migrated["authority"]["grants"])==1
+    migrated["authority"]["approved_actions"]=["inspect"]
+    migrated=save_state_atomic(legacy_path,migrated,1)
+    assert len(migrated["authority"]["grants"])==1
     try: save_state_atomic(path,state,0)
     except ValueError: pass
     else: raise AssertionError("stale revision accepted")
