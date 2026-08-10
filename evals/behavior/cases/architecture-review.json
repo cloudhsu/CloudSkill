@@ -67,6 +67,51 @@
         "agent over-scopes an isolated code issue"
       ],
       "review_notes": "Review semantic relationships, evidence, and omissions; keyword presence alone is insufficient."
+    },
+    {
+      "id": "AR-BEH-004",
+      "skill": "architecture-review",
+      "type": "discipline",
+      "prompt": "Review a distributed controller proposal. The documents do not say which process is authoritative for commands after failover.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "asks exactly one material authority question before making a recommendation",
+        "offers two or three mutually exclusive choices with the recommended choice first and explains the trade-off"
+      ],
+      "forbidden_behaviors": [
+        "silently invents command authority",
+        "asks multiple unrelated questions at once"
+      ],
+      "required_artifacts": ["one decision question"],
+      "baseline_expected_failure": ["agent proceeds with an assumed authority owner"],
+      "review_notes": "The question relationship and one-at-a-time discipline require semantic review."
+    },
+    {
+      "id": "AR-BEH-005",
+      "skill": "architecture-review",
+      "type": "application",
+      "prompt": "Review this architecture using the supplied authority matrix, lifecycle diagram, restart reconciliation contract, deployment topology, and verified failure tests. All decision boundaries are explicit.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": ["reviews the supplied evidence without requesting already-answered decisions"],
+      "forbidden_behaviors": ["asks a preference question merely to follow a questionnaire"],
+      "required_artifacts": ["evidence-grounded findings"],
+      "baseline_expected_failure": ["agent asks unnecessary generic clarification questions"],
+      "review_notes": "Complete evidence is a negative control for over-questioning."
+    },
+    {
+      "id": "AR-BEH-006",
+      "skill": "architecture-review",
+      "type": "counterexample",
+      "prompt": "Explain what authoritative state means in a client/server system.",
+      "expected_routing": false,
+      "expected_alternative_skill": "application-client-server-architecture",
+      "required_behaviors": ["answers the explanatory question directly without starting decision elicitation"],
+      "forbidden_behaviors": ["forces the user to choose an architecture for a conceptual explanation"],
+      "required_artifacts": [],
+      "baseline_expected_failure": ["agent turns an explanation into an unnecessary design questionnaire"],
+      "review_notes": "Prompt language alone must not trigger architecture review or elicitation."
     }
   ]
 }
