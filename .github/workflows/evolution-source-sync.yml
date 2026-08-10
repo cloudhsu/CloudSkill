@@ -1,0 +1,37 @@
+name: CloudBox Evolution Source Sync
+
+on:
+  workflow_dispatch:
+    inputs:
+      source_id:
+        description: Logical source ID from the private registry
+        required: true
+        type: string
+  schedule:
+    - cron: '17 */6 * * *'
+
+permissions:
+  contents: read
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+      - name: Validate source contracts
+        run: python scripts/validate_evolution_source_sync.py
+      - name: Synchronize configured source
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          EVOLUTION_SOURCE_URL: ${{ secrets.EVOLUTION_SOURCE_URL }}
+          EVOLUTION_EXCHANGE_URL: ${{ secrets.EVOLUTION_EXCHANGE_URL }}
+        run: |
+          test -n "$EVOLUTION_SOURCE_URL"
+          test -n "$EVOLUTION_EXCHANGE_URL"
+          python scripts/cloudskill_evolution.py source sync \
+            --registry .cloudskill/evolution-sources.private.json \
+            --exchange .local/private-evolution-exchange \
+            --source-id "${{ inputs.source_id }}"
