@@ -36,6 +36,17 @@ preserved = module.lifecycle_payload(
 if (preserved["stage"], preserved["introduced_version"], preserved["last_reviewed_version"]) != ("experimental", "unreleased", "5.6.0"):
     raise SystemExit("mechanical refresh invented lifecycle evidence")
 
+original_version_path = module.VERSION
+module.VERSION = ROOT / "missing-version-fixture"
+try:
+    missing_version_errors = module.audit(check=False)
+except FileNotFoundError as exc:
+    raise SystemExit(f"missing VERSION crashed lifecycle audit: {exc}") from exc
+finally:
+    module.VERSION = original_version_path
+if not any("VERSION" in error for error in missing_version_errors):
+    raise SystemExit("missing VERSION did not produce an auditable lifecycle error")
+
 errors = module.audit(check=False)
 
 # The standardization owner must declare the lifecycle reference and CLI.

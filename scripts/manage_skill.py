@@ -174,6 +174,11 @@ def audit(check: bool = False) -> list[str]:
     required_types = set(policy.get("required_behavior_types", []))
     errors: list[str] = []
     rows: list[tuple[str, str, int, int, str]] = []
+    current_version: str | None = None
+    if VERSION.is_file():
+        current_version = VERSION.read_text(encoding="utf-8").strip()
+    else:
+        errors.append(f"missing VERSION file: {VERSION}")
 
     for skill in skill_names():
         path = SKILLS / skill / "lifecycle.json"
@@ -189,7 +194,8 @@ def audit(check: bool = False) -> list[str]:
             errors.append(f"{skill}: lifecycle schema_version must be 1")
         if payload.get("skill") != skill:
             errors.append(f"{skill}: lifecycle skill name mismatch")
-        errors.extend(f"{skill}: {error}" for error in lifecycle_semantic_errors(payload, VERSION.read_text(encoding="utf-8").strip()))
+        if current_version is not None:
+            errors.extend(f"{skill}: {error}" for error in lifecycle_semantic_errors(payload, current_version))
         stage = payload.get("stage")
         if stage not in valid_stages:
             errors.append(f"{skill}: invalid lifecycle stage {stage!r}")

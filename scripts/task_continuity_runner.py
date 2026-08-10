@@ -166,6 +166,13 @@ def _validate_task3_schema_instance(value: Any, schema_path: Path) -> list[str]:
     return _task3_schema_errors(value, schema, schema)
 
 
+def validate_schema_instance(value: Any, schema: dict[str, Any]) -> list[str]:
+    """Validate an in-memory JSON value through the shared contract interpreter."""
+    if not isinstance(schema, dict):
+        return ["schema must be an object"]
+    return _task3_schema_errors(value, schema, schema)
+
+
 def validate_provider_output(provider_output: Any) -> list[str]:
     """Validate provider output through its published schema and shared interpreter."""
     return _validate_task3_schema_instance(provider_output, PROVIDER_OUTPUT_SCHEMA_PATH)
@@ -307,6 +314,8 @@ def fake_executor_capability_errors(source: str) -> list[str]:
         if not isinstance(node, tuple(allowed_nodes)):
             errors.append(f"fake executor uses non-allowlisted syntax: {type(node).__name__}")
             continue
+        if isinstance(node, ast.Attribute) and isinstance(node.ctx, ast.Store):
+            errors.append("fake executor cannot mutate object attributes")
         if isinstance(node, ast.Call):
             if isinstance(node.func, ast.Name):
                 if node.func.id not in {"set", "isinstance"}:
@@ -590,21 +599,19 @@ def run_cases(
     stage: str,
     experiment_id: str,
     run_id: str,
-    attempt: int = 1,
-    cost_ledger_path: Path | None = None,
     planned_provider: str | None = None,
     planned_canonical_model: str | None = None,
+    attempt: int = 1,
+    cost_ledger_path: Path | None = None,
 ) -> list[dict]:
     """Evaluate authoritative Task 2 cases with an injected callback and atomic evidence output."""
     if _paths_alias(output_path, cost_ledger_path):
         raise ValueError("result output and cost ledger must be distinct non-aliased paths")
-    if not all(isinstance(value, str) and value.strip() for value in (context, stage, experiment_id, run_id)) or not isinstance(attempt, int) or isinstance(attempt, bool) or attempt < 1:
-        raise ValueError("context, stage, experiment_id, run_id, and positive integer attempt are required")
+    if not all(isinstance(value, str) and value.strip() for value in (context, stage, experiment_id, run_id, planned_provider, planned_canonical_model)) or not isinstance(attempt, int) or isinstance(attempt, bool) or attempt < 1:
+        raise ValueError("context, stage, experiment_id, run_id, planned_provider, planned_canonical_model, and positive integer attempt are required")
     reconciliation_path = _preflight_result_destination(output_path, cost_ledger_path)
     cases = task2.load_cases(cases_path)
     if cost_ledger_path is not None:
-        if not all(isinstance(value, str) and value.strip() for value in (planned_provider, planned_canonical_model)):
-            raise ValueError("planned_provider and planned_canonical_model are required for cost-ledger preflight")
         planned_records = [
             {
                 "record_id": _record_id(experiment_id, run_id, case["id"], planned_provider, planned_canonical_model, stage, attempt),
@@ -624,8 +631,8 @@ def run_cases(
         metadata_errors = _metadata_errors(metadata)
         if metadata_errors:
             raise ValueError("invalid provider metadata: " + "; ".join(metadata_errors))
-        requested_provider = planned_provider or metadata["provider"]
-        requested_model = planned_canonical_model or metadata["canonical_model"]
+        requested_provider = planned_provider
+        requested_model = planned_canonical_model
         identity_diagnostics: list[str] = []
         identity_reconciliation = "MATCH"
         evidence_status = "COMPLETE"

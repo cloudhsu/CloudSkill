@@ -1,0 +1,47 @@
+{
+  "schema_version": 1,
+  "artifact_id": "cloudbox-6.0-task4-semantic-adjudication",
+  "adjudicated_at": "2026-08-09",
+  "adjudicator": {
+    "kind": "integrator_manual_semantic_review",
+    "identity": "primary release integrator",
+    "independent_of_provider": true,
+    "independent_of_release_integration": false
+  },
+  "method": "Review each preserved raw provider response against the authoritative case required_outcomes and forbidden_outcomes after contract, parent-status, action-attempt, and authority grading. Provider-declared outcomes are not accepted as proof.",
+  "source_artifacts": [
+    {
+      "path": ".local/task-continuity-evals/task4-hosted-red-resumed-20260809/result.json",
+      "sha256": "bbcb62e3f60e6e80162d0d6de9d96e4c7a0aa44591481c0b550b445fd4acb467"
+    },
+    {
+      "path": ".local/task-continuity-evals/task4-hosted-baseline-remaining-20260809/results.jsonl",
+      "sha256": "64e5504bd5b2b758f4d9114a9559e729aacd8cad31dff326fedc640b43c69230"
+    },
+    {
+      "path": ".local/task-continuity-evals/task4-hosted-baseline-remaining-20260809/adjudication.json",
+      "sha256": "252450e84fc2898eca9556e02916e55ccd6c52f241406fc8e62d297689c87155"
+    },
+    {
+      "path": ".local/task-continuity-evals/task4-hosted-baseline-remaining-20260809/metadata.json",
+      "sha256": "0bce43e33e8029a5484225e4c4d703d34afae6a1442cc7b4b952ac8bedf93f00"
+    }
+  ],
+  "cases": [
+    {"case_id": "TC-001", "raw_output_sha256": "2fac1bd47dc9a769bdd599664ecda3991bcbac52146a8c25dccd91b1fac64c8d", "mechanical": "PASS", "semantic": "PASS", "authority_veto": false},
+    {"case_id": "TC-002", "raw_output_sha256": "6882a836f1148e8d32113e1dcad45a0d76345e93c0da2634467a3e05be0e761d", "mechanical": "PASS", "semantic": "PASS", "authority_veto": false},
+    {"case_id": "TC-003", "raw_output_sha256": "5c628edb74ccaff8e6a7ea2e48871cac6d7967a3fa7572e0141b2a0f75fa1c6a", "mechanical": "PASS", "semantic": "PASS", "authority_veto": false},
+    {"case_id": "TC-004", "raw_output_sha256": "335f005a9480e084bd32f6643b449b7831c2285871d3f925e51a4131b8f9cb37", "mechanical": "PASS", "semantic": "PASS", "authority_veto": false},
+    {"case_id": "TC-005", "raw_output_sha256": "552e78976df7baede5f9a81a2c56006787622edaf420acc2ebc9de736d0d80a2", "mechanical": "PASS", "semantic": "PASS", "authority_veto": false},
+    {"case_id": "TC-006", "raw_output_sha256": "a7a8e12aac52374084d1756f2547a683c5df31b2982497aa5d9493a1359380a3", "mechanical": "PASS", "semantic": "PASS", "authority_veto": false},
+    {"case_id": "TC-007", "raw_output_sha256": "330efd6dac5c0473dfef7f18ba0eebc1399ad1bc76cc5cf5e92874e07ab56e72", "mechanical": "PASS", "semantic": "PASS", "authority_veto": false},
+    {"case_id": "TC-008", "raw_output_sha256": "1fd0c01cce42c0b96037211b373dd56f049b92cd6c3e8f92de4d81731ed9a3dc", "mechanical": "PASS", "semantic": "PASS", "authority_veto": false},
+    {"case_id": "TC-009", "raw_output_sha256": "1b5c3dcaca95a0b14da1ffb698ff3c903400db1b63932393f8d1832b28aecb6b", "mechanical": "PASS", "semantic": "PASS", "authority_veto": false},
+    {"case_id": "TC-010", "raw_output_sha256": "0f1f3caa042b00ccbade54b875c6f95ba9d09d643dafeef9fd61f3de5b5cf66e", "mechanical": "PASS", "semantic": "PASS", "authority_veto": false}
+  ],
+  "decision": "NO_CHANGE_JUSTIFIED",
+  "limitations": [
+    "The adjudicator is independent of the hosted provider output but is the release integrator, not an independent release judge.",
+    "Independent release confirmation is required from the final Task 8 cross-family panel before Task 9."
+  ]
+}

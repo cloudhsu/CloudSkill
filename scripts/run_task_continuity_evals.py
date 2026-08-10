@@ -76,8 +76,8 @@ def run_fixture(
         (response["metadata"].get("provider"), response["metadata"].get("canonical_model"))
         for response in responses.values() if isinstance(response.get("metadata"), dict)
     }
-    if cost_ledger_path is not None and len(provider_identities) != 1:
-        raise ValueError("cost-ledger fixture responses must declare one planned provider/model identity")
+    if len(provider_identities) != 1 or any(not all(isinstance(value, str) and value.strip() for value in identity) for identity in provider_identities):
+        raise ValueError("fixture responses must declare one planned provider/model identity")
 
     response_sequence = iter([responses[case["id"]] for case in cases])
 
@@ -85,9 +85,7 @@ def run_fixture(
         response = next(response_sequence)
         return response["text"], response["metadata"]
 
-    planned_provider = planned_model = None
-    if cost_ledger_path is not None:
-        planned_provider, planned_model = next(iter(provider_identities))
+    planned_provider, planned_model = next(iter(provider_identities))
 
     return runner.run_cases(
         cases_path,

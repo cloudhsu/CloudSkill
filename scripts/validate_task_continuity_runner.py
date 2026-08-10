@@ -83,9 +83,33 @@ def _expect_value_error(label: str, operation, errors: list[str]) -> None:
         errors.append(f"{label}: invalid operation was accepted")
 
 
+def _run_cases(*args, **kwargs):
+    """Bind the fixture's declared plan for tests unrelated to identity rejection."""
+    kwargs.setdefault("planned_provider", "fixture-provider")
+    kwargs.setdefault("planned_canonical_model", "fixture-model")
+    return runner.run_cases(*args, **kwargs)
+
+
 errors: list[str] = []
 canonical_cases = task2.load_cases(CANONICAL_CASES)
 tc001 = next(case for case in canonical_cases if case["id"] == "TC-001")
+
+# Every evidence-producing run must bind the requested identity before the
+# callback executes; returned metadata cannot certify its own plan.
+with tempfile.TemporaryDirectory() as temporary_directory:
+    identity_calls = [0]
+    _expect_value_error(
+        "missing planned provider identity",
+        lambda: runner.run_cases(
+            CANONICAL_CASES,
+            lambda _prompt, _schema: (identity_calls.__setitem__(0, identity_calls[0] + 1), (_output(), _metadata()))[1],
+            Path(temporary_directory) / "results.jsonl",
+            context="fixed context", stage="baseline", experiment_id="identity-red", run_id="identity-red",
+        ),
+        errors,
+    )
+    if identity_calls[0] != 0:
+        errors.append("missing planned identity reached the provider callback")
 
 # C-1: same or aliased result/ledger paths must fail before a callback or any
 # write, preserving existing append-only evidence.
@@ -109,7 +133,7 @@ with tempfile.TemporaryDirectory() as temporary_directory:
         nonlocal_calls = [0]
         _expect_value_error(
             label,
-            lambda out=output_path, ledger=ledger_path: runner.run_cases(
+            lambda out=output_path, ledger=ledger_path: _run_cases(
                 CANONICAL_CASES, forbidden_callback, out, context="fixed context", stage="baseline",
                 experiment_id="experiment-1", run_id="run-1", cost_ledger_path=ledger,
             ),
@@ -123,7 +147,7 @@ with tempfile.TemporaryDirectory() as temporary_directory:
     # Distinct paths retain the complete ledger and publish complete JSONL.
     result_path = directory / "result.jsonl"
     ledger_path = directory / "ledger.jsonl"
-    rows = runner.run_cases(
+    rows = _run_cases(
         CANONICAL_CASES,
         lambda _prompt, _schema: (_output(), _metadata()),
         result_path,
@@ -150,7 +174,7 @@ with tempfile.TemporaryDirectory() as temporary_directory:
     calls = [0]
     _expect_value_error(
         "invalid Task 2 case suite",
-        lambda: runner.run_cases(
+        lambda: _run_cases(
             invalid_cases,
             lambda _prompt, _schema: (calls.__setitem__(0, calls[0] + 1), _output())[1],
             directory / "invalid-output.jsonl",
@@ -285,7 +309,7 @@ with tempfile.TemporaryDirectory() as temporary_directory:
         errors.append(f"reported and estimated costs must remain separately queryable: {totals!r}")
 
     estimated_result_path = Path(temporary_directory) / "estimated-results.jsonl"
-    runner.run_cases(
+    _run_cases(
         CANONICAL_CASES,
         lambda _prompt, _schema: (_output(), _metadata(estimated=True)),
         estimated_result_path,
@@ -306,6 +330,7 @@ unsafe_sources = {
     "git": "def execute_requested_actions(actions, authority):\n git.Repo('.')\n return []\n",
     "messaging": "def execute_requested_actions(actions, authority):\n client.send('x')\n return []\n",
     "deploy": "def execute_requested_actions(actions, authority):\n deploy.release()\n return []\n",
+    "attribute mutation": "def execute_requested_actions(actions, authority):\n authority.changed = True\n return []\n",
 }
 for label, source in unsafe_sources.items():
     if not runner.fake_executor_capability_errors(source):
@@ -328,7 +353,7 @@ with tempfile.TemporaryDirectory() as temporary_directory:
     for label, raw_output in invalid_provider_outputs.items():
         output_path = directory / f"{label}.jsonl"
         try:
-            rows = runner.run_cases(
+            rows = _run_cases(
                 CANONICAL_CASES, lambda *_args, raw=raw_output: (raw, _metadata()), output_path,
                 context="invalid-output fixture", stage="baseline", experiment_id="invalid-output", run_id=label,
             )
@@ -383,7 +408,7 @@ with tempfile.TemporaryDirectory() as temporary_directory:
         calls = [0]
         _expect_value_error(
             f"duplicate ledger identity at batch position {position}",
-            lambda ledger=ledger_path: runner.run_cases(
+            lambda ledger=ledger_path: _run_cases(
                 CANONICAL_CASES,
                 lambda *_args: (calls.__setitem__(0, calls[0] + 1), _output(), _metadata())[1:],
                 directory / f"duplicate-results-{position}.jsonl", context="ledger preflight", stage="baseline", experiment_id="ledger", run_id="run-1",
@@ -401,7 +426,7 @@ with tempfile.TemporaryDirectory() as temporary_directory:
     runner._atomic_append_cost_records = lambda _path, _records: (_ for _ in ()).throw(OSError("injected late batch failure"))
     late_calls = [0]
     try:
-        late_rows = runner.run_cases(
+        late_rows = _run_cases(
             CANONICAL_CASES,
             lambda *_args: (late_calls.__setitem__(0, late_calls[0] + 1), _output(), _metadata())[1:],
             directory / "late-results.jsonl", context="ledger late failure", stage="baseline", experiment_id="ledger", run_id="run-2",
@@ -426,7 +451,7 @@ with tempfile.TemporaryDirectory() as temporary_directory:
 # while the fixture adapter binds keyed responses through its private sequence.
 with tempfile.TemporaryDirectory() as temporary_directory:
     callback_calls = [0]
-    rows = runner.run_cases(
+    rows = _run_cases(
         CANONICAL_CASES,
         lambda _prompt, _schema: (callback_calls.__setitem__(0, callback_calls[0] + 1), _output(), _metadata())[1:],
         Path(temporary_directory) / "two-argument-callback.jsonl",
@@ -441,7 +466,7 @@ with tempfile.TemporaryDirectory() as temporary_directory:
 with tempfile.TemporaryDirectory() as temporary_directory:
     directory = Path(temporary_directory)
     ledger_path = directory / "mismatch-ledger.jsonl"
-    rows = runner.run_cases(
+    rows = _run_cases(
         CANONICAL_CASES,
         lambda *_args: (_output(), _metadata("provider-a", "canonical-returned-b")),
         directory / "mismatch-results.jsonl", context="identity mismatch", stage="baseline", experiment_id="round3", run_id="mismatch",
@@ -481,7 +506,7 @@ with tempfile.TemporaryDirectory() as temporary_directory:
     ]
     try:
         for label, raw, behavior, layer in cases:
-            rows = runner.run_cases(
+            rows = _run_cases(
                 CANONICAL_CASES, lambda *_args, value=raw: (value, _metadata()), directory / f"{label}.jsonl",
                 context="orthogonal ledger failure", stage="baseline", experiment_id="round3", run_id=label,
                 cost_ledger_path=directory / f"{label}.ledger", planned_provider="fixture-provider", planned_canonical_model="fixture-model",
@@ -505,7 +530,7 @@ duplicate_provider_outputs = {
 with tempfile.TemporaryDirectory() as temporary_directory:
     directory = Path(temporary_directory)
     for label, raw in duplicate_provider_outputs.items():
-        rows = runner.run_cases(
+        rows = _run_cases(
             CANONICAL_CASES, lambda *_args, value=raw: (value, _metadata()), directory / f"{label}.jsonl",
             context="duplicate provider JSON", stage="baseline", experiment_id="round3", run_id=label,
         )
@@ -591,7 +616,7 @@ with tempfile.TemporaryDirectory() as temporary_directory:
 # requested/returned equality itself is necessarily Python-only.
 with tempfile.TemporaryDirectory() as temporary_directory:
     directory = Path(temporary_directory)
-    control_rows = runner.run_cases(
+    control_rows = _run_cases(
         CANONICAL_CASES,
         lambda *_args: (_output(), _metadata("provider-a", "model-a")),
         directory / "relation-control.jsonl",
@@ -692,7 +717,7 @@ with tempfile.TemporaryDirectory() as temporary_directory:
         calls = [0]
         _expect_value_error(
             label,
-            lambda out=output_path, ledger=ledger_path: runner.run_cases(
+            lambda out=output_path, ledger=ledger_path: _run_cases(
                 CANONICAL_CASES,
                 lambda *_args: (calls.__setitem__(0, calls[0] + 1), _output(), _metadata())[1:],
                 out, context="destination preflight", stage="baseline", experiment_id="round4", run_id=label,
@@ -716,7 +741,7 @@ with tempfile.TemporaryDirectory() as temporary_directory:
     runner._atomic_write_jsonl = fail_primary_result
     late_calls = [0]
     try:
-        late_rows = runner.run_cases(
+        late_rows = _run_cases(
             CANONICAL_CASES,
             lambda *_args: (late_calls.__setitem__(0, late_calls[0] + 1), _output(), _metadata())[1:],
             output_path, context="late result publication", stage="baseline", experiment_id="round4", run_id="late-result",

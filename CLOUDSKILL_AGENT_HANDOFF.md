@@ -15,6 +15,22 @@ This is the operational entry point for a new conversation or coding agent that 
 
 ## Current repository state
 
+### CloudBox 6.0 Task 8 resumed corrections (2026-08-10)
+
+- User explicitly resumed through push and Release, still gated on every
+  documented PASS condition.
+- New RED/GREEN coverage requires planned provider/model identity on every
+  evidence run, separately hashes and locally validates Claude plain fallback,
+  closes blocked-panel cost/status gaps, rejects fake-executor attribute
+  mutation, and makes missing VERSION auditable.
+- Task 4 manual semantic evidence is frozen at
+  `docs/releases/6.0.0-task-continuity-adjudication.json`; independent release
+  confirmation remains required from the final panel.
+- Fresh full deterministic checks passed after these corrections.
+- New hosted ceiling: four required cells, at most two Claude zero-token
+  fallbacks, six attempts total. Stop before Task 9 on incomplete/degraded/
+  blocked evidence, unresolved veto, or ceiling exhaustion.
+
 ### CloudBox 6.0 Task 8 PAUSED — corrected panel degraded (2026-08-10)
 
 - Corrected panel envelope:

@@ -2,6 +2,22 @@
 
 This document records the evolution rationale and evidence chain for work that may span multiple conversations. Git commits and tags remain the authoritative source history.
 
+## 2026-08-10 — Task 8 resumed with bounded evaluator corrections
+
+The user resumed the release path. New failing mutations reproduced the open
+Opus findings: returned metadata could self-certify its planned identity, the
+Claude plain fallback reused the strict packet hash and accepted invalid JSON,
+boolean token values could trigger fallback, all-blocked panel status was
+unreachable, blocked spend could aggregate under a null model, fake executor
+objects could be mutated, and missing VERSION crashed lifecycle audit.
+
+Minimum code changes make those mutations GREEN. A committed Task 4 semantic
+adjudication manifest now hashes the ignored raw evidence and truthfully marks
+the integrator review as provider-independent but not release-independent.
+Fresh full deterministic checks pass. A new final-panel scope permits four
+required cells plus at most two zero-token Claude fallbacks, with a hard ceiling
+of six attempts and no permission to enter Task 9 on degraded or vetoed output.
+
 ## 2026-08-10 — Corrected panel degraded; Task 8 paused
 
 The corrected panel is schema-valid but degraded: GPT frontier PASS, GPT

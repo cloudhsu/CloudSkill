@@ -13,6 +13,8 @@ CONTRACT_PATH = ROOT / "evals/runtime/contracts/multimodel-panel.schema.json"
 def classify_panel(workers: list[dict[str, Any]]) -> str:
     if not workers:
         return "INCOMPLETE"
+    if all(worker.get("status") == "BLOCKED" for worker in workers):
+        return "BLOCKED"
     if any(worker.get("status") == "BLOCKED" for worker in workers):
         return "DEGRADED"
     cells = {(worker.get("family"), worker.get("role")) for worker in workers if worker.get("status") in {"PASS", "FAIL", "MANUAL_REQUIRED"}}
@@ -69,8 +71,8 @@ def validate_panel_record(record: Any, schema_path: Path = CONTRACT_PATH) -> lis
                 errors.append(f"workers[{index}] completed evidence requires canonical model")
             if not isinstance(raw_hash, str) or len(raw_hash) != 64:
                 errors.append(f"workers[{index}] completed evidence requires raw output hash")
-        if status == "BLOCKED" and (canonical is not None or raw_hash is not None):
-            errors.append(f"workers[{index}] blocked evidence cannot fabricate returned identity/output")
+        if status == "BLOCKED" and (canonical is not None or raw_hash is not None or cost is not None):
+            errors.append(f"workers[{index}] blocked evidence cannot fabricate returned identity/output/cost")
     classified = classify_panel(workers)
     if record.get("status") != classified:
         errors.append(f"panel status {record.get('status')!r} conflicts with classified status {classified!r}")

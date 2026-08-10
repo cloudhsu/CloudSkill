@@ -57,6 +57,7 @@ mutations = [
     ({**record, "aggregate_score": 99.0}, "aggregate score"),
     ({**record, "workers": [{**workers[0], "blind_label": workers[0]["worker_id"]}, *workers[1:]]}, "unblinded worker identity"),
     ({**record, "workers": [{**workers[0], "cost": {"amount": 0.01}}, *workers[1:]]}, "unconstrained cost"),
+    ({**record, "status": "DEGRADED", "workers": [*workers[:3], {**worker("D", "claude", "frontier", status="BLOCKED"), "cost": {"kind": "usage_only", "amount": 1, "currency": "tokens"}}]}, "blocked worker cost without canonical identity"),
     ({**record, "workers": [*workers[:3], worker("D", "claude", "frontier", status="BLOCKED")]}, "blocked worker"),
 ]
 for mutated, label in mutations:
@@ -66,6 +67,8 @@ for mutated, label in mutations:
 blocked = [*workers[:3], worker("D", "claude", "frontier", status="BLOCKED")]
 if classify_panel(blocked) != "DEGRADED":
     raise SystemExit("blocked worker was mislabeled as a complete 2x2")
+if classify_panel([worker(label, family, role, status="BLOCKED") for label, family, role in (("A", "gpt", "efficient"), ("B", "gpt", "frontier"), ("C", "claude", "efficient"), ("D", "claude", "frontier"))]) != "BLOCKED":
+    raise SystemExit("all-blocked panel did not use the declared BLOCKED state")
 
 costs = aggregate_costs(workers)
 if len(costs) != 4 or any("score" in item for item in costs):
@@ -82,9 +85,35 @@ def plain(_packet: bytes) -> dict:
     calls.append("plain")
     return {"status": "PASS", "raw_output": '{"verdict":"PASS"}', "tokens": 12, "canonical_model": "claude-sonnet"}
 
-fallback = bounded_claude_request(b"frozen", {"type": "object"}, {"max_attempts": 2}, preflight=preflight, strict_call=strict, plain_call=plain)
-if calls != ["preflight", "strict", "plain"] or fallback["status"] != "PASS" or fallback["fallback"] != "bounded_plain_output":
+fallback_schema = {
+    "type": "object", "additionalProperties": False, "required": ["verdict"],
+    "properties": {"verdict": {"enum": ["PASS", "FAIL"]}},
+}
+fallback = bounded_claude_request(b"frozen", fallback_schema, {"max_attempts": 2}, preflight=preflight, strict_call=strict, plain_call=plain)
+if (
+    calls != ["preflight", "strict", "plain"] or fallback["status"] != "PASS"
+    or fallback["fallback"] != "bounded_plain_output"
+    or fallback.get("fallback_prompt_hash") in {None, fallback.get("packet_hash")}
+):
     raise SystemExit("zero-token authenticated Claude fallback did not remain bounded")
+
+def invalid_plain(_packet: bytes) -> dict:
+    return {"status": "PASS", "raw_output": '{}', "tokens": 1, "canonical_model": "claude-sonnet"}
+invalid_fallback = bounded_claude_request(
+    b"frozen", fallback_schema, {"max_attempts": 2}, preflight=lambda: {"authenticated": True},
+    strict_call=lambda _packet, _schema: {"status": "BLOCKED", "tokens": 0}, plain_call=invalid_plain,
+)
+if invalid_fallback.get("status") != "BLOCKED" or not invalid_fallback.get("validation_errors"):
+    raise SystemExit("schema-invalid Claude plain fallback was accepted")
+
+boolean_tokens_calls: list[str] = []
+boolean_tokens = bounded_claude_request(
+    b"frozen", fallback_schema, {"max_attempts": 2}, preflight=lambda: {"authenticated": True},
+    strict_call=lambda _packet, _schema: {"status": "BLOCKED", "tokens": False},
+    plain_call=lambda _packet: boolean_tokens_calls.append("plain") or {},
+)
+if boolean_tokens_calls or boolean_tokens.get("attempts") != 1:
+    raise SystemExit("boolean token value was misclassified as a zero-token fallback")
 
 with tempfile.TemporaryDirectory(prefix="cloudbox-panel-test-") as temp:
     root = Path(temp)

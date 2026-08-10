@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Any, Callable
 
 from multimodel_panel_contract import aggregate_costs, classify_panel, validate_panel_record
+from task_continuity_runner import validate_schema_instance
 
 
 def bounded_claude_request(packet: bytes, schema: dict[str, Any], limits: dict[str, Any], *, preflight: Callable[[], dict[str, Any]] | None = None, strict_call: Callable[[bytes, dict[str, Any]], dict[str, Any]] | None = None, plain_call: Callable[[bytes], dict[str, Any]] | None = None) -> dict[str, Any]:
@@ -20,11 +21,31 @@ def bounded_claude_request(packet: bytes, schema: dict[str, Any], limits: dict[s
         return {"status": "BLOCKED", "attempts": 0, "fallback": None, "packet_hash": packet_hash}
     first = strict_call(packet, schema)
     first["packet_hash"] = packet_hash
-    if first.get("status") != "BLOCKED" or first.get("tokens") not in {0, None} or limits["max_attempts"] == 1:
+    tokens = first.get("tokens")
+    zero_token_block = tokens is None or (isinstance(tokens, (int, float)) and not isinstance(tokens, bool) and tokens == 0)
+    if first.get("status") != "BLOCKED" or not zero_token_block or limits["max_attempts"] == 1:
         first.update(attempts=1, fallback=None)
         return first
-    second = plain_call(packet)
-    second.update(packet_hash=packet_hash, attempts=2, fallback="bounded_plain_output")
+    plain_packet = b"Return exactly one JSON object matching the supplied schema.\n" + packet
+    fallback_prompt_hash = hashlib.sha256(plain_packet).hexdigest()
+    second = plain_call(plain_packet)
+    validation_errors: list[str] = []
+    raw_output = second.get("raw_output")
+    try:
+        parsed = json.loads(raw_output) if isinstance(raw_output, str) else None
+    except json.JSONDecodeError as exc:
+        parsed = None
+        validation_errors.append(f"plain fallback output is not JSON: {exc}")
+    if parsed is None and not validation_errors:
+        validation_errors.append("plain fallback output must be JSON text")
+    elif parsed is not None:
+        validation_errors.extend(validate_schema_instance(parsed, schema))
+    second.update(
+        packet_hash=packet_hash, fallback_prompt_hash=fallback_prompt_hash,
+        attempts=2, fallback="bounded_plain_output", validation_errors=validation_errors,
+    )
+    if validation_errors:
+        second.update(status="BLOCKED", failure_layer="output_contract")
     return second
 
 
