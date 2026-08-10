@@ -73,7 +73,7 @@ def run_git(args: list[str], *, cwd: Path) -> subprocess.CompletedProcess[str]:
         ["git", *args], cwd=cwd, text=True, capture_output=True, check=False
     )
     if result.returncode:
-        raise SystemExit(f"git {' '.join(args)} failed in {cwd}: {result.stderr.strip()}")
+        raise SystemExit("Git Eval Exchange operation failed; remote and path details redacted")
     return result
 
 
@@ -132,8 +132,8 @@ def do_push(config: dict[str, Any], args: argparse.Namespace) -> int:
     for path in pending:
         path.replace(synced_dir / path.name)
 
-    print(f"Pushed {len(pending)} candidate(s) as {zip_name} to {exchange_repo}")
-    print(f"Moved source files to {synced_dir} (not deleted).")
+    print(f"Pushed {len(pending)} candidate(s) as {zip_name} to the configured private Eval Exchange")
+    print("Moved source files to the local synced/ archive (not deleted).")
     return 0
 
 

@@ -33,8 +33,19 @@ jobs:
           test -n "$EVOLUTION_EXCHANGE_URL"
           test -n "$EVOLUTION_SOURCE_ID"
           mkdir -p .cloudskill .local
-          printf '{"schema_version":"1.0","sources":[{"source_id":"%s","url_secret":"EVOLUTION_SOURCE_URL","ref":"HEAD"}]}' "$EVOLUTION_SOURCE_ID" > .cloudskill/evolution-sources.private.json
-          git clone --quiet "$EVOLUTION_EXCHANGE_URL" .local/private-evolution-exchange
+          python - <<'PY'
+          import json, os, re
+          source_id = os.environ["EVOLUTION_SOURCE_ID"]
+          if not re.fullmatch(r"[a-z0-9][a-z0-9_-]*", source_id):
+              raise SystemExit("invalid source identifier")
+          registry = {"schema_version": "1.0", "sources": [{"source_id": source_id, "url_secret": "EVOLUTION_SOURCE_URL", "ref": "HEAD"}]}
+          with open(".cloudskill/evolution-sources.private.json", "w", encoding="utf-8") as stream:
+              json.dump(registry, stream)
+          PY
+          if ! git clone --quiet "$EVOLUTION_EXCHANGE_URL" .local/private-evolution-exchange 2>/dev/null; then
+            echo "Private Eval Exchange clone failed; remote details redacted" >&2
+            exit 1
+          fi
           python scripts/cloudskill_evolution.py source sync \
             --registry .cloudskill/evolution-sources.private.json \
             --exchange .local/private-evolution-exchange \
@@ -44,5 +55,8 @@ jobs:
           git -C .local/private-evolution-exchange add sources
           if ! git -C .local/private-evolution-exchange diff --cached --quiet; then
             git -C .local/private-evolution-exchange commit -m "sync evolution source $EVOLUTION_SOURCE_ID"
-            git -C .local/private-evolution-exchange push
+            if ! git -C .local/private-evolution-exchange push 2>/dev/null; then
+              echo "Private Eval Exchange push failed; remote details redacted" >&2
+              exit 1
+            fi
           fi

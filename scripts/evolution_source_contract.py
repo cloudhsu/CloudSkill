@@ -6,7 +6,6 @@ import os
 import re
 import subprocess
 import tempfile
-import uuid
 from pathlib import Path
 from typing import Any
 
@@ -63,20 +62,27 @@ def sync_source(source_id: str, registry: dict[str, Any], exchange: Path, env: d
     state_path = root / "state" / "checkpoint.json"
     if state_path.is_file() and json.loads(state_path.read_text(encoding="utf-8")).get("commit") == commit:
         return {"status": "NO_CHANGE", "source_id": source_id, "model_calls": 0, "commit_fingerprint": commit[:12]}
-    operation_id = uuid.uuid4().hex
     with tempfile.TemporaryDirectory(prefix="cloudskill-source-") as tmp_name:
         checkout = Path(tmp_name) / "source"
         _git(["clone", "--quiet", "--no-checkout", url, str(checkout)])
         _git(["checkout", "--quiet", commit], cwd=checkout)
         paths = source.get("paths") or ["."]
-        inventory = []
+        inventory: list[tuple[str, bytes]] = []
         for scoped in paths:
             base = (checkout / scoped).resolve()
             if checkout.resolve() not in (base, *base.parents):
                 raise ValueError("resolved source path escapes checkout")
-            if base.is_file(): inventory.append(str(Path(scoped)))
-            elif base.is_dir(): inventory.extend(str(path.relative_to(checkout)) for path in sorted(base.rglob("*")) if path.is_file())
-        digest = hashlib.sha256("\n".join(inventory).encode()).hexdigest()
+            if base.is_file(): inventory.append((str(Path(scoped)), base.read_bytes()))
+            elif base.is_dir(): inventory.extend((str(path.relative_to(checkout)), path.read_bytes()) for path in sorted(base.rglob("*")) if path.is_file())
+        content = hashlib.sha256()
+        for relative_path, payload in inventory:
+            content.update(relative_path.encode("utf-8"))
+            content.update(b"\0")
+            content.update(hashlib.sha256(payload).digest())
+        digest = content.hexdigest()
+    # Stable identity makes every partial-write permutation recoverable: a retry
+    # repairs the same candidate/provenance paths before advancing checkpoint.
+    operation_id = hashlib.sha256(f"{source_id}\0{commit}\0{digest}".encode()).hexdigest()
     candidate = {"candidate_id": f"SRC-{operation_id[:12]}", "source_id": source_id, "source_commit": commit, "content_fingerprint": digest, "confidence": "inferred", "status": "REVIEW_PENDING", "model_calls": 0}
     provenance = {"operation_id": operation_id, "source_id": source_id, "commit": commit, "content_fingerprint": digest, "candidate_id": candidate["candidate_id"]}
     for folder, name, value in (("candidates", candidate["candidate_id"] + ".json", candidate), ("provenance", operation_id + ".json", provenance)):
