@@ -2,6 +2,18 @@
 
 This document records the evolution rationale and evidence chain for work that may span multiple conversations. Git commits and tags remain the authoritative source history.
 
+## 2026-08-10 — Task 9 release candidate version synchronization
+
+After the bounded four-cell Task 8 PASS, authoritative package version surfaces
+were synchronized to `6.0.0`, release notes were added, and the generated Skill
+manifest was refreshed. Lifecycle records remain at their verified `5.8.0`
+review version because a package-version change is not evidence that every
+Skill received a new controlled review. The synchronized candidate then passed
+two fresh full repository suites and an exact-diff check. Publication remains
+contingent on exact-tip CI, normal reviewed merge, annotated tag and Release
+verification. No post-6 source-ingestion automation or documentation is added
+to the 6.0.0 candidate.
+
 ## 2026-08-10 — Task 8 PASS after bounded lineage-cell replacement
 
 The lineage manifest proved the scope declaration is the direct evidence-only

@@ -1,5 +1,15 @@
 # Changelog
 
+## 6.0.0
+
+### Evidence-gated Skill evolution
+
+- Added executable task-continuity contracts that preserve authority, action, provider, cost, latency, model-identity, and lineage evidence across multi-session evolution work.
+- Added a repository-owned, bounded cross-family review panel with durable attempt reservation, deterministic schema enforcement, explicit degraded and unresolved states, and independently reviewable sanitized evidence.
+- Added lifecycle and compatibility controls for major-version review currency, exact-candidate lineage, no-change decisions, rollback evidence, and release gating.
+- Hardened Runtime Eval provider isolation and canonical-model provenance without allowing aliases or malformed consequential actions to self-certify.
+- Preserved the full RED-to-GREEN correction history and final four-cell Task 8 PASS evidence for the reviewed 6.0 source candidate.
+
 ## 5.8.0
 
 ### Multi-model Skill distillation and Eval adjudication

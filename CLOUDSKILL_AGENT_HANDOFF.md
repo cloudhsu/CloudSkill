@@ -15,6 +15,18 @@ This is the operational entry point for a new conversation or coding agent that 
 
 ## Current repository state
 
+### CloudBox 6.0 Task 9 release candidate preparation (2026-08-10)
+
+- Task 8 remains PASS. Authoritative version surfaces have been synchronized
+  to `6.0.0`, release notes added, and `SKILL_MANIFEST.json` regenerated.
+- The 19 lifecycle records intentionally retain their verified `5.8.0` review
+  currency under the documented cross-major policy; version synchronization
+  does not fabricate a new controlled Skill review.
+- Two fresh full-suite passes and exact-diff review completed on the synchronized
+  candidate. Commit/push, PR/CI, merge, tag, GitHub Release, remote verification,
+  and the separate post-release record remain required before publication may
+  be claimed.
+
 ### CloudBox 6.0 Task 8 PASS; Task 9 authorized (2026-08-10)
 
 - The affected GPT-efficient lineage cell passed in one of one replacement
