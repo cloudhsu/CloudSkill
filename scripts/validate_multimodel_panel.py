@@ -115,6 +115,15 @@ boolean_tokens = bounded_claude_request(
 if boolean_tokens_calls or boolean_tokens.get("attempts") != 1:
     raise SystemExit("boolean token value was misclassified as a zero-token fallback")
 
+unknown_tokens_calls: list[str] = []
+unknown_tokens = bounded_claude_request(
+    b"frozen", fallback_schema, {"max_attempts": 2}, preflight=lambda: {"authenticated": True},
+    strict_call=lambda _packet, _schema: {"status": "BLOCKED", "tokens": None},
+    plain_call=lambda _packet: unknown_tokens_calls.append("plain") or {},
+)
+if unknown_tokens_calls or unknown_tokens.get("attempts") != 1:
+    raise SystemExit("unknown token evidence was misclassified as a verified zero-token fallback")
+
 with tempfile.TemporaryDirectory(prefix="cloudbox-panel-test-") as temp:
     root = Path(temp)
     fixture = root / "workers.json"

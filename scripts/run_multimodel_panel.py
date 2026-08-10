@@ -22,7 +22,7 @@ def bounded_claude_request(packet: bytes, schema: dict[str, Any], limits: dict[s
     first = strict_call(packet, schema)
     first["packet_hash"] = packet_hash
     tokens = first.get("tokens")
-    zero_token_block = tokens is None or (isinstance(tokens, (int, float)) and not isinstance(tokens, bool) and tokens == 0)
+    zero_token_block = isinstance(tokens, (int, float)) and not isinstance(tokens, bool) and tokens == 0
     if first.get("status") != "BLOCKED" or not zero_token_block or limits["max_attempts"] == 1:
         first.update(attempts=1, fallback=None)
         return first

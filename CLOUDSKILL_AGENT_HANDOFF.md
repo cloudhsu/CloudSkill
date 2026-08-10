@@ -21,7 +21,8 @@ This is the operational entry point for a new conversation or coding agent that 
   documented PASS condition.
 - New RED/GREEN coverage requires planned provider/model identity on every
   evidence run, separately hashes and locally validates Claude plain fallback,
-  closes blocked-panel cost/status gaps, rejects fake-executor attribute
+  permits fallback only for a numeric zero-token result (unknown/boolean token
+  evidence cannot trigger it), closes blocked-panel cost/status gaps, rejects fake-executor attribute
   mutation, and makes missing VERSION auditable.
 - Task 4 manual semantic evidence is frozen at
   `docs/releases/6.0.0-task-continuity-adjudication.json`; independent release

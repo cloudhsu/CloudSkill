@@ -17,6 +17,8 @@ the integrator review as provider-independent but not release-independent.
 Fresh full deterministic checks pass. A new final-panel scope permits four
 required cells plus at most two zero-token Claude fallbacks, with a hard ceiling
 of six attempts and no permission to enter Task 9 on degraded or vetoed output.
+The fallback gate subsequently tightened from zero-or-unknown to verified
+numeric zero only; unknown and boolean token evidence now stop without retry.
 
 ## 2026-08-10 — Corrected panel degraded; Task 8 paused
 
