@@ -22,6 +22,10 @@ final-panel judgments without provider request/response identifiers or local
 paths. The prior date dispute is no longer described as an independent
 adjudication, and lifecycle compatibility discloses the exact major-boundary
 behavior. No new hosted inference or Task 9 action occurred in this increment.
+The verified correction source candidate is
+`5bf6a8af9608cbc2ed3d6584b63e751c63fea5d0`, tree
+`f88280ae074c0003a51ac7ba3fc42de4504ac1e3`; later documentation records are
+evidence-only lineage and do not silently move that source boundary.
 
 ## 2026-08-10 — Final Task 8 panel stopped release progression
 

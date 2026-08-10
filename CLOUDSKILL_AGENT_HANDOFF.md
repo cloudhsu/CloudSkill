@@ -17,6 +17,10 @@ This is the operational entry point for a new conversation or coding agent that 
 
 ### CloudBox 6.0 final-panel correction increment (2026-08-10)
 
+- Deterministic correction source candidate is
+  `5bf6a8af9608cbc2ed3d6584b63e751c63fea5d0`, tree
+  `f88280ae074c0003a51ac7ba3fc42de4504ac1e3`; its full repository suite passed
+  before commit.
 - Final-panel raw judgments and Task 4 raw provider evidence are now sanitized,
   reviewable repository artifacts under `docs/releases/evidence/`; validators
   reject Task 4 release evidence that points only to ignored `.local` files.
