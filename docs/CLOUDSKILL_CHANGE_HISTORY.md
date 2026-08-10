@@ -27,6 +27,13 @@ The verified correction source candidate is
 `f88280ae074c0003a51ac7ba3fc42de4504ac1e3`; later documentation records are
 evidence-only lineage and do not silently move that source boundary.
 
+After the source candidate and evidence tip independently passed the full
+suite, the user-authorized recheck scope was frozen to GPT 5.4/5.5 and pinned
+Claude Sonnet 4.6/Opus 4.8 IDs. The repository-owned durable attempt budget is
+mandatory, the ceiling is six, and no extra model call is permitted. Any
+non-PASS cell, unresolved veto/major finding, identity/contract error, or
+ceiling exhaustion stops before Task 9.
+
 ## 2026-08-10 — Final Task 8 panel stopped release progression
 
 The newly declared final panel executed all four required cells in four hosted

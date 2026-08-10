@@ -33,8 +33,11 @@ This is the operational entry point for a new conversation or coding agent that 
   a silently overturned judge verdict. Compatibility text now discloses that
   two-feature lifecycle enforcement is active but does not expire the 5.8.0
   reviews at the 6.0.0 major boundary.
-- No new hosted call is authorized until full deterministic verification and
-  exact candidate/evidence commits are frozen. Task 9 remains NOT RUN.
+- Source candidate `5bf6a8a` and evidence tip `a3e09b1` both passed the full
+  deterministic suite. A final-panel recheck is now scoped to four pinned
+  model IDs, at most six durable-budget attempts, and no other model calls.
+  Task 9 remains gated on four independent PASS verdicts without veto/major
+  findings or contract errors.
 
 ### CloudBox 6.0 final Task 8 panel STOP (2026-08-10)
 
