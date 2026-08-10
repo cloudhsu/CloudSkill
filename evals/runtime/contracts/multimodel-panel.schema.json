@@ -8,7 +8,7 @@
   "properties": {
     "schema_version": {"const": 1},
     "panel_id": {"type": "string", "minLength": 1},
-    "status": {"enum": ["COMPLETE_2X2", "DEGRADED", "INCOMPLETE", "BLOCKED"]},
+    "status": {"enum": ["COMPLETE_2X2", "COMPLETE_UNRESOLVED", "DEGRADED", "INCOMPLETE", "BLOCKED"]},
     "identity_map_hash": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
     "adjudication_path": {"type": "string", "minLength": 1},
     "workers": {

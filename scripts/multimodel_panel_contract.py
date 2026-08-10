@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from collections import defaultdict
+import json
 from pathlib import Path
 from typing import Any
 
@@ -19,11 +20,17 @@ def classify_panel(workers: list[dict[str, Any]]) -> str:
         return "DEGRADED"
     cells = {(worker.get("family"), worker.get("role")) for worker in workers if worker.get("status") in {"PASS", "FAIL", "MANUAL_REQUIRED"}}
     required = {("gpt", "efficient"), ("gpt", "frontier"), ("claude", "efficient"), ("claude", "frontier")}
-    return "COMPLETE_2X2" if cells == required and len(workers) == 4 else "INCOMPLETE"
+    if cells == required and len(workers) == 4:
+        return "COMPLETE_2X2" if all(worker.get("status") == "PASS" for worker in workers) else "COMPLETE_UNRESOLVED"
+    return "INCOMPLETE"
 
 
 def validate_panel_record(record: Any, schema_path: Path = CONTRACT_PATH) -> list[str]:
-    errors = schema_runtime._validate_task3_schema_instance(record, schema_path)
+    try:
+        schema = json.loads(schema_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        return [f"cannot read panel schema: {exc}"]
+    errors = schema_runtime.validate_schema_instance(record, schema)
     if not isinstance(record, dict):
         return errors
     workers = record.get("workers")

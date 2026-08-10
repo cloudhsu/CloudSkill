@@ -3,6 +3,8 @@ from __future__ import annotations
 
 import sys
 import json
+import inspect
+import copy
 import tempfile
 from pathlib import Path
 
@@ -18,6 +20,7 @@ except ModuleNotFoundError as exc:
 
 
 def worker(label: str, family: str, role: str, *, status: str = "PASS") -> dict:
+    completed = status != "BLOCKED"
     return {
         "worker_id": f"worker-{label}",
         "blind_label": label,
@@ -26,20 +29,20 @@ def worker(label: str, family: str, role: str, *, status: str = "PASS") -> dict:
         "provider": family,
         "requested_model": role,
         "selected_model": f"{family}-{role}",
-        "provider_returned_model": f"{family}-{role}" if status == "PASS" else None,
-        "model_identity_evidence": "provider_returned" if status == "PASS" else None,
-        "canonical_model": f"{family}-{role}" if status == "PASS" else None,
+        "provider_returned_model": f"{family}-{role}" if completed else None,
+        "model_identity_evidence": "provider_returned" if completed else None,
+        "canonical_model": f"{family}-{role}" if completed else None,
         "status": status,
         "output_path": f"workers/{label}.json",
         "packet_hash": "1" * 64,
         "prompt_hash": "2" * 64,
-        "raw_output_hash": "3" * 64 if status == "PASS" else None,
+        "raw_output_hash": "3" * 64 if completed else None,
         "adapter_version": "fixture-adapter-1", "transport_mode": "fixture",
         "tokens": {"input": 10, "cache": 2, "output": 3, "reasoning": 1},
         "latency_ms": 10, "attempts": 1, "retries": 0, "fallback": None,
         "fallback_prompt_hash": None,
         "failure_layer": None, "verdict": status, "findings_path": f"workers/{label}-findings.json",
-        "cost": {"kind": "provider_reported", "amount": 0.01, "currency": "USD"} if status == "PASS" else None,
+        "cost": {"kind": "provider_reported", "amount": 0.01, "currency": "USD"} if completed else None,
     }
 
 
@@ -53,6 +56,11 @@ if errors:
     raise SystemExit("valid panel rejected: " + "; ".join(errors))
 if classify_panel(workers) != "COMPLETE_2X2":
     raise SystemExit("complete 2x2 panel was not classified complete")
+unresolved = [{**workers[0], "status": "FAIL", "verdict": "FAIL"}, *workers[1:]]
+if classify_panel(unresolved) != "COMPLETE_UNRESOLVED":
+    raise SystemExit("structurally complete unresolved panel was mislabeled release-complete")
+if "_validate_task3_schema_instance" in inspect.getsource(validate_panel_record):
+    raise SystemExit("panel validator still depends on a private schema interpreter")
 
 mutations = [
     ({**record, "workers": [workers[0], {**workers[1], "output_path": workers[0]["output_path"]}, *workers[2:]]}, "duplicate output path"),
@@ -71,6 +79,16 @@ mutations = [
 for mutated, label in mutations:
     if not validate_panel_record(mutated):
         raise SystemExit(f"{label} mutation was accepted")
+
+# Authoritative-schema drift must propagate through the public interpreter.
+with tempfile.TemporaryDirectory(prefix="cloudbox-panel-schema-drift-") as temp:
+    drift_schema = json.loads((ROOT / "evals/runtime/contracts/multimodel-panel.schema.json").read_text(encoding="utf-8"))
+    drift_schema["properties"]["workers"]["items"]["properties"]["raw_output_hash"].pop("pattern")
+    drift_path = Path(temp) / "panel.schema.json"
+    drift_path.write_text(json.dumps(drift_schema), encoding="utf-8")
+    non_hex_record = {**record, "workers": [{**workers[0], "raw_output_hash": "z" * 64}, *workers[1:]]}
+    if validate_panel_record(non_hex_record, drift_path):
+        raise SystemExit("panel schema drift did not propagate through the public interpreter")
 
 blocked = [*workers[:3], worker("D", "claude", "frontier", status="BLOCKED")]
 if classify_panel(blocked) != "DEGRADED":

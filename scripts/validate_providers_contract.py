@@ -152,6 +152,10 @@ else:
     if pinned_identity.get("canonical_model") != "gpt-5.4" or pinned_identity.get("model_identity_evidence") != "explicit_selection":
         errors.append("Codex adapter did not preserve a fully pinned CLI model selection")
 
+claude_adapter_text = (SCRIPTS / "claude_eval_adapter.py").read_text(encoding="utf-8")
+if '"acceptEdits"' in claude_adapter_text or '"dontAsk"' not in claude_adapter_text:
+    errors.append("Claude evaluation adapter must deny unapproved tool actions instead of auto-accepting edits")
+
 # cloudskill-eval-<provider> smoke wrappers for every hosted-agent provider.
 for provider_id, info in providers.items():
     if not isinstance(info, dict) or info.get("family") != "hosted-agent":

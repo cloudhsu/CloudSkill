@@ -149,10 +149,9 @@ def call_claude_cli(
     Runs from a fresh empty temporary directory with --safe-mode (no CLAUDE.md,
     Skills, plugins, hooks, or MCP auto-loading) and --tools "" (no built-in
     tool access), so the model sees only the supplied Eval prompt, not this
-    repository's own CloudBox skills or files. --permission-mode acceptEdits
-    avoids the non-interactive session stalling/erroring on a permission
-    prompt it cannot answer; the temporary directory has nothing real to
-    protect, so an auto-accepted edit there is harmless. Confirmed against a
+    repository's own CloudBox skills or files. --permission-mode dontAsk
+    rejects any action that would require interactive approval instead of
+    auto-accepting edits. Confirmed against a
     real run: without an explicit "do not use tools" framing in the prompt
     itself, the model occasionally attempted a tool call anyway (observed
     stop_reason="tool_use", subtype="error_max_structured_output_retries")
@@ -182,7 +181,7 @@ def call_claude_cli(
             "--tools",
             "",
             "--permission-mode",
-            "acceptEdits",
+            "dontAsk",
             "--no-session-persistence",
             "--strict-mcp-config",
             "--system-prompt",
@@ -234,7 +233,7 @@ def call_claude_cli(
                 "version": info["version"],
                 "safe_mode": True,
                 "tools_disabled": True,
-                "permission_mode": "acceptEdits",
+                "permission_mode": "dontAsk",
                 "no_session_persistence": True,
                 "strict_mcp_config": True,
                 "num_turns": payload.get("num_turns"),

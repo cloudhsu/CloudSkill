@@ -34,6 +34,16 @@ mandatory, the ceiling is six, and no extra model call is permitted. Any
 non-PASS cell, unresolved veto/major finding, identity/contract error, or
 ceiling exhaustion stops before Task 9.
 
+The bounded recheck then completed four strict calls without fallback. GPT
+efficient failed on an evidence-tip lineage interpretation, GPT frontier
+passed, and both pinned Claude cells required manual review. Remaining
+mechanical findings are corrected by distinguishing `COMPLETE_UNRESOLVED` from
+release-complete status, using the public panel-schema interpreter plus a drift
+test, denying unapproved Claude actions, retaining sanitized literal RED
+diagnostics, and clarifying Task 4 transport/independence and cross-major review
+currency. Task 8 remains STOP pending independent confirmation; no Task 9
+action occurred.
+
 ## 2026-08-10 — Final Task 8 panel stopped release progression
 
 The newly declared final panel executed all four required cells in four hosted
@@ -171,6 +181,10 @@ Task 5 is closed as `NO_CHANGE_JUSTIFIED`; changing global instructions or
 `agent-development-process` would violate the evidence gate. Task 6 is the next
 increment. Raw evidence and adjudication remain ignored under
 `.local/task-continuity-evals/task4-hosted-baseline-remaining-20260809/`.
+The semantic adjudicator was the release integrator, not an independent release
+judge; the hosted coordinator applied the provider schema, action trace, and
+grade functions separately rather than feeding raw CLI metadata directly to
+`run_cases()`.
 
 ## 2026-08-09 — Task 4 TC-001 hosted baseline PASS after bounded fallback
 

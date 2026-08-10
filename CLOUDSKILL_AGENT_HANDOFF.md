@@ -38,6 +38,11 @@ This is the operational entry point for a new conversation or coding agent that 
   model IDs, at most six durable-budget attempts, and no other model calls.
   Task 9 remains gated on four independent PASS verdicts without veto/major
   findings or contract errors.
+- The recheck used four strict attempts, no fallback, and produced GPT
+  efficient FAIL, GPT frontier PASS, Claude efficient/frontier MANUAL_REQUIRED.
+  Its raw evidence is formalized at
+  `docs/releases/evidence/6.0.0-final-panel-recheck-red-evidence.json`; Task 8
+  remains STOP while the remaining deterministic findings are corrected.
 
 ### CloudBox 6.0 final Task 8 panel STOP (2026-08-10)
 
@@ -165,6 +170,10 @@ This is the operational entry point for a new conversation or coding agent that 
   `NO_CHANGE_JUSTIFIED`: no global invariant, `agent-development-process`
   Skill, lifecycle, or behavior-case edit was made. Next work is Task 6's
   executable multi-model panel contract.
+- This semantic PASS/NO_CHANGE decision was made by the release integrator,
+  not an independent release judge. The hosted path used a separate coordinator
+  around the CLI adapter plus published schema/action/grade functions, not raw
+  adapter metadata as a direct `run_cases()` callback.
 - Ignored raw evidence and adjudication are under
   `.local/task-continuity-evals/task4-hosted-baseline-remaining-20260809/`.
 

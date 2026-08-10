@@ -41,7 +41,7 @@ def main() -> int:
     adjudication = json.loads(adjudication_path.read_text(encoding="utf-8"))
     bundle = {
         "schema_version": 1,
-        "artifact_id": "cloudbox-6.0-final-task8-panel-red-evidence",
+        "artifact_id": args.output.stem,
         "sanitization": {
             "removed": ["provider response_id", "provider request_id", "absolute local paths"],
             "raw_judgments_preserved": True,
