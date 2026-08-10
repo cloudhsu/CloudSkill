@@ -3,7 +3,7 @@ from pathlib import Path
 import sys
 ROOT=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT/"scripts"))
-from review_assurance_contract import achieved_level, decide_review, evidence_applicable, load_review_policy, next_review_cells, required_level
+from review_assurance_contract import achieved_level, decide_review, evidence_applicable, load_review_policy, next_review_cells, required_level, validate_review_record
 
 def w(family, model, status="PASS"):
     return {"family":family,"canonical_model":model,"status":status,"model_identity_evidence":"provider_returned" if status!="BLOCKED" else None}
@@ -27,5 +27,11 @@ assert evidence_applicable(record,source_hash="1"*64,contract_hash="2"*64,packet
 assert not evidence_applicable(record,source_hash="9"*64,contract_hash="2"*64,packet_hash="3"*64,rubric_hash="4"*64,risk_class="low")
 assert next_review_cells({"workers":[],"blocking_findings":[]}, "L0_NONE", {"provider_calls":0})==[]
 assert next_review_cells({"workers":[],"blocking_findings":[{"severity":"High"}]}, "L1_CROSS_FAMILY_2X2", {"provider_calls":4})==[]
+persisted={"schema_version":1,"review_id":"R1","review_scope":"release","risk_class":"high","required_level":"L1_CROSS_FAMILY_2X2","achieved_level":"L1_CROSS_FAMILY_2X2","decision":"PASS","source_hash":"1"*64,"contract_hash":"2"*64,"packet_hash":"3"*64,"rubric_hash":"4"*64,"workers":[w("gpt","a")],"blocking_findings":[],"exception":None}
+assert "achieved_level does not match workers" in validate_review_record(persisted)
+persisted["achieved_level"]="L0_SINGLE_REVIEW"
+persisted["decision"]="BLOCKED"
+assert validate_review_record(persisted)==[]
+failed={**persisted,"workers":[w("gpt","a","FAIL")],"decision":"PASS"}
+assert "decision does not match review evidence" in validate_review_record(failed)
 print("Validated risk-based review assurance, degradation, evidence reuse, and token-aware scheduling")
-

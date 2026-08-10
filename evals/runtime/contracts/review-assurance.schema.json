@@ -13,6 +13,7 @@
     "decision":{"enum":["PASS","PASS_WITH_EXCEPTION","BLOCKED"]},
     "source_hash":{"type":"string","pattern":"^[0-9a-f]{64}$"},"contract_hash":{"type":"string","pattern":"^[0-9a-f]{64}$"},
     "packet_hash":{"type":"string","pattern":"^[0-9a-f]{64}$"},"rubric_hash":{"type":"string","pattern":"^[0-9a-f]{64}$"},
-    "workers":{"type":"array"},"blocking_findings":{"type":"array"},"exception":{"type":["object","null"]}
+    "workers":{"type":"array","items":{"type":"object","additionalProperties":true,"required":["family","canonical_model","status","model_identity_evidence"],"properties":{"family":{"type":"string","minLength":1},"canonical_model":{"type":"string","minLength":1},"status":{"enum":["PASS","FAIL","MANUAL_REQUIRED","BLOCKED","INVALID"]},"model_identity_evidence":{"type":["string","null"]}}}},
+    "blocking_findings":{"type":"array","items":{"type":"object","required":["severity"],"properties":{"severity":{"enum":["Info","Low","Medium","High","Critical"]},"veto":{"type":"boolean"}}}},"exception":{"type":["object","null"]}
   }
 }

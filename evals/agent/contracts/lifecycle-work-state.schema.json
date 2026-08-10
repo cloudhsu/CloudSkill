@@ -6,8 +6,8 @@
     "schema_version":{"const":1},"work_id":{"type":"string","minLength":1},"revision":{"type":"integer","minimum":0},
     "plan_id":{"type":"string","minLength":1},"plan_revision":{"type":"integer","minimum":1},
     "status":{"enum":["active","paused","interrupted","blocked","deferred","failed","complete"]},
-    "stage":{"type":"string"},"profiles":{"type":"array"},"authority":{"type":"object"},
-    "current_action":{"oneOf":[{"type":"null"},{"type":"object","additionalProperties":false,"required":["action_id","deduplication_key","plan_revision","authority_scope","attempt","max_attempts","state"],"properties":{"action_id":{"type":"string","minLength":1},"deduplication_key":{"type":"string","minLength":1},"plan_revision":{"type":"integer","minimum":1},"authority_scope":{"type":"array"},"attempt":{"type":"integer","minimum":1},"max_attempts":{"type":"integer","minimum":1},"state":{"enum":["pending","running","completed","uncertain","failed"]}}}]},
+    "stage":{"type":"string"},"profiles":{"type":"array"},"authority":{"type":"object","required":["approved_actions"],"properties":{"approved_actions":{"type":"array","items":{"type":"string","minLength":1},"uniqueItems":true},"prohibited_actions":{"type":"array","items":{"type":"string","minLength":1},"uniqueItems":true}}},
+    "current_action":{"oneOf":[{"type":"null"},{"type":"object","additionalProperties":false,"required":["action_id","deduplication_key","plan_revision","authority_scope","attempt","max_attempts","state"],"properties":{"action_id":{"type":"string","minLength":1},"deduplication_key":{"type":"string","minLength":1},"plan_revision":{"type":"integer","minimum":1},"authority_scope":{"type":"array","items":{"type":"string","minLength":1},"uniqueItems":true},"attempt":{"type":"integer","minimum":1},"max_attempts":{"type":"integer","minimum":1},"state":{"enum":["pending","running","completed","uncertain","failed"]}}}]},
     "review":{"type":"object"},"budgets":{"type":"object"},"lease":{"type":"object"},"completed_steps":{"type":"array"},"pause_reason":{"type":"string"},"budget_rejection":{"type":"object"}
   }
 }

@@ -33,10 +33,14 @@ with tempfile.TemporaryDirectory() as name:
     try: assert_fence(newer,"owner-a",leased["lease"]["fencing_token"])
     except ValueError: pass
     else: raise AssertionError("stale owner accepted")
-    save_state_atomic(path,newer,1,owner_id="owner-b",fencing_token=newer["lease"]["fencing_token"])
+    save_state_atomic(path,newer,1,owner_id="owner-b",fencing_token=newer["lease"]["fencing_token"],now=131)
     try: save_state_atomic(path,newer,2,owner_id="owner-a",fencing_token=leased["lease"]["fencing_token"])
     except ValueError: pass
     else: raise AssertionError("persistence boundary accepted stale fence")
+    over_authorized={**newer,"authority":{"approved_actions":["inspect"]},"current_action":{**newer["current_action"],"authority_scope":["inspect","publish"]}}
+    try: save_state_atomic(path,over_authorized,2,owner_id="owner-b",fencing_token=newer["lease"]["fencing_token"])
+    except ValueError as exc: assert "authority" in str(exc)
+    else: raise AssertionError("persistence boundary accepted expanded authority")
     assert reconcile_action(newer,lambda action:{"state":"completed"})=="ALREADY_COMPLETED"
     assert reconcile_action(newer,lambda action:{"state":"unknown"})=="RECONCILIATION_REQUIRED"
     cancelled=cancel_work(newer,"user pivot",lambda action:{"state":"completed"})

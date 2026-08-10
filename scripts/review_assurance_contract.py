@@ -60,8 +60,9 @@ def _valid_exception(exception: Any, required: str, achieved: str) -> bool:
     return isinstance(exception,dict) and set(exception)==EXCEPTION_FIELDS and exception.get("required_level")==required and exception.get("achieved_level")==achieved and all(isinstance(exception.get(key),str) and exception[key].strip() for key in EXCEPTION_FIELDS) and len(exception["source_hash"])==64
 
 
-def decide_review(required: str, achieved: str, findings: list[dict[str,Any]], exception: dict[str,Any] | None) -> dict[str,Any]:
-    if any(item.get("severity") in BLOCKING_SEVERITIES or item.get("veto") is True for item in findings):
+def decide_review(required: str, achieved: str, findings: list[dict[str,Any]], exception: dict[str,Any] | None, workers: list[dict[str,Any]] | None=None) -> dict[str,Any]:
+    unresolved_worker=workers is not None and any(item.get("status")!="PASS" for item in workers)
+    if unresolved_worker or any(item.get("severity") in BLOCKING_SEVERITIES or item.get("veto") is True for item in findings):
         decision="BLOCKED"
     elif level_rank(achieved)>=level_rank(required):
         decision="PASS"
@@ -70,6 +71,20 @@ def decide_review(required: str, achieved: str, findings: list[dict[str,Any]], e
     else:
         decision="BLOCKED"
     return {"required_level":required,"achieved_level":achieved,"decision":decision,"exception_used":decision=="PASS_WITH_EXCEPTION"}
+
+def validate_review_record(record: dict[str,Any]) -> list[str]:
+    errors=[]
+    workers=record.get("workers")
+    findings=record.get("blocking_findings")
+    if not isinstance(workers,list): return ["workers must be an array"]
+    if not isinstance(findings,list): return ["blocking_findings must be an array"]
+    computed=achieved_level(workers)
+    if record.get("achieved_level")!=computed: errors.append("achieved_level does not match workers")
+    try: decision=decide_review(record.get("required_level"),computed,findings,record.get("exception"),workers)["decision"]
+    except (TypeError,ValueError): errors.append("review levels are invalid")
+    else:
+        if record.get("decision")!=decision: errors.append("decision does not match review evidence")
+    return errors
 
 
 def evidence_applicable(record: dict[str,Any], *, source_hash: str, contract_hash: str, packet_hash: str, rubric_hash: str, risk_class: str) -> bool:
@@ -86,4 +101,3 @@ def next_review_cells(record: dict[str,Any], required: str, budget: dict[str,Any
     targets={"L0_SINGLE_REVIEW":1,"L3_SINGLE_FAMILY_PAIR":2,"L2_SINGLE_FAMILY_QUAD":4,"L1_CROSS_FAMILY_2X2":4}
     missing=max(0,targets[required]-len(canonical_independent_cells(record.get("workers",[]))))
     return [{"role":"efficient" if index==0 else "frontier","family":"diverse" if required=="L1_CROSS_FAMILY_2X2" else "single"} for index in range(min(missing,int(budget["provider_calls"])))]
-
