@@ -23,3 +23,10 @@ def reconcile_action(state:dict[str,Any],inspector:Callable[[dict[str,Any]],dict
     if external=="authority_required":return "AUTHORITY_REQUIRED"
     return "RECONCILIATION_REQUIRED"
 
+def cancel_work(state:dict[str,Any],reason:str,inspector:Callable[[dict[str,Any]],dict[str,Any]])->dict[str,Any]:
+    value=copy.deepcopy(state); action=value.get("current_action")
+    if action:
+        result=inspector(action)
+        value.setdefault("completed_steps",[]).append({"action_id":action.get("action_id"),"reconciled_state":result.get("state")})
+    value["current_action"]=None; value["status"]="paused"; value["pause_reason"]=reason
+    return value

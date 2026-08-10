@@ -3,10 +3,11 @@ from pathlib import Path
 import json,sys,tempfile
 ROOT=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT/"scripts"))
-from lifecycle_orchestration_contract import classify_failure, load_profiles, select_profiles
+from lifecycle_orchestration_contract import classify_failure, deployment_decision, load_profiles, select_profiles
 from lifecycle_plan_contract import create_plan, replan
 from lifecycle_state_store import load_state, save_state_atomic
-from lifecycle_reconciliation import acquire_lease, assert_fence, reconcile_action
+from lifecycle_reconciliation import acquire_lease, assert_fence, cancel_work, reconcile_action
+from lifecycle_review_adapter import consume_budget, plan_review
 
 profiles=load_profiles(ROOT/"config/lifecycle-profiles.json")
 assert select_profiles({"work_type":"development","risk":"low"},profiles)==["iterative_incremental"]
@@ -34,5 +35,13 @@ with tempfile.TemporaryDirectory() as name:
     else: raise AssertionError("stale owner accepted")
     assert reconcile_action(newer,lambda action:{"state":"completed"})=="ALREADY_COMPLETED"
     assert reconcile_action(newer,lambda action:{"state":"unknown"})=="RECONCILIATION_REQUIRED"
+    cancelled=cancel_work(newer,"user pivot",lambda action:{"state":"completed"})
+    assert cancelled["status"]=="paused" and cancelled["current_action"] is None
+budgeted=consume_budget({"status":"active","budgets":{"tokens":{"limit":10,"used":8}}},"tokens",3)
+assert budgeted["status"]=="paused" and budgeted["budgets"]["tokens"]["used"]==11
+review=plan_review({"review":{"required_level":"L3_SINGLE_FAMILY_PAIR"},"budgets":{"provider_calls":{"limit":2,"used":0}}},{"workers":[],"blocking_findings":[]})
+assert len(review["next_cells"])==2 and review["achieved_level"]=="L0_NONE"
+assert deployment_decision({"status":"deployed"},{"observation_complete":False})=="HOLD"
+assert deployment_decision({"status":"observing"},{"observation_complete":True,"hard_gate_breached":True})=="ROLLBACK"
+assert deployment_decision({"status":"observing"},{"observation_complete":True,"hard_gate_breached":False})=="ADVANCE"
 print("Validated composable planning, risk replan, durable state, fencing, and interruption reconciliation")
-

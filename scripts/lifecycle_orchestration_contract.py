@@ -32,3 +32,8 @@ def classify_failure(observation: dict[str,Any])->str:
     if mechanism=="implementation":return "implement"
     raise ValueError("failure mechanism is insufficient for re-entry")
 
+def deployment_decision(state:dict[str,Any],health_evidence:dict[str,Any])->str:
+    if state.get("status") not in {"deployed","observing"}: return "AUTHORITY_REQUIRED"
+    if not health_evidence.get("observation_complete"): return "HOLD"
+    if health_evidence.get("hard_gate_breached"): return "ROLLBACK"
+    return "ADVANCE"
