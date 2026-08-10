@@ -2,6 +2,23 @@
 
 This document records the evolution rationale and evidence chain for work that may span multiple conversations. Git commits and tags remain the authoritative source history.
 
+## 2026-08-11 — CloudBox 6.2 adaptive lifecycle release candidate
+
+CloudBox 6.2 adds risk-selected Review Assurance and a composable, resumable
+lifecycle owner rather than a fixed waterfall. Deterministic RED/GREEN and
+independent review corrected authority, fencing, retry, budget, review-lineage,
+cross-family scheduling, exception, durability, and grant-history defects.
+Source candidate `a364cea` (tree `ba76a24`) passes the complete suite and the
+final GPT-5.4/GPT-5.5/Claude Sonnet/Claude Opus 2x2. Exact evidence hashes and
+pending operational gates are recorded in
+`docs/releases/6.2.0-pre-release-evidence.md`.
+
+Two later-version decisions are also preserved without expanding 6.2 scope:
+controlled CLI/MCP tool adapters, and a public CloudBox Core plus locally
+installable private Evolution Pack. The private pack starts as a sibling local
+Git repository with no remote or upload; later private GitHub creation is a
+separate authorized operation.
+
 ## 2026-08-10 — CloudBox 6.1.0 publication verified
 
 PR `#8` merged the reviewed 6.1 candidate into `main` as `4da337f`.
