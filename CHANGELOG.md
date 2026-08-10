@@ -1,5 +1,15 @@
 # Changelog
 
+## 6.2.0
+
+### Adaptive lifecycle and review assurance
+
+- Added composable lifecycle profiles with versioned plans, risk-triggered replanning, durable checkpoints, interruption reconciliation, action identity, budgets, and deployment-versus-operational closure.
+- Added risk-selected Review Assurance levels from deterministic-only checks through cross-family 2x2 review, with truthful achieved levels, hash-bound exceptions, blocking vetoes, and token-aware scheduling.
+- Hardened lifecycle persistence with revision checks, fencing-token lease turnover, authority-scope enforcement, atomic replacement, and directory durability synchronization.
+- Added executable contracts, behavior cases, documentation, and repository-wide deterministic validation for the new lifecycle and review mechanisms.
+- Recorded controlled external CLI/MCP adapters as a post-6.2 evolution discussion; no new external execution authority is introduced by this release.
+
 ## 6.1.0
 
 ### Git-first evolution intake and architecture elicitation
