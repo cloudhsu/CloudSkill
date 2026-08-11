@@ -15,6 +15,14 @@ This is the operational entry point for a new conversation or coding agent that 
 
 ## Current repository state
 
+### CloudBox 6.3.0 published and remotely verified (2026-08-11)
+
+- PR `#13` merged as `65e89b3`; annotated tag `v6.3.0` peels to that merge.
+- The GitHub Release is published, non-draft, and non-prerelease.
+- Main-push run `31493279127` and tag-push run `31493326320` both passed.
+- Exact identifiers and rollback notes are in
+  `docs/releases/6.3.0-post-release-record.md`.
+
 ### Manual Eval ZIP exchange candidate (2026-08-11)
 
 - The unreleased 6.3 controlled-tool experiment was withdrawn after review
