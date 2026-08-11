@@ -150,12 +150,16 @@ with tempfile.TemporaryDirectory(prefix="cloudbox-git-adapter-") as temp_name:
     uncertain = save_action_atomic(reconcile_path, uncertain, uncertain["revision"], owner_id=context.owner_id, fencing_token=context.fencing_token, now=context.now_epoch)
     uncertain = transition_action(uncertain, "UNCERTAIN", {"reason": "fixture transport loss"})
     save_action_atomic(reconcile_path, uncertain, uncertain["revision"], owner_id=context.owner_id, fencing_token=context.fencing_token, now=context.now_epoch)
+    (seed / "README.md").write_text("three\n", encoding="utf-8")
+    git(["commit", "-am", "three"], seed)
+    git(["push", "origin", "HEAD:main"], seed)
     reconciled = reconcile_prepared(reconcile_preparation, reconcile_path, context)
     if reconciled["state"] != "SUCCEEDED" or reconciled["output"].get("status") != "OBSERVED_COMPLETE":
         errors.append(f"Git fetch reconciliation did not observe authoritative remote/local refs: {reconciled}")
 
     observation_invocation = invocation("git.fetch", 8, {"repository": "clone", "remote": "origin"}, "grant-000001")
     observation_preparation = prepare_v2(observation_invocation, registry, context)
+    git(["fetch", "origin"], clone)
     git(["remote", "set-url", "origin", str(root / "missing-remote.git")], clone)
     observation_path = root / "actions/reconcile-observation-failure.json"
     uncertain = save_action_atomic(observation_path, observation_preparation.action, 0, owner_id=context.owner_id, fencing_token=context.fencing_token, now=context.now_epoch)
@@ -166,8 +170,8 @@ with tempfile.TemporaryDirectory(prefix="cloudbox-git-adapter-") as temp_name:
     uncertain = transition_action(uncertain, "UNCERTAIN", {"reason": "fixture transport loss"})
     save_action_atomic(observation_path, uncertain, uncertain["revision"], owner_id=context.owner_id, fencing_token=context.fencing_token, now=context.now_epoch)
     observation = reconcile_prepared(observation_preparation, observation_path, context)
-    if observation["state"] != "UNCERTAIN" or load_action(observation_path)["state"] != "UNCERTAIN":
-        errors.append("reconciliation observation failure was misclassified as terminal")
+    if observation["state"] != "SUCCEEDED" or load_action(observation_path)["state"] != "SUCCEEDED":
+        errors.append("prepared-ref reconciliation was incorrectly coupled to the later remote endpoint")
     git(["remote", "set-url", "origin", str(remote)], clone)
 
     empty_remote = root / "empty.git"
@@ -222,11 +226,30 @@ with tempfile.TemporaryDirectory(prefix="cloudbox-git-adapter-") as temp_name:
         archive.writestr("manifest.json", json.dumps(manifest))
         archive.writestr(payload_name, payload)
     import_request = invocation("git.import_bundle", 5, {"inbox": "inbox", "dry_run": False}, "grant-000001")
-    imported = execute_prepared(prepare_v2(import_request, registry, context), root / "actions/import.json", context)
+    prepared_import = prepare_v2(import_request, registry, context)
+    late_archive = imports / "late-arrival.zip"
+    late_archive.write_bytes((imports / "adapter-fixture.zip").read_bytes())
+    imported = execute_prepared(prepared_import, root / "actions/import.json", context)
     if imported["state"] != "SUCCEEDED" or imported["output"].get("candidates") != 1:
         errors.append("adapter import did not preserve configured safe-candidate routing")
+    import_state = load_action(root / "actions/import.json")
+    if not import_state.get("target_evidence") or any(item.get("target_digest") != prepared_import.invocation["operation_targets"]["digest"] for item in import_state["target_evidence"]):
+        errors.append("per-archive completion evidence was not bound to the durable target digest")
     if len(list((inbox / "candidates").glob("*.json"))) != 1 or list((inbox / "manual-review").glob("*.json")):
         errors.append("adapter and manual importer private-term routing diverged")
+    if not late_archive.is_file():
+        errors.append("late bundle arrival was consumed by an older prepared action")
+    late_archive.unlink()
+
+    replacement = imports / "replacement.zip"
+    replacement.write_bytes((imports / "processed" / "adapter-fixture.zip").read_bytes())
+    replacement_request = invocation("git.import_bundle", 11, {"inbox": "inbox", "dry_run": False}, "grant-000001")
+    prepared_replacement = prepare_v2(replacement_request, registry, context)
+    replacement.write_bytes(b"different archive identity")
+    replacement_result = execute_prepared(prepared_replacement, root / "actions/replacement.json", context)
+    if replacement_result["state"] != "FAILED" or not replacement.is_file():
+        errors.append("same-name bundle replacement was not rejected before import")
+    replacement.unlink()
 
     totals = import_archives(inbox, ["PrivateFixtureTerm"], True)
     if totals.get("archives") != 0:

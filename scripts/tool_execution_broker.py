@@ -278,6 +278,21 @@ def _claim_expired_lease(action: dict[str, Any], prepared: PreparedInvocation, a
     )
 
 
+def _append_target_evidence(action: dict[str, Any], prepared: PreparedInvocation, result: dict[str, Any]) -> dict[str, Any]:
+    items = result.get("output", {}).get("target_evidence", [])
+    if not isinstance(items, list):
+        return action
+    value = json.loads(json.dumps(action))
+    for item in items:
+        if isinstance(item, dict):
+            value.setdefault("target_evidence", []).append({
+                "action_id": action["action_id"],
+                "target_digest": prepared.invocation["operation_targets"]["digest"],
+                **item,
+            })
+    return value
+
+
 def execute_prepared(prepared: PreparedInvocation, action_path: Path, context: ExecutionContext) -> dict[str, Any]:
     if not reserve_idempotency(
         action_path.parent, prepared.action["idempotency_key"],
@@ -317,6 +332,7 @@ def execute_prepared(prepared: PreparedInvocation, action_path: Path, context: E
 
     result = _invoke_adapter(prepared, "execute")
 
+    action = _append_target_evidence(action, prepared, result)
     terminal_evidence = {"result_hash": result["output_hash"], "diagnostics": result["diagnostics"]}
     action = transition_action(action, result["state"], terminal_evidence)
     save_action_atomic(action_path, action, action["revision"], **persistence)
@@ -338,6 +354,7 @@ def reconcile_prepared(prepared: PreparedInvocation, action_path: Path, context:
     action = _claim_expired_lease(action, prepared, action_path, context)
     result = _invoke_adapter(prepared, "reconcile")
     persistence = {"owner_id": context.owner_id, "fencing_token": context.fencing_token, "now": context.now_epoch}
+    action = _append_target_evidence(action, prepared, result)
     reconciliation = {"result_hash": result["output_hash"], "state": result["state"], "diagnostics": result["diagnostics"]}
     if result["state"] == "UNCERTAIN":
         action = json.loads(json.dumps(action))

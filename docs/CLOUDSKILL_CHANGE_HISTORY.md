@@ -153,6 +153,18 @@ and canonical digest validity. V1 invocation/action contracts fail closed and
 are retained for manual diagnosis rather than migration. Focused executable
 evidence passes; execute/reconcile still require exact-target conversion.
 
+## 2026-08-11 — Exact-target execution and reconciliation implemented
+
+Git fetch now uses explicit prepared object-ID refspecs without tags or prune,
+then verifies the intended remote-tracking destinations. Reconciliation consults
+only the immutable target set, preventing later remote advances from changing an
+older outcome. Controlled bundle import preflights and processes only listed
+path/hash/size identities; late arrivals remain untouched and same-name content
+replacement fails before import. Durable action evidence binds each observed
+target outcome to the action and canonical target digest. Existing manual import
+continues to scan its Inbox dynamically. Focused deterministic evidence passes;
+full regression and fresh release assurance remain pending.
+
 ## 2026-08-11 — Public/private package split deferred
 
 The user retained the public Core/private Evolution Pack design but explicitly

@@ -12,7 +12,7 @@ import time
 from pathlib import Path
 from typing import Any
 
-from import_eval_candidates import import_archives, resolve_private_terms
+from import_eval_candidates import import_selected_archives, resolve_private_terms
 from tool_adapter_contract import canonical_target_digest
 
 
@@ -70,7 +70,7 @@ def _prepare(capability: str, arguments: dict[str, Any], secrets: dict[str, str]
     return "SUCCEEDED", "immutable operation targets prepared", {"operation_targets": targets}, []
 
 
-def _execute(capability: str, arguments: dict[str, Any], secrets: dict[str, str]) -> tuple[str, str, dict[str, Any], list[str]]:
+def _execute(capability: str, arguments: dict[str, Any], targets: dict[str, Any], secrets: dict[str, str]) -> tuple[str, str, dict[str, Any], list[str]]:
     if capability == "git.inspect":
         output, effects = _inspect(Path(arguments["repository"]))
         return "SUCCEEDED", "repository inspected", output, effects
@@ -82,52 +82,77 @@ def _execute(capability: str, arguments: dict[str, Any], secrets: dict[str, str]
             raise ValueError("requested remote is not registered in repository")
         if _git(["remote", "get-url", remote], repository) != secrets["SOURCE_REMOTE_URL"]:
             raise ValueError("registered remote URL is not host-authorized")
-        before = _ref_fingerprint(repository, remote)
-        _git(["fetch", "--no-tags", "--prune", remote], repository)
-        after = _ref_fingerprint(repository, remote)
-        status = "NO_CHANGE" if before == after else "UPDATED"
-        return "SUCCEEDED", "registered remote fetched", {"status": status, "refs_hash": after}, [f"remote-tracking refs: {status.lower()}"]
+        refspecs = []
+        evidence = []
+        for item in targets["items"]:
+            branch = item["ref"][len("refs/heads/"):]
+            destination = f"refs/remotes/{remote}/{branch}"
+            refspecs.append(f"+{item['object_id']}:{destination}")
+        if refspecs:
+            _git(["fetch", "--no-tags", remote, *refspecs], repository)
+        for item in targets["items"]:
+            branch = item["ref"][len("refs/heads/"):]
+            destination = f"refs/remotes/{remote}/{branch}"
+            observed = _git(["rev-parse", destination], repository)
+            if observed != item["object_id"]:
+                raise RuntimeError("prepared fetch target was not installed")
+            evidence.append({"ref": item["ref"], "object_id": observed, "outcome": "INSTALLED"})
+        return "SUCCEEDED", "prepared Git refs fetched", {"status": "TARGETS_INSTALLED", "target_evidence": evidence}, ["prepared remote-tracking refs installed"]
     if capability == "git.import_bundle":
         inbox = Path(arguments["inbox"])
         config_path = Path(secrets["CLOUDSKILL_CONFIG_PATH"])
         terms = resolve_private_terms(inbox, config_path)
         captured = io.StringIO()
         with contextlib.redirect_stdout(captured):
-            totals = import_archives(inbox, terms, bool(arguments.get("dry_run", False)))
+            totals = import_selected_archives(inbox, targets["items"], terms, bool(arguments.get("dry_run", False)))
         return "SUCCEEDED", "versioned bundle import inspected", totals, ["local Eval Inbox import queues evaluated"]
     raise ValueError("unknown registered Git capability")
 
 
-def _reconcile(capability: str, arguments: dict[str, Any], secrets: dict[str, str]) -> tuple[str, str, dict[str, Any], list[str]]:
+def _reconcile(capability: str, arguments: dict[str, Any], targets: dict[str, Any], secrets: dict[str, str]) -> tuple[str, str, dict[str, Any], list[str]]:
     if capability == "git.fetch":
         repository = Path(arguments["repository"])
         remote = arguments["remote"]
-        if remote not in set(_git(["remote"], repository).splitlines()):
-            raise ValueError("requested remote is not registered in repository")
-        if _git(["remote", "get-url", remote], repository) != secrets["SOURCE_REMOTE_URL"]:
-            raise ValueError("registered remote URL is not host-authorized")
-        advertised: dict[str, str] = {}
-        for row in _git(["ls-remote", "--heads", remote], repository).splitlines():
-            object_id, ref = row.split(None, 1)
-            heads_prefix = "refs/heads/"
-            advertised[ref[len(heads_prefix):] if ref.startswith(heads_prefix) else ref] = object_id
-        local: dict[str, str] = {}
-        prefix = f"refs/remotes/{remote}/"
-        rows = _git(["for-each-ref", "--format=%(refname) %(objectname)", prefix], repository)
-        for row in rows.splitlines():
-            ref, object_id = row.split(None, 1)
-            branch = ref[len(prefix):] if ref.startswith(prefix) else ref
-            if branch != "HEAD":
-                local[branch] = object_id
-        complete = advertised == local
-        state = "SUCCEEDED" if complete else "FAILED"
-        return state, "Git fetch reconciliation completed", {"status": "OBSERVED_COMPLETE" if complete else "OBSERVED_INCOMPLETE"}, []
+        evidence = []
+        incomplete = False
+        for item in targets["items"]:
+            branch = item["ref"][len("refs/heads/"):]
+            destination = f"refs/remotes/{remote}/{branch}"
+            try:
+                observed = _git(["rev-parse", destination], repository)
+            except RuntimeError:
+                incomplete = True
+                observed = None
+            matched = observed == item["object_id"]
+            incomplete = incomplete or not matched
+            evidence.append({"ref": item["ref"], "object_id": item["object_id"], "observed_object_id": observed, "outcome": "MATCHED" if matched else "NOT_OBSERVED"})
+        if not targets["items"]:
+            rows = _git(["for-each-ref", "--format=%(refname)", f"refs/remotes/{remote}/"], repository)
+            incomplete = any(row and not row.endswith("/HEAD") for row in rows.splitlines())
+        state = "UNCERTAIN" if incomplete else "SUCCEEDED"
+        return state, "Git fetch reconciliation completed", {"status": "OBSERVED_INCOMPLETE" if incomplete else "OBSERVED_COMPLETE", "target_evidence": evidence}, []
     if capability == "git.import_bundle":
         inbox = Path(arguments["inbox"])
-        pending = sorted(path.name for path in (inbox / "imports").glob("*.zip")) if (inbox / "imports").is_dir() else []
-        complete = not pending
-        state = "SUCCEEDED" if complete else "FAILED"
-        return state, "bundle import reconciliation completed", {"status": "OBSERVED_COMPLETE" if complete else "OBSERVED_PENDING", "pending_count": len(pending)}, []
+        evidence = []
+        state = "SUCCEEDED"
+        for item in targets["items"]:
+            pending = inbox / item["relative_path"]
+            processed = inbox / "imports" / "processed" / pending.name
+            unsupported = inbox / "imports" / "unsupported" / pending.name
+            if pending.is_file():
+                observed = hashlib.sha256(pending.read_bytes()).hexdigest()
+                outcome = "PENDING" if observed == item["sha256"] else "IDENTITY_CONFLICT"
+                state = "FAILED" if outcome == "PENDING" and state == "SUCCEEDED" else "BLOCKED"
+            elif processed.is_file() and hashlib.sha256(processed.read_bytes()).hexdigest() == item["sha256"]:
+                outcome = "PROCESSED"
+            elif unsupported.is_file() and hashlib.sha256(unsupported.read_bytes()).hexdigest() == item["sha256"]:
+                outcome = "UNSUPPORTED"
+            else:
+                outcome = "NOT_OBSERVED"
+                if state not in {"BLOCKED", "FAILED"}:
+                    state = "UNCERTAIN"
+            evidence.append({"relative_path": item["relative_path"], "sha256": item["sha256"], "outcome": outcome})
+        return state, "bundle import reconciliation completed", {"status": "OBSERVED_COMPLETE" if state == "SUCCEEDED" else "OBSERVED_INCOMPLETE", "target_evidence": evidence}, []
     raise ValueError("capability does not support reconciliation")
 
 
@@ -160,9 +185,9 @@ def main() -> int:
         if operation == "prepare":
             state, summary, output, effects = _prepare(request["capability_id"], request["arguments"], request.get("secrets", {}))
         elif operation == "reconcile":
-            state, summary, output, effects = _reconcile(request["capability_id"], request["arguments"], request.get("secrets", {}))
+            state, summary, output, effects = _reconcile(request["capability_id"], request["arguments"], request["operation_targets"], request.get("secrets", {}))
         else:
-            state, summary, output, effects = _execute(request["capability_id"], request["arguments"], request.get("secrets", {}))
+            state, summary, output, effects = _execute(request["capability_id"], request["arguments"], request["operation_targets"], request.get("secrets", {}))
         result = make_result(request, state, summary, output, effects, [], int((time.monotonic() - started) * 1000))
     except (KeyError, OSError, RuntimeError, ValueError, subprocess.TimeoutExpired) as exc:
         state = "UNCERTAIN" if request.get("operation") == "reconcile" else "FAILED"

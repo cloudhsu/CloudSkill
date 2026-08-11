@@ -208,6 +208,21 @@ This is the operational entry point for a new conversation or coding agent that 
   temporary-Git validators pass. Exact-target execution/reconciliation is the
   next open layer; full-suite GREEN is not yet claimed.
 
+### CloudBox 6.3 exact-target execution GREEN (2026-08-11)
+
+- Fetch execution now installs only prepared ref/object-ID refspecs without tags
+  or implicit prune. Reconciliation reads only those immutable targets, so a
+  later remote advance or endpoint loss cannot redefine an older action.
+- Controlled bundle import preflights and processes only prepared relative
+  path/hash/size items. Late archives remain pending for a new action and
+  same-name content replacement is rejected before import. Manual import still
+  scans dynamically through its unchanged entry point.
+- Broker durable state appends per-target evidence bound to action ID and target
+  digest without increasing attempts during reconciliation. Focused contract,
+  broker, recovery, Git, and interaction-capture validators pass.
+- Next: documentation synchronization and complete-suite regression. Release
+  review/version/push remain gated.
+
 ### CloudBox 6.2.0 published and remotely verified (2026-08-11)
 
 - PR `#10` merged as `6be22cd`; annotated tag `v6.2.0` peels to that
