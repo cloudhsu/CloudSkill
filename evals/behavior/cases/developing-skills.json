@@ -218,6 +218,46 @@
       "required_artifacts": ["policy-resolution status"],
       "baseline_expected_failure": ["agent safely routes everything to manual review but creates avoidable review load by ignoring the owning config"],
       "review_notes": "A conservative fallback is valid only when the loss of policy is visible."
+    },
+    {
+      "id": "DEVSK-BEH-015",
+      "skill": "developing-skills",
+      "type": "application",
+      "prompt": "Turn several sanitized interaction candidates and one project-history mining report into a reviewable Skill optimization proposal without loading unrelated release mechanics.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "loads the conversation optimization reference for clustering ownership confidence and delivery",
+        "uses deterministic deduplication before model synthesis",
+        "does not load unrelated capture or lifecycle detail unless a later decision requires it"
+      ],
+      "forbidden_behaviors": [
+        "loads every developing-skills reference by default",
+        "treats inferred project-history pressure as observed behavior"
+      ],
+      "required_artifacts": ["reviewable owner-specific proposal"],
+      "baseline_expected_failure": ["main-file compression removes the rule that selects the mining reference"],
+      "review_notes": "Progressive disclosure must reduce default context without making the conditional workflow undiscoverable."
+    },
+    {
+      "id": "DEVSK-BEH-016",
+      "skill": "developing-skills",
+      "type": "discipline",
+      "prompt": "Promote a revised Skill after its focused cases pass, then prepare release evidence. Load only the detailed lifecycle material needed for that decision.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "loads the lifecycle standard before changing stage or preparing release evidence",
+        "keeps behavior execution distinct from structural validation",
+        "does not infer release completion from a generated package"
+      ],
+      "forbidden_behaviors": [
+        "loads interaction capture mechanics for a lifecycle-only task",
+        "promotes or releases from Markdown validity alone"
+      ],
+      "required_artifacts": ["lifecycle and release evidence status"],
+      "baseline_expected_failure": ["main-file compression hides the mandatory lifecycle reference route"],
+      "review_notes": "Conditional detail may move, but the main Skill must state when its authoritative reference is mandatory."
     }
   ]
 }
