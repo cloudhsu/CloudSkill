@@ -11,6 +11,7 @@ sys.path.insert(0, str(ROOT / "scripts"))
 
 from tool_adapter_contract import (  # noqa: E402
     REGISTRY_PATH,
+    canonical_target_digest,
     get_capability,
     load_registry,
     validate_action_state,
@@ -21,9 +22,11 @@ from tool_adapter_contract import (  # noqa: E402
 
 errors: list[str] = []
 registry = load_registry(REGISTRY_PATH)
+no_targets = {"kind": "none", "items": []}
+no_targets = {**no_targets, "digest": canonical_target_digest(no_targets)}
 
 valid_invocation = {
-    "contract_version": "1.0",
+    "contract_version": "2.0",
     "adapter_id": "git-local",
     "capability_id": "git.inspect",
     "action_id": "act-00000001",
@@ -31,6 +34,7 @@ valid_invocation = {
     "plan_id": "plan-00000001",
     "plan_revision": 1,
     "arguments": {"repository": "fixture"},
+    "operation_targets": no_targets,
     "authority_grant_id": None,
     "deadline": "2026-08-11T12:00:00Z",
 }
@@ -99,7 +103,7 @@ if not validate_result(bad_hash):
     errors.append("result output_hash mismatch was accepted")
 
 valid_action = {
-    "schema_version": 1,
+    "schema_version": 2,
     "revision": 1,
     "action_id": "act-00000001",
     "idempotency_key": "idem-00000001",
@@ -112,6 +116,8 @@ valid_action = {
     "attempt": 0,
     "max_attempts": 1,
     "input_hash": "0" * 64,
+    "operation_targets": no_targets,
+    "target_evidence": [],
     "authority_grant_id": None,
     "evidence": [],
     "lease": None,

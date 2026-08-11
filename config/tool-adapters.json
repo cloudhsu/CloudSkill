@@ -1,6 +1,6 @@
 {
-  "schema_version": 1,
-  "protocol_version": "1.0",
+  "schema_version": 2,
+  "protocol_version": "2.0",
   "adapters": [
     {
       "adapter_id": "git-local",
@@ -23,6 +23,8 @@
           "idempotent": true,
           "supports_reconciliation": false,
           "max_output_bytes": 4096,
+          "target_kind": "none",
+          "max_target_items": 0,
           "argument_schema": {"type": "object", "additionalProperties": false, "required": ["repository"], "properties": {"repository": {"type": "string", "minLength": 1, "maxLength": 128}}}
         },
         {
@@ -36,6 +38,8 @@
           "idempotent": true,
           "supports_reconciliation": true,
           "max_output_bytes": 4096,
+          "target_kind": "git-fetch-refs",
+          "max_target_items": 256,
           "argument_schema": {"type": "object", "additionalProperties": false, "required": ["repository", "remote"], "properties": {"repository": {"type": "string", "minLength": 1, "maxLength": 128}, "remote": {"type": "string", "pattern": "^[A-Za-z0-9._-]{1,64}$"}}}
         },
         {
@@ -49,6 +53,8 @@
           "idempotent": true,
           "supports_reconciliation": true,
           "max_output_bytes": 8192,
+          "target_kind": "eval-bundle-archives",
+          "max_target_items": 256,
           "argument_schema": {"type": "object", "additionalProperties": false, "required": ["inbox"], "properties": {"inbox": {"type": "string", "minLength": 1, "maxLength": 128}, "dry_run": {"type": "boolean"}}}
         }
       ]

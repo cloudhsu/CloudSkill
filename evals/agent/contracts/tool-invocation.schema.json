@@ -3,9 +3,9 @@
   "title": "CloudBox controlled tool invocation",
   "type": "object",
   "additionalProperties": false,
-  "required": ["contract_version", "adapter_id", "capability_id", "action_id", "idempotency_key", "plan_id", "plan_revision", "arguments", "authority_grant_id", "deadline"],
+  "required": ["contract_version", "adapter_id", "capability_id", "action_id", "idempotency_key", "plan_id", "plan_revision", "arguments", "operation_targets", "authority_grant_id", "deadline"],
   "properties": {
-    "contract_version": {"const": "1.0"},
+    "contract_version": {"const": "2.0"},
     "adapter_id": {"type": "string", "pattern": "^[a-z][a-z0-9._-]{2,63}$"},
     "capability_id": {"type": "string", "pattern": "^[a-z][a-z0-9._-]{2,63}$"},
     "action_id": {"type": "string", "pattern": "^act-[a-z0-9][a-z0-9-]{7,63}$"},
@@ -13,6 +13,16 @@
     "plan_id": {"type": "string", "pattern": "^plan-[a-z0-9][a-z0-9-]{7,63}$"},
     "plan_revision": {"type": "integer", "minimum": 1},
     "arguments": {"type": "object", "maxProperties": 32},
+    "operation_targets": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "digest", "items"],
+      "properties": {
+        "kind": {"enum": ["none", "git-fetch-refs", "eval-bundle-archives"]},
+        "digest": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "items": {"type": "array", "maxItems": 256, "items": {"type": "object"}}
+      }
+    },
     "authority_grant_id": {"type": ["string", "null"], "pattern": "^grant-[a-z0-9][a-z0-9-]{5,63}$"},
     "deadline": {"type": "string", "minLength": 20, "maxLength": 40}
   }

@@ -184,6 +184,18 @@ This is the operational entry point for a new conversation or coding agent that 
   drift and inbox-wide late archive consumption. Production v2 edits remain
   prohibited until this contract RED is observed.
 
+### CloudBox 6.3 immutable-target contract v2 GREEN (2026-08-11)
+
+- The preserved contract RED failed on the missing canonical target API as
+  expected. Registry/protocol schema 2, invocation contract 2.0, and durable
+  action schema 2 now require target kind, bounded items, and canonical digest.
+- `validate_operation_targets` rejects digest drift, duplicate/unsorted items,
+  mismatched capability kind, invalid refs/object IDs, archive path escape,
+  invalid hashes/sizes, and excessive target count.
+- `validate_immutable_operation_targets.py` and the authoritative adapter
+  contract validator pass. Broker/adapters and their v1 fixtures are intentionally
+  the next open layer; the complete suite is not yet GREEN.
+
 ### CloudBox 6.2.0 published and remotely verified (2026-08-11)
 
 - PR `#10` merged as `6be22cd`; annotated tag `v6.2.0` peels to that

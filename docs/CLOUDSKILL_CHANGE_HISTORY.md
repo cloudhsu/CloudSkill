@@ -133,6 +133,16 @@ so the first run must fail before production contract changes. The sixth review'
 temporary Git/inbox reproductions remain evidence for the two external-resource
 identity failures that caused the architecture stop.
 
+## 2026-08-11 — Immutable operation-target contract v2 implemented
+
+After observing the missing-API RED, the authoritative registry and invocation/
+action schemas moved together to version 2. The shared interpreter recomputes
+canonical target digests and enforces capability-specific closed target items,
+bounds, stable ordering, uniqueness, Git ref/object identity, and root-relative
+bundle archive identity. Focused immutable-target and contract mutation evidence
+passes. Execution and reconciliation remain on the old layer and the complete
+suite is intentionally not claimed.
+
 ## 2026-08-11 — Public/private package split deferred
 
 The user retained the public Core/private Evolution Pack design but explicitly
