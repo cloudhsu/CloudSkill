@@ -42,13 +42,19 @@ python3 scripts/cloudskill_evolution.py tool invoke \
   --invocation .local/tool-actions/invocation.json \
   --state-dir .local/tool-actions/state \
   --root-ref REPOSITORY_ROOT=/approved/repository/parent \
-  --authority git.fetch
+  --authority git.fetch \
+  --owner-id operator-session-1 \
+  --fencing-token 1
 ```
 
 Root references are operator/host policy. An invocation contains a path relative
 to that root and cannot select an arbitrary working directory or executable.
 Read-only `git.inspect` does not need an authority flag. Mutating operations
 need the exact authority declared by the registry.
+Mutating operations also require a lifecycle-owner identity and monotonically
+increasing fencing token. A resumed or replacement owner must reconcile the
+existing checkpoint before acquiring a higher token; it must not delete the
+checkpoint to force another execution.
 
 If an adapter later requires a private endpoint or token, the registry stores
 only a reference such as `SOURCE_REMOTE_URL`. Bind it to an environment variable

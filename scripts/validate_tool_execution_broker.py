@@ -52,7 +52,7 @@ def invocation(mode: str = "success") -> dict:
         "plan_revision": 1,
         "arguments": {"repository": "repo", "mode": mode},
         "authority_grant_id": "grant-000001",
-        "deadline": "2026-08-11T12:00:00Z",
+        "deadline": "2099-08-11T12:00:00Z",
     }
 
 
@@ -65,6 +65,9 @@ with tempfile.TemporaryDirectory(prefix="cloudbox-tool-broker-") as temp_name:
         secret_values={"FIXTURE_SECRET": "private-value"},
         approved_authority={"fixture.execute"},
         repository_root=ROOT,
+        owner_id="fixture-owner",
+        fencing_token=1,
+        now_epoch=1760000000,
     )
     prepared = prepare_invocation(invocation(), registry(), context)
     if isinstance(prepared.argv, str) or prepared.argv[:2] != [sys.executable, str(FIXTURE)]:
@@ -87,7 +90,7 @@ with tempfile.TemporaryDirectory(prefix="cloudbox-tool-broker-") as temp_name:
         else:
             errors.append(f"{label} was accepted")
 
-    no_authority = ExecutionContext(root_refs=context.root_refs, secret_values=context.secret_values, approved_authority=set(), repository_root=ROOT)
+    no_authority = ExecutionContext(root_refs=context.root_refs, secret_values=context.secret_values, approved_authority=set(), repository_root=ROOT, owner_id="fixture-owner", fencing_token=1, now_epoch=1760000000)
     try:
         prepare_invocation(invocation(), registry(), no_authority)
     except ValueError:
@@ -95,7 +98,7 @@ with tempfile.TemporaryDirectory(prefix="cloudbox-tool-broker-") as temp_name:
     else:
         errors.append("mutation without authority was accepted")
 
-    missing_secret = ExecutionContext(root_refs=context.root_refs, secret_values={}, approved_authority=context.approved_authority, repository_root=ROOT)
+    missing_secret = ExecutionContext(root_refs=context.root_refs, secret_values={}, approved_authority=context.approved_authority, repository_root=ROOT, owner_id="fixture-owner", fencing_token=1, now_epoch=1760000000)
     try:
         prepare_invocation(invocation(), registry(), missing_secret)
     except ValueError:
@@ -112,6 +115,16 @@ with tempfile.TemporaryDirectory(prefix="cloudbox-tool-broker-") as temp_name:
     else:
         errors.append("executable provenance drift was accepted")
 
+    expired = invocation()
+    expired["deadline"] = "2000-01-01T00:00:00Z"
+    try:
+        prepare_invocation(expired, registry(), context)
+    except ValueError as exc:
+        if "deadline" not in str(exc):
+            errors.append("expired invocation failed for the wrong reason")
+    else:
+        errors.append("expired invocation was accepted")
+
     for index, mode in enumerate(("leak", "malformed", "oversized", "timeout"), start=2):
         value = invocation(mode)
         value["action_id"] = f"act-0000000{index}"
@@ -126,6 +139,10 @@ with tempfile.TemporaryDirectory(prefix="cloudbox-tool-broker-") as temp_name:
             errors.append(f"{mode} produced {result['state']} instead of {expected}")
         if mode == "timeout" and load_action(root / "actions" / f"act-0000000{index}.json").get("attempt") != 1:
             errors.append("timeout caused an implicit retry")
+        if mode == "timeout":
+            resumed = execute_prepared(prepared, root / "actions" / f"act-0000000{index}.json", context)
+            if resumed["state"] != "BLOCKED" or load_action(root / "actions" / f"act-0000000{index}.json")["attempt"] != 1:
+                errors.append("existing uncertain checkpoint was not resumed without re-execution")
 
     no_change = invocation("no-change")
     no_change["action_id"] = "act-00000006"

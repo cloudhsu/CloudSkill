@@ -27,6 +27,19 @@ invalid recovery/state authority back to architecture. Focused deterministic
 evidence passes; full-suite, model-backed review, version synchronization, and
 publication are still separate gates.
 
+## 2026-08-11 — First 6.3 release review returned to implementation
+
+Risk policy selected L1 cross-family review. The first GPT-5.4 cell exposed
+three executable integration gaps: persisted actions could not enter a safe
+resume path, broker writes did not carry the action store's lease/fencing
+identity, and required invocation deadlines were never enforced. The remaining
+panel cells were stopped to avoid reviewing a known-bad candidate. New
+RED/GREEN fixtures require expired-deadline rejection, owner/fencing on every
+mutating revision, atomic first-writer reservation, and a no-reexecution
+`BLOCKED` result for an existing uncertain checkpoint. The complete
+deterministic suite passes after correction; fresh exact-tip assurance remains
+pending.
+
 ## 2026-08-11 — Public/private package split deferred
 
 The user retained the public Core/private Evolution Pack design but explicitly

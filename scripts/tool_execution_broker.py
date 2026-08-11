@@ -9,10 +9,11 @@ import subprocess
 import sys
 import time
 from dataclasses import dataclass
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from tool_action_store import save_action_atomic, transition_action
+from tool_action_store import load_action, save_action_atomic, transition_action
 from tool_adapter_contract import get_adapter, get_capability, validate_invocation, validate_registry, validate_result
 
 
@@ -24,6 +25,7 @@ class ExecutionContext:
     repository_root: Path
     owner_id: str | None = None
     fencing_token: int | None = None
+    now_epoch: int | None = None
 
 
 @dataclass(frozen=True)
@@ -68,6 +70,16 @@ def prepare_invocation(invocation: dict[str, Any], registry: dict[str, Any], con
     required_authority = set(capability["required_authority"])
     if not required_authority <= context.approved_authority:
         raise ValueError("tool invocation exceeds approved authority")
+    now_epoch = context.now_epoch if context.now_epoch is not None else int(time.time())
+    try:
+        deadline = datetime.fromisoformat(invocation["deadline"].replace("Z", "+00:00"))
+    except (TypeError, ValueError) as exc:
+        raise ValueError("invocation deadline is not a valid timestamp") from exc
+    if deadline.tzinfo is None or deadline.astimezone(timezone.utc).timestamp() <= now_epoch:
+        raise ValueError("invocation deadline has expired")
+    mutating = capability["risk"] != "read-only"
+    if mutating and (not context.owner_id or not isinstance(context.fencing_token, int) or context.fencing_token < 1):
+        raise ValueError("mutating invocation requires broker owner and fencing token")
 
     roots: list[Path] = []
     for reference in capability["allowed_root_refs"]:
@@ -128,7 +140,7 @@ def prepare_invocation(invocation: dict[str, Any], registry: dict[str, Any], con
         "input_hash": input_hash,
         "authority_grant_id": invocation["authority_grant_id"],
         "evidence": [],
-        "lease": None,
+        "lease": ({"owner_id": context.owner_id, "fencing_token": context.fencing_token, "expires_at": now_epoch + capability["timeout_seconds"] + 30} if mutating else None),
     }
     environment = {"PATH": os.environ.get("PATH", ""), "PYTHONIOENCODING": "utf-8"}
     return PreparedInvocation(invocation, adapter, capability, [sys.executable, str(adapter_path)], repository_root, environment, request, action)
@@ -154,14 +166,50 @@ def _uncertain_result(prepared: PreparedInvocation, reason: str, latency_ms: int
     }
 
 
+def _blocked_result(prepared: PreparedInvocation, reason: str) -> dict[str, Any]:
+    output: dict[str, Any] = {}
+    return {
+        "contract_version": "1.0",
+        "adapter_id": prepared.invocation["adapter_id"],
+        "capability_id": prepared.invocation["capability_id"],
+        "action_id": prepared.invocation["action_id"],
+        "state": "BLOCKED",
+        "summary": "durable action requires lifecycle-owner recovery",
+        "output": output,
+        "artifact_refs": [],
+        "observed_side_effects": [],
+        "diagnostics": [reason],
+        "output_hash": hashlib.sha256(json.dumps(output, sort_keys=True).encode("utf-8")).hexdigest(),
+        "latency_ms": 0,
+        "model_calls": 0,
+    }
+
+
 def execute_prepared(prepared: PreparedInvocation, action_path: Path, context: ExecutionContext) -> dict[str, Any]:
     if action_path.exists():
-        raise ValueError("action identity already exists; reconcile durable state")
-    action = save_action_atomic(action_path, prepared.action, 0)
-    action = transition_action(action, "AUTHORIZED", {"authority_grant_id": action["authority_grant_id"]})
-    action = save_action_atomic(action_path, action, action["revision"])
+        current = load_action(action_path)
+        if current.get("action_id") != prepared.action["action_id"] or current.get("input_hash") != prepared.action["input_hash"]:
+            raise ValueError("existing action identity conflicts with prepared invocation")
+        if current.get("state") in {"RUNNING", "UNCERTAIN"}:
+            return _blocked_result(prepared, "existing action may have completed; reconcile before retry")
+        if current.get("state") in {"SUCCEEDED", "FAILED", "BLOCKED"}:
+            return _blocked_result(prepared, f"existing action is {current['state']}; lifecycle-owner transition required")
+        action = current
+    else:
+        action = save_action_atomic(
+            action_path,
+            prepared.action,
+            0,
+            owner_id=context.owner_id,
+            fencing_token=context.fencing_token,
+            now=context.now_epoch,
+        )
+    persistence = {"owner_id": context.owner_id, "fencing_token": context.fencing_token, "now": context.now_epoch}
+    if action["state"] == "PLANNED":
+        action = transition_action(action, "AUTHORIZED", {"authority_grant_id": action["authority_grant_id"]})
+        action = save_action_atomic(action_path, action, action["revision"], **persistence)
     action = transition_action(action, "RUNNING", {"adapter_version": prepared.adapter["adapter_version"]})
-    action = save_action_atomic(action_path, action, action["revision"])
+    action = save_action_atomic(action_path, action, action["revision"], **persistence)
 
     started = time.monotonic()
     process = subprocess.Popen(
@@ -207,7 +255,7 @@ def execute_prepared(prepared: PreparedInvocation, action_path: Path, context: E
 
     terminal_evidence = {"result_hash": result["output_hash"], "diagnostics": result["diagnostics"]}
     action = transition_action(action, result["state"], terminal_evidence)
-    save_action_atomic(action_path, action, action["revision"])
+    save_action_atomic(action_path, action, action["revision"], **persistence)
     return result
 
 

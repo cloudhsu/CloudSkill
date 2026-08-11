@@ -34,13 +34,13 @@ def invocation(capability: str, action: int, arguments: dict, authority: str | N
         "plan_revision": 1,
         "arguments": arguments,
         "authority_grant_id": authority,
-        "deadline": "2026-08-11T12:00:00Z",
+        "deadline": "2099-08-11T12:00:00Z",
     }
 
 
 errors: list[str] = []
 tool_help = subprocess.run([sys.executable, str(ROOT / "scripts/cloudskill_evolution.py"), "tool", "invoke", "--help"], text=True, capture_output=True)
-if tool_help.returncode or "--root-ref" not in tool_help.stdout or "--authority" not in tool_help.stdout:
+if tool_help.returncode or any(flag not in tool_help.stdout for flag in ("--root-ref", "--authority", "--owner-id", "--fencing-token")):
     errors.append("controlled tool operator CLI is unavailable")
 with tempfile.TemporaryDirectory(prefix="cloudbox-git-adapter-") as temp_name:
     root = Path(temp_name)
@@ -67,6 +67,9 @@ with tempfile.TemporaryDirectory(prefix="cloudbox-git-adapter-") as temp_name:
         secret_values={},
         approved_authority={"git.fetch", "git.import_bundle"},
         repository_root=ROOT,
+        owner_id="git-fixture-owner",
+        fencing_token=1,
+        now_epoch=1760000000,
     )
     inspect = invocation("git.inspect", 1, {"repository": "clone"}, None)
     result = execute_prepared(prepare_invocation(inspect, registry, context), root / "actions/inspect.json", context)

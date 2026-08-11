@@ -5,6 +5,7 @@ from __future__ import annotations
 import errno
 import json
 import os
+import tempfile
 from pathlib import Path
 from typing import Any
 
@@ -105,13 +106,26 @@ def save_action_atomic(
     if errors:
         raise ValueError("invalid tool action state: " + "; ".join(errors))
     path.parent.mkdir(parents=True, exist_ok=True)
-    temporary = path.with_suffix(path.suffix + ".tmp")
-    with temporary.open("w", encoding="utf-8") as stream:
-        json.dump(value, stream, sort_keys=True, indent=2)
-        stream.write("\n")
-        stream.flush()
-        os.fsync(stream.fileno())
-    temporary.replace(path)
+    descriptor, temporary_name = tempfile.mkstemp(prefix=path.name + ".", suffix=".tmp", dir=path.parent)
+    temporary = Path(temporary_name)
+    try:
+        with os.fdopen(descriptor, "w", encoding="utf-8") as stream:
+            json.dump(value, stream, sort_keys=True, indent=2)
+            stream.write("\n")
+            stream.flush()
+            os.fsync(stream.fileno())
+        if current is None:
+            try:
+                os.link(temporary, path)
+            except FileExistsError as exc:
+                raise ValueError("stale tool action revision") from exc
+        else:
+            temporary.replace(path)
+    finally:
+        try:
+            temporary.unlink()
+        except FileNotFoundError:
+            pass
     _fsync_directory(path.parent)
     return value
 

@@ -32,6 +32,8 @@ def main() -> int:
     invoke.add_argument("--root-ref", action="append", default=[])
     invoke.add_argument("--secret-ref", action="append", default=[])
     invoke.add_argument("--authority", action="append", default=[])
+    invoke.add_argument("--owner-id")
+    invoke.add_argument("--fencing-token", type=int)
     for area, action in (("candidate", "review"), ("candidate", "evaluate"), ("evolution", "apply"), ("evolution", "release")):
         command = sub.choices.get(area) or sub.add_parser(area)
         children = getattr(command, "_cloudskill_children", None)
@@ -51,6 +53,8 @@ def main() -> int:
             secret_values=secrets,
             approved_authority=set(args.authority),
             repository_root=Path(__file__).resolve().parents[1],
+            owner_id=args.owner_id,
+            fencing_token=args.fencing_token,
         )
         prepared = prepare_invocation(invocation, load_registry(Path(args.registry)), context)
         state_path = Path(args.state_dir).expanduser().resolve() / f"{invocation['action_id']}.json"

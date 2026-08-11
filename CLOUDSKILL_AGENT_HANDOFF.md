@@ -43,6 +43,24 @@ This is the operational entry point for a new conversation or coding agent that 
   script requires updating its SHA-256 and rerunning the contract/broker/Git
   validators.
 
+### CloudBox 6.3 first release review correction (2026-08-11)
+
+- Review Assurance selects `L1_CROSS_FAMILY_2X2` because the increment creates
+  an authority/security-sensitive local mutation boundary. The first GPT-5.4
+  review failed, so the remaining three cells were not spent on a known-bad
+  candidate. Raw output remains ignored at
+  `.local/reviews/cloudbox-6.3/gpt-5.4.txt`, SHA-256
+  `6baadd6466f8cbbbe66faa229b2cec9ed4b2e46eab9e9f7db58f6f9d44d70434`.
+- RED reproduced that existing checkpoints were rejected rather than resumed,
+  broker persistence did not pass lease/fencing ownership, and expired
+  invocation deadlines were ignored. GREEN now blocks ambiguous replay for
+  lifecycle-owner reconciliation, resumes only safe pre-execution states,
+  requires owner/fencing for mutation, atomically reserves first action state,
+  and rejects expired deadlines before process launch.
+- Focused validators and the complete deterministic suite pass after the
+  correction. A new exact-tip L1 panel is still required; no prior failed cell
+  counts toward achieved assurance.
+
 ### CloudBox 6.2.0 published and remotely verified (2026-08-11)
 
 - PR `#10` merged as `6be22cd`; annotated tag `v6.2.0` peels to that
