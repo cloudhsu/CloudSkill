@@ -73,6 +73,14 @@ REQUIRED_REUSE_FIELDS = {
     "unaffected_evidence",
     "on_invalidation",
 }
+DELTA_FIELDS = (
+    "external_side_effect",
+    "authority_or_state",
+    "sensitive_or_privileged",
+    "platform_or_compatibility",
+    "irreversible_or_unreconciled",
+    "outside_verified_envelope",
+)
 
 
 def fail(errors: list[str], message: str) -> None:
@@ -368,11 +376,117 @@ def run_contract_mutations(registry: dict[str, Any]) -> list[str]:
         return [f"shared lifecycle template contract cannot load registry: {exc}"]
     if loaded != registry:
         fail(errors, "shared lifecycle template loader changed authoritative registry content")
+    errors.extend(selector_contract_errors(registry, contract.assess_template))
     return errors + selector_propagation_errors(
         registry,
         contract.load_templates,
         contract.assess_template,
     )
+
+
+def selection_facts(template: dict[str, Any]) -> dict[str, Any]:
+    """Return the smallest hand-derived fact record for an exact match."""
+    return {
+        **template["applicability"],
+        **{field: False for field in DELTA_FIELDS},
+    }
+
+
+def selector_contract_errors(registry: dict[str, Any], assess_template: Any) -> list[str]:
+    """Exercise direct selection and fail-closed bounded-delta behavior."""
+    errors: list[str] = []
+    templates = registry["templates"]
+
+    for template_id in sorted(IMPLEMENTED_TEMPLATE_IDS):
+        template = templates[template_id]
+        resolution = assess_template(template_id, selection_facts(template), registry)
+        if resolution.get("status") != "selected":
+            fail(errors, f"implemented template {template_id!r} did not select on its exact applicability facts")
+            continue
+        if resolution.get("template_id") != template_id:
+            fail(errors, f"selected template {template_id!r} did not retain its exact template ID")
+        if resolution.get("contract_version") != template["contract_version"]:
+            fail(errors, f"selected template {template_id!r} did not retain its contract version")
+        if resolution.get("full_risk_calculation_required") is not False:
+            fail(errors, f"selected template {template_id!r} required a full risk calculation")
+        if resolution.get("reasons") != []:
+            fail(errors, f"selected template {template_id!r} had unexpected reasons")
+        if resolution.get("matched_conditions") != template["applicability"]:
+            fail(errors, f"selected template {template_id!r} did not record exact matched applicability")
+        if resolution.get("delta_answers") != {field: False for field in DELTA_FIELDS}:
+            fail(errors, f"selected template {template_id!r} did not record the all-false bounded delta")
+
+    for template_id in sorted(DEFERRED_TEMPLATE_IDS):
+        resolution = assess_template(template_id, {}, registry)
+        if resolution.get("status") != "unsupported":
+            fail(errors, f"deferred template {template_id!r} did not return unsupported")
+        if resolution.get("reasons") != ["template_deferred"]:
+            fail(errors, f"deferred template {template_id!r} did not report template_deferred")
+        if resolution.get("full_risk_calculation_required") is not True:
+            fail(errors, f"deferred template {template_id!r} did not require full risk calculation")
+
+    unknown = assess_template("unknown-template", {}, registry)
+    if unknown.get("status") != "unsupported":
+        fail(errors, "unknown template selected through a default fallback")
+    if unknown.get("reasons") != ["template_unknown"]:
+        fail(errors, "unknown template did not report template_unknown")
+    if unknown.get("full_risk_calculation_required") is not True:
+        fail(errors, "unknown template did not require full risk calculation")
+
+    template_id = "lightweight-change"
+    base_facts = selection_facts(templates[template_id])
+    for field in DELTA_FIELDS:
+        true_facts = {**base_facts, field: True}
+        true_result = assess_template(template_id, true_facts, registry)
+        expected_true_reason = f"delta:{field}:true"
+        if (
+            true_result.get("status") != "escalation_required"
+            or true_result.get("reasons") != [expected_true_reason]
+            or true_result.get("full_risk_calculation_required") is not True
+        ):
+            fail(errors, f"true delta {field!r} did not fail closed with {expected_true_reason!r}")
+
+        missing_facts = dict(base_facts)
+        del missing_facts[field]
+        missing_result = assess_template(template_id, missing_facts, registry)
+        expected_unknown_reason = f"delta:{field}:missing_or_unknown"
+        if (
+            missing_result.get("status") != "escalation_required"
+            or missing_result.get("reasons") != [expected_unknown_reason]
+            or missing_result.get("full_risk_calculation_required") is not True
+        ):
+            fail(errors, f"missing delta {field!r} did not fail closed with {expected_unknown_reason!r}")
+
+        unknown_result = assess_template(template_id, {**base_facts, field: "unknown"}, registry)
+        if (
+            unknown_result.get("status") != "escalation_required"
+            or unknown_result.get("reasons") != [expected_unknown_reason]
+            or unknown_result.get("full_risk_calculation_required") is not True
+        ):
+            fail(errors, f"unknown delta {field!r} did not fail closed with {expected_unknown_reason!r}")
+
+    mismatched = assess_template(template_id, {**base_facts, "scope": "bounded"}, registry)
+    if (
+        mismatched.get("status") != "escalation_required"
+        or mismatched.get("reasons") != ["applicability:scope:mismatch"]
+        or mismatched.get("full_risk_calculation_required") is not True
+    ):
+        fail(errors, "positive applicability mismatch did not fail closed")
+
+    exclusion = templates[template_id]["exclusions"][0]
+    excluded = assess_template(
+        template_id,
+        {**base_facts, "triggered_exclusions": [exclusion]},
+        registry,
+    )
+    if (
+        excluded.get("status") != "escalation_required"
+        or excluded.get("matched_exclusions") != [exclusion]
+        or excluded.get("reasons") != [f"exclusion:{exclusion}"]
+        or excluded.get("full_risk_calculation_required") is not True
+    ):
+        fail(errors, "declared exclusion did not fail closed with its exact reason")
+    return errors
 
 
 def main() -> int:
