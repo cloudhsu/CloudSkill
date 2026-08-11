@@ -125,7 +125,9 @@ def main() -> int:
             state, summary, output, effects = _execute(request["capability_id"], request["arguments"], request.get("secrets", {}))
         result = make_result(request, state, summary, output, effects, [], int((time.monotonic() - started) * 1000))
     except (KeyError, OSError, RuntimeError, ValueError, subprocess.TimeoutExpired) as exc:
-        result = make_result(request, "FAILED", "registered Git operation did not complete", {}, [], [str(exc)], int((time.monotonic() - started) * 1000))
+        state = "UNCERTAIN" if request.get("operation") == "reconcile" else "FAILED"
+        summary = "reconciliation observation did not complete" if state == "UNCERTAIN" else "registered Git operation did not complete"
+        result = make_result(request, state, summary, {}, [], [str(exc)], int((time.monotonic() - started) * 1000))
     print(json.dumps(result, sort_keys=True))
     return 0
 

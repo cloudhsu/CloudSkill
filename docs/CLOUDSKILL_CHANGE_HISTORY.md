@@ -66,6 +66,18 @@ caught and corrected an initial Python 3.7 `removeprefix` incompatibility. Full
 suite and a fresh four-cell exact-tip L1 review remain required before version
 synchronization or publication.
 
+## 2026-08-11 — Third 6.3 review hardened duplicate and recovery boundaries
+
+Fresh GPT-5.4 review of the second correction reproduced three P1 paths, so the
+remaining review cells were stopped. A repeated idempotency key could execute
+again under another action file, a replacement owner could not persist after an
+expired lease, and failure to observe external state during reconciliation was
+treated as terminal failure. New RED/GREEN evidence adds an atomic idempotency
+reservation bound to action/input/file identity, explicit expired-lease takeover
+by a higher fencing token, and `UNCERTAIN` preservation when reconciliation
+itself cannot establish completion. Focused validators pass; complete-suite and
+fresh exact-tip assurance remain required before release.
+
 ## 2026-08-11 — Public/private package split deferred
 
 The user retained the public Core/private Evolution Pack design but explicitly

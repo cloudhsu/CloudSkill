@@ -152,7 +152,7 @@ with tempfile.TemporaryDirectory(prefix="cloudbox-tool-broker-") as temp_name:
                     errors.append("changed secret reference failed for the wrong reason")
             else:
                 errors.append("reconciliation accepted changed secret/config identity")
-            later_context = ExecutionContext(root_refs=context.root_refs, secret_values=context.secret_values, approved_authority=context.approved_authority, repository_root=ROOT, owner_id="fixture-owner", fencing_token=1, now_epoch=4100000000)
+            later_context = ExecutionContext(root_refs=context.root_refs, secret_values=context.secret_values, approved_authority=context.approved_authority, repository_root=ROOT, owner_id="replacement-owner", fencing_token=2, now_epoch=4100000100)
             reconciliation_prepared = prepare_reconciliation(value, registry(), later_context)
             reconciled = reconcile_prepared(reconciliation_prepared, root / "actions" / f"act-0000000{index}.json", later_context)
             reconciled_state = load_action(root / "actions" / f"act-0000000{index}.json")
@@ -160,6 +160,13 @@ with tempfile.TemporaryDirectory(prefix="cloudbox-tool-broker-") as temp_name:
                 errors.append("adapter reconciliation did not classify external completion")
             if reconciled_state["state"] != "SUCCEEDED" or reconciled_state["attempt"] != 1:
                 errors.append("reconciliation re-executed or failed to close durable action")
+
+    duplicate = invocation("success")
+    duplicate["action_id"] = "act-00000007"
+    duplicate["idempotency_key"] = "idem-00000001"
+    duplicate_result = execute_prepared(prepare_invocation(duplicate, registry(), context), root / "actions/act-00000007.json", context)
+    if duplicate_result["state"] != "BLOCKED" or (root / "actions/act-00000007.json").exists():
+        errors.append("duplicate idempotency key executed under a second action identity")
 
     no_change = invocation("no-change")
     no_change["action_id"] = "act-00000006"

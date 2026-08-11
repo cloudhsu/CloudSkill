@@ -96,7 +96,11 @@ Reconciliation invokes only a capability that declares reconciliation support,
 observes external state without repeating the original side effect, and records
 the evidence without incrementing the execution attempt. Changed inputs,
 root/secret values, or action identity are rejected rather than attached to the
-old checkpoint.
+old checkpoint. A durable atomic reservation also binds each idempotency key to
+one action/input/file identity. After lease expiry, only a replacement owner with
+a higher fencing token can claim the action. If reconciliation cannot observe
+the external system, the action remains `UNCERTAIN`; observation failure is not
+proof that the original side effect failed.
 
 The lifecycle owner reads the plan revision and action checkpoint, preserves
 completed evidence, and chooses reconciliation, re-plan, architecture re-entry,

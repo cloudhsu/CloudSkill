@@ -98,6 +98,22 @@ This is the operational entry point for a new conversation or coding agent that 
   then restart L1 review from four fresh cells. Version synchronization and
   release remain prohibited until exact-tip assurance passes.
 
+### CloudBox 6.3 third release review re-entry (2026-08-11)
+
+- Fresh GPT-5.4 review of `70b06ba` returned FAIL; the remaining L1 cells were
+  stopped. Raw output is `.local/reviews/cloudbox-6.3/gpt-5.4-r3.txt`, SHA-256
+  `8eac0ae6e0574fa22147b8ec2f6da26da9286ded083fec22201af5ec13f102bf`.
+- Executable review cases exposed three P1 recovery defects: idempotency was
+  scoped only to the caller-selected action file, expired leases were not
+  refreshed for a higher fencing owner, and a failed reconciliation observation
+  was misclassified as proof that the original operation failed.
+- RED/GREEN now atomically reserves each idempotency key to one action/input/file
+  identity, explicitly claims an expired lease before resumed persistence, and
+  keeps reconciliation transport/observation errors `UNCERTAIN`. Focused broker,
+  Git adapter, and recovery validators pass after correction.
+- Next: rerun the complete suite twice, commit, and restart all four L1 cells
+  fresh. Version synchronization and release remain prohibited.
+
 ### CloudBox 6.2.0 published and remotely verified (2026-08-11)
 
 - PR `#10` merged as `6be22cd`; annotated tag `v6.2.0` peels to that

@@ -13,7 +13,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from tool_action_store import load_action, save_action_atomic, transition_action
+from tool_action_store import load_action, reserve_idempotency, save_action_atomic, transition_action
 from tool_adapter_contract import get_adapter, get_capability, validate_invocation, validate_registry, validate_result
 
 
@@ -232,7 +232,30 @@ def _invoke_adapter(prepared: PreparedInvocation, operation: str) -> dict[str, A
     return parsed
 
 
+def _claim_expired_lease(action: dict[str, Any], prepared: PreparedInvocation, action_path: Path, context: ExecutionContext) -> dict[str, Any]:
+    lease = action.get("lease")
+    if lease is None or (lease.get("owner_id") == context.owner_id and lease.get("fencing_token") == context.fencing_token):
+        return action
+    if context.now_epoch < lease.get("expires_at", 0) or not isinstance(context.fencing_token, int) or context.fencing_token <= lease.get("fencing_token", 0):
+        raise ValueError("stale tool action fencing token")
+    claimed = json.loads(json.dumps(action))
+    claimed["lease"] = {
+        "owner_id": context.owner_id,
+        "fencing_token": context.fencing_token,
+        "expires_at": context.now_epoch + prepared.capability["timeout_seconds"] + 30,
+    }
+    return save_action_atomic(
+        action_path, claimed, action["revision"], owner_id=context.owner_id,
+        fencing_token=context.fencing_token, now=context.now_epoch,
+    )
+
+
 def execute_prepared(prepared: PreparedInvocation, action_path: Path, context: ExecutionContext) -> dict[str, Any]:
+    if not reserve_idempotency(
+        action_path.parent, prepared.action["idempotency_key"],
+        prepared.action["action_id"], prepared.action["input_hash"], action_path.name,
+    ):
+        return _blocked_result(prepared, "idempotency key is already bound to another action identity")
     if action_path.exists():
         current = load_action(action_path)
         if current.get("action_id") != prepared.action["action_id"] or current.get("input_hash") != prepared.action["input_hash"]:
@@ -252,6 +275,7 @@ def execute_prepared(prepared: PreparedInvocation, action_path: Path, context: E
             now=context.now_epoch,
         )
     persistence = {"owner_id": context.owner_id, "fencing_token": context.fencing_token, "now": context.now_epoch}
+    action = _claim_expired_lease(action, prepared, action_path, context)
     if action["state"] == "PLANNED":
         action = transition_action(action, "AUTHORIZED", {"authority_grant_id": action["authority_grant_id"]})
         action = save_action_atomic(action_path, action, action["revision"], **persistence)
@@ -274,6 +298,7 @@ def reconcile_prepared(prepared: PreparedInvocation, action_path: Path, context:
         raise ValueError("capability does not support reconciliation")
     if action.get("action_id") != prepared.action.get("action_id") or action.get("input_hash") != prepared.action.get("input_hash"):
         raise ValueError("reconciliation invocation conflicts with durable action")
+    action = _claim_expired_lease(action, prepared, action_path, context)
     result = _invoke_adapter(prepared, "reconcile")
     persistence = {"owner_id": context.owner_id, "fencing_token": context.fencing_token, "now": context.now_epoch}
     reconciliation = {"result_hash": result["output_hash"], "state": result["state"], "diagnostics": result["diagnostics"]}

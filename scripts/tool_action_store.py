@@ -6,6 +6,7 @@ import errno
 import json
 import os
 import tempfile
+import hashlib
 from pathlib import Path
 from typing import Any
 
@@ -136,3 +137,26 @@ def find_by_idempotency(ledger_dir: Path, key: str) -> dict[str, Any] | None:
         if action.get("idempotency_key") == key:
             return action
     return None
+
+
+def reserve_idempotency(ledger_dir: Path, key: str, action_id: str, input_hash: str, action_file: str) -> bool:
+    """Atomically bind one idempotency key to one action identity."""
+    reservations = ledger_dir / ".idempotency"
+    reservations.mkdir(parents=True, exist_ok=True)
+    path = reservations / (hashlib.sha256(key.encode("utf-8")).hexdigest() + ".json")
+    value = {"idempotency_key": key, "action_id": action_id, "input_hash": input_hash, "action_file": action_file}
+    payload = (json.dumps(value, sort_keys=True) + "\n").encode("utf-8")
+    try:
+        descriptor = os.open(str(path), os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+    except FileExistsError:
+        try:
+            existing = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            return False
+        return existing == value
+    with os.fdopen(descriptor, "wb") as stream:
+        stream.write(payload)
+        stream.flush()
+        os.fsync(stream.fileno())
+    _fsync_directory(reservations)
+    return True

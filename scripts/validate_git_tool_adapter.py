@@ -13,7 +13,7 @@ sys.path.insert(0, str(ROOT / "scripts"))
 
 from import_eval_candidates import import_archives, resolve_private_terms  # noqa: E402
 from eval_bundle_contract import build_bundle_manifest  # noqa: E402
-from tool_action_store import save_action_atomic, transition_action  # noqa: E402
+from tool_action_store import load_action, save_action_atomic, transition_action  # noqa: E402
 from tool_execution_broker import ExecutionContext, execute_prepared, prepare_invocation, reconcile_prepared  # noqa: E402
 
 ADAPTER = ROOT / "scripts/git_tool_adapter.py"
@@ -126,6 +126,22 @@ with tempfile.TemporaryDirectory(prefix="cloudbox-git-adapter-") as temp_name:
     reconciled = reconcile_prepared(reconcile_preparation, reconcile_path, context)
     if reconciled["state"] != "SUCCEEDED" or reconciled["output"].get("status") != "OBSERVED_COMPLETE":
         errors.append(f"Git fetch reconciliation did not observe authoritative remote/local refs: {reconciled}")
+
+    git(["remote", "set-url", "origin", str(root / "missing-remote.git")], clone)
+    observation_invocation = invocation("git.fetch", 8, {"repository": "clone", "remote": "origin"}, "grant-000001")
+    observation_preparation = prepare_invocation(observation_invocation, registry, context)
+    observation_path = root / "actions/reconcile-observation-failure.json"
+    uncertain = save_action_atomic(observation_path, observation_preparation.action, 0, owner_id=context.owner_id, fencing_token=context.fencing_token, now=context.now_epoch)
+    uncertain = transition_action(uncertain, "AUTHORIZED", {"authority_grant_id": "grant-000001"})
+    uncertain = save_action_atomic(observation_path, uncertain, uncertain["revision"], owner_id=context.owner_id, fencing_token=context.fencing_token, now=context.now_epoch)
+    uncertain = transition_action(uncertain, "RUNNING", {"adapter_version": "1.0.0"})
+    uncertain = save_action_atomic(observation_path, uncertain, uncertain["revision"], owner_id=context.owner_id, fencing_token=context.fencing_token, now=context.now_epoch)
+    uncertain = transition_action(uncertain, "UNCERTAIN", {"reason": "fixture transport loss"})
+    save_action_atomic(observation_path, uncertain, uncertain["revision"], owner_id=context.owner_id, fencing_token=context.fencing_token, now=context.now_epoch)
+    observation = reconcile_prepared(observation_preparation, observation_path, context)
+    if observation["state"] != "UNCERTAIN" or load_action(observation_path)["state"] != "UNCERTAIN":
+        errors.append("reconciliation observation failure was misclassified as terminal")
+    git(["remote", "set-url", "origin", str(remote)], clone)
 
     bad = invocation("git.fetch", 3, {"repository": "clone", "remote": "unregistered"}, "grant-000001")
     result = execute_prepared(prepare_invocation(bad, registry, context), root / "actions/bad-fetch.json", context)
