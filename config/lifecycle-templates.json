@@ -18,6 +18,20 @@
         "authority or durable-state change",
         "security, privacy, platform, deployment, or external-side-effect change"
       ],
+      "exclusion_facts": {
+        "material_semantic_change": {
+          "type": "boolean",
+          "condition": "material semantic change"
+        },
+        "authority_or_durable_state_change": {
+          "type": "boolean",
+          "condition": "authority or durable-state change"
+        },
+        "security_privacy_platform_deployment_or_external_side_effect_change": {
+          "type": "boolean",
+          "condition": "security, privacy, platform, deployment, or external-side-effect change"
+        }
+      },
       "stages": [
         "analyze",
         "implement",
@@ -102,6 +116,20 @@
         "unknown owner or authority boundary",
         "irreversible or unreconciled outcome"
       ],
+      "exclusion_facts": {
+        "design_unapproved": {
+          "type": "boolean",
+          "condition": "unapproved design"
+        },
+        "owner_or_authority_boundary_unknown": {
+          "type": "boolean",
+          "condition": "unknown owner or authority boundary"
+        },
+        "irreversible_or_unreconciled_outcome": {
+          "type": "boolean",
+          "condition": "irreversible or unreconciled outcome"
+        }
+      },
       "stages": [
         "analyze",
         "design",
@@ -191,6 +219,20 @@
         "missing RED baseline evidence",
         "release claim without execution evidence"
       ],
+      "exclusion_facts": {
+        "unsanitized_private_evidence": {
+          "type": "boolean",
+          "condition": "unsanitized private evidence"
+        },
+        "red_baseline_evidence_missing": {
+          "type": "boolean",
+          "condition": "missing RED baseline evidence"
+        },
+        "release_claim_without_execution_evidence": {
+          "type": "boolean",
+          "condition": "release claim without execution evidence"
+        }
+      },
       "stages": [
         "analyze",
         "verify_red",

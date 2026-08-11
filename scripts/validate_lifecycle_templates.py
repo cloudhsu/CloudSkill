@@ -42,6 +42,7 @@ REQUIRED_IMPLEMENTED_FIELDS = {
     "contract_version",
     "applicability",
     "exclusions",
+    "exclusion_facts",
     "stages",
     "gates",
     "owners",
@@ -150,6 +151,30 @@ def registry_errors(registry: Any) -> list[str]:
             continue
         if not isinstance(entry["applicability"], dict) or not entry["applicability"]:
             fail(errors, f"{prefix}: applicability must be a non-empty object")
+        exclusions = entry["exclusions"] if isinstance(entry.get("exclusions"), list) else []
+        if not is_unique_nonempty_string_list(exclusions):
+            fail(errors, f"{prefix}: exclusions must be unique non-empty strings")
+        exclusion_facts = entry.get("exclusion_facts")
+        if not isinstance(exclusion_facts, dict) or not exclusion_facts:
+            fail(errors, f"{prefix}: exclusion_facts must be a non-empty object")
+        else:
+            mapped_conditions: list[str] = []
+            for fact_name, definition in exclusion_facts.items():
+                if not isinstance(fact_name, str) or not fact_name:
+                    fail(errors, f"{prefix}: exclusion fact names must be non-empty strings")
+                    continue
+                if not isinstance(definition, dict) or set(definition) != {"type", "condition"}:
+                    fail(errors, f"{prefix}: exclusion fact {fact_name!r} has an invalid schema")
+                    continue
+                if definition["type"] != "boolean":
+                    fail(errors, f"{prefix}: exclusion fact {fact_name!r} must be boolean")
+                condition = definition["condition"]
+                if not isinstance(condition, str) or condition not in exclusions:
+                    fail(errors, f"{prefix}: exclusion fact {fact_name!r} must map to a declared exclusion")
+                else:
+                    mapped_conditions.append(condition)
+            if set(mapped_conditions) != set(exclusions) or len(mapped_conditions) != len(set(mapped_conditions)):
+                fail(errors, f"{prefix}: exclusion facts must map one-to-one to declared exclusions")
         for field in (
             "exclusions",
             "stages",
@@ -296,6 +321,10 @@ def selector_propagation_errors(
             else:
                 facts = {
                     **propagated["templates"][synthetic_id]["applicability"],
+                    **{
+                        field: False
+                        for field in propagated["templates"][synthetic_id]["exclusion_facts"]
+                    },
                     "external_side_effect": False,
                     "authority_or_state": False,
                     "sensitive_or_privileged": False,
@@ -376,6 +405,7 @@ def run_contract_mutations(registry: dict[str, Any]) -> list[str]:
         return [f"shared lifecycle template contract cannot load registry: {exc}"]
     if loaded != registry:
         fail(errors, "shared lifecycle template loader changed authoritative registry content")
+    errors.extend(loader_lifecycle_structure_errors(registry, contract.load_templates))
     errors.extend(selector_contract_errors(registry, contract.assess_template))
     return errors + selector_propagation_errors(
         registry,
@@ -388,8 +418,55 @@ def selection_facts(template: dict[str, Any]) -> dict[str, Any]:
     """Return the smallest hand-derived fact record for an exact match."""
     return {
         **template["applicability"],
+        **{field: False for field in template.get("exclusion_facts", {})},
         **{field: False for field in DELTA_FIELDS},
     }
+
+
+def loader_lifecycle_structure_errors(registry: dict[str, Any], load_templates: Any) -> list[str]:
+    """Prove the shared loader rejects structurally weak implemented entries."""
+    errors: list[str] = []
+    mutations = {
+        "empty applicability": lambda value: value["templates"]["lightweight-change"].__setitem__(
+            "applicability", {}
+        ),
+        "empty exclusions": lambda value: value["templates"]["lightweight-change"].__setitem__(
+            "exclusions", []
+        ),
+        "missing typed exclusion facts": lambda value: value["templates"]["lightweight-change"].pop(
+            "exclusion_facts"
+        ),
+        "missing lifecycle stages": lambda value: value["templates"]["lightweight-change"].pop(
+            "stages"
+        ),
+        "missing owner": lambda value: value["templates"]["lightweight-change"]["owners"].pop(
+            "lifecycle_plan"
+        ),
+        "missing gate evidence": lambda value: value["templates"]["lightweight-change"]["gates"][
+            0
+        ].pop("required_evidence"),
+        "weakened resume reconciliation": lambda value: value["templates"]["lightweight-change"][
+            "resume_reconciliation"
+        ].__setitem__("reconcile_before_resume", False),
+        "weakened reuse invalidation": lambda value: value["templates"]["lightweight-change"][
+            "reuse_invalidation"
+        ].__setitem__("on_invalidation", "ignore"),
+    }
+    for label, mutate in mutations.items():
+        altered = copy.deepcopy(registry)
+        mutate(altered)
+        with tempfile.TemporaryDirectory(prefix="cloudbox-lifecycle-template-load-") as temp_name:
+            path = Path(temp_name) / "lifecycle-templates.json"
+            path.write_text(json.dumps(altered), encoding="utf-8")
+            try:
+                load_templates(path)
+            except ValueError:
+                continue
+            except Exception as exc:
+                fail(errors, f"shared lifecycle template loader had unexpected {label} failure: {exc}")
+            else:
+                fail(errors, f"shared lifecycle template loader accepted {label}")
+    return errors
 
 
 def selector_contract_errors(registry: dict[str, Any], assess_template: Any) -> list[str]:
@@ -415,6 +492,16 @@ def selector_contract_errors(registry: dict[str, Any], assess_template: Any) -> 
             fail(errors, f"selected template {template_id!r} did not record exact matched applicability")
         if resolution.get("delta_answers") != {field: False for field in DELTA_FIELDS}:
             fail(errors, f"selected template {template_id!r} did not record the all-false bounded delta")
+        exclusion_facts = template.get("exclusion_facts")
+        if not isinstance(exclusion_facts, dict) or not exclusion_facts:
+            fail(errors, f"selected template {template_id!r} has no typed exclusion-fact mapping")
+        else:
+            expected_exclusion_answers = {field: False for field in exclusion_facts}
+            if resolution.get("exclusion_answers") != expected_exclusion_answers:
+                fail(
+                    errors,
+                    f"selected template {template_id!r} did not record all explicit exclusion answers",
+                )
 
     for template_id in sorted(DEFERRED_TEMPLATE_IDS):
         resolution = assess_template(template_id, {}, registry)
@@ -473,19 +560,74 @@ def selector_contract_errors(registry: dict[str, Any], assess_template: Any) -> 
     ):
         fail(errors, "positive applicability mismatch did not fail closed")
 
-    exclusion = templates[template_id]["exclusions"][0]
-    excluded = assess_template(
+    exclusion_facts = templates[template_id].get("exclusion_facts", {})
+    material_change = "material_semantic_change"
+    if material_change not in exclusion_facts:
+        fail(errors, "lightweight-change does not map material_semantic_change to a registry exclusion")
+        return errors
+    legacy_exclusion = assess_template(
         template_id,
-        {**base_facts, "triggered_exclusions": [exclusion]},
+        {**base_facts, "triggered_exclusions": [templates[template_id]["exclusions"][0]]},
         registry,
     )
     if (
-        excluded.get("status") != "escalation_required"
-        or excluded.get("matched_exclusions") != [exclusion]
-        or excluded.get("reasons") != [f"exclusion:{exclusion}"]
-        or excluded.get("full_risk_calculation_required") is not True
+        legacy_exclusion.get("status") != "escalation_required"
+        or legacy_exclusion.get("reasons") != ["legacy_triggered_exclusions_unsupported"]
+        or legacy_exclusion.get("full_risk_calculation_required") is not True
     ):
-        fail(errors, "declared exclusion did not fail closed with its exact reason")
+        fail(errors, "legacy caller-precomputed exclusions did not fail closed")
+    for implemented_id in sorted(IMPLEMENTED_TEMPLATE_IDS):
+        implemented_template = templates[implemented_id]
+        implemented_facts = selection_facts(implemented_template)
+        for exclusion_fact, definition in sorted(implemented_template["exclusion_facts"].items()):
+            if not isinstance(definition, dict) or not isinstance(definition.get("condition"), str):
+                fail(errors, f"typed exclusion fact {implemented_id}/{exclusion_fact} has no condition")
+                continue
+            condition = definition["condition"]
+            excluded = assess_template(
+                implemented_id,
+                {**implemented_facts, exclusion_fact: True},
+                registry,
+            )
+            if (
+                excluded.get("status") != "escalation_required"
+                or excluded.get("matched_exclusions") != [condition]
+                or excluded.get("reasons") != [f"exclusion:{condition}"]
+                or excluded.get("full_risk_calculation_required") is not True
+            ):
+                fail(errors, f"true typed exclusion fact {implemented_id}/{exclusion_fact} did not fail closed")
+            missing_exclusion_facts = dict(implemented_facts)
+            del missing_exclusion_facts[exclusion_fact]
+            expected_reason = f"exclusion_fact:{exclusion_fact}:missing_or_unknown"
+            missing_exclusion = assess_template(
+                implemented_id,
+                missing_exclusion_facts,
+                registry,
+            )
+            if (
+                missing_exclusion.get("status") != "escalation_required"
+                or missing_exclusion.get("reasons") != [expected_reason]
+                or missing_exclusion.get("full_risk_calculation_required") is not True
+            ):
+                fail(
+                    errors,
+                    f"missing typed exclusion fact {implemented_id}/{exclusion_fact} did not fail closed",
+                )
+            for invalid_value in (None, "unknown", 1):
+                unknown_exclusion = assess_template(
+                    implemented_id,
+                    {**implemented_facts, exclusion_fact: invalid_value},
+                    registry,
+                )
+                if (
+                    unknown_exclusion.get("status") != "escalation_required"
+                    or unknown_exclusion.get("reasons") != [expected_reason]
+                    or unknown_exclusion.get("full_risk_calculation_required") is not True
+                ):
+                    fail(
+                        errors,
+                        f"unknown typed exclusion fact {implemented_id}/{exclusion_fact} did not fail closed",
+                    )
     return errors
 
 
@@ -540,6 +682,16 @@ def main() -> int:
         deferred_reclassified = copy.deepcopy(registry)
         deferred_reclassified["templates"]["release"]["status"] = "implemented"
         mutation_must_fail(deferred_reclassified, "deferred status removed")
+        exclusion_type_weakened = copy.deepcopy(registry)
+        exclusion_type_weakened["templates"]["lightweight-change"]["exclusion_facts"][
+            "material_semantic_change"
+        ]["type"] = "string"
+        mutation_must_fail(exclusion_type_weakened, "typed exclusion fact weakened")
+        exclusion_mapping_weakened = copy.deepcopy(registry)
+        exclusion_mapping_weakened["templates"]["lightweight-change"]["exclusion_facts"][
+            "material_semantic_change"
+        ]["condition"] = "not a declared exclusion"
+        mutation_must_fail(exclusion_mapping_weakened, "typed exclusion mapping disconnected")
 
     for error in errors:
         print(f"ERROR: {error}")
