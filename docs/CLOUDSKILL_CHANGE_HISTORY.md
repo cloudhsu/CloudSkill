@@ -2,6 +2,14 @@
 
 This document records the evolution rationale and evidence chain for work that may span multiple conversations. Git commits and tags remain the authoritative source history.
 
+## 2026-08-11 — CloudBox 6.3.0 publication verified
+
+PR `#13` merged the reviewed manual-only Eval ZIP exchange into `main` as
+`65e89b3`. Annotated tag `v6.3.0` peels to that commit. Main-push and tag-push
+validation passed, and the GitHub Release is published as
+non-draft/non-prerelease. Exact identifiers and rollback notes are recorded in
+`docs/releases/6.3.0-post-release-record.md`.
+
 ## 2026-08-11 — Controlled automation withdrawn; manual ZIP exchange retained
 
 Repeated review showed that the unreleased controlled-tool candidate required
