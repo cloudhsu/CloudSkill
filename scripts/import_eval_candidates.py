@@ -195,20 +195,19 @@ def import_zip(zip_path: Path, inbox: Path, terms: list[str], seen_keys: set[str
     return counts
 
 
-def main() -> int:
-    args = parse_args()
-    inbox, terms = resolve_inbox(args)
+def import_archives(inbox: Path, terms: list[str], dry_run: bool) -> dict[str, int]:
+    """Import pending archives while preserving the manual CLI semantics."""
     imports_dir = inbox / "imports"
     processed_dir = imports_dir / "processed"
     unsupported_dir = imports_dir / "unsupported"
-    if not args.dry_run:
+    if not dry_run:
         for folder in ("candidates", "manual-review", "rejected", "imports", "imports/processed", "imports/unsupported"):
             (inbox / folder).mkdir(parents=True, exist_ok=True)
 
     zips = sorted(p for p in imports_dir.glob("*.zip") if p.is_file()) if imports_dir.is_dir() else []
     if not zips:
         print(f"No import archives found in {imports_dir}")
-        return 0
+        return {"archives": 0, "candidates": 0, "manual_review": 0, "rejected": 0, "duplicate": 0, "skipped": 0, "unsupported": 0}
     if not terms:
         print(
             "WARNING: no private sensitive-terms file resolved; every imported candidate "
@@ -218,20 +217,20 @@ def main() -> int:
     seen_keys = existing_content_keys(inbox)
     totals = {"candidates": 0, "manual_review": 0, "rejected": 0, "duplicate": 0, "skipped": 0, "unsupported": 0}
     for zip_path in zips:
-        counts = import_zip(zip_path, inbox, terms, seen_keys, args.dry_run)
+        counts = import_zip(zip_path, inbox, terms, seen_keys, dry_run)
         for key, value in counts.items():
             totals[key] += value
         print(
             f"{zip_path.name}: candidates={counts['candidates']} manual_review={counts['manual_review']} "
             f"rejected={counts['rejected']} duplicate={counts['duplicate']} skipped={counts['skipped']} unsupported={counts['unsupported']}"
         )
-        if not args.dry_run and counts["unsupported"]:
+        if not dry_run and counts["unsupported"]:
             unsupported_dir.mkdir(parents=True, exist_ok=True)
             target = unsupported_dir / zip_path.name
             shutil.move(str(zip_path), str(target))
             sidecar = target.with_suffix(target.suffix + ".status.json")
             sidecar.write_text(json.dumps({"bundle_id": hashlib.sha256(target.read_bytes()).hexdigest()[:16], "status": "UNSUPPORTED", "archive": target.name}, indent=2) + "\n", encoding="utf-8")
-        elif not args.dry_run and not counts["skipped"]:
+        elif not dry_run and not counts["skipped"]:
             processed_dir.mkdir(parents=True, exist_ok=True)
             shutil.move(str(zip_path), str(processed_dir / zip_path.name))
 
@@ -240,8 +239,15 @@ def main() -> int:
         f"manual_review={totals['manual_review']} rejected={totals['rejected']} "
         f"duplicate={totals['duplicate']} skipped={totals['skipped']} unsupported={totals['unsupported']}"
     )
-    if args.dry_run:
+    if dry_run:
         print("DRY RUN: no files were written or moved.")
+    return {"archives": len(zips), **totals}
+
+
+def main() -> int:
+    args = parse_args()
+    inbox, terms = resolve_inbox(args)
+    import_archives(inbox, terms, args.dry_run)
     return 0
 
 

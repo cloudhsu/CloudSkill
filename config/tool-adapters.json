@@ -9,7 +9,7 @@
       "provenance": {
         "kind": "repository-script",
         "path": "scripts/git_tool_adapter.py",
-        "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+        "sha256": "a52cbb97c02f18856765186c2406b07427116f1c25214c7f8c045359b2fc1180"
       },
       "capabilities": [
         {
