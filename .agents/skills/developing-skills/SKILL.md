@@ -151,3 +151,6 @@ Stop or route to manual review when privacy cannot be established, authority is
 missing, evidence cannot reproduce the claimed failure, a reference split hides
 a mandatory safeguard, or recovery/rollback is undefined. Do not trade required
 behavior for a smaller context file.
+
+When optimizing Skills, preserve priorities in this order: lifecycle and its
+dynamic feedback loop, then evidence and verification, then token/context cost.

@@ -27,18 +27,24 @@ resume behavior, and review assurance. A generic tool such as `writing-plans`
 may produce detailed implementation work packages only within that selected
 profile and current plan revision.
 
-Use proportional planning:
+Select the lifecycle profile first for every planned increment; it remains the
+highest authority so feedback, re-entry, interruption, and replanning form one
+dynamic loop. Then use proportional planning inside that lifecycle:
 
-- small, stable, low-risk work uses a lightweight execution plan;
+- small, stable, low-risk work uses a lightweight lifecycle projection and
+  execution plan;
 - medium work with an approved stable design may use a detailed writing-plan;
-- uncertain, long-running, externally coupled, or high-risk work uses the
-  CloudBox lifecycle plan first and creates detailed plans only per bounded
-  stage.
+- uncertain, long-running, externally coupled, or high-risk work persists the
+  CloudBox lifecycle plan and creates detailed plans only per bounded stage.
 
 New evidence or risk invalidates affected detailed steps through a CloudBox
 replan. Preserve completed unaffected evidence. Never allow a generic planning
 plugin to become a second authority or force heavyweight artifacts on trivial
 work.
+
+The fixed optimization priority is: lifecycle and complete dynamic loop first;
+evidence and verification second; token/context reduction third. A lower
+priority cannot weaken a higher one.
 
 ## Content boundary
 
