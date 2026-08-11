@@ -60,10 +60,35 @@ REQUIRED_OWNER_KEYS = {
     "evidence",
 }
 REQUIRED_CONSUMER_PATHS = {"scripts/lifecycle_template_contract.py"}
+REQUIRED_GATE_FIELDS = {"gate_id", "owner", "required_evidence", "transition"}
+REQUIRED_RESUME_FIELDS = {
+    "checkpoint_owner",
+    "reconcile_before_resume",
+    "on_unreconciled",
+    "required_evidence",
+}
+REQUIRED_REUSE_FIELDS = {
+    "reuse_when",
+    "invalidate_when",
+    "unaffected_evidence",
+    "on_invalidation",
+}
 
 
 def fail(errors: list[str], message: str) -> None:
     errors.append(message)
+
+
+def is_nonempty_string_list(value: Any) -> bool:
+    return (
+        isinstance(value, list)
+        and bool(value)
+        and all(isinstance(item, str) and item.strip() for item in value)
+    )
+
+
+def is_unique_nonempty_string_list(value: Any) -> bool:
+    return is_nonempty_string_list(value) and len(value) == len(set(value))
 
 
 def registry_errors(registry: Any) -> list[str]:
@@ -128,19 +153,92 @@ def registry_errors(registry: Any) -> list[str]:
                 fail(errors, f"{prefix}: {field} must be a non-empty list")
         if not isinstance(entry["compatible_overlays"], list):
             fail(errors, f"{prefix}: compatible_overlays must be a list")
-        if not isinstance(entry["owners"], dict):
+        owners = entry["owners"] if isinstance(entry["owners"], dict) else {}
+        if not owners:
             fail(errors, f"{prefix}: owners must be an object")
         else:
-            missing_owners = REQUIRED_OWNER_KEYS - set(entry["owners"])
+            missing_owners = REQUIRED_OWNER_KEYS - set(owners)
             if missing_owners:
                 fail(errors, f"{prefix}: owners missing {sorted(missing_owners)!r}")
-            if entry["owners"].get("lifecycle_plan") != "development-process-tailoring":
+            for owner_name, owner_id in owners.items():
+                if not isinstance(owner_id, str) or not owner_id.strip():
+                    fail(errors, f"{prefix}: owners/{owner_name} must be a non-empty string")
+            if owners.get("lifecycle_plan") != "development-process-tailoring":
                 fail(errors, f"{prefix}: lifecycle ownership must remain development-process-tailoring")
         if not isinstance(entry["review_level"], str) or not entry["review_level"]:
             fail(errors, f"{prefix}: review_level must be a non-empty string")
-        for field in ("resume_reconciliation", "reuse_invalidation"):
-            if not isinstance(entry[field], dict) or not entry[field]:
-                fail(errors, f"{prefix}: {field} must be a non-empty object")
+
+        required_evidence = entry["required_evidence"]
+        if not is_unique_nonempty_string_list(required_evidence):
+            fail(errors, f"{prefix}: required_evidence must be unique non-empty strings")
+        evidence_set = set(required_evidence) if is_unique_nonempty_string_list(required_evidence) else set()
+        stage_set = set(entry["stages"]) if is_nonempty_string_list(entry["stages"]) else set()
+        gate_ids: set[str] = set()
+        gates = entry["gates"] if isinstance(entry["gates"], list) else []
+        for gate in gates:
+            gate_prefix = f"{prefix}: gate"
+            if not isinstance(gate, dict):
+                fail(errors, f"{gate_prefix} must be an object")
+                continue
+            missing_gate_fields = REQUIRED_GATE_FIELDS - set(gate)
+            if missing_gate_fields:
+                fail(errors, f"{gate_prefix} missing {sorted(missing_gate_fields)!r}")
+                continue
+            gate_id = gate["gate_id"]
+            if not isinstance(gate_id, str) or not gate_id.strip():
+                fail(errors, f"{gate_prefix} gate_id must be a non-empty string")
+            elif gate_id in gate_ids:
+                fail(errors, f"{gate_prefix} gate_id must be unique: {gate_id!r}")
+            else:
+                gate_ids.add(gate_id)
+            if not isinstance(gate["owner"], str) or gate["owner"] not in set(owners.values()):
+                fail(errors, f"{gate_prefix} owner must be a declared template owner")
+            if not is_unique_nonempty_string_list(gate["required_evidence"]):
+                fail(errors, f"{gate_prefix} required_evidence must be unique non-empty strings")
+            elif not set(gate["required_evidence"]) <= evidence_set:
+                fail(errors, f"{gate_prefix} required_evidence must be declared by the template")
+            transition = gate["transition"]
+            if not isinstance(transition, dict) or set(transition) != {"on_pass", "on_fail"}:
+                fail(errors, f"{gate_prefix} transition must declare exactly on_pass and on_fail")
+            else:
+                if not isinstance(transition["on_pass"], str) or transition["on_pass"] not in stage_set | {"complete"}:
+                    fail(errors, f"{gate_prefix} on_pass must enter a template stage or complete")
+                if transition["on_fail"] != "escalation_required":
+                    fail(errors, f"{gate_prefix} on_fail must fail closed to escalation_required")
+
+        resume = entry["resume_reconciliation"]
+        if not isinstance(resume, dict) or set(resume) != REQUIRED_RESUME_FIELDS:
+            fail(errors, f"{prefix}: resume_reconciliation has an invalid schema")
+        else:
+            if resume["checkpoint_owner"] != owners.get("state"):
+                fail(errors, f"{prefix}: resume checkpoint_owner must be the state owner")
+            if resume["reconcile_before_resume"] is not True:
+                fail(errors, f"{prefix}: resume must reconcile before resuming")
+            if resume["on_unreconciled"] != "reconciliation_required":
+                fail(errors, f"{prefix}: unreconciled resume must fail closed")
+            if not is_unique_nonempty_string_list(resume["required_evidence"]):
+                fail(errors, f"{prefix}: resume required_evidence must be unique non-empty strings")
+            elif not set(resume["required_evidence"]) <= evidence_set:
+                fail(errors, f"{prefix}: resume evidence must be declared by the template")
+
+        reuse = entry["reuse_invalidation"]
+        if not isinstance(reuse, dict) or set(reuse) != REQUIRED_REUSE_FIELDS:
+            fail(errors, f"{prefix}: reuse_invalidation has an invalid schema")
+        else:
+            reuse_when = reuse["reuse_when"]
+            invalidate_when = reuse["invalidate_when"]
+            valid_reuse_when = is_unique_nonempty_string_list(reuse_when)
+            valid_invalidate_when = is_unique_nonempty_string_list(invalidate_when)
+            if not valid_reuse_when:
+                fail(errors, f"{prefix}: reuse_when must be unique non-empty strings")
+            if not valid_invalidate_when:
+                fail(errors, f"{prefix}: invalidate_when must be unique non-empty strings")
+            if valid_reuse_when and valid_invalidate_when and set(reuse_when) & set(invalidate_when):
+                fail(errors, f"{prefix}: reuse and invalidation conditions must not overlap")
+            if reuse["unaffected_evidence"] != "preserve":
+                fail(errors, f"{prefix}: unaffected evidence must be preserved")
+            if reuse["on_invalidation"] != "new_plan_revision":
+                fail(errors, f"{prefix}: invalidation must require a new plan revision")
 
     required_consumers = registry.get("required_consumer_paths")
     if not isinstance(required_consumers, list) or set(required_consumers) != REQUIRED_CONSUMER_PATHS:
@@ -156,29 +254,13 @@ def mutation_must_fail(registry: dict[str, Any], label: str) -> None:
         raise AssertionError(f"lifecycle template negative mutation was accepted: {label}")
 
 
-def run_contract_mutations(registry: dict[str, Any]) -> list[str]:
-    """Exercise future contract propagation without copying selector policy here."""
+def selector_propagation_errors(
+    registry: dict[str, Any],
+    load_templates: Any,
+    assess_template: Any,
+) -> list[str]:
+    """Prove the supplied loader and selector consume the supplied registry."""
     errors: list[str] = []
-    if str(SCRIPTS) not in sys.path:
-        sys.path.insert(0, str(SCRIPTS))
-    try:
-        contract = importlib.import_module("lifecycle_template_contract")
-    except Exception as exc:  # pragma: no cover - guarded by the RED prerequisite
-        return [f"cannot load shared lifecycle template contract: {exc}"]
-
-    for name in ("load_templates", "assess_template"):
-        if not callable(getattr(contract, name, None)):
-            fail(errors, f"shared lifecycle template contract is missing {name}()")
-    if errors:
-        return errors
-
-    try:
-        loaded = contract.load_templates(REGISTRY_PATH)
-    except Exception as exc:
-        return [f"shared lifecycle template contract cannot load registry: {exc}"]
-    if loaded != registry:
-        fail(errors, "shared lifecycle template loader changed authoritative registry content")
-
     synthetic_id = "validator-synthetic-template"
     synthetic = copy.deepcopy(registry)
     synthetic_entry = copy.deepcopy(synthetic["templates"]["lightweight-change"])
@@ -195,9 +277,9 @@ def run_contract_mutations(registry: dict[str, Any]) -> list[str]:
         path = Path(temp_name) / "lifecycle-templates.json"
         path.write_text(json.dumps(synthetic), encoding="utf-8")
         try:
-            propagated = contract.load_templates(path)
+            propagated = load_templates(path)
         except Exception as exc:
-            fail(errors, f"synthetic registry template did not propagate through shared loader: {exc}")
+            fail(errors, f"synthetic registry template did not propagate through loader: {exc}")
         else:
             if synthetic_id not in propagated.get("templates", {}):
                 fail(errors, "synthetic registry template did not appear through shared loader")
@@ -212,26 +294,83 @@ def run_contract_mutations(registry: dict[str, Any]) -> list[str]:
                     "outside_verified_envelope": False,
                 }
                 try:
-                    resolution = contract.assess_template(synthetic_id, facts, propagated)
+                    resolution = assess_template(synthetic_id, facts, propagated)
                 except Exception as exc:
                     fail(errors, f"synthetic registry template was unreachable from selector: {exc}")
                 else:
                     if resolution.get("status") != "selected":
                         fail(errors, "synthetic registry template did not select through shared selector")
-                try:
-                    stale_resolution = contract.assess_template(synthetic_id, facts, registry)
-                except Exception as exc:
-                    fail(errors, f"stale consumer mapping did not fail closed: {exc}")
-                else:
-                    if stale_resolution.get("status") != "unsupported":
-                        fail(errors, "stale consumer mapping did not return unsupported")
-
-    # A consumer that hand-copies the current IDs must be detected as stale as
-    # soon as the authoritative registry gains a template.
-    copied_consumer_ids = set(registry["templates"])
-    if copied_consumer_ids == set(synthetic["templates"]):
-        fail(errors, "copied consumer mapping was not detected as stale")
     return errors
+
+
+def fixture_load_templates(path: Path) -> dict[str, Any]:
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+def registry_driven_fixture_selector(
+    template_id: str, facts: dict[str, Any], registry: dict[str, Any]
+) -> dict[str, str]:
+    template = registry.get("templates", {}).get(template_id)
+    if template is None or template.get("status") != "implemented":
+        return {"status": "unsupported"}
+    if any(facts.get(key) != value for key, value in template["applicability"].items()):
+        return {"status": "escalation_required"}
+    return {"status": "selected"}
+
+
+def copied_fixture_selector(
+    template_id: str, facts: dict[str, Any], registry: dict[str, Any]
+) -> dict[str, str]:
+    """Deliberate stale mapping mutation: it ignores a new registry entry."""
+    copied_ids = frozenset(IMPLEMENTED_TEMPLATE_IDS)
+    if template_id not in copied_ids:
+        return {"status": "unsupported"}
+    return registry_driven_fixture_selector(template_id, facts, registry)
+
+
+def run_negative_drift_proof(registry: dict[str, Any]) -> None:
+    """Prove this validator rejects the exact copied-selector regression."""
+    correct_errors = selector_propagation_errors(
+        registry,
+        fixture_load_templates,
+        registry_driven_fixture_selector,
+    )
+    if correct_errors:
+        raise AssertionError(f"registry-driven selector fixture failed: {correct_errors!r}")
+    copied_errors = selector_propagation_errors(
+        registry,
+        fixture_load_templates,
+        copied_fixture_selector,
+    )
+    if not any("did not select through shared selector" in error for error in copied_errors):
+        raise AssertionError("copied selector mutation was accepted")
+
+
+def run_contract_mutations(registry: dict[str, Any]) -> list[str]:
+    """Exercise the future shared contract with the same anti-drift proof."""
+    errors: list[str] = []
+    if str(SCRIPTS) not in sys.path:
+        sys.path.insert(0, str(SCRIPTS))
+    try:
+        contract = importlib.import_module("lifecycle_template_contract")
+    except Exception as exc:  # pragma: no cover - guarded by the RED prerequisite
+        return [f"cannot load shared lifecycle template contract: {exc}"]
+    for name in ("load_templates", "assess_template"):
+        if not callable(getattr(contract, name, None)):
+            fail(errors, f"shared lifecycle template contract is missing {name}()")
+    if errors:
+        return errors
+    try:
+        loaded = contract.load_templates(REGISTRY_PATH)
+    except Exception as exc:
+        return [f"shared lifecycle template contract cannot load registry: {exc}"]
+    if loaded != registry:
+        fail(errors, "shared lifecycle template loader changed authoritative registry content")
+    return errors + selector_propagation_errors(
+        registry,
+        contract.load_templates,
+        contract.assess_template,
+    )
 
 
 def main() -> int:
@@ -246,6 +385,9 @@ def main() -> int:
     else:
         errors.extend(registry_errors(registry))
 
+    if registry is not None and not registry_errors(registry):
+        run_negative_drift_proof(registry)
+
     if not CONTRACT_PATH.is_file():
         fail(errors, "missing shared lifecycle template contract: scripts/lifecycle_template_contract.py")
     elif registry is not None and not registry_errors(registry):
@@ -258,6 +400,21 @@ def main() -> int:
         evidence_removed = copy.deepcopy(registry)
         del evidence_removed["templates"]["bounded-feature"]["required_evidence"]
         mutation_must_fail(evidence_removed, "required evidence removed")
+        gate_owner_removed = copy.deepcopy(registry)
+        del gate_owner_removed["templates"]["lightweight-change"]["gates"][0]["owner"]
+        mutation_must_fail(gate_owner_removed, "gate owner removed")
+        gate_evidence_removed = copy.deepcopy(registry)
+        del gate_evidence_removed["templates"]["lightweight-change"]["gates"][0]["required_evidence"]
+        mutation_must_fail(gate_evidence_removed, "gate evidence removed")
+        gate_transition_weakened = copy.deepcopy(registry)
+        gate_transition_weakened["templates"]["lightweight-change"]["gates"][0]["transition"]["on_fail"] = "complete"
+        mutation_must_fail(gate_transition_weakened, "gate failure transition weakened")
+        resume_reconciliation_removed = copy.deepcopy(registry)
+        resume_reconciliation_removed["templates"]["bounded-feature"]["resume_reconciliation"]["reconcile_before_resume"] = False
+        mutation_must_fail(resume_reconciliation_removed, "resume reconciliation weakened")
+        invalidation_weakened = copy.deepcopy(registry)
+        invalidation_weakened["templates"]["skill-evolution"]["reuse_invalidation"]["on_invalidation"] = "ignore"
+        mutation_must_fail(invalidation_weakened, "reuse invalidation weakened")
         deferred_reclassified = copy.deepcopy(registry)
         deferred_reclassified["templates"]["release"]["status"] = "implemented"
         mutation_must_fail(deferred_reclassified, "deferred status removed")

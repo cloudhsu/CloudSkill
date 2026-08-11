@@ -26,15 +26,25 @@
       "gates": [
         {
           "gate_id": "scope-and-delta",
+          "owner": "development-process-tailoring",
           "required_evidence": [
-            "bounded delta record"
-          ]
+            "all-false bounded delta record"
+          ],
+          "transition": {
+            "on_pass": "implement",
+            "on_fail": "escalation_required"
+          }
         },
         {
           "gate_id": "verification",
+          "owner": "verification-owner",
           "required_evidence": [
             "focused verification result"
-          ]
+          ],
+          "transition": {
+            "on_pass": "complete",
+            "on_fail": "escalation_required"
+          }
         }
       ],
       "owners": {
@@ -47,12 +57,17 @@
       "required_evidence": [
         "normalized task facts",
         "all-false bounded delta record",
-        "focused verification result"
+        "focused verification result",
+        "durable state reconciliation"
       ],
       "review_level": "L0_SINGLE_REVIEW",
       "resume_reconciliation": {
         "checkpoint_owner": "existing-lifecycle-orchestration",
-        "interruption_rule": "reconcile durable state before resuming"
+        "reconcile_before_resume": true,
+        "on_unreconciled": "reconciliation_required",
+        "required_evidence": [
+          "durable state reconciliation"
+        ]
       },
       "reuse_invalidation": {
         "reuse_when": [
@@ -60,7 +75,9 @@
         ],
         "invalidate_when": [
           "any matched condition or bounded delta changes"
-        ]
+        ],
+        "unaffected_evidence": "preserve",
+        "on_invalidation": "new_plan_revision"
       },
       "compatible_overlays": [],
       "escalation_conditions": [
@@ -95,15 +112,26 @@
       "gates": [
         {
           "gate_id": "approved-design",
+          "owner": "development-process-tailoring",
           "required_evidence": [
-            "approved design and owner record"
-          ]
+            "approved design",
+            "known-owner record"
+          ],
+          "transition": {
+            "on_pass": "implement",
+            "on_fail": "escalation_required"
+          }
         },
         {
           "gate_id": "verification",
+          "owner": "verification-owner",
           "required_evidence": [
             "automated verification result"
-          ]
+          ],
+          "transition": {
+            "on_pass": "release",
+            "on_fail": "escalation_required"
+          }
         }
       ],
       "owners": {
@@ -118,12 +146,17 @@
         "known-owner record",
         "normalized task facts",
         "bounded delta record",
-        "automated verification result"
+        "automated verification result",
+        "durable state reconciliation"
       ],
       "review_level": "L2_SINGLE_FAMILY_QUAD",
       "resume_reconciliation": {
         "checkpoint_owner": "existing-lifecycle-orchestration",
-        "interruption_rule": "reconcile durable state and plan revision before resuming"
+        "reconcile_before_resume": true,
+        "on_unreconciled": "reconciliation_required",
+        "required_evidence": [
+          "durable state reconciliation"
+        ]
       },
       "reuse_invalidation": {
         "reuse_when": [
@@ -131,7 +164,9 @@
         ],
         "invalidate_when": [
           "design, owner, delta, or plan revision changes"
-        ]
+        ],
+        "unaffected_evidence": "preserve",
+        "on_invalidation": "new_plan_revision"
       },
       "compatible_overlays": [
         "skill-evolution"
@@ -167,17 +202,27 @@
       "gates": [
         {
           "gate_id": "evidence-inventory",
+          "owner": "developing-skills",
           "required_evidence": [
             "sanitized and deduplicated evidence inventory"
-          ]
+          ],
+          "transition": {
+            "on_pass": "verify",
+            "on_fail": "escalation_required"
+          }
         },
         {
           "gate_id": "red-green-regression",
+          "owner": "developing-skills",
           "required_evidence": [
-            "RED result",
+            "RED baseline result",
             "minimum change",
             "GREEN and adjacent regression result"
-          ]
+          ],
+          "transition": {
+            "on_pass": "release",
+            "on_fail": "escalation_required"
+          }
         }
       ],
       "owners": {
@@ -191,14 +236,19 @@
         "sanitized and deduplicated evidence inventory",
         "owner selection",
         "RED baseline result",
-        "minimum change record",
+        "minimum change",
         "GREEN and adjacent regression result",
-        "review and release-boundary decision"
+        "review and release-boundary decision",
+        "durable state reconciliation"
       ],
       "review_level": "L3_SINGLE_FAMILY_PAIR",
       "resume_reconciliation": {
         "checkpoint_owner": "existing-lifecycle-orchestration",
-        "interruption_rule": "reconcile evidence lineage and completed RED/GREEN gates before resuming"
+        "reconcile_before_resume": true,
+        "on_unreconciled": "reconciliation_required",
+        "required_evidence": [
+          "durable state reconciliation"
+        ]
       },
       "reuse_invalidation": {
         "reuse_when": [
@@ -206,7 +256,9 @@
         ],
         "invalidate_when": [
           "Skill text, Eval, contract, source, rubric, environment, or risk changes"
-        ]
+        ],
+        "unaffected_evidence": "preserve",
+        "on_invalidation": "new_plan_revision"
       },
       "compatible_overlays": [],
       "escalation_conditions": [
