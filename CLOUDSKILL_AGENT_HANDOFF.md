@@ -28,9 +28,15 @@ This is the operational entry point for a new conversation or coding agent that 
   `selected` with `full_risk_calculation_required: false`. True or unknown
   deltas escalate. The current authoritative `bounded-feature +
   skill-evolution` composition returns `conflict` because its owners differ.
-- Task 4 static/manual semantic adjudication passed the post-change cases. The
-  complete deterministic suite and `git diff --check` passed after Task 5
-  documentation. Provider-backed Runtime Eval remains `NOT RUN`.
+- Task 4 static/manual semantic adjudication passed the post-change cases. Its
+  retained provenance identifies only a separate read-only agent; reviewer ID,
+  human-versus-model execution modality, provider/model, and raw-output lineage
+  are unknown, so independence is not claimed. Pre-change cases 009–016 are
+  normalized to `FAIL`, with partial prior behavior satisfaction noted for all
+  except the full omission in case 013. The complete deterministic suite and
+  `git diff --check` passed after Task 5 documentation. The pure selector makes
+  zero model calls; provider-backed Runtime Eval remains `NOT RUN`, with
+  provider token/cost evidence unavailable.
 - Candidate evidence is in
   `docs/evolution/2026-08-11-lifecycle-template-pilot-evidence.md`; operating
   guidance is in `docs/LIFECYCLE_TEMPLATE_CATALOG.md`. Final independent

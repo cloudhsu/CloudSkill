@@ -16,7 +16,8 @@ Repository evidence read for this record includes the approved design and
 plan, Task 1 through Task 4 reports, the registry, selector/composer, lifecycle
 plan contract, focused validators, behavior cases, Skill text, handoff, and
 change history. No private Inbox, raw transcript, credential, external project
-source, hidden runtime trace, or provider output was used.
+source, or hidden runtime trace was used. Provider-backed Runtime Eval was not
+run for this pilot and therefore supplied no Runtime Eval output.
 
 The implementation lineage is:
 
@@ -59,16 +60,25 @@ Deterministic RED/GREEN was preserved across the task reports:
   forgery, unrelated-evidence over-invalidation, and incomplete lineage. The
   focused validators are GREEN after authoritative replay and selective
   invalidation repairs.
-- Task 4 independently mapped the pre-change Skill at `0ad81d0` to
+- Task 4 mapped the pre-change Skill at `0ad81d0` to
   `PROC-BEH-007..016`. Cases 007 and 008 were already PASS and remain
-  regression-only. Cases 009, 010, 011, 012, 014, 015, and 016 were partial
-  failures with exact template-contract omissions; case 013 was a full failure
-  on unknown-delta escalation. The same separate read-only static/manual
-  adjudicator mapped the changed Skill at `0d17f40` to PASS for all ten cases.
+  regression-only. Cases 009, 010, 011, 012, 014, 015, and 016 are classified
+  `FAIL` because required template-contract behavior was missing, while their
+  prior generic process behavior is noted as partially satisfying the rubric.
+  Case 013 is also `FAIL` because unknown-delta escalation was absent. The same
+  separate read-only static/manual adjudicator mapped the changed Skill at
+  `0d17f40` to PASS for all ten cases.
 
-That Task 4 result is static/manual semantic adjudication. The behavior case
-validator proves only contract structure. Neither is represented as a provider-
-backed Behavior execution.
+The Task 4 report identifies the adjudicator only as a "separate read-only
+agent" that manually mapped each rubric to the before/after Skill. It records no
+stable reviewer/agent ID, human reviewer identity, provider/model ID, prompt or
+raw-output hash, or human-only attestation. Whether the adjudication was model-
+assisted or performed by a human is therefore `UNKNOWN`; reviewer independence
+cannot be established from the retained provenance. The report does establish
+that the adjudicator did not edit repository files and that no repository
+Runtime Eval provider was invoked. This remains static/manual semantic
+adjudication. The behavior case validator proves only contract structure.
+Neither is represented as provider-backed Behavior execution.
 
 ## Fast-path and size evidence
 
@@ -93,9 +103,12 @@ data, not model context.
 
 For comparison only, a four-UTF-8-bytes-per-token heuristic gives request/result
 estimates of approximately 110/152, 118/160, and 114/157 tokens. These are not
-provider tokenizer measurements, usage records, or billing evidence. Provider
-input/output/reasoning tokens and provider cost are unavailable because model
-calls were zero.
+provider tokenizer measurements, usage records, or billing evidence. The pure
+selector/composer makes zero model calls. Provider-backed Runtime Eval is
+`NOT RUN`, so provider input/output/reasoning-token and provider-cost evidence
+for that Eval is unavailable. The Task 4 adjudicator's execution modality is
+unknown, so this record makes no call, token, or cost claim for that separate
+adjudication.
 
 The fast path removes only a fresh full-risk calculation. It retains lifecycle
 ownership, all selected gates/evidence, verification, Review Assurance, durable
@@ -122,11 +135,10 @@ reconciliation, and invalidation/replan rules.
 - Adjacent controls keep trivial work lightweight, keep generic detailed
   planning subordinate, and preserve lifecycle first, evidence/verification
   second, token reduction third.
-- Two Task 4 minor observations remain visible for final review: its historical
-  pre-change summary used `PARTIAL` outside the standard evidence-result
-  taxonomy, and final review should confirm the Skill's literal-boolean/all-
-  false wording is sufficiently unambiguous. Neither was classified High or
-  Medium by the Task 4 review.
+- Task 4's historical uppercase `PARTIAL` label is normalized here to `FAIL`
+  with partial prior behavior satisfaction retained as explanatory detail.
+  Final review should still confirm that the Skill's literal-boolean/all-false
+  wording is sufficiently unambiguous; Task 4 classified that as a minor.
 
 ## Deterministic checks
 
@@ -150,9 +162,10 @@ package, and install-smoke evidence; it is not CI or provider behavior evidence.
 
 ## Review and release truth
 
-Task 4 used a separate read-only static/manual adjudicator for the pre/post
-Skill comparison. Task 5 self-review covers documentation consistency and
-evidence transcription only. Independent exact-tip review of authority,
+Task 4 used a separate read-only static/manual adjudicator of unknown identity
+and unknown human/model execution modality for the pre/post Skill comparison.
+Task 5 self-review covers documentation consistency and evidence transcription
+only. Independent exact-tip review of authority,
 lifecycle continuity, evidence validity, composition conflict, deferred
 behavior, anti-drift tests, token claims, privacy, and documentation is
 `NOT RUN` at this checkpoint; the controller has assigned it to a final

@@ -235,7 +235,8 @@ template definitions as a second authority.
 - [x] **Step 2: Record RED/GREEN and cost evidence**
 
 Record which full-risk calculations are avoided by exact matches, selector
-input/output bytes, model calls (expected zero), semantic adjudication, and all
+input/output bytes, selector/composer model calls (expected zero), provider-
+backed Runtime Eval status separately, semantic-adjudicator provenance, and all
 regression findings. Token values remain estimates unless measured by a provider.
 
 - [x] **Step 3: Run complete regression**

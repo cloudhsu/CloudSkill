@@ -16,13 +16,20 @@ Deterministic RED/GREEN corrected typed exclusions, owner/gate conflict,
 resolution provenance and integrity, invalidation-safe replan, deferred-ID
 forgery, selective evidence invalidation, and complete lineage. Static/manual
 semantic adjudication passed the final ten Skill cases while preserving two
-pre-existing controls as regression-only. The current authoritative
-`bounded-feature + skill-evolution` pair truthfully returns `conflict` because
+pre-existing controls as regression-only. Its retained provenance names only a
+separate read-only agent; human/model modality, reviewer/model identity, and raw
+judge lineage are unknown, so independence is not claimed. The eight
+pre-change template cases are normalized to `FAIL`; seven note partial prior
+generic-process satisfaction and case 013 records a full omission. The current
+authoritative `bounded-feature + skill-evolution` pair truthfully returns
+`conflict` because
 its policy/action/evidence owners differ; only an owner-aligned synthetic
 fixture proves successful strongest-gate composition.
 
 Task 5 adds a human catalog and evidence record without duplicating the
-registry. Provider-backed Runtime Eval, final independent exact-tip review,
+registry. The pure selector/composer makes zero model calls. Provider-backed
+Runtime Eval is `NOT RUN`, and provider token/cost evidence for it is
+unavailable. Final independent exact-tip review,
 version synchronization, push, PR, merge, tag, Release, and host reload remain
 `NOT RUN` at this checkpoint. Exact measurements, evidence limitations, and
 continuation are in
