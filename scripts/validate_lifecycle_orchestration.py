@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 from pathlib import Path
-import copy,json,sys,tempfile
+import copy,hashlib,json,sys,tempfile
 ROOT=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT/"scripts"))
 from lifecycle_orchestration_contract import classify_failure, deployment_decision, load_profiles, select_profiles
@@ -43,7 +43,7 @@ template_facts={
 resolution=compose_templates("bounded-feature",["skill-evolution"],template_facts,compatible_registry)
 composer_integrity_hash=resolution.get("resolution_integrity_hash")
 assert isinstance(composer_integrity_hash,str) and len(composer_integrity_hash)==64
-templated_plan=create_plan("W2",["eval_driven_evolution"],"c"*64,tasks,resolution)
+templated_plan=create_plan("W2",["eval_driven_evolution"],"c"*64,tasks,resolution,compatible_registry)
 assert templated_plan["template_resolution"]=={
     "status":"selected",
     "template_ids":["bounded-feature","skill-evolution"],
@@ -63,7 +63,7 @@ assert templated_plan["required_review_level"]=="L2_SINGLE_FAMILY_QUAD"
 stronger_registry=copy.deepcopy(compatible_registry)
 stronger_registry["templates"]["bounded-feature"]["review_level"]="L1_CROSS_FAMILY_2X2"
 stronger_resolution=compose_templates("bounded-feature",["skill-evolution"],template_facts,stronger_registry)
-stronger_plan=create_plan("W3",["eval_driven_evolution"],"f"*64,tasks,stronger_resolution)
+stronger_plan=create_plan("W3",["eval_driven_evolution"],"f"*64,tasks,stronger_resolution,stronger_registry)
 assert stronger_plan["required_review_level"]=="L1_CROSS_FAMILY_2X2"
 hand_built={
     "status":"selected",
@@ -79,40 +79,62 @@ deferred_relabel.update(hand_built)
 tampered_resolution=copy.deepcopy(resolution)
 tampered_resolution["delta_evidence_hash"]="0"*64
 for invalid_selected in (hand_built,deferred_relabel,tampered_resolution):
-    try: create_plan("W-forged",["iterative_incremental"],"0"*64,tasks,invalid_selected)
+    try: create_plan("W-forged",["iterative_incremental"],"0"*64,tasks,invalid_selected,compatible_registry)
     except ValueError as exc: assert "composer-selected" in str(exc)
     else: raise AssertionError("non-composer or integrity-invalid selected resolution accepted")
+forged_resealed=copy.deepcopy(resolution)
+forged_assessment=copy.deepcopy(next(iter(forged_resealed["assessments"].values())))
+forged_assessment["template_id"]="release"
+forged_assessment["contract_version"]=1
+forged_resealed["template_ids"]=["release"]
+forged_resealed["composition_order"]=["release"]
+forged_resealed["contract_versions"]={"release":1}
+forged_resealed["assessments"]={"release":forged_assessment}
+forged_payload={key:value for key,value in forged_resealed.items() if key!="resolution_integrity_hash"}
+forged_resealed["resolution_integrity_hash"]=hashlib.sha256(json.dumps(forged_payload,sort_keys=True,separators=(",",":"),ensure_ascii=False).encode("utf-8")).hexdigest()
+try: create_plan("W-resealed-forge",["iterative_incremental"],"4"*64,tasks,forged_resealed,template_registry)
+except ValueError as exc: assert "authoritative registry" in str(exc)
+else: raise AssertionError("resealed deferred-template forgery accepted")
 for rejected_resolution in (
     compose_templates("release",[],template_facts,template_registry),
     compose_templates("bounded-feature",[],{**template_facts,"outside_verified_envelope":True},template_registry),
     compose_templates("bounded-feature",["skill-evolution"],template_facts,template_registry),
 ):
-    try: create_plan("W-rejected",["iterative_incremental"],"d"*64,tasks,rejected_resolution)
+    try: create_plan("W-rejected",["iterative_incremental"],"d"*64,tasks,rejected_resolution,template_registry)
     except ValueError as exc: assert "selected template resolution" in str(exc)
     else: raise AssertionError("non-selected template resolution accepted as plan input")
 changed=replan(plan,{"kind":"authority_boundary_changed","evidence_hash":"b"*64},{"risk_class":"high"},{"invalidate":["T1"],"reuse":[]})
 assert changed["revision"]==2 and changed["tasks_invalidated"]==["T1"] and changed["required_review_level"]=="L1_CROSS_FAMILY_2X2"
-template_changed=replan(templated_plan,{"kind":"source_changed","evidence_hash":"e"*64},{"risk_class":"medium"},{"invalidate":["T1"],"invalidate_evidence":["delta evidence"],"reuse":["approved design","approved design"]})
+unrelated_changed=replan(templated_plan,{"kind":"test_report_changed","evidence_hash":"5"*64},{"risk_class":"medium"},{"invalidate":[],"invalidate_evidence":["unrelated:test-report"],"reuse":["approved design"]})
+assert unrelated_changed["template_resolution"]["status"]=="selected"
+assert unrelated_changed["template_resolution"]["delta_evidence_hash"]==resolution["delta_evidence_hash"]
+template_changed=replan(templated_plan,{"kind":"source_changed","evidence_hash":"e"*64},{"risk_class":"medium"},{"invalidate":["T1"],"invalidate_evidence":[resolution["delta_evidence_hash"]],"reuse":["approved design","approved design"]})
 assert template_changed["template_resolution_lineage"]==[templated_plan["template_resolution"]]
 assert template_changed["template_resolution"]["plan_revision"]==2
 assert template_changed["template_resolution"]["status"]=="escalation_required"
 assert template_changed["template_resolution"]["full_risk_calculation_required"] is True
 assert template_changed["template_resolution"]["delta_evidence_hash"] is None
 assert template_changed["template_resolution"]["composer_resolution_integrity_hash"] is None
-assert template_changed["evidence_invalidated"]==["delta evidence"]
+assert template_changed["evidence_invalidated"]==[resolution["delta_evidence_hash"]]
 assert template_changed["evidence_reused"]==["approved design"]
 still_unresolved=replan(template_changed,{"kind":"scope_rechecked","evidence_hash":"3"*64},{"risk_class":"medium"},{"invalidate":[],"reuse":["approved design"]})
 assert still_unresolved["template_resolution"]["status"]=="escalation_required"
 assert still_unresolved["template_resolution"]["plan_revision"]==3
 assert still_unresolved["template_resolution"]["delta_evidence_hash"] is None
-assert still_unresolved["template_resolution_lineage"]==[templated_plan["template_resolution"]]
+assert still_unresolved["template_resolution_lineage"]==[
+    templated_plan["template_resolution"],
+    template_changed["template_resolution"],
+]
 replacement=compose_templates("bounded-feature",[],{key:value for key,value in template_facts.items() if key not in overlay_template["applicability"] and key not in overlay_template["exclusion_facts"]},template_registry)
-reselected=replan(templated_plan,{"kind":"source_changed","evidence_hash":"1"*64},{"risk_class":"medium"},{"invalidate":["T1"],"invalidate_evidence":["delta evidence"],"reuse":[]},replacement)
+reselected=replan(template_changed,{"kind":"source_changed","evidence_hash":"1"*64},{"risk_class":"medium"},{"invalidate":["T1"],"invalidate_evidence":[],"reuse":[]},replacement,template_registry)
 assert reselected["template_resolution"]["status"]=="selected"
-assert reselected["template_resolution"]["plan_revision"]==2
+assert reselected["template_resolution"]["plan_revision"]==3
 assert reselected["template_resolution"]["delta_evidence_hash"]==replacement["delta_evidence_hash"]
-assert reselected["template_resolution_lineage"]==[templated_plan["template_resolution"]]
-try: replan(templated_plan,{"kind":"source_changed","evidence_hash":"f"*64},{"risk_class":"medium"},{"invalidate":[],"invalidate_evidence":["delta evidence"],"reuse":["delta evidence"]})
+assert reselected["template_resolution_lineage"]==[
+    templated_plan["template_resolution"],
+    template_changed["template_resolution"],
+]
+try: replan(templated_plan,{"kind":"source_changed","evidence_hash":"f"*64},{"risk_class":"medium"},{"invalidate":[],"invalidate_evidence":[resolution["delta_evidence_hash"]],"reuse":[resolution["delta_evidence_hash"]]})
 except ValueError as exc: assert "invalidated and reused" in str(exc)
 else: raise AssertionError("replan reused invalidated evidence")
 for malformed_plan in (
@@ -121,6 +143,7 @@ for malformed_plan in (
     {**templated_plan,"template_resolution":{**templated_plan["template_resolution"],"plan_revision":9}},
     {**templated_plan,"revision":"1"},
     {**plan,"template_resolution_lineage":[]},
+    {**template_changed,"template_resolution_lineage":[]},
 ):
     try: replan(malformed_plan,{"kind":"source_changed","evidence_hash":"2"*64},{"risk_class":"medium"},{"invalidate":[],"reuse":[]})
     except ValueError as exc: assert "template resolution lineage" in str(exc)

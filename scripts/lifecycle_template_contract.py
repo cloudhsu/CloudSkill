@@ -261,8 +261,9 @@ def compose_templates(
     return result
 
 
-def validate_selected_resolution(resolution: Any) -> None:
-    """Reject unsealed, relabeled, or mutated composition output."""
+def validate_selected_resolution(resolution: Any, registry: dict[str, Any]) -> None:
+    """Replay a sealed selection against its authoritative registry evidence."""
+    _validate_registry(registry)
     if not isinstance(resolution, dict):
         raise ValueError("plan requires composer-selected resolution provenance and integrity")
     integrity_hash = resolution.get("resolution_integrity_hash")
@@ -320,6 +321,42 @@ def validate_selected_resolution(resolution: Any) -> None:
         or resolution.get("resolved_review_level") not in LEVELS
     ):
         raise ValueError("plan requires composer-selected resolution provenance and integrity")
+    facts: dict[str, Any] = {}
+    assessment_fields = {
+        "template_id",
+        "contract_version",
+        "status",
+        "matched_conditions",
+        "matched_exclusions",
+        "exclusion_answers",
+        "delta_answers",
+        "reasons",
+        "full_risk_calculation_required",
+    }
+    for template_id in template_ids:
+        assessment = assessments[template_id]
+        if (
+            set(assessment) != assessment_fields
+            or assessment["template_id"] != template_id
+            or assessment["contract_version"] != versions[template_id]
+            or assessment["matched_exclusions"] != []
+            or assessment["reasons"] != []
+            or assessment["full_risk_calculation_required"] is not False
+        ):
+            raise ValueError("selected resolution disagrees with authoritative registry assessment evidence")
+        for evidence_field in ("matched_conditions", "exclusion_answers", "delta_answers"):
+            evidence = assessment[evidence_field]
+            if not isinstance(evidence, dict):
+                raise ValueError("selected resolution has invalid assessment evidence")
+            for fact_name, fact_value in evidence.items():
+                if fact_name in facts and (
+                    type(facts[fact_name]) is not type(fact_value) or facts[fact_name] != fact_value
+                ):
+                    raise ValueError("selected resolution has conflicting assessment evidence")
+                facts[fact_name] = copy.deepcopy(fact_value)
+    replayed = compose_templates(template_ids[0], template_ids[1:], facts, registry)
+    if replayed != resolution:
+        raise ValueError("selected resolution does not replay against authoritative registry")
 
 
 def _composition_result(

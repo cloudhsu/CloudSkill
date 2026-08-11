@@ -19,6 +19,7 @@ def create_plan(
     source_hash:str,
     tasks:list[dict[str,Any]],
     template_resolution:dict[str,Any]|None=None,
+    template_registry:dict[str,Any]|None=None,
 )->dict[str,Any]:
     ids=[task.get("task_id") for task in tasks]
     if any(not value for value in ids) or len(ids)!=len(set(ids)): raise ValueError("task IDs must be unique and nonblank")
@@ -28,7 +29,7 @@ def create_plan(
     plan_id="PLAN-"+hashlib.sha256((work_id+source_hash).encode()).hexdigest()[:12]
     plan={"schema_version":1,"plan_id":plan_id,"revision":1,"based_on_revision":None,"work_id":work_id,"profiles":profiles,"source_hash":source_hash,"risk_baseline":{},"tasks":copy.deepcopy(tasks),"tasks_added":ids,"tasks_removed":[],"tasks_invalidated":[],"evidence_reused":[],"authority_required":[],"required_review_level":"L2_SINGLE_FAMILY_QUAD"}
     if template_resolution is not None:
-        plan["template_resolution"]=_selected_plan_resolution(template_resolution,1)
+        plan["template_resolution"]=_selected_plan_resolution(template_resolution,template_registry,1)
         plan["template_resolution_lineage"]=[]
         plan["required_review_level"]=max(
             plan["required_review_level"],
@@ -37,12 +38,14 @@ def create_plan(
         )
     return plan
 
-def _selected_plan_resolution(resolution:dict[str,Any],plan_revision:int)->dict[str,Any]:
+def _selected_plan_resolution(resolution:dict[str,Any],registry:dict[str,Any]|None,plan_revision:int)->dict[str,Any]:
+    if registry is None:
+        raise ValueError("plan requires authoritative registry for selected template resolution")
     try:
-        validate_selected_resolution(resolution)
+        validate_selected_resolution(resolution,registry)
     except ValueError as exc:
         raise ValueError(
-            "plan requires selected template resolution with composer-selected provenance and integrity"
+            "plan requires selected template resolution with composer-selected provenance, integrity, and authoritative registry replay"
         ) from exc
     snapshot={
         "status":"selected",
@@ -138,13 +141,13 @@ def _validated_lineage(plan:dict[str,Any])->tuple[dict[str,Any],list[dict[str,An
     lineage=plan.get("template_resolution_lineage")
     if not isinstance(lineage,list):
         raise ValueError("invalid template resolution lineage shape")
-    previous_revision=0
-    for item in lineage:
+    if len(lineage)!=revision-1:
+        raise ValueError("invalid template resolution lineage revision ordering")
+    for expected_revision,item in enumerate(lineage,start=1):
         _validate_plan_resolution(item)
         item_revision=item["plan_revision"]
-        if item["status"]!="selected" or item_revision<=previous_revision or item_revision>=revision:
+        if item_revision!=expected_revision:
             raise ValueError("invalid template resolution lineage revision ordering")
-        previous_revision=item_revision
     return copy.deepcopy(current),copy.deepcopy(lineage)
 
 def _canonical_hash(value:Any)->str:
@@ -154,7 +157,7 @@ def _canonical_hash(value:Any)->str:
 def _is_hash(value:Any)->bool:
     return isinstance(value,str) and len(value)==64 and all(character in "0123456789abcdef" for character in value)
 
-def replan(plan:dict[str,Any], trigger:dict[str,Any], risk:dict[str,Any], impact:dict[str,Any], template_resolution:dict[str,Any]|None=None)->dict[str,Any]:
+def replan(plan:dict[str,Any], trigger:dict[str,Any], risk:dict[str,Any], impact:dict[str,Any], template_resolution:dict[str,Any]|None=None, template_registry:dict[str,Any]|None=None)->dict[str,Any]:
     if not trigger.get("kind") or not trigger.get("evidence_hash"): raise ValueError("replan needs evidence trigger")
     prior_resolution:dict[str,Any]|None=None
     lineage:list[dict[str,Any]]|None=None
@@ -174,12 +177,17 @@ def replan(plan:dict[str,Any], trigger:dict[str,Any], risk:dict[str,Any], impact
         invalidated_evidence=list(dict.fromkeys(impact.get("invalidate_evidence",[])))
         if set(invalidated_evidence)&set(value["evidence_reused"]):
             raise ValueError("evidence cannot be both invalidated and reused")
-        if prior_resolution["status"]=="selected":
-            lineage.append(prior_resolution)
+        lineage.append(prior_resolution)
         value["template_resolution_lineage"]=lineage
+        selection_evidence_ids={
+            prior_resolution["delta_evidence_hash"]
+        } if prior_resolution["status"]=="selected" else set()
+        selection_evidence_invalidated=bool(
+            selection_evidence_ids & set(invalidated_evidence)
+        )
         if template_resolution is not None:
-            value["template_resolution"]=_selected_plan_resolution(template_resolution,value["revision"])
-        elif invalidated_evidence:
+            value["template_resolution"]=_selected_plan_resolution(template_resolution,template_registry,value["revision"])
+        elif selection_evidence_invalidated:
             value["template_resolution"]=_unresolved_plan_resolution(prior_resolution,value["revision"])
         else:
             value["template_resolution"]=_advance_plan_resolution(prior_resolution,value["revision"])
