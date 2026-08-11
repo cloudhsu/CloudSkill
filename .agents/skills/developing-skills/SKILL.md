@@ -5,242 +5,146 @@ description: Use when creating, editing, splitting, merging, evaluating, releasi
 
 # Developing CloudSkill Skills
 
-## Core principle
+## Core contract
 
-A skill change is successful only when it improves agent routing or behavior on repeatable cases. More documentation is not evidence of improvement.
+A Skill change succeeds only when it improves repeatable routing or behavior.
+More prose, valid Markdown, or a generated package is not evidence of improvement.
 
-Read:
+Preserve privacy, evidence lineage, the authoritative owner, RED evidence before
+behavior change, truthful execution status, and the smallest responsible change.
+Never store raw transcripts or claim access, tests, installation, publication,
+or model execution that did not occur.
 
-- `references/behavior-driven-skill-development.md`
-- `references/skill-authoring-sources.md` when reviewing external influences or attribution.
-- `references/interaction-eval-capture.md` when converting a live interaction into a private Eval candidate or reviewing an Eval Inbox.
-- `references/conversation-derived-optimization.md` when mining multiple available interactions or producing an optimized overlay, branch, or release candidate.
-- `references/skill-lifecycle-standard.md` when creating, promoting, reviewing, deprecating, or evolving a Skill.
+## Load conditional detail
 
-Use:
+Read only the references required by the active workflow:
 
-- `assets/SKILL_CONTRACT.template.md`
-- `assets/BEHAVIOR_EVAL_CASE.template.json`
-- `assets/INTERACTION_EVAL_CANDIDATE.template.json`
-- `assets/export_eval_candidate.py` when no CloudSkill repository is reachable on this machine.
-- `assets/EVAL_MINING_REPORT.template.md`
-- `assets/SKILL_PROPOSAL.template.md`
-- `assets/SKILL_LIFECYCLE.template.json`
-- `assets/SKILL_RELEASE_EVIDENCE.template.md`
+- `references/behavior-driven-skill-development.md` for RED/GREEN records,
+  evaluation layers, regressions, and result states.
+- `references/skill-authoring-sources.md` for external influences, adaptation,
+  citations, and third-party project evidence.
+- `references/interaction-eval-capture.md` for positive/negative shorthand,
+  sanitization, configuration discovery, private Inbox routing, disconnected
+  export/import, legacy/manual handling, or promotion from candidates.
+- `references/conversation-derived-optimization.md` for several interactions,
+  Eval Inbox review, project-history mining, deterministic clustering, owner
+  analysis, token-aware synthesis, and reviewable delivery.
+- `references/skill-lifecycle-standard.md` before creating or changing a stage,
+  preparing release evidence, deprecating, or replacing a Skill.
 
-## Interaction capture shorthand
+Do not load every reference by default. Keep detailed mechanics in one
+authoritative reference rather than copying mutable checklists into this file.
 
-## Standardized lifecycle
+Use the matching assets and repository commands named by those references.
+Create new Skills with `scripts/manage_skill.py new`; before commit refresh and
+audit lifecycle evidence, then run the complete repository checks.
 
-Use one lifecycle for every Skill:
+## Explicit capture requests
 
-`draft -> experimental -> active -> stable -> deprecated`
+Treat these phrases as exact workflow triggers:
 
-- `draft`: ownership and non-trigger boundaries are still being defined.
-- `experimental`: RED evidence and minimum routing/behavior cases exist, but release evidence is incomplete.
-- `active`: the same cases are GREEN, adjacent regressions pass, and executable evidence exists.
-- `stable`: the Skill has remained unambiguous across releases and its context/maintenance cost is acceptable.
-- `deprecated`: new routing moves to an explicit replacement or ordinary workflow.
+- `整理成正向案例`
+- `整理成負向案例`
+- `從專案提煉優化案例`
 
-Use the repository command rather than hand-building inconsistent folders:
+For the first two, follow `references/interaction-eval-capture.md`. For project
+history, follow its dedicated section in
+`references/conversation-derived-optimization.md`. Capture only necessary,
+sanitized evidence in the configured private queue. If sanitization or policy
+ownership is uncertain, use manual review or return `MANUAL_REQUIRED`.
 
-```bash
-python scripts/manage_skill.py new \
-  --name example-skill \
-  --description "Use when ..." \
-  --display-name "Example Skill" \
-  --short-description "..." \
-  --case-prefix EXAMPLE
-```
+Capture never authorizes formal Eval/Skill edits, Git mutation, or publication.
+A candidate is evidence to review, not proof that behavior passed.
 
-Before commit:
+## Untrusted exchange boundary
 
-```bash
-python scripts/manage_skill.py refresh --all
-python scripts/manage_skill.py audit --check
-python scripts/run_all_checks.py
-```
+Exporter success and payload validity do not prove consumer compatibility. Run
+the final archive through the real importer before approving its format. While
+the exchange contract evolves, retain manual review, unsupported evidence, and
+explicit legacy recovery; never silently migrate or delete source bundles.
 
-A stage change is a release decision. It requires the gates in
-`references/skill-lifecycle-standard.md`; Markdown validity alone cannot promote a Skill.
-
-
-Treat these user phrases as explicit capture requests:
-
-- `整理成正向案例` — preserve a successful route and the behaviors that made the result useful.
-- `整理成負向案例` — preserve the observed failure, user correction, and future required/forbidden behavior.
-- `從專案提煉優化案例` — mine the current project's commit history, architecture/design documents, and code (not a live interaction) for reusable engineering pressure. Use `references/conversation-derived-optimization.md` "Project-history mining" for scope-bounding, confidence discipline, and third-party attribution rules; the output pipeline and sanitization rules below still apply.
-
-For either interaction-capture phrase:
-
-1. Capture only the turns needed to understand the task, result, and correction; do not save the raw or complete transcript.
-2. Apply mandatory sanitization before writing. Generalize organization, customer, person, project, product, equipment, site, account, address, path, URL, schedule, recipe, safety-limit, and other identifying data.
-3. Distinguish observed skill loading from inferred or unknown routing. Do not claim hidden runtime traces.
-4. Read project `.cloudskill/config.local.json`, then user `~/.cloudskill/config.json`. Do not guess an output path when no valid configuration exists.
-5. Create a draft from `INTERACTION_EVAL_CANDIDATE.template.json`. If a configuration resolves to a reachable CloudSkill repository, use its `scripts/capture_eval_candidate.py` helper. If none resolves (a disconnected/external session with no reachable CloudSkill repository on this machine), use this Skill's own `assets/export_eval_candidate.py` instead — see `references/interaction-eval-capture.md` for the export/transfer/import flow.
-6. Save a sanitization-safe record to the private candidate queue. Route uncertain records to `manual-review`.
-7. Do not modify formal Evals, skills, commits, tags, branches, or remotes during capture.
-
-A captured candidate is evidence to review, not proof that routing or behavior passed. Batch conversion requires deduplication, owner analysis, a repeatable prompt, required and forbidden behavior, and an explicit RED/GREEN decision.
-
-### Treat the exchange boundary as untrusted
-
-Payload validity does not prove container or consumer compatibility. Before
-approving an export format, run the produced archive through the real importer
-and verify its final disposition. While the format is evolving, retain manual
-review, unsupported evidence, and explicit legacy recovery; do not auto-delete
-or silently migrate source bundles.
-
-For each archive, validate every declared member and build the complete routing
-plan before publishing any candidate. Treat archive names, member paths,
-candidate identifiers, queue labels, sizes, compression, and resource references
-as untrusted. Executable importers must generate local collision-safe output
+Plan and validate every declared archive payload before publishing any result.
+Treat names, paths, identifiers, queue labels, sizes, compression, and resource
+references as untrusted. Executable importers must generate local collision-safe
 names, prove queue containment, bound resource use, and retain failed evidence.
 
-An explicitly supplied Inbox path does not cancel an applicable privacy policy.
-Reuse its owning configuration when ownership can be proved. Otherwise stop or
-disclose the conservative fallback and route uncertain content to manual review.
+An explicit Inbox path does not cancel privacy policy. Reuse its owning config
+only when ownership is proved; otherwise stop or disclose the conservative
+fallback and route uncertain content to manual review.
 
-## Historical interaction mining and optimization requests
+## Evolution workflow
 
-Use this path when the user asks to optimize one or more skills from past conversations, previous corrections, memories, exported transcripts, or an Eval Inbox.
+### 1. Inventory and classify evidence
 
-1. **Inventory accessible evidence.** List the current conversation, available memory/context, uploaded exports, configured Eval Inbox, and connected repository evidence that were actually read. Mark unavailable history explicitly.
-2. **Sanitize before synthesis.** Remove or generalize organization, customer, person, project, product, equipment, site, account, address, local path, URL, schedule, recipe, safety limit, credential, and other identifying data.
-3. **Extract reusable pressure.** Preserve failure boundaries such as state ownership, timeout, late completion, retry safety, stale state, lifecycle, evidence denominator, audience transformation, release control, or overengineering. Do not preserve incidental names.
-4. **Cluster and deduplicate.** Merge semantically equivalent corrections. Separate routing failures, behavior omissions, artifact problems, unsupported claims, and project-only preferences.
-   Use deterministic metadata/content clustering before model synthesis; do not spend model context comparing byte-identical or already-equivalent candidates.
-5. **Locate the authoritative owner.** Update the smallest existing skill, router, reference, or validator that owns the pressure. Do not modify every skill merely because the source conversation mentioned several domains.
-6. **Establish RED evidence.** Add routing, recognition, application, counterexample, or discipline cases that reproduce the observed failure before changing skill instructions.
-7. **Make the smallest responsible change.** Prefer routing metadata, one decision rule, one safeguard, or one reference over a broad rewrite.
-8. **Regress adjacent routes.** Verify that code review does not become process tailoring, equipment modeling does not become resource architecture, agent product design does not become repository governance, and trivial tasks do not invoke CloudBox.
-9. **Produce a reviewable delivery.** Use a branch/PR only when write access is available and the user authorized it. Otherwise produce a deterministic overlay or patch that preserves repository paths.
-10. **Report execution truthfully.** Distinguish structural validation, model behavior execution, repository write, installation, and host/plugin reload. A generated package is not proof that ChatGPT loaded the updated skill.
+List only sources actually available. Mark unavailable history and distinguish
+observed, inferred, and unknown evidence. Classify the pressure as routing,
+missing behavior/artifact, prohibited action, unsupported claim, duplication,
+wrong ownership, or a mechanical rule better enforced by tooling.
 
-Never claim complete account-wide conversation access unless an explicit export or source was actually read. Never store raw transcripts in the repository. Never claim a branch, PR, test, install, or release succeeded after a connector or local command failed.
-
-## Workflow
-
-### 1. Define the observed problem
-
-Classify the need as one or more of:
-
-- Skill fails to trigger.
-- Skill triggers too broadly.
-- Wrong adjacent skill is selected.
-- Required analysis or artifact is omitted.
-- A prohibited action or unsupported claim occurs.
-- Instructions are duplicated or owned by the wrong skill.
-- A mechanical rule should be automated rather than documented.
-- A live interaction should be preserved as a positive or negative Eval candidate.
-- Multiple available interactions should be mined into a sanitized optimization candidate.
-
-Preserve the source evidence and confidence level. A historical project demonstrates a solved pressure; it does not make every historical implementation choice normative.
+Sanitize before synthesis. Generalize organizations, people, projects,
+products, equipment, sites, accounts, addresses, paths, URLs, schedules,
+recipes, safety limits, credentials, and other identifying details.
 
 ### 2. Locate the authoritative owner
 
-Before adding a skill:
+Search existing descriptions, Skills, references, assets, routing cases, and
+repository rules. Expand an owner when trigger, audience, and lifecycle match.
+Split only when the work is independently routable. Keep project conventions in
+repository instructions and enforce mechanical consistency in scripts or CI.
 
-- Search existing skill names, descriptions, references, assets, routing cases, and repository guidance.
-- Expand an existing owner when trigger, audience, and lifecycle are the same.
-- Split a skill only when triggers or required behavior have become independently routable.
-- Keep project-specific conventions in repository instructions rather than global skills.
-- Put enforceable syntax and consistency rules in scripts or CI.
+For multiple candidates, deterministically filter byte-identical or equivalent
+records before model synthesis. Cluster common pressure and do not modify every
+Skill merely because several domains appeared in the source.
 
-### 3. Establish RED evidence before editing
+### 3. Establish RED evidence
 
-Create or select repeatable cases before changing the skill:
+Create or select the smallest repeatable routing, recognition, application,
+counterexample, discipline, or reference case. Run current behavior without the
+proposed instruction and record the exact omission. If no observable failure
+exists, use `NO_CHANGE_JUSTIFIED`; do not invent a fix.
 
-- **Routing case:** Which skill should or should not load?
-- **Recognition case:** Does the agent identify the relevant pressure?
-- **Application case:** Does it apply the method to a new scenario?
-- **Counterexample:** Does it avoid the skill when another route is correct?
-- **Discipline case:** Does it preserve the rule under schedule, authority, sunk-cost, or operational pressure?
-- **Reference case:** Can it retrieve and correctly use the required information?
+### 4. Define and implement the minimum contract
 
-Run or record the current behavior without the proposed change. Capture the exact omission, wrong route, unsupported claim, or rationalization. If no observable failure exists, do not claim the edit fixes behavior.
+Specify trigger/non-trigger conditions, required and forbidden behavior,
+artifact, evidence, stop conditions, companions, and the baseline failure.
 
-### 4. Define the skill contract
+Prefer, in order: description correction; routing/counterexample case; one
+decision rule; one safeguard or stop condition; a supporting reference/asset;
+then a new Skill only when independent routing is proved. Keep decision flow in
+`SKILL.md`; keep conditional detail and reusable mechanics in references,
+scripts, or assets.
 
-Specify:
+For an authoritative-contract pattern, match the closest existing instance's
+positive propagation and negative drift-injection tests, not only its layout.
 
-- Trigger and non-trigger conditions.
-- Required and forbidden behavior.
-- Required output or artifact.
-- Evidence and verification expectations.
-- Stop or escalation conditions.
-- Required and optional companion skills.
-- Baseline failure the change is intended to correct.
+### 5. Verify GREEN and adjacent behavior
 
-The frontmatter description is a routing contract. It must begin with `Use when`, describe triggering conditions, and avoid summarizing the workflow.
+Re-run the same cases and verify routing, behavior, artifacts, forbidden-action
+absence, evidence truth, and reasonable context cost. Regress adjacent owners,
+negative controls, simple tasks, and multi-Skill composition. Close only
+demonstrated loopholes.
 
-### 5. Make the smallest responsible change
+Use exact source/diff hashes for review. Reuse evidence only when scope, source,
+contract, rubric, environment, and risk are equivalent. Stop additional model
+calls after a blocking finding until it is corrected. Do not repeat unchanged
+waiting status.
 
-Prefer this order:
+### 6. Report execution truthfully and control release
 
-1. Description correction.
-2. Routing or counterexample evaluation.
-3. One explicit decision rule or safeguard.
-4. Common mistake, red flag, or stop condition.
-5. Supporting reference or asset.
-6. New skill only when independent routing is justified.
+Report accessible evidence, unavailable sources, owner/overlap decision,
+sanitization/deduplication, contract, RED result, minimal change, GREEN and
+adjacent regression, structural/install checks, delivery form, release status,
+and remaining limitations.
 
-Keep judgment and decision flow in `SKILL.md`; move heavy reference material and reusable templates to supporting files. Do not duplicate mutable rules across skills, `AGENTS.md`, and documentation.
+Before any stage or release decision, follow
+`references/skill-lifecycle-standard.md`. Distinguish structural validation,
+semantic or provider-backed execution, repository writes, installation,
+host/plugin reload, push, merge, tag, and Release. Record each as PASS, FAIL,
+BLOCKED, NOT RUN, or MANUAL REQUIRED as applicable.
 
-When the change introduces a new instance of an authoritative-contract pattern (single source + shared adapter + consumer registry, e.g. `behavior-output-contract.json` or `providers.json`), it is not complete until it reaches the same anti-drift rigor as the closest existing instance — including that instance's positive-propagation and negative-drift-injection mutation tests, not just its file layout. Name the closest existing instance and check parity against it explicitly; do not declare the new instance done because it structurally resembles the old one.
+## Stop conditions
 
-### 6. Verify GREEN behavior
-
-Re-run the same cases after the change and verify:
-
-- Correct routing.
-- Required behavior and artifacts.
-- Absence of forbidden behavior.
-- Truthful evidence reporting.
-- Reasonable scope and token cost.
-
-A valid Markdown file or passing structural validator is not a behavioral pass.
-
-### 7. Refactor and regress
-
-Test adjacent skills, negative controls, simple tasks, and multi-skill composition. Record new loopholes or rationalizations and close only the ones demonstrated by evidence. Re-run prior cases after every change.
-
-### 8. Release with evidence
-
-Before release:
-
-- Run structural, description, routing, behavior-case, documentation, and install-smoke checks.
-- Record behavior execution as PASS, FAIL, BLOCKED, NOT RUN, or MANUAL REQUIRED.
-- Update version, changelog, manifest, and release evidence.
-- Use a single-purpose branch and reversible commit.
-
-## Common mistakes
-
-- Writing a new skill because one project had a unique folder or class name.
-- Editing first and inventing evaluation cases afterward.
-- Treating routing coverage as proof that the workflow is followed.
-- Copying an external methodology without adapting it to CloudSkill's architecture and governance scope.
-- Adding prose for a rule that a validator can enforce deterministically.
-- Declaring behavior tests passed when only schemas or case files were validated.
-- Copying an authoritative-contract pattern's file layout (single source + adapter + consumer registry) without also copying its anti-drift mutation tests, then declaring the new instance complete because it structurally resembles the original.
-- Fixing a defect by adding a new validator or import path without checking whether that fix's own side effects (for example, a new dynamic import writing bytecode cache) can reintroduce the same class of problem it was meant to prevent.
-- Claiming all past conversations were read when only current context or summaries were available.
-- Claiming a GitHub branch or PR was created after a connector returned an authorization error.
-- Embedding a user's local path or organization-specific terms into a reusable global skill.
-
-## Required output
-
-1. Accessible evidence inventory and unavailable sources
-2. Observed failure and evidence
-3. Existing owner and overlap decision
-4. Sanitization and deduplication result
-5. Skill contract
-6. RED baseline case and result
-7. Minimal change
-8. GREEN result
-9. Adjacent-skill regression
-10. Structural and install checks
-11. Delivery form: branch/PR, overlay, patch, or MANUAL_REQUIRED
-12. Release status and remaining limitations
-
-For interaction capture, the required output is the saved candidate path or a `MANUAL_REQUIRED` result; do not claim that a formal Eval or skill change was completed.
+Stop or route to manual review when privacy cannot be established, authority is
+missing, evidence cannot reproduce the claimed failure, a reference split hides
+a mandatory safeguard, or recovery/rollback is undefined. Do not trade required
+behavior for a smaller context file.
