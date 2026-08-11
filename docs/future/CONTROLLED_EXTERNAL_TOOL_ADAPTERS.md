@@ -1,7 +1,9 @@
 # Controlled external tool adapters — future discussion
 
-Status: deferred beyond CloudBox 6.2.0. This is a discussion scope, not a
-shipped capability or authorization to execute external side effects.
+Status: the controlled local CLI and Git vertical slice is implemented for the
+CloudBox 6.3 candidate. MCP, live GitHub mutation, NAS polling, and wider
+adapters remain future work. See `docs/CONTROLLED_TOOL_ADAPTERS.md` for the
+implemented boundary; this document does not authorize external side effects.
 
 ## Pressure
 

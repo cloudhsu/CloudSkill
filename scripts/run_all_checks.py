@@ -26,6 +26,10 @@ commands = [
     [sys.executable, 'scripts/validate_task_continuity_runner.py'],
     [sys.executable, 'scripts/validate_multimodel_panel.py'],
     [sys.executable, 'scripts/validate_review_assurance.py'],
+    [sys.executable, 'scripts/validate_tool_adapter_contract.py'],
+    [sys.executable, 'scripts/validate_tool_action_recovery.py'],
+    [sys.executable, 'scripts/validate_tool_execution_broker.py'],
+    [sys.executable, 'scripts/validate_git_tool_adapter.py'],
     [sys.executable, 'scripts/validate_lifecycle_orchestration.py'],
 ]
 

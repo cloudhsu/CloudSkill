@@ -52,3 +52,20 @@ For each state identify:
 - Reconciliation.
 
 Never assume the conversation transcript is the authoritative workflow state for consequential operations.
+
+## Controlled external execution
+
+For reusable CLI or MCP-style operations, select a narrow capability from one
+versioned registry. The model supplies only contract-valid business arguments;
+the host owns executable selection, root and secret resolution, authority, and
+process environment. Never turn the adapter layer into model-authored shell.
+
+Persist a stable action and idempotency identity before mutation. A timeout,
+disconnect, or malformed response is `UNCERTAIN` when external completion
+cannot be disproved. Reconcile with the external authoritative system before
+retry. The adapter reports evidence but cannot expand authority, revise the
+lifecycle plan, or select its next attempt.
+
+Keep raw logs and large artifacts outside model context. Return bounded
+summaries, hashes, artifact references, observed effects, and redacted
+diagnostics. Deterministic no-change paths should end with zero model calls.

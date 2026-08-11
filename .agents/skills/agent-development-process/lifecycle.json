@@ -17,6 +17,10 @@
     "AID-NEG-01"
   ],
   "behavior_case_ids": [
+    "AGENT-TOOL-001",
+    "AGENT-TOOL-002",
+    "AGENT-TOOL-003",
+    "AGENT-TOOL-004",
     "AID-BEH-001",
     "AID-BEH-002",
     "AID-BEH-003"
@@ -24,6 +28,7 @@
   "behavior_case_types": [
     "application",
     "counterexample",
+    "discipline",
     "recognition"
   ],
   "next_review_triggers": [

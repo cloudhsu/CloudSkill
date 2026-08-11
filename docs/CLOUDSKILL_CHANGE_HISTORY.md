@@ -14,6 +14,19 @@ the expected boundary. The initial executable validator intentionally fails on
 the missing `tool_adapter_contract` module, establishing RED before production
 code.
 
+## 2026-08-11 — CloudBox 6.3 controlled-tool vertical slice implemented
+
+RED/GREEN increments now provide one authoritative adapter registry and
+envelope interpreter, durable action revisions with leases/fencing and
+reconciliation gates, a no-shell local CLI broker, and temporary-repository
+`git.inspect`/`git.fetch` plus versioned bundle-import integration. The existing
+manual importer remains callable and shares its import function with the
+adapter. The lifecycle owner selects the controlled-tool profile and routes
+uncertain completion to reconciliation, changed authority/risk to re-plan, and
+invalid recovery/state authority back to architecture. Focused deterministic
+evidence passes; full-suite, model-backed review, version synchronization, and
+publication are still separate gates.
+
 ## 2026-08-11 — Public/private package split deferred
 
 The user retained the public Core/private Evolution Pack design but explicitly

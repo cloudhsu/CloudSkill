@@ -30,6 +30,19 @@ This is the operational entry point for a new conversation or coding agent that 
 - Continue with Task 2 in
   `docs/superpowers/plans/2026-08-11-cloudbox-6.3-controlled-tool-adapters.md`.
 
+### CloudBox 6.3 controlled-tool implementation candidate (2026-08-11)
+
+- Tasks 1–6 implement the authoritative registry/envelopes, durable fenced
+  action state, controlled local CLI broker, temporary-repository Git adapter,
+  legacy manual-import compatibility, and lifecycle-owner event routing.
+- Focused deterministic validators pass. Behavior case files are structurally
+  valid; model-backed semantic GREEN is not yet claimed.
+- Task 7 documentation and full-suite integration are in progress. Version
+  remains 6.2.0 until review and release gates authorize synchronization.
+- The adapter registry pins `scripts/git_tool_adapter.py`; any edit to that
+  script requires updating its SHA-256 and rerunning the contract/broker/Git
+  validators.
+
 ### CloudBox 6.2.0 published and remotely verified (2026-08-11)
 
 - PR `#10` merged as `6be22cd`; annotated tag `v6.2.0` peels to that
