@@ -2,7 +2,7 @@
 
 <p align="center"><img src="assets/cloudbox-logo.png" width="160" alt="CloudBox logo"></p>
 
-**Current version: 6.2.0**
+**Current version: 6.3.0**
 
 CloudBox 6.2 defines risk-based Review Assurance and resumable, adaptive
 lifecycle planning. See `docs/REVIEW_ASSURANCE_LEVELS.md` and

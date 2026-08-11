@@ -28,6 +28,16 @@ This is the operational entry point for a new conversation or coding agent that 
   manual review. Formal Eval/Skill changes still require explicit review.
 - Continue from `docs/superpowers/plans/2026-08-11-cloudbox-manual-eval-exchange.md`.
 
+### CloudBox 6.3.0 release correction in progress (2026-08-11)
+
+- Review corrections add collision-free archive retention, bounded ZIP
+  resources and member paths, whole-archive planning before candidate
+  publication, per-archive failure containment, and content-derived candidate
+  output names confined to the selected Inbox queue.
+- Version surfaces are synchronized to 6.3.0. Deterministic checks passed before
+  the latest path-containment correction; rerun them and obtain fresh exact-tip
+  review before push, merge, tag, or release.
+
 ### CloudBox 6.2.0 published and remotely verified (2026-08-11)
 
 - PR `#10` merged as `6be22cd`; annotated tag `v6.2.0` peels to that
