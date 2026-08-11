@@ -2,6 +2,15 @@
 
 This document records the evolution rationale and evidence chain for work that may span multiple conversations. Git commits and tags remain the authoritative source history.
 
+## 2026-08-11 — Skill optimization and token pilot merged
+
+PR `#15` merged the reviewed Inbox/session Skill optimization, the
+`developing-skills` progressive-disclosure pilot, and proportional Plan Owner
+clarification into `main` as `0a8e7ee`. Merge-push validation run `31504215873`
+passed. The fixed decision order is lifecycle/dynamic loop first,
+evidence/verification second, and token/context reduction third. Product
+version, tag, and GitHub Release remain unchanged.
+
 ## 2026-08-11 — Token-refactor exact-tip review passed
 
 Independent exact-tip review passed at `ed9fca6` after two Medium evidence

@@ -15,7 +15,7 @@ This is the operational entry point for a new conversation or coding agent that 
 
 ## Current repository state
 
-### Developing Skills token-refactor candidate (2026-08-11)
+### Developing Skills token refactor merged (2026-08-11)
 
 - `developing-skills` now uses explicit progressive disclosure: its default
   main file fell from 15,062 to 7,662 UTF-8 bytes while mandatory lifecycle,
@@ -31,7 +31,9 @@ This is the operational entry point for a new conversation or coding agent that 
   regressions were found and corrected. Evidence is in
   `docs/evolution/2026-08-11-developing-skills-token-refactor-evidence.md`.
 - Exact-tip `ed9fca6` independent review passed with no High/Medium findings.
-  Do not version, push, merge, or release before user approval.
+  PR `#15` merged to `main` as `0a8e7ee`; merge-push validation run
+  `31504215873` passed. Version, tag, and GitHub Release remain unchanged and
+  require a separate decision.
 
 ### Inbox/session Skill optimization candidate (2026-08-11)
 
