@@ -159,6 +159,19 @@ This is the operational entry point for a new conversation or coding agent that 
   fixtures together before resuming release review.
 - Version remains 6.2.0. Do not push, merge, tag, or release 6.3 from this state.
 
+### CloudBox 6.3 immutable-target redesign approved (2026-08-11)
+
+- The user selected the recommended contract-v2 design: prepare and authorize an
+  immutable `operation_targets` digest before mutation. Fetch targets bind exact
+  ref/object IDs; bundle targets bind relative path, content hash, and size.
+- The written design is
+  `docs/superpowers/specs/2026-08-11-cloudbox-6.3-immutable-operation-targets-design.md`.
+  It preserves manual import, blocks unfinished v1 checkpoints instead of
+  migrating them, excludes implicit prune semantics, and requires per-target
+  reconciliation evidence.
+- Next gate: user review of the written spec, then create a TDD implementation
+  plan. No production implementation has begun from this redesign.
+
 ### CloudBox 6.2.0 published and remotely verified (2026-08-11)
 
 - PR `#10` merged as `6be22cd`; annotated tag `v6.2.0` peels to that

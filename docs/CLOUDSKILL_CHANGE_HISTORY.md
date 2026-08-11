@@ -113,6 +113,17 @@ Contracts, compatibility, implementation, and RED fixtures must move together.
 No remaining L1 cells, version synchronization, push, merge, tag, or release are
 authorized from this candidate.
 
+## 2026-08-11 — Immutable operation-target redesign selected
+
+The user selected the contract-v2 approach. A read-only prepare phase freezes a
+bounded target set before authorization: fetch records exact ref/object IDs and
+bundle import records exact relative paths, hashes, and sizes. Execution, retry,
+and reconciliation share the same digest and per-target evidence. Late remote
+advances and late inbox arrivals therefore create new work rather than changing
+an older action. Unfinished v1 development checkpoints are blocked and retained;
+manual import remains unchanged. The approved design is recorded separately;
+implementation awaits the written-spec review and a new TDD plan.
+
 ## 2026-08-11 — Public/private package split deferred
 
 The user retained the public Core/private Evolution Pack design but explicitly
