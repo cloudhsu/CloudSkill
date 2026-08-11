@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import time
 from pathlib import Path
 from evolution_source_contract import load_source_registry, sync_source
 from tool_adapter_contract import load_registry
@@ -56,6 +57,7 @@ def main() -> int:
             repository_root=Path(__file__).resolve().parents[1],
             owner_id=args.owner_id,
             fencing_token=args.fencing_token,
+            now_epoch=int(time.time()),
         )
         registry = load_registry(Path(args.registry))
         prepared = prepare_invocation(invocation, registry, context) if args.action == "invoke" else prepare_reconciliation(invocation, registry, context)

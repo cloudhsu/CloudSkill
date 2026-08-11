@@ -124,7 +124,13 @@ def prepare_invocation(invocation: dict[str, Any], registry: dict[str, Any], con
         "secrets": secrets,
     }
     secret_fingerprints = {name: hashlib.sha256(value.encode("utf-8")).hexdigest() for name, value in secrets.items()}
-    input_hash = hashlib.sha256(json.dumps({**request, "secrets": secret_fingerprints}, sort_keys=True).encode("utf-8")).hexdigest()
+    identity = {
+        **request,
+        "secrets": secret_fingerprints,
+        "adapter_version": adapter["adapter_version"],
+        "adapter_provenance_sha256": provenance["sha256"],
+    }
+    input_hash = hashlib.sha256(json.dumps(identity, sort_keys=True).encode("utf-8")).hexdigest()
     action = {
         "schema_version": 1,
         "revision": 0,
@@ -233,20 +239,21 @@ def _invoke_adapter(prepared: PreparedInvocation, operation: str) -> dict[str, A
 
 
 def _claim_expired_lease(action: dict[str, Any], prepared: PreparedInvocation, action_path: Path, context: ExecutionContext) -> dict[str, Any]:
+    now_epoch = context.now_epoch if context.now_epoch is not None else int(time.time())
     lease = action.get("lease")
     if lease is None or (lease.get("owner_id") == context.owner_id and lease.get("fencing_token") == context.fencing_token):
         return action
-    if context.now_epoch < lease.get("expires_at", 0) or not isinstance(context.fencing_token, int) or context.fencing_token <= lease.get("fencing_token", 0):
+    if now_epoch < lease.get("expires_at", 0) or not isinstance(context.fencing_token, int) or context.fencing_token <= lease.get("fencing_token", 0):
         raise ValueError("stale tool action fencing token")
     claimed = json.loads(json.dumps(action))
     claimed["lease"] = {
         "owner_id": context.owner_id,
         "fencing_token": context.fencing_token,
-        "expires_at": context.now_epoch + prepared.capability["timeout_seconds"] + 30,
+        "expires_at": now_epoch + prepared.capability["timeout_seconds"] + 30,
     }
     return save_action_atomic(
         action_path, claimed, action["revision"], owner_id=context.owner_id,
-        fencing_token=context.fencing_token, now=context.now_epoch,
+        fencing_token=context.fencing_token, now=now_epoch,
     )
 
 
@@ -296,7 +303,11 @@ def reconcile_prepared(prepared: PreparedInvocation, action_path: Path, context:
         raise ValueError("only UNCERTAIN actions require reconciliation")
     if not prepared.capability.get("supports_reconciliation"):
         raise ValueError("capability does not support reconciliation")
-    if action.get("action_id") != prepared.action.get("action_id") or action.get("input_hash") != prepared.action.get("input_hash"):
+    if (
+        action.get("action_id") != prepared.action.get("action_id")
+        or action.get("input_hash") != prepared.action.get("input_hash")
+        or action.get("adapter_version") != prepared.action.get("adapter_version")
+    ):
         raise ValueError("reconciliation invocation conflicts with durable action")
     action = _claim_expired_lease(action, prepared, action_path, context)
     result = _invoke_adapter(prepared, "reconcile")

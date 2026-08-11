@@ -153,6 +153,16 @@ with tempfile.TemporaryDirectory(prefix="cloudbox-tool-broker-") as temp_name:
             else:
                 errors.append("reconciliation accepted changed secret/config identity")
             later_context = ExecutionContext(root_refs=context.root_refs, secret_values=context.secret_values, approved_authority=context.approved_authority, repository_root=ROOT, owner_id="replacement-owner", fencing_token=2, now_epoch=4100000100)
+            changed_registry = registry()
+            changed_registry["adapters"][0]["adapter_version"] = "9.9.9"
+            changed_version = prepare_reconciliation(value, changed_registry, later_context)
+            try:
+                reconcile_prepared(changed_version, root / "actions" / f"act-0000000{index}.json", later_context)
+            except ValueError as exc:
+                if "conflicts" not in str(exc):
+                    errors.append("adapter-version drift failed for the wrong reason")
+            else:
+                errors.append("reconciliation accepted adapter-version drift")
             reconciliation_prepared = prepare_reconciliation(value, registry(), later_context)
             reconciled = reconcile_prepared(reconciliation_prepared, root / "actions" / f"act-0000000{index}.json", later_context)
             reconciled_state = load_action(root / "actions" / f"act-0000000{index}.json")

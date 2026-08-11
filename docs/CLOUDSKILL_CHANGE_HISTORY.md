@@ -78,6 +78,16 @@ by a higher fencing token, and `UNCERTAIN` preservation when reconciliation
 itself cannot establish completion. Focused validators pass; complete-suite and
 fresh exact-tip assurance remain required before release.
 
+## 2026-08-11 — Fourth 6.3 review closed CLI-time and version-drift gaps
+
+Fresh GPT-5.4 review found that the public CLI did not populate broker time for
+expired-lease takeover and that reconciliation could apply a different adapter
+version to an `UNCERTAIN` checkpoint. The CLI now supplies current epoch time,
+the broker retains a defensive fallback, action identity fingerprints the
+adapter version and pinned provenance, and reconciliation rejects explicit
+version drift. Focused deterministic evidence passes; all other review cells
+were withheld and the release remains gated.
+
 ## 2026-08-11 — Public/private package split deferred
 
 The user retained the public Core/private Evolution Pack design but explicitly

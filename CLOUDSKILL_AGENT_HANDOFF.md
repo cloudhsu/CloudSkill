@@ -114,6 +114,19 @@ This is the operational entry point for a new conversation or coding agent that 
 - Next: rerun the complete suite twice, commit, and restart all four L1 cells
   fresh. Version synchronization and release remain prohibited.
 
+### CloudBox 6.3 fourth release review re-entry (2026-08-11)
+
+- Fresh GPT-5.4 review of `96ef85d` returned FAIL; remaining L1 cells were
+  stopped. Raw output is `.local/reviews/cloudbox-6.3/gpt-5.4-r4.txt`, SHA-256
+  `5f77342f730650dc5a357f0c5e826583a8f58408fad26121d93b571c252870a8`.
+- The public CLI left recovery time unset, causing replacement-owner lease
+  takeover to compare `None` with the expiry. Reconciliation also accepted an
+  `UNCERTAIN` checkpoint created by another adapter version.
+- GREEN supplies authoritative current time at the CLI boundary and retains a
+  defensive broker fallback. Action input identity now includes adapter version
+  and pinned provenance, and reconciliation explicitly rejects adapter-version
+  drift. Focused validators pass; full-suite and fresh L1 review remain pending.
+
 ### CloudBox 6.2.0 published and remotely verified (2026-08-11)
 
 - PR `#10` merged as `6be22cd`; annotated tag `v6.2.0` peels to that
