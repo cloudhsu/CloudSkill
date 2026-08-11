@@ -2,11 +2,12 @@
 
 | Field | Value |
 |---|---|
-| Status | Candidate; independent exact-tip review pending |
+| Status | Final-review correction candidate; independent exact-tip re-review pending |
 | Observation scope | Three implemented templates and seven deferred registry entries |
 | Registry authority | `config/lifecycle-templates.json` |
 | Plan Owner | `development-process-tailoring` |
-| Implementation source tip | `0d17f40e74c04d760de2418d792c8b4d344adb8c` |
+| Pre-correction final-review tip | `5a06cdd` |
+| Final correction source | This record's containing commit (resolve with Git) |
 | Provider-backed Runtime Eval | `NOT RUN` |
 | Version/push/PR/merge/tag/Release | `NOT RUN` |
 
@@ -27,12 +28,39 @@ The implementation lineage is:
 - selection and typed-exclusion GREEN: `af39df0`, `15eba41`;
 - composition/replan and evidence-integrity repairs: `02b9e87`, `bfc96b0`,
   `0ad81d0`;
-- Skill behavior candidate: `0d17f40e74c04d760de2418d792c8b4d344adb8c`.
+- Skill behavior candidate: `0d17f40e74c04d760de2418d792c8b4d344adb8c`;
+- Task 5 evidence corrections reviewed at `5a06cdd`;
+- final-review corrections: this record's containing commit.
 
 The candidate documentation commit that contains this record is intentionally
 not self-certified as independently reviewed. The controller-assigned final
 reviewer must record the exact candidate tip used for review and return PASS
 only after resolving every High/Medium finding.
+
+## Final-review correction evidence
+
+The final review of `b31ac35..5a06cdd` reported three blocking findings and
+four minor documentation/ledger findings. The one authorized correction wave
+reproduced each blocking mechanism before changing production code:
+
+- the composition fixture expected concatenation even though that order broke
+  the overlay's `verify_green -> release` constraint; a synthetic opposing
+  stage constraint was also accepted instead of returning a cycle conflict;
+- selected delta evidence could be replayed across work/source/task/fact/risk
+  contexts because neither the resolution nor persisted plan snapshot bound
+  that complete context and registry identity;
+- authority/side-effect and equivalent delta-changing triggers remained
+  selected unless the caller explicitly named the prior evidence hash for
+  invalidation.
+
+Focused RED diagnostics named the missing context parameter, partial-order
+violation/cycle acceptance, automatic source/invalidation failure, and replay
+of an old resolution after an invalidating trigger. GREEN now uses a stable
+topological merge, seals normalized selection context into delta/resolution/
+plan evidence and independently matches it at admission, and derives
+invalidation from trigger/context semantics. The legacy four-argument
+`create_plan` result is asserted unchanged at the Python-value contract level.
+No provider or external runtime was invoked for these fixes.
 
 ## Authority and delivered boundary
 
@@ -122,23 +150,29 @@ reconciliation, and invalidation/replan rules.
 - Deferred and unknown templates return `unsupported` without fallback.
 - Duplicate, incompatible, and owner/gate/completion-conflicting overlays
   return `conflict`.
+- Every input template's stage partial order survives a deterministic
+  topological merge; cyclic stage constraints return `conflict`.
 - The current authoritative `bounded-feature + skill-evolution` pair is
   declared compatible but returns `conflict` because policy/action/evidence
   owners differ. Successful strongest-gate composition is proved only against
   a synthetic owner-aligned registry fixture.
-- Selected plan admission requires authoritative replay, provenance, and an
-  integrity seal. Replans keep contiguous selected/unresolved lineage and
-  invalidate the selected resolution only when its delta-evidence identity is
-  affected.
+- Selected plan admission requires authoritative replay, provenance, integrity,
+  and an exact work/source/task/fact/risk/registry binding. Cross-context and
+  caller-resealed replay are rejected. Replans keep contiguous selected/
+  unresolved lineage and automatically invalidate all-false selection evidence
+  when source, authority, side-effect, bound fact/risk, or explicit delta
+  changes contradict it. Only a fresh resolution bound to new context may
+  preserve `selected`.
 - Legacy lifecycle-plan callers without a template resolution retain their
   previous shape and default Review Assurance behavior.
 - Adjacent controls keep trivial work lightweight, keep generic detailed
   planning subordinate, and preserve lifecycle first, evidence/verification
   second, token reduction third.
 - Task 4's historical uppercase `PARTIAL` label is normalized here to `FAIL`
-  with partial prior behavior satisfaction retained as explanatory detail.
-  Final review should still confirm that the Skill's literal-boolean/all-false
-  wording is sufficiently unambiguous; Task 4 classified that as a minor.
+  with partial prior behavior satisfaction retained as explanatory detail. The
+  Skill now states literal `true`/`false`, six literal `false` values for the
+  fast path, and escalation for literal `true`, missing, non-boolean, or unknown
+  values.
 
 ## Deterministic checks
 
@@ -160,16 +194,24 @@ exited 0 and again ended with `All CloudSkill checks passed.` `git diff
 --check` produced no diagnostics. This is local deterministic/static, fixture,
 package, and install-smoke evidence; it is not CI or provider behavior evidence.
 
+For the final correction tree, the same combined command exited 0 and ended
+with `All CloudSkill checks passed.` It included the strengthened partial-order,
+cycle, complete-context binding, caller-resealed replay, automatic invalidation,
+fresh-resolution, legacy-plan compatibility, Skill wording-mutation, package,
+handoff, and full adjacent-regression checks. `git diff --check` again produced
+no diagnostics. Provider-backed Behavior/Runtime execution remains `NOT RUN`.
+
 ## Review and release truth
 
 Task 4 used a separate read-only static/manual adjudicator of unknown identity
 and unknown human/model execution modality for the pre/post Skill comparison.
 Task 5 self-review covers documentation consistency and evidence transcription
-only. Independent exact-tip review of authority,
+only. Final review of `5a06cdd` found the issues recorded above; independent
+exact-tip re-review of the containing correction commit for authority,
 lifecycle continuity, evidence validity, composition conflict, deferred
 behavior, anti-drift tests, token claims, privacy, and documentation is
-`NOT RUN` at this checkpoint; the controller has assigned it to a final
-reviewer after the candidate commit.
+`NOT RUN` at this checkpoint. The controller has assigned it to the final
+reviewer after the correction commit.
 
 No version synchronization, push, PR, merge, tag, GitHub Release, provider
 Runtime Eval, external host reload, deployment, or field verification was

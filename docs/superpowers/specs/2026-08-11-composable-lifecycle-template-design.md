@@ -1,6 +1,7 @@
 # Composable Lifecycle Template Design
 
-Status: approved design; implementation plan pending.
+Status: pilot implemented; final-review corrections applied; independent
+exact-tip re-review pending.
 
 ## Goal
 
@@ -38,11 +39,12 @@ Each template is a versioned contract containing:
 - allowed companion templates and composition precedence;
 - exit conditions and triggers for a full risk reassessment.
 
-A selected template instance records the template version, task/source identity,
-matched conditions, delta-check result, composition order, overrides, plan
-revision, evidence lineage, and achieved review level. Template definitions are
-immutable for an active instance; changes create a new template version or plan
-revision.
+A selected template instance records the template version, work/task/source
+identity, normalized task facts and risk context, authoritative registry
+identity, matched conditions, delta-check result, composition order, overrides,
+plan revision, evidence lineage, and achieved review level. Template definitions
+are immutable for an active instance; changes create a new template version or
+plan revision.
 
 ## Initial template catalog
 
@@ -94,8 +96,10 @@ Precedence:
 5. lightweight execution optimization.
 
 An overlay may strengthen a gate, add evidence, or add a feedback path. It may
-not weaken a base or higher-precedence constraint. Conflicting owners, gates,
-or completion semantics fail closed and require Plan Owner adjudication.
+not weaken a base or higher-precedence constraint. Compose stage partial orders
+with a deterministic topological merge; a cycle fails closed. Conflicting
+owners, gates, stage orders, or completion semantics require Plan Owner
+adjudication.
 
 Example future composition:
 
@@ -124,14 +128,14 @@ Before applying a template, perform six bounded checks:
    deterministically reconciled?
 6. Does any known condition fall outside the template's verified envelope?
 
-If every answer is false and all positive applicability conditions match, use
-the template without a fresh full risk calculation. Record the answers as
-evidence rather than silently assuming them.
+If every answer is literal `false` and all positive applicability conditions
+match, use the template without a fresh full risk calculation. Record the
+answers as evidence rather than silently assuming them.
 
-If any answer is true or unknown, do not treat that as automatic rejection.
-Return to the Plan Owner to add a compatible overlay, select another template,
-run a full risk assessment, or create a new plan revision. Unknown never means
-safe.
+If any answer is literal `true`, missing, non-boolean, or unknown, do not treat
+that as automatic rejection. Return to the Plan Owner to add a compatible
+overlay, select another template, run a full risk assessment, or create a new
+plan revision. Unknown never means safe.
 
 ## Runtime and persistence boundary
 
@@ -143,6 +147,14 @@ the durable runtime owner.
 Template selection must be reproducible from normalized task facts. The
 selector returns selected, escalation-required, unsupported, or conflict with
 machine-readable reasons. It never performs the planned work.
+
+Before a selected composition enters a plan, its delta evidence and resolution
+must bind work identity, source hash, full task definitions, normalized task
+facts/risk context, and the authoritative registry identity. Plan admission
+independently matches that context and replays the resolution. A trigger that
+contradicts selected all-false delta evidence automatically invalidates it and
+requires an unresolved/full-risk plan revision unless a fresh authoritative
+resolution is bound to the new context.
 
 ## Verification
 

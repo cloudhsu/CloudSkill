@@ -9,6 +9,7 @@ from __future__ import annotations
 import copy
 import hashlib
 import json
+import math
 from pathlib import Path
 from typing import Any
 
@@ -141,6 +142,11 @@ def compose_templates(
     overlay_ids: list[str],
     facts: dict[str, Any],
     registry: dict[str, Any],
+    *,
+    work_id: str | None = None,
+    source_hash: str | None = None,
+    tasks: list[dict[str, Any]] | None = None,
+    risk_context: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Resolve one base and declared overlays without weakening constraints."""
     _validate_registry(registry)
@@ -213,14 +219,31 @@ def compose_templates(
 
     owner_conflicts = _owner_conflicts(template_ids, templates)
     gate_conflicts, resolved_gates = _resolve_gates(template_ids, templates)
+    stage_conflicts, resolved_stages = _resolve_stages(template_ids, templates)
     scalar_conflicts = _completion_scalar_conflicts(template_ids, templates)
-    conflicts = owner_conflicts + gate_conflicts + scalar_conflicts
+    conflicts = owner_conflicts + gate_conflicts + stage_conflicts + scalar_conflicts
     if conflicts:
         return _composition_result(
             "conflict", template_ids, contract_versions, conflicts, assessments
         )
 
-    resolved_stages = _merge_template_lists(template_ids, templates, "stages")
+    selection_context = _selection_context(
+        work_id=work_id,
+        source_hash=source_hash,
+        tasks=tasks,
+        task_facts=facts,
+        risk_context=risk_context,
+        registry=registry,
+    )
+    if selection_context is None:
+        return _composition_result(
+            "escalation_required",
+            template_ids,
+            contract_versions,
+            ["selection_context:missing_or_invalid"],
+            assessments,
+        )
+
     resolved_evidence = _merge_template_lists(template_ids, templates, "required_evidence")
     review_level = max(
         (templates[template_id]["review_level"] for template_id in template_ids),
@@ -229,6 +252,7 @@ def compose_templates(
     delta_evidence = {
         "composition_order": template_ids,
         "contract_versions": contract_versions,
+        "selection_context": selection_context,
         "templates": {
             template_id: {
                 "matched_conditions": assessments[template_id]["matched_conditions"],
@@ -253,7 +277,9 @@ def compose_templates(
             "resolved_review_level": review_level,
             "resolved_resume_reconciliation": _resolve_resume(template_ids, templates),
             "resolved_reuse_invalidation": _resolve_reuse(template_ids, templates),
-            "resolution_schema_version": 1,
+            "selection_context": selection_context,
+            "selection_context_hash": _canonical_hash(selection_context),
+            "resolution_schema_version": 2,
             "resolution_provenance": RESOLUTION_PROVENANCE,
         }
     )
@@ -261,7 +287,16 @@ def compose_templates(
     return result
 
 
-def validate_selected_resolution(resolution: Any, registry: dict[str, Any]) -> None:
+def validate_selected_resolution(
+    resolution: Any,
+    registry: dict[str, Any],
+    *,
+    work_id: str | None = None,
+    source_hash: str | None = None,
+    tasks: list[dict[str, Any]] | None = None,
+    task_facts: dict[str, Any] | None = None,
+    risk_context: dict[str, Any] | None = None,
+) -> None:
     """Replay a sealed selection against its authoritative registry evidence."""
     _validate_registry(registry)
     if not isinstance(resolution, dict):
@@ -288,18 +323,21 @@ def validate_selected_resolution(resolution: Any, registry: dict[str, Any]) -> N
         "resolved_review_level",
         "resolved_resume_reconciliation",
         "resolved_reuse_invalidation",
+        "selection_context",
+        "selection_context_hash",
         "resolution_schema_version",
         "resolution_provenance",
+        "resolution_integrity_hash",
     }
     template_ids = resolution.get("template_ids")
     versions = resolution.get("contract_versions")
     assessments = resolution.get("assessments")
     if (
-        not required <= set(resolution)
+        set(resolution) != required
         or resolution.get("status") != "selected"
         or resolution.get("full_risk_calculation_required") is not False
         or resolution.get("reasons") != []
-        or resolution.get("resolution_schema_version") != 1
+        or resolution.get("resolution_schema_version") != 2
         or resolution.get("resolution_provenance") != RESOLUTION_PROVENANCE
         or not _is_hash(integrity_hash)
         or integrity_hash != _canonical_hash(payload)
@@ -321,7 +359,38 @@ def validate_selected_resolution(resolution: Any, registry: dict[str, Any]) -> N
         or resolution.get("resolved_review_level") not in LEVELS
     ):
         raise ValueError("plan requires composer-selected resolution provenance and integrity")
-    facts: dict[str, Any] = {}
+    selection_context = resolution.get("selection_context")
+    if not isinstance(selection_context, dict):
+        raise ValueError("selected resolution has invalid selection context")
+    replay_context = _selection_context(
+        work_id=selection_context.get("work_id"),
+        source_hash=selection_context.get("source_hash"),
+        tasks=selection_context.get("tasks"),
+        task_facts=selection_context.get("task_facts"),
+        risk_context=selection_context.get("risk_context"),
+        registry=registry,
+    )
+    if (
+        replay_context != selection_context
+        or resolution.get("selection_context_hash") != _canonical_hash(selection_context)
+    ):
+        raise ValueError("selected resolution context does not match authoritative registry identity")
+    expected_values = (work_id, source_hash, tasks, task_facts, risk_context)
+    if any(value is not None for value in expected_values):
+        if any(value is None for value in expected_values):
+            raise ValueError("selected resolution validation requires complete expected context")
+        expected_context = _selection_context(
+            work_id=work_id,
+            source_hash=source_hash,
+            tasks=tasks,
+            task_facts=task_facts,
+            risk_context=risk_context,
+            registry=registry,
+        )
+        if expected_context is None or expected_context != selection_context:
+            raise ValueError("selected resolution context does not match plan work/source/task/risk identity")
+
+    facts = selection_context["task_facts"]
     assessment_fields = {
         "template_id",
         "contract_version",
@@ -349,12 +418,20 @@ def validate_selected_resolution(resolution: Any, registry: dict[str, Any]) -> N
             if not isinstance(evidence, dict):
                 raise ValueError("selected resolution has invalid assessment evidence")
             for fact_name, fact_value in evidence.items():
-                if fact_name in facts and (
+                if fact_name not in facts or (
                     type(facts[fact_name]) is not type(fact_value) or facts[fact_name] != fact_value
                 ):
-                    raise ValueError("selected resolution has conflicting assessment evidence")
-                facts[fact_name] = copy.deepcopy(fact_value)
-    replayed = compose_templates(template_ids[0], template_ids[1:], facts, registry)
+                    raise ValueError("selected resolution assessment disagrees with bound task facts")
+    replayed = compose_templates(
+        template_ids[0],
+        template_ids[1:],
+        facts,
+        registry,
+        work_id=selection_context["work_id"],
+        source_hash=selection_context["source_hash"],
+        tasks=selection_context["tasks"],
+        risk_context=selection_context["risk_context"],
+    )
     if replayed != resolution:
         raise ValueError("selected resolution does not replay against authoritative registry")
 
@@ -434,6 +511,42 @@ def _completion_scalar_conflicts(
     return conflicts
 
 
+def _resolve_stages(
+    template_ids: list[str], templates: dict[str, dict[str, Any]]
+) -> tuple[list[str], list[str]]:
+    """Deterministically merge every template's stage partial order."""
+    first_seen: dict[str, int] = {}
+    outgoing: dict[str, set[str]] = {}
+    indegree: dict[str, int] = {}
+    for template_id in template_ids:
+        stages = templates[template_id]["stages"]
+        for stage in stages:
+            if stage not in first_seen:
+                first_seen[stage] = len(first_seen)
+                outgoing[stage] = set()
+                indegree[stage] = 0
+        for predecessor, successor in zip(stages, stages[1:]):
+            if successor not in outgoing[predecessor]:
+                outgoing[predecessor].add(successor)
+                indegree[successor] += 1
+
+    ready = [stage for stage, count in indegree.items() if count == 0]
+    ready.sort(key=first_seen.__getitem__)
+    resolved: list[str] = []
+    while ready:
+        stage = ready.pop(0)
+        resolved.append(stage)
+        for successor in sorted(outgoing[stage], key=first_seen.__getitem__):
+            indegree[successor] -= 1
+            if indegree[successor] == 0:
+                ready.append(successor)
+        ready.sort(key=first_seen.__getitem__)
+
+    if len(resolved) != len(first_seen):
+        return ["stage_order_conflict:cycle"], []
+    return [], resolved
+
+
 def _merge_template_lists(
     template_ids: list[str], templates: dict[str, dict[str, Any]], key: str
 ) -> list[Any]:
@@ -478,6 +591,63 @@ def _resolve_reuse(
 def _canonical_hash(value: Any) -> str:
     encoded = json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
     return hashlib.sha256(encoded.encode("utf-8")).hexdigest()
+
+
+def _selection_context(
+    *,
+    work_id: Any,
+    source_hash: Any,
+    tasks: Any,
+    task_facts: Any,
+    risk_context: Any,
+    registry: dict[str, Any],
+) -> dict[str, Any] | None:
+    if not isinstance(work_id, str) or not work_id.strip() or not _is_hash(source_hash):
+        return None
+    if not isinstance(tasks, list) or not tasks:
+        return None
+    if not isinstance(task_facts, dict) or not isinstance(risk_context, dict):
+        return None
+    try:
+        normalized_tasks = _normalize_json_value(tasks)
+        normalized_facts = _normalize_json_value(task_facts)
+        normalized_risk = _normalize_json_value(risk_context)
+    except ValueError:
+        return None
+    if not isinstance(normalized_tasks, list) or any(
+        not isinstance(task, dict) for task in normalized_tasks
+    ):
+        return None
+    return {
+        "work_id": work_id,
+        "source_hash": source_hash,
+        "tasks": normalized_tasks,
+        "task_facts": normalized_facts,
+        "risk_context": normalized_risk,
+        "registry_identity": {
+            "schema_version": registry["schema_version"],
+            "sha256": _canonical_hash(registry),
+        },
+    }
+
+
+def _normalize_json_value(value: Any) -> Any:
+    if value is None or type(value) in {bool, int, str}:
+        return value
+    if type(value) is float:
+        if not math.isfinite(value):
+            raise ValueError("selection context must contain finite JSON values")
+        return value
+    if isinstance(value, list):
+        return [_normalize_json_value(item) for item in value]
+    if isinstance(value, dict):
+        if any(not isinstance(key, str) for key in value):
+            raise ValueError("selection context object keys must be strings")
+        return {
+            key: _normalize_json_value(value[key])
+            for key in sorted(value)
+        }
+    raise ValueError("selection context must contain JSON values")
 
 
 def _is_hash(value: Any) -> bool:

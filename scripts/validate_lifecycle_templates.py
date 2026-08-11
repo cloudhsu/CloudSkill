@@ -10,6 +10,7 @@ anti-drift evidence instead of a second template implementation.
 from __future__ import annotations
 
 import copy
+import hashlib
 import importlib
 import json
 import sys
@@ -492,8 +493,42 @@ def composition_contract_errors(registry: dict[str, Any], compose_templates: Any
         fail(errors, "validator fixture could not express a compatible owner overlay")
         return errors
 
-    selected = compose_templates(base_id, [overlay_id], facts, compatible)
-    repeated = compose_templates(base_id, [overlay_id], facts, compatible)
+    task_definitions = [
+        {
+            "task_id": "T-template",
+            "owner": "development-process-tailoring",
+            "dependencies": [],
+        }
+    ]
+    selection_binding = {
+        "work_id": "W-template",
+        "source_hash": "7" * 64,
+        "tasks": task_definitions,
+        "risk_context": {"risk_class": "medium", "scope": "bounded"},
+    }
+    unbound = compose_templates(base_id, [overlay_id], facts, compatible)
+    if unbound.get("status") != "escalation_required" or unbound.get("reasons") != [
+        "selection_context:missing_or_invalid"
+    ]:
+        fail(errors, "selected composition did not require authoritative selection context")
+    try:
+        selected = compose_templates(
+            base_id,
+            [overlay_id],
+            facts,
+            compatible,
+            **selection_binding,
+        )
+        repeated = compose_templates(
+            base_id,
+            [overlay_id],
+            facts,
+            compatible,
+            **selection_binding,
+        )
+    except TypeError:
+        fail(errors, "selected composition does not accept authoritative selection context")
+        return errors
     if selected != repeated:
         fail(errors, "composition was not deterministic for identical normalized input")
     if selected.get("status") != "selected":
@@ -505,9 +540,81 @@ def composition_contract_errors(registry: dict[str, Any], compose_templates: Any
         fail(errors, "composition did not persist its deterministic order")
     if selected.get("contract_versions") != {base_id: 1, overlay_id: 1}:
         fail(errors, "composition did not retain every template contract version")
-    expected_stages = list(dict.fromkeys(templates[base_id]["stages"] + templates[overlay_id]["stages"]))
+    expected_registry_hash = hashlib.sha256(
+        json.dumps(
+            compatible,
+            sort_keys=True,
+            separators=(",", ":"),
+            ensure_ascii=False,
+        ).encode("utf-8")
+    ).hexdigest()
+    expected_context = {
+        "work_id": "W-template",
+        "source_hash": "7" * 64,
+        "tasks": task_definitions,
+        "task_facts": facts,
+        "risk_context": {"risk_class": "medium", "scope": "bounded"},
+        "registry_identity": {
+            "schema_version": 1,
+            "sha256": expected_registry_hash,
+        },
+    }
+    if selected.get("selection_context") != expected_context:
+        fail(errors, "composition did not bind the complete normalized selection context")
+    context_hash = selected.get("selection_context_hash")
+    if not isinstance(context_hash, str) or len(context_hash) != 64:
+        fail(errors, "composition did not seal its normalized selection context")
+    changed_registry = copy.deepcopy(compatible)
+    changed_registry["templates"]["release"]["deferred_reason"] = "Changed authority."
+    binding_variants = {
+        "work identity": (facts, compatible, {**selection_binding, "work_id": "W-other"}),
+        "source identity": (facts, compatible, {**selection_binding, "source_hash": "8" * 64}),
+        "task definition": (
+            facts,
+            compatible,
+            {**selection_binding, "tasks": [{**task_definitions[0], "owner": "architecture-review"}]},
+        ),
+        "task facts": ({**facts, "requirement_revision": 2}, compatible, selection_binding),
+        "risk context": (
+            facts,
+            compatible,
+            {**selection_binding, "risk_context": {"risk_class": "high", "scope": "bounded"}},
+        ),
+        "registry identity": (facts, changed_registry, selection_binding),
+    }
+    for label, values in binding_variants.items():
+        variant_facts, variant_registry, variant_binding = values
+        variant = compose_templates(
+            base_id,
+            [overlay_id],
+            variant_facts,
+            variant_registry,
+            **variant_binding,
+        )
+        if variant.get("delta_evidence_hash") == selected.get("delta_evidence_hash"):
+            fail(errors, f"delta evidence identity did not bind {label}")
+    expected_stages = [
+        "analyze",
+        "design",
+        "verify_red",
+        "implement",
+        "verify",
+        "verify_green",
+        "release",
+        "learn",
+    ]
     if selected.get("resolved_stages") != expected_stages:
-        fail(errors, "composition did not merge stages in precedence order")
+        fail(errors, "composition did not preserve every template stage partial order")
+    for template_id in (base_id, overlay_id):
+        resolved_positions = {
+            stage: index for index, stage in enumerate(selected.get("resolved_stages", []))
+        }
+        template_stages = templates[template_id]["stages"]
+        if any(
+            resolved_positions.get(left, -1) >= resolved_positions.get(right, -1)
+            for left, right in zip(template_stages, template_stages[1:])
+        ):
+            fail(errors, f"composition violated {template_id!r} stage order")
     expected_evidence = list(
         dict.fromkeys(
             templates[base_id]["required_evidence"] + templates[overlay_id]["required_evidence"]
@@ -528,7 +635,7 @@ def composition_contract_errors(registry: dict[str, Any], compose_templates: Any
     delta_hash = selected.get("delta_evidence_hash")
     if not isinstance(delta_hash, str) or len(delta_hash) != 64:
         fail(errors, "composition did not produce a deterministic delta evidence hash")
-    if selected.get("resolution_schema_version") != 1:
+    if selected.get("resolution_schema_version") != 2:
         fail(errors, "composition did not version its selected-resolution contract")
     if selected.get("resolution_provenance") != "lifecycle_template_contract.compose_templates":
         fail(errors, "composition did not identify its selected-resolution provenance")
@@ -545,6 +652,22 @@ def composition_contract_errors(registry: dict[str, Any], compose_templates: Any
         "gate_transition_conflict:verification" not in gate_conflict.get("reasons", [])
     ):
         fail(errors, "composition accepted conflicting gate completion semantics")
+
+    cyclic_registry = copy.deepcopy(compatible)
+    cyclic_registry["templates"][overlay_id]["stages"] = [
+        "analyze",
+        "verify_red",
+        "implement",
+        "design",
+        "verify_green",
+        "release",
+        "learn",
+    ]
+    cyclic = compose_templates(base_id, [overlay_id], facts, cyclic_registry)
+    if cyclic.get("status") != "conflict" or cyclic.get("reasons") != [
+        "stage_order_conflict:cycle"
+    ]:
+        fail(errors, "composition accepted cyclic template stage constraints")
     return errors
 
 

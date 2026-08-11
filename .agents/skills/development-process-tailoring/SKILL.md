@@ -40,8 +40,8 @@ versions, compatibility, gates, owners, and evidence. Never select from name or
 prose resemblance, reconstruct a template body from memory, or silently fall
 back from an unknown or deferred ID.
 
-For every candidate, answer all six bounded-delta questions with explicit
-booleans:
+For every candidate, answer all six bounded-delta questions with literal
+`true` or `false` values:
 
 - external side effect;
 - authority or state change;
@@ -51,26 +51,31 @@ booleans:
 - work outside the verified envelope.
 
 An implemented template whose applicability and exclusions match may use the
-no-full-risk fast path only when all six answers are false. Preserve the
-contract version and delta-evidence identity and continue every required gate
-and verification step. Any true, missing, or unknown answer requires
-`escalation_required`, a full risk calculation, and a stop before creating a
-selected template-backed plan. Unknown and deferred IDs are `unsupported`, not
-aliases or defaults.
+no-full-risk fast path only when every one of the six answers is literal
+`false`. Preserve the contract version and delta-evidence identity and continue
+every required gate and verification step. Any literal `true`, missing,
+non-boolean, or unknown answer requires `escalation_required`, a full risk
+calculation, and a stop before creating a selected template-backed plan. Unknown
+and deferred IDs are `unsupported`, not aliases or defaults.
 
 Compose only through the shared contract: one base, unique overlays, declared
-compatibility, and no owner conflict. Preserve every required gate and evidence
-item and the strongest review/gate result. `unsupported`,
+compatibility, and no owner conflict. Preserve every template's stage partial
+order through the contract's deterministic topological merge; a cycle is
+`conflict`. Preserve every required gate and evidence item and the strongest
+review/gate result. `unsupported`,
 `escalation_required`, or `conflict` stops plan creation; a template never
 becomes a second Plan Owner.
 
 Persist selected template IDs, contract versions, composition order, status,
-and delta-evidence identity in the lifecycle plan. If changed evidence
-invalidates that identity, create a new plan revision, retain the prior
-resolution in ordered lineage, mark the current resolution unresolved, and
-preserve unrelated hash-valid evidence. Restore `selected` only from a fresh
-contract result replayed against the authoritative registry, never from memory
-or a caller-recomputed seal.
+delta-evidence identity, and the bound work/source/tasks/facts/risk/registry
+context in the lifecycle plan. A source, authority-boundary, side-effect-scope,
+bound fact/risk, or explicit delta change that contradicts the all-false
+selection automatically invalidates that identity; do not depend on a caller
+invalidation list. Create a new plan revision, retain the prior resolution in
+ordered lineage, mark the current resolution unresolved/full-risk, and preserve
+unrelated hash-valid evidence. Restore `selected` only from a fresh contract
+result bound to the new context and replayed against the authoritative registry,
+never from memory or a caller-recomputed seal.
 
 Long-running work must persist plan/work revisions, checkpoints, authority,
 action identity, budgets, evidence lineage, and Review Assurance state. Resume

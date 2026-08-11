@@ -15,12 +15,13 @@ This is the operational entry point for a new conversation or coding agent that 
 
 ## Current repository state
 
-### Composable lifecycle-template pilot candidate (2026-08-12)
+### Composable lifecycle-template final-review correction candidate (2026-08-12)
 
 - Branch `feat/cloudbox-skill-optimization` contains a three-template pilot at
-  implementation source tip `0d17f40`: `lightweight-change`,
-  `bounded-feature`, and `skill-evolution`. Seven registered template IDs remain
-  deferred and return `unsupported`.
+  pre-correction review tip `5a06cdd`: `lightweight-change`, `bounded-feature`,
+  and `skill-evolution`. Seven registered template IDs remain deferred and
+  return `unsupported`. The final-review correction source is the commit
+  containing this handoff entry.
 - `config/lifecycle-templates.json` is the sole registry authority. The pure
   selector/composer has no model, task-execution, persistence, Git, or release
   authority; existing lifecycle orchestration remains the durable owner.
@@ -28,23 +29,35 @@ This is the operational entry point for a new conversation or coding agent that 
   `selected` with `full_risk_calculation_required: false`. True or unknown
   deltas escalate. The current authoritative `bounded-feature +
   skill-evolution` composition returns `conflict` because its owners differ.
+  Compatible stage lists use deterministic topological merge and cycles fail
+  closed. Selected delta/resolution/plan evidence binds work, source, tasks,
+  normalized facts/risk, and full registry identity; cross-context or caller-
+  resealed replay is rejected.
+- Authority-boundary, side-effect-scope, source, bound-fact/risk, and explicit
+  delta-changing triggers automatically invalidate an all-false selection,
+  retain ordered lineage, and require full-risk re-resolution. A caller
+  invalidation list is not required, and replaying the old selection does not
+  count as fresh resolution.
 - Task 4 static/manual semantic adjudication passed the post-change cases. Its
   retained provenance identifies only a separate read-only agent; reviewer ID,
   human-versus-model execution modality, provider/model, and raw-output lineage
   are unknown, so independence is not claimed. Pre-change cases 009–016 are
   normalized to `FAIL`, with partial prior behavior satisfaction noted for all
   except the full omission in case 013. The complete deterministic suite and
-  `git diff --check` passed after Task 5 documentation. The pure selector makes
-  zero model calls; provider-backed Runtime Eval remains `NOT RUN`, with
-  provider token/cost evidence unavailable.
+  `git diff --check` passed after Task 5 documentation and the final correction
+  suite passed locally. The pure selector makes zero model calls; provider-
+  backed Runtime Eval remains `NOT RUN`, with provider token/cost evidence
+  unavailable.
 - Candidate evidence is in
   `docs/evolution/2026-08-11-lifecycle-template-pilot-evidence.md`; operating
-  guidance is in `docs/LIFECYCLE_TEMPLATE_CATALOG.md`. Final independent
-  exact-tip review is assigned to the controller's reviewer after the Task 5
-  commit. Do not self-certify it from this handoff.
+  guidance is in `docs/LIFECYCLE_TEMPLATE_CATALOG.md`. Final review of
+  `5a06cdd` found three blocking and four minor findings; the one correction
+  wave addresses all seven. Independent exact-tip re-review of the containing
+  commit is still assigned to the controller's reviewer. Do not self-certify it
+  from this handoff.
 - Version synchronization, push, PR, merge, tag, Release, and host reload are
-  `NOT RUN`. Continue with exact-tip review and correct every High/Medium
-  finding before any publication decision.
+  `NOT RUN`. Continue with exact-tip re-review and correct any remaining
+  High/Medium finding before any publication decision.
 
 ### Developing Skills token refactor merged (2026-08-11)
 

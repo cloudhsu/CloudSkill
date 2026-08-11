@@ -2,7 +2,7 @@
 
 This document records the evolution rationale and evidence chain for work that may span multiple conversations. Git commits and tags remain the authoritative source history.
 
-## 2026-08-12 — Composable lifecycle-template pilot candidate
+## 2026-08-12 — Composable lifecycle-template final-review correction candidate
 
 The pilot adds one authoritative registry, a pure deterministic selector/
 composer, sealed lifecycle-plan integration, and minimum Skill routing for
@@ -26,10 +26,22 @@ authoritative `bounded-feature + skill-evolution` pair truthfully returns
 its policy/action/evidence owners differ; only an owner-aligned synthetic
 fixture proves successful strongest-gate composition.
 
+Final review of `b31ac35..5a06cdd` then exposed three additional blocking
+mechanisms: concatenated stage lists violated an overlay partial order and did
+not detect cycles; selected evidence and persisted snapshots did not bind the
+complete work/source/task/fact/risk/registry context; and invalidating
+authority/side-effect/delta triggers depended on caller-supplied hash lists.
+One bounded TDD correction wave now topologically merges stages, rejects
+cycles, seals and independently admits exact normalized selection context, and
+automatically moves contradictory all-false selections to unresolved/full-risk
+lineage unless a fresh authoritative result is bound to the new context. The
+legacy four-argument plan-creation contract remains unchanged. Four associated
+wording/status/ledger minors were corrected in the same wave.
+
 Task 5 adds a human catalog and evidence record without duplicating the
 registry. The pure selector/composer makes zero model calls. Provider-backed
 Runtime Eval is `NOT RUN`, and provider token/cost evidence for it is
-unavailable. Final independent exact-tip review,
+unavailable. Independent exact-tip re-review of the correction commit,
 version synchronization, push, PR, merge, tag, Release, and host reload remain
 `NOT RUN` at this checkpoint. Exact measurements, evidence limitations, and
 continuation are in

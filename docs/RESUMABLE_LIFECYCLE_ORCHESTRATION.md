@@ -30,10 +30,19 @@ statuses stop template-backed plan creation.
 
 The current authoritative `bounded-feature + skill-evolution` pair fails closed
 as `conflict` because its policy/action/evidence owners differ. Template
-resolution evidence is sealed, replayed against the registry, and persisted in
-the lifecycle plan. A changed delta-evidence identity creates a new plan
-revision and contiguous resolution lineage; unrelated valid evidence remains
-reusable.
+stage lists are deterministic partial-order constraints: composition uses a
+topological merge and a cycle returns `conflict`. Template resolution evidence
+binds work, source, task definitions, normalized task facts/risk, and complete
+registry identity; it is sealed, independently matched, replayed against the
+registry, and persisted in the lifecycle plan. Cross-context reuse and a
+caller-resealed replay are rejected.
+
+A source, authority-boundary, side-effect-scope, bound-fact/risk, or explicit
+delta change that contradicts the selected all-false evidence automatically
+invalidates its exact delta identity. Replan creates contiguous lineage and an
+unresolved, full-risk-required current resolution unless a fresh authoritative
+resolution is bound to the new context. This does not depend on a caller
+supplying an invalidation list; unrelated valid evidence remains reusable.
 
 A resumed task first reconciles durable state, authoritative plan revision, hashes, external effects and authority. It returns SAFE_TO_RESUME, ALREADY_COMPLETED, RETRY_REQUIRED, ATTEMPTS_EXHAUSTED, RECONCILIATION_REQUIRED, STALE_BASELINE or AUTHORITY_REQUIRED. Timeout alone never proves failure.
 

@@ -4,10 +4,11 @@
 
 **Goal:** Add three pre-qualified, composable lifecycle templates with deterministic applicability/delta checks so matching work avoids repeated full risk calculation without weakening lifecycle or evidence.
 
-**Execution status (2026-08-12):** Tasks 1 through 4 are committed. Task 5
-documentation/regression is a local candidate; independent exact-tip review is
-deliberately pending until the controller's final reviewer inspects the
-candidate commit. No publication operation is authorized by this status.
+**Execution status (2026-08-12):** Tasks 1 through 5 are committed through
+`5a06cdd`. Final whole-branch review found three blocking and four minor
+findings. One bounded correction wave has addressed them locally; independent
+exact-tip re-review remains pending. No publication operation is authorized by
+this status.
 
 **Architecture:** Add one authoritative versioned template registry and a pure selector/composer beside the existing lifecycle-profile contract. The existing Plan Owner and durable lifecycle runtime remain authoritative; template output is only normalized planning input and never executes work.
 
@@ -95,9 +96,10 @@ each deferred template, and no default fallback for unknown IDs.
 
 - [x] **Step 2: Add delta RED assertions**
 
-Require all six values to be explicit booleans. All false plus matched positive
-conditions returns `selected` and `full_risk_calculation_required: false`. Any
-true or missing/unknown value returns `escalation_required` with the exact
+Require all six values to be literal `true` or `false`. Six literal `false`
+values plus matched positive conditions return `selected` and
+`full_risk_calculation_required: false`. Any literal `true`, missing,
+non-boolean, or unknown value returns `escalation_required` with the exact
 reason and `full_risk_calculation_required: true`.
 
 - [x] **Step 3: Implement the minimum pure contract**
@@ -132,28 +134,37 @@ git commit -m "feat: select lifecycle templates deterministically"
 - Modify: `scripts/validate_lifecycle_orchestration.py`
 
 **Interfaces:**
-- `compose_templates(base_id: str, overlay_ids: list[str], facts: dict, registry: dict) -> dict`
-- `create_plan(..., template_resolution: dict | None = None) -> dict`
+- `compose_templates(..., *, work_id, source_hash, tasks, risk_context) -> dict`
+- `create_plan(..., template_resolution=None, template_registry=None, template_facts=None, risk_context=None) -> dict`
 - Composition status: `selected | escalation_required | unsupported | conflict`.
 
 - [x] **Step 1: Add composition RED assertions**
 
 Require one base, unique overlays, declared compatibility, strongest review/gate
-preservation, and deterministic resolved owners/evidence/stages. Reject unknown,
-deferred, duplicated, incompatible, or owner-conflicting overlays.
+preservation, and deterministic resolved owners/evidence/stages. Every template
+stage partial order must survive a deterministic topological merge; cycles
+conflict. Reject unknown, deferred, duplicated, incompatible, or owner-
+conflicting overlays.
 
 - [x] **Step 2: Add lifecycle integration RED assertions**
 
 Require a plan created from a selected resolution to persist template IDs,
 contract versions, delta evidence hash, composition order, and resolution
-status. Reject escalation/unsupported/conflict as plan input. A replan must keep
-the prior resolution as lineage and invalidate affected evidence only.
+status. Selected evidence and the plan snapshot bind work/source/task identity,
+normalized facts/risk, and authoritative registry identity. Reject cross-
+context replay and escalation/unsupported/conflict as plan input. A replan must
+keep the prior resolution as lineage and invalidate affected evidence only.
 
 - [x] **Step 3: Implement minimal composition**
 
-Merge lists deterministically in precedence order, never weaken gates/review,
-and fail closed on conflicting scalar ownership/completion semantics. Extend
-`create_plan` compatibly with an optional resolution argument.
+Merge stages with a deterministic topological order and other lists without
+duplicates, never weaken gates/review, and fail closed on cyclic stages or
+conflicting scalar ownership/completion semantics. Extend `create_plan`
+compatibly with optional template context arguments; its legacy four-argument
+result remains unchanged. Replan automatically invalidates selected all-false
+evidence when source, authority, side-effect, bound facts/risk, or explicit
+delta changes contradict it, unless a fresh authoritative resolution is bound
+to the new context.
 
 - [x] **Step 4: Verify GREEN**
 

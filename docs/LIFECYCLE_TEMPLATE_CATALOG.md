@@ -67,6 +67,13 @@ be literal `false` for `selected`. That result records
 calculation, not the lifecycle, gates, evidence, verification, resume, or
 reconciliation obligations.
 
+A selected composition that can enter a lifecycle plan also requires a
+normalized selection context: work identity, source hash, full task
+definitions, task facts, risk context, and the SHA-256 identity of the complete
+authoritative registry. The delta-evidence and selected-resolution seals cover
+that context. Omitting it returns `escalation_required`; replay under another
+work item, source, task definition, fact/risk context, or registry is rejected.
+
 A true, missing, non-boolean, or unknown delta returns
 `escalation_required` and requires a full risk calculation. Missing or malformed
 applicability/exclusion evidence also escalates. The Plan Owner may then select
@@ -87,7 +94,9 @@ revision.
 Composition is one base plus zero or more unique overlays, resolved by the
 shared contract in base-first order. The base must explicitly declare every
 overlay compatible. The result preserves every required gate and evidence item
-and the strongest Review Assurance level. Owner, gate-transition, or completion
+and the strongest Review Assurance level. Stage constraints are merged as one
+deterministic topological order that preserves each template's partial order;
+a cycle returns `conflict`. Owner, gate-transition, stage-order, or completion
 semantic conflicts fail closed.
 
 The current registry declares `skill-evolution` as an allowed overlay for
@@ -115,14 +124,20 @@ These are usage examples, not alternate definitions:
 ## Plan persistence, replan, and stop conditions
 
 A selected resolution persists template IDs and versions, composition order,
-delta-evidence identity, review level, provenance, integrity, and plan revision.
-Admission replays the resolution against the authoritative registry; a caller-
-recomputed seal is not sufficient.
+the normalized selection context and its identity, delta-evidence identity,
+review level, provenance, integrity, and plan revision. Admission independently
+matches work/source/tasks/facts/risk and replays the resolution against the
+authoritative registry; a caller-recomputed seal is not sufficient. Legacy
+plans created without a template resolution retain their existing contract.
 
 When changed evidence invalidates the delta identity, create a new plan
 revision, retain the prior resolution in ordered lineage, mark the current
-resolution unresolved, and preserve unrelated hash-valid evidence. Only a
-fresh registry replay may restore `selected`.
+resolution unresolved, require full risk calculation, and preserve unrelated
+hash-valid evidence. Authority-boundary and side-effect-scope changes, a source
+change, a changed bound fact/risk context, or any trigger that contradicts an
+all-literal-false delta do this automatically; callers do not opt in by naming
+the old evidence hash. Only a fresh registry replay bound to the new context
+may restore `selected`.
 
 Stop template-backed plan creation when any of these applies:
 
