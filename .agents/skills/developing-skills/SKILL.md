@@ -30,7 +30,8 @@ Read only the references required by the active workflow:
   Eval Inbox review, project-history mining, deterministic clustering, owner
   analysis, token-aware synthesis, and reviewable delivery.
 - `references/skill-lifecycle-standard.md` before creating or changing a stage,
-  preparing release evidence, deprecating, or replacing a Skill.
+  preparing release evidence, deprecating, or replacing a Skill. The shared
+  lifecycle is `draft -> experimental -> active -> stable -> deprecated`.
 
 Do not load every reference by default. Keep detailed mechanics in one
 authoritative reference rather than copying mutable checklists into this file.
