@@ -40,6 +40,16 @@ mutating revision, atomic first-writer reservation, and a no-reexecution
 deterministic suite passes after correction; fresh exact-tip assurance remains
 pending.
 
+## 2026-08-11 — Second 6.3 review exposed incomplete reconciliation
+
+The first correction passed deterministic checks but the fresh GPT-5.4 review
+found that reconciliation remained declarative: the broker never invoked an
+adapter reconciliation operation, leaving uncertain actions permanently
+blocked. It also found that adapter bundle import supplied no configured
+private terms, changing queue behavior from the manual importer. Both findings
+return to implementation with new RED cases. Remaining L1 cells were not spent
+on the failed candidate; version synchronization and publication remain gated.
+
 ## 2026-08-11 — Public/private package split deferred
 
 The user retained the public Core/private Evolution Pack design but explicitly

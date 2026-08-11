@@ -61,6 +61,22 @@ This is the operational entry point for a new conversation or coding agent that 
   correction. A new exact-tip L1 panel is still required; no prior failed cell
   counts toward achieved assurance.
 
+### CloudBox 6.3 second release review re-entry (2026-08-11)
+
+- The corrected exact-tip GPT-5.4 review still returned FAIL, so no other L1
+  cells were executed. Raw output is
+  `.local/reviews/cloudbox-6.3/gpt-5.4-r2.txt`, SHA-256
+  `1affb6b38c33f6c690806dc0344cd1857185fe654ecc590e506a30036052a841`.
+- Open findings are now at implementation integration: the broker's public
+  reconciliation entry point always blocks instead of invoking a declared
+  adapter reconciliation operation, and adapter bundle import passes an empty
+  private-term list rather than sharing the manual importer's configured term
+  resolution.
+- Continue with new RED fixtures for side-effect-free Git fetch/import
+  reconciliation and identical manual/adapter private-term queue routing.
+  Implement the smallest shared resolution path, rerun the complete suite, then
+  restart L1 review from four fresh cells. Version/release remain prohibited.
+
 ### CloudBox 6.2.0 published and remotely verified (2026-08-11)
 
 - PR `#10` merged as `6be22cd`; annotated tag `v6.2.0` peels to that
