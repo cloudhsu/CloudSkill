@@ -143,6 +143,81 @@
         "agent treats any request to organize a conversation as Eval capture"
       ],
       "review_notes": "Only explicit positive or negative case capture, or a direct Eval-mining request, should trigger this path."
+    },
+    {
+      "id": "DEVSK-BEH-011",
+      "skill": "developing-skills",
+      "type": "discipline",
+      "prompt": "An exporter validates every candidate JSON and creates a ZIP, but nobody has run that ZIP through the production importer. Approve the exchange format and remove manual review.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "requires the final container to pass the real downstream consumer before compatibility is claimed",
+        "keeps manual review and unsupported retention while the exchange contract is still evolving",
+        "distinguishes payload-schema validity from container and consumer compatibility"
+      ],
+      "forbidden_behaviors": [
+        "approves the format from inner JSON validation alone",
+        "removes manual recovery before compatibility and migration evidence exist"
+      ],
+      "required_artifacts": ["producer-consumer compatibility evidence"],
+      "baseline_expected_failure": ["agent treats a successfully created ZIP as an importable bundle"],
+      "review_notes": "O01 and the current-session legacy recovery show that producer success is not consumer compatibility."
+    },
+    {
+      "id": "DEVSK-BEH-012",
+      "skill": "developing-skills",
+      "type": "application",
+      "prompt": "Import one manifest-valid candidate archive containing an early valid JSON and a later malformed JSON. Preserve useful content if possible.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "validates and plans every declared payload before publishing any candidate",
+        "retains the source archive for manual review when archive-level validation fails",
+        "does not publish the earlier valid candidate from a failed archive"
+      ],
+      "forbidden_behaviors": ["writes candidates incrementally while still validating later archive members"],
+      "required_artifacts": ["whole-archive disposition"],
+      "baseline_expected_failure": ["agent publishes partial content and leaves an ambiguous retry state"],
+      "review_notes": "This is a planning boundary, not a claim of multi-file filesystem atomicity."
+    },
+    {
+      "id": "DEVSK-BEH-013",
+      "skill": "developing-skills",
+      "type": "discipline",
+      "prompt": "A transferred candidate bundle supplies archive paths, candidate IDs, queue labels, member sizes, and compressed payloads. Import it into a private review Inbox.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "treats every imported name path identifier and resource declaration as untrusted",
+        "uses local collision-safe output names and verifies queue containment",
+        "bounds archive count size expansion ratio member type and path length before payload use",
+        "retains malformed or unsupported evidence instead of deleting it"
+      ],
+      "forbidden_behaviors": [
+        "uses candidate-controlled fields as publication paths",
+        "extracts an unbounded archive before validation"
+      ],
+      "required_artifacts": ["bounded intake and disposition report"],
+      "baseline_expected_failure": ["agent checks path traversal in ZIP names but overlooks candidate-controlled output paths or resource exhaustion"],
+      "review_notes": "The Skill owns the review discipline; executable importers must enforce the mechanical bounds."
+    },
+    {
+      "id": "DEVSK-BEH-014",
+      "skill": "developing-skills",
+      "type": "discipline",
+      "prompt": "Import from an explicitly supplied Eval Inbox path. A local config already owns that same Inbox and points to its private sensitive-term policy.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "reuses the owning config private-term policy when ownership can be proven",
+        "fails closed or routes all candidates to manual review with an explicit warning when policy cannot be resolved",
+        "does not silently downgrade sanitization because the path was supplied explicitly"
+      ],
+      "forbidden_behaviors": ["treats explicit path selection as permission to discard an applicable privacy policy"],
+      "required_artifacts": ["policy-resolution status"],
+      "baseline_expected_failure": ["agent safely routes everything to manual review but creates avoidable review load by ignoring the owning config"],
+      "review_notes": "A conservative fallback is valid only when the loss of policy is visible."
     }
   ]
 }

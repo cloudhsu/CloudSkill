@@ -83,6 +83,24 @@ For either interaction-capture phrase:
 
 A captured candidate is evidence to review, not proof that routing or behavior passed. Batch conversion requires deduplication, owner analysis, a repeatable prompt, required and forbidden behavior, and an explicit RED/GREEN decision.
 
+### Treat the exchange boundary as untrusted
+
+Payload validity does not prove container or consumer compatibility. Before
+approving an export format, run the produced archive through the real importer
+and verify its final disposition. While the format is evolving, retain manual
+review, unsupported evidence, and explicit legacy recovery; do not auto-delete
+or silently migrate source bundles.
+
+For each archive, validate every declared member and build the complete routing
+plan before publishing any candidate. Treat archive names, member paths,
+candidate identifiers, queue labels, sizes, compression, and resource references
+as untrusted. Executable importers must generate local collision-safe output
+names, prove queue containment, bound resource use, and retain failed evidence.
+
+An explicitly supplied Inbox path does not cancel an applicable privacy policy.
+Reuse its owning configuration when ownership can be proved. Otherwise stop or
+disclose the conservative fallback and route uncertain content to manual review.
+
 ## Historical interaction mining and optimization requests
 
 Use this path when the user asks to optimize one or more skills from past conversations, previous corrections, memories, exported transcripts, or an Eval Inbox.
@@ -91,6 +109,7 @@ Use this path when the user asks to optimize one or more skills from past conver
 2. **Sanitize before synthesis.** Remove or generalize organization, customer, person, project, product, equipment, site, account, address, local path, URL, schedule, recipe, safety limit, credential, and other identifying data.
 3. **Extract reusable pressure.** Preserve failure boundaries such as state ownership, timeout, late completion, retry safety, stale state, lifecycle, evidence denominator, audience transformation, release control, or overengineering. Do not preserve incidental names.
 4. **Cluster and deduplicate.** Merge semantically equivalent corrections. Separate routing failures, behavior omissions, artifact problems, unsupported claims, and project-only preferences.
+   Use deterministic metadata/content clustering before model synthesis; do not spend model context comparing byte-identical or already-equivalent candidates.
 5. **Locate the authoritative owner.** Update the smallest existing skill, router, reference, or validator that owns the pressure. Do not modify every skill merely because the source conversation mentioned several domains.
 6. **Establish RED evidence.** Add routing, recognition, application, counterexample, or discipline cases that reproduce the observed failure before changing skill instructions.
 7. **Make the smallest responsible change.** Prefer routing metadata, one decision rule, one safeguard, or one reference over a broad rewrite.

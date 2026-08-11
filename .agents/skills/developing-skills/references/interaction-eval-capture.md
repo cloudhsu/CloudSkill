@@ -29,6 +29,12 @@ Use the first valid configuration in this order:
 
 A valid configuration must keep `default_sanitization=true`, `save_raw_transcript=false`, `auto_modify_skills=false`, `auto_commit=false`, and `auto_push=false`. Stop rather than weakening these controls.
 
+If the operator supplies an Inbox path explicitly, still search the normal
+configuration locations for a configuration whose resolved Inbox is exactly
+that path. Reuse its private sensitive-term policy. If no owner can be proven,
+say that policy resolution failed and route all content to `manual-review/`;
+explicit destination selection is not a privacy-policy override.
+
 ## When no configuration resolves: disconnected/external session export
 
 Do not guess a write location and do not silently skip capture when neither
@@ -157,5 +163,14 @@ Only from the CloudSkill repository and only after explicit instruction:
 7. Establish RED evidence before modifying a skill.
 8. Run structural and behavioral regression checks.
 9. Review the diff before commit or push.
+
+Container intake is a separate precondition to this list. The exporter must
+produce a versioned manifest with declared payload hashes and a manifest-bound
+filename, and the real importer must validate the completed ZIP. Importers plan
+the whole archive before publishing any candidate, use only locally generated
+output names, reject queue escape/symlink and unsafe member forms, bound member
+count/path/size/expansion, preserve collisions, and leave malformed input for
+manual review. These are executable obligations; this reference does not
+replace their tests.
 
 One interaction may justify a candidate. A skill rule normally requires a repeatable failure or a high-severity prohibited behavior.
