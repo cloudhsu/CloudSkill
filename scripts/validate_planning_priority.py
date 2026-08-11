@@ -11,6 +11,9 @@ def contract_errors(process_text: str, developing_text: str):
     process = re.sub(r"\s+", " ", process_text).lower()
     developing = re.sub(r"\s+", " ", developing_text).lower()
     checks = {
+        "development-process-tailoring owns the lifecycle plan": (
+            "own the lifecycle plan, execution-plan contract" in process
+        ),
         "lifecycle is highest planning authority": (
             "lifecycle is always the highest planning authority" in process
         ),
@@ -57,6 +60,14 @@ def main() -> int:
     )
     if not contract_errors(mutated, developing_text):
         errors.append("negative mutation did not detect lifecycle-priority drift")
+
+    owner_mutation = process_text.replace(
+        "Own the lifecycle plan, execution-plan contract",
+        "Observe the lifecycle plan and execution-plan contract",
+        1,
+    )
+    if not contract_errors(owner_mutation, developing_text):
+        errors.append("negative mutation did not detect Plan Owner drift")
 
     if errors:
         for error in errors:
