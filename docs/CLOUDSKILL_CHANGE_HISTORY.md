@@ -2,6 +2,23 @@
 
 This document records the evolution rationale and evidence chain for work that may span multiple conversations. Git commits and tags remain the authoritative source history.
 
+## 2026-08-11 — Developing Skills context and planning authority pilot
+
+The user approved a token-oriented progressive-disclosure pilot for
+`developing-skills` and a bounded clarification of Plan Owner composition. The
+main Skill was reduced by about half in UTF-8 bytes while conditional capture,
+mining, and lifecycle mechanics remained in directly routed references. Full
+regression exposed two universal invariants that could not safely move out of
+default context—lifecycle markers and manual/raw-transcript safeguards—and both
+were restored before the suite passed. `development-process-tailoring` now
+chooses planning depth by risk while generic detailed-planning tools remain
+subordinate. Lifecycle is selected first for every planned increment so the
+complete feedback/replan loop remains authoritative even when the resulting
+execution plan is lightweight. The user fixed the priority as lifecycle first,
+evidence and verification second, and token reduction third. Exact measurements
+and truthful status are in
+`docs/evolution/2026-08-11-developing-skills-token-refactor-evidence.md`.
+
 ## 2026-08-11 — Inbox and session optimization owner pass
 
 The user authorized formal optimization of the imported review Inbox and the

@@ -31,13 +31,13 @@
 - Consumes: canonical Skill path and its Markdown direct-reference links.
 - Produces: deterministic size metrics and required-workflow/reference assertions used by Tasks 2–3.
 
-- [ ] **Step 1: Record the pre-change baseline**
+- [x] **Step 1: Record the pre-change baseline**
 
 Run a small read-only measurement using UTF-8 bytes, whitespace-delimited words,
 physical lines, and `ceil(bytes / 4)` as an explicitly approximate token value.
 Save the result in the eventual evidence record, not in mutable Skill metadata.
 
-- [ ] **Step 2: Add failing structural cases**
+- [x] **Step 2: Add failing structural cases**
 
 Create `scripts/validate_skill_context_budget.py` so it requires the main Skill
 to route these conditional workflows to direct references: interaction capture,
@@ -46,7 +46,7 @@ universal privacy, RED/GREEN, authoritative-owner, and evidence-truth invariants
 to remain in `SKILL.md`. Set the maximum main-file byte budget below the current
 baseline but only after identifying content that can be moved without loss.
 
-- [ ] **Step 3: Verify RED**
+- [x] **Step 3: Verify RED**
 
 Run:
 
@@ -58,13 +58,13 @@ Expected: FAIL because the current main file exceeds the new budget or lacks
 the explicit lifecycle/release reference route. Confirm the failure is caused
 by the intended refactor contract.
 
-- [ ] **Step 4: Register the validator**
+- [x] **Step 4: Register the validator**
 
 Add the validator to `scripts/run_all_checks.py` and add focused Behavior cases
 that require correct conditional-reference selection without leaking the
 expected answer into prompts. Register those case IDs in the lifecycle record.
 
-- [ ] **Step 5: Commit the RED increment**
+- [x] **Step 5: Commit the RED increment**
 
 ```bash
 git add scripts/validate_skill_context_budget.py scripts/run_all_checks.py evals/behavior/cases/developing-skills.json .agents/skills/developing-skills/lifecycle.json
@@ -84,20 +84,20 @@ git commit -m "test: define developing skill context budget"
 - Consumes: Task 1 workflow/reference assertions and size budget.
 - Produces: a smaller default Skill whose direct references own conditional procedures.
 
-- [ ] **Step 1: Move only conditional mechanics**
+- [x] **Step 1: Move only conditional mechanics**
 
 Keep the core principle, reference router, universal safeguards, owner decision,
 RED/GREEN loop, minimal-change order, adjacent regression, and truthful release
 boundary in `SKILL.md`. Move detailed capture steps, mining delivery formats,
 and lifecycle/release mechanics into their existing authoritative references.
 
-- [ ] **Step 2: Remove duplicated mutable text**
+- [x] **Step 2: Remove duplicated mutable text**
 
 For each moved rule, retain one authority. Use a short imperative link in
 `SKILL.md` that says when the reference is mandatory; do not preserve a second
 full checklist in the main file.
 
-- [ ] **Step 3: Verify GREEN**
+- [x] **Step 3: Verify GREEN**
 
 Run:
 
@@ -110,13 +110,13 @@ python3 scripts/validate_pack.py
 
 Expected: all PASS; manifest refresh is committed if content hashes change.
 
-- [ ] **Step 4: Run focused semantic GREEN**
+- [x] **Step 4: Run focused semantic GREEN**
 
 Execute the new cases plus `DEVSK-BEH-011` through `DEVSK-BEH-014` against the
 refactored Skill and direct references. Record case-level PASS/FAIL and state
 that provider-backed corpus execution is `NOT RUN` unless actually invoked.
 
-- [ ] **Step 5: Commit the refactor**
+- [x] **Step 5: Commit the refactor**
 
 ```bash
 git add .agents/skills/developing-skills SKILL_MANIFEST.json
@@ -135,25 +135,25 @@ git commit -m "refactor: reduce developing skill context cost"
 - Consumes: existing lifecycle plan, risk/replan, resume, and review-assurance contracts.
 - Produces: one authoritative proportional-planning rule and focused Behavior evidence.
 
-- [ ] **Step 1: Add RED behavior cases**
+- [x] **Step 1: Add RED behavior cases**
 
 Add cases requiring lightweight planning for small stable work, bounded detailed
 planning for an approved medium increment, and lifecycle-first stage planning
 for uncertain/high-risk work. Require new risk to invalidate only affected
 detailed steps while preserving unaffected evidence. Forbid dual plan authority.
 
-- [ ] **Step 2: Verify RED**
+- [x] **Step 2: Verify RED**
 
 Run the cases without the proposed Skill change and record the exact omission.
 If baseline behavior already satisfies every case, mark the change
 `NO_CHANGE_JUSTIFIED` and do not add duplicate prose.
 
-- [ ] **Step 3: Make the minimum GREEN change**
+- [x] **Step 3: Make the minimum GREEN change**
 
 Only if RED is demonstrated, add one compact proportional-planning section to
 `development-process-tailoring` and register its cases in lifecycle evidence.
 
-- [ ] **Step 4: Verify and commit independently**
+- [x] **Step 4: Verify and commit independently**
 
 ```bash
 python3 scripts/validate_behavior_evals.py
@@ -175,13 +175,13 @@ git commit -m "feat: tailor detailed planning by risk"
 - Consumes: before/after metrics, structural results, semantic verdicts, and exact source tip.
 - Produces: reviewable candidate evidence and continuation state for both independent increments.
 
-- [ ] **Step 1: Record comparative evidence**
+- [x] **Step 1: Record comparative evidence**
 
 Record before/after lines, bytes, words, approximate tokens, percentage change,
 moved authorities, focused semantic results, full-suite status, and explicit
 `NOT RUN` items. Do not claim provider billing savings from the estimate.
 
-- [ ] **Step 2: Run the complete deterministic suite**
+- [x] **Step 2: Run the complete deterministic suite**
 
 ```bash
 PYTHONDONTWRITEBYTECODE=1 python3 scripts/run_all_checks.py

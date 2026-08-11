@@ -15,6 +15,24 @@ This is the operational entry point for a new conversation or coding agent that 
 
 ## Current repository state
 
+### Developing Skills token-refactor candidate (2026-08-11)
+
+- `developing-skills` now uses explicit progressive disclosure: its default
+  main file fell from 15,062 to 7,662 UTF-8 bytes while mandatory lifecycle,
+  privacy, manual-review, and evidence safeguards remained default-loaded.
+- Focused semantic forward tests passed 6/6 for Skill evolution and 1/1 for
+  proportional planning. Provider-backed Runtime Eval remains `NOT RUN`.
+- `development-process-tailoring` is the single, highest Plan Owner. It selects
+  the lifecycle profile first, then projects lightweight or bounded detailed
+  planning inside that dynamic lifecycle according to risk.
+- Fixed optimization order: lifecycle/dynamic loop, then evidence/verification,
+  then token/context savings. Lower priorities may not weaken higher ones.
+- The complete deterministic suite passed after two information-loss
+  regressions were found and corrected. Evidence is in
+  `docs/evolution/2026-08-11-developing-skills-token-refactor-evidence.md`.
+- Exact-tip independent review remains pending. Do not version, push, merge, or
+  release before candidate review and user approval.
+
 ### Inbox/session Skill optimization candidate (2026-08-11)
 
 - Branch `feat/cloudbox-skill-optimization` converts 45 private review records
