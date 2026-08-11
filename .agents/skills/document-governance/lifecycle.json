@@ -44,5 +44,5 @@
     "the skill has not been reviewed for two feature releases"
   ],
   "replacement_skill": null,
-  "notes": "6.3 evolution distinguishes historical evidence container versions from the versions and capture times of observed facts."
+  "notes": "Post-6.3 evolution candidate distinguishes historical evidence container versions from the versions and capture times of observed facts."
 }

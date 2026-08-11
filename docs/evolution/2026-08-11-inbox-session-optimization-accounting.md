@@ -18,7 +18,8 @@ inferred/unknown, while executed importer and release failures are observed.
 | NO_CHANGE_JUSTIFIED | O07–O10, O16, O23, O25–O26, O28, O30 | Existing agent/process/review/plugin/governance behavior already complied. Token-specific deterministic clustering and stop-on-blocker rules were consolidated in `developing-skills`; no duplicate token Skill was created. |
 | MERGED_AND_PROMOTED | O11–O14 | `code-review`: ordered parsing, joined shutdown, readiness/acceptance/completion/readback separation. |
 | MERGED_AND_PROMOTED | O15, O17 | `framework-design`: unequal capabilities and authoritative registry propagation/drift. |
-| MERGED_AND_PROMOTED | O18, O24, O29 | `cross-platform-native-architecture`: design-host ABI, process identity/liveness, startup and local-secret ownership. |
+| MERGED_AND_PROMOTED | O18, O29 | `cross-platform-native-architecture`: design-host ABI plus startup and local-secret ownership. |
+| SPLIT_NO_CHANGE_AND_PROMOTED | O24 | The source incident concerned agent-operated shell/process termination and is already covered by `coding-agent-project-governance`; no agent-governance change was needed. Only its generalized product-runtime pressure—cross-platform process identity/liveness—was promoted to `cross-platform-native-architecture`. Agent tooling must continue routing to governance, not native product architecture. |
 | MERGED_AND_PROMOTED | O19–O20 | `software-quality-iso25010`: freshness/correlation and risk-bounded native evidence cells/denominators. |
 | MERGED_AND_PROMOTED | O21 | `safe-incremental-refactoring`: seam/test/bootstrap/auth decision table. |
 | SPLIT_AND_PROMOTED | O22 | `application-client-server-architecture`: four distinct cases for durability divergence, schema/product versions, immutable compensation, and post-external-commit reconciliation. |
@@ -40,3 +41,5 @@ format and migration policy exist.
 - Model-backed Runtime Eval corpus execution: not claimed; the targeted GREEN
   is an independent semantic execution, not a full provider-backed corpus run.
 - Exact-tip review remains the final candidate gate.
+- Case-level semantic evidence is recorded in
+  `docs/evolution/2026-08-11-inbox-session-semantic-evidence.md`.

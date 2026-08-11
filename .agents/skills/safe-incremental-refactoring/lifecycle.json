@@ -42,5 +42,5 @@
     "the skill has not been reviewed for two feature releases"
   ],
   "replacement_skill": null,
-  "notes": "6.3 evolution adds a compact extraction decision contract spanning compatibility seams, test shape, lazy dependency bootstrap, and authentication authority."
+  "notes": "Post-6.3 evolution candidate adds a compact extraction decision contract spanning compatibility seams, test shape, lazy dependency bootstrap, and authentication authority."
 }

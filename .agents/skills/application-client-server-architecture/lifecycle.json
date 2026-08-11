@@ -41,5 +41,5 @@
     "the skill has not been reviewed for two feature releases"
   ],
   "replacement_skill": null,
-  "notes": "6.3 evolution keeps four durable-state pressures independently testable: persistence divergence, schema compatibility, immutable compensation, and post-external-commit reconciliation."
+  "notes": "Post-6.3 evolution candidate keeps four durable-state pressures independently testable: persistence divergence, schema compatibility, immutable compensation, and post-external-commit reconciliation."
 }
