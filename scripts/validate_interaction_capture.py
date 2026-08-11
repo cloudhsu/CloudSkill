@@ -237,6 +237,9 @@ if export_script_path.is_file():
             '--input', str(draft_path), '--outbox', str(external_project / '.cloudskill/eval-outbox'),
             '--project-name', 'validator-smoke', '--non-interactive',
         ], cwd=external_project)
+        export_config = json.loads((external_project / '.cloudskill/config.local.json').read_text(encoding='utf-8'))
+        if export_config.get('export_project_name') != 'validator-smoke' or export_config.get('export_agent_name') != 'codex':
+            fail('portable exporter did not persist project and agent aliases')
         exported_zips = list(external_project.glob('validator-smoke-codex-codex-*.zip'))
         if len(exported_zips) != 1:
             fail('export_eval_candidate.py did not produce exactly one zip archive')
@@ -268,12 +271,60 @@ if export_script_path.is_file():
             if len(list((repo_inbox / 'imports/processed').glob('*.zip'))) != 1:
                 fail('import_eval_candidates.py did not move the processed zip into imports/processed/')
 
+            renamed = repo_inbox / 'imports' / 'renamed.zip'
+            shutil.copy2(exported_zips[0], renamed)
+            renamed_result = run([
+                sys.executable, str(import_script_path), '--eval-inbox', str(repo_inbox),
+            ], cwd=ROOT)
+            if 'unsupported=1' not in renamed_result.stdout or not (repo_inbox / 'imports/unsupported/renamed.zip').is_file():
+                fail('manifest-valid archive with a mismatched filename was not routed to unsupported/')
+
             # Re-running import on an inbox with no new zips must be a no-op, not an error.
             rerun = run([
                 sys.executable, str(import_script_path), '--eval-inbox', str(repo_inbox),
             ], cwd=ROOT)
             if 'No import archives found' not in rerun.stdout:
                 fail('re-running import_eval_candidates.py with nothing new to import did not report a no-op')
+
+            # One real mixed batch proves that shared seen_keys, totals, and
+            # archive disposition work together rather than only in isolated runs.
+            batch_inbox = tmp / 'batch-inbox'
+            batch_imports = batch_inbox / 'imports'
+            batch_imports.mkdir(parents=True)
+            shutil.copy2(exported_zips[0], batch_imports / exported_zips[0].name)
+            with zipfile.ZipFile(exported_zips[0]) as source:
+                members = {name: source.read(name) for name in source.namelist()}
+            duplicate_manifest = json.loads(members['manifest.json'])
+            duplicate_manifest['bundle_id'] = 'd' * 32
+            duplicate_name = (
+                f"{duplicate_manifest['export_project_name']}-{duplicate_manifest['host']}-"
+                f"{duplicate_manifest['agent_name']}-{duplicate_manifest['created_at_utc']}-dddddddd.zip"
+            )
+            with zipfile.ZipFile(batch_imports / duplicate_name, 'w', zipfile.ZIP_DEFLATED) as archive:
+                archive.writestr('manifest.json', json.dumps(duplicate_manifest, ensure_ascii=False, indent=2) + '\n')
+                for name, payload in members.items():
+                    if name != 'manifest.json':
+                        archive.writestr(name, payload)
+            shutil.copy2(exported_zips[0], batch_imports / 'wrong-name.zip')
+            (batch_imports / 'malformed.zip').write_bytes(b'not a zip')
+
+            batch = run([
+                sys.executable, str(import_script_path), '--eval-inbox', str(batch_inbox),
+            ], cwd=ROOT)
+            expected_totals = ('TOTAL: 4 archive(s)', 'manual_review=1', 'duplicate=1', 'skipped=1', 'unsupported=1')
+            if any(value not in batch.stdout for value in expected_totals):
+                fail('mixed multi-zip batch totals did not preserve valid, duplicate, malformed, and unsupported outcomes')
+            if len(list((batch_inbox / 'imports/processed').glob('*.zip'))) != 2:
+                fail('mixed batch did not process both supported archives')
+            if not (batch_inbox / 'imports/unsupported/wrong-name.zip').is_file():
+                fail('mixed batch did not retain the filename-mismatched archive as unsupported')
+            if not (batch_imports / 'malformed.zip').is_file():
+                fail('mixed batch did not retain the malformed archive for manual review')
+            if len(list((batch_inbox / 'manual-review').glob('*.json'))) != 1:
+                fail('mixed batch partially imported unsupported/malformed content or failed to deduplicate')
+            importer_source = import_script_path.read_text(encoding='utf-8')
+            if any(marker in importer_source for marker in ('openai', 'anthropic', 'ollama', 'subprocess')):
+                fail('manual importer acquired a model/provider execution dependency')
 
 sync_script_path = ROOT / 'scripts/sync_eval_exchange.py'
 if not sync_script_path.is_file():

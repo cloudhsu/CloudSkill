@@ -5,10 +5,9 @@
 **Current version: 6.2.0**
 
 CloudBox 6.2 defines risk-based Review Assurance and resumable, adaptive
-lifecycle planning. The 6.3 candidate adds contract-v2 immutable target
-preparation plus a controlled local CLI and Git
-adapter vertical slice without arbitrary shell access; see
-`docs/CONTROLLED_TOOL_ADAPTERS.md`. MCP and live remote mutations remain in
+lifecycle planning. See `docs/REVIEW_ASSURANCE_LEVELS.md` and
+`docs/RESUMABLE_LIFECYCLE_ORCHESTRATION.md`. A later-version discussion for
+controlled CLI/MCP integration is recorded in
 `docs/future/CONTROLLED_EXTERNAL_TOOL_ADAPTERS.md`.
 The approved later split between the public development package and a locally
 installable private evolution package is recorded in

@@ -3,7 +3,7 @@ from pathlib import Path
 import json,sys,tempfile
 ROOT=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT/"scripts"))
-from lifecycle_orchestration_contract import classify_failure, classify_tool_event, deployment_decision, load_profiles, select_profiles
+from lifecycle_orchestration_contract import classify_failure, deployment_decision, load_profiles, select_profiles
 from lifecycle_plan_contract import create_plan, replan
 import lifecycle_state_store
 from lifecycle_state_store import load_state, save_state_atomic
@@ -13,17 +13,11 @@ from lifecycle_review_adapter import consume_budget, plan_review
 profiles=load_profiles(ROOT/"config/lifecycle-profiles.json")
 assert select_profiles({"work_type":"development","risk":"low"},profiles)==["iterative_incremental"]
 assert select_profiles({"work_type":"skill_evolution"},profiles)==["eval_driven_evolution"]
-assert select_profiles({"work_type":"controlled_tool_adapter"},profiles)==["controlled_tool_vertical_slice"]
 assert "discovery_spike" in select_profiles({"work_type":"development","technical_uncertainty":"high"},profiles)
 assert "stage_gated" in select_profiles({"work_type":"development","safety":"high"},profiles)
 assert classify_failure({"failed_mechanism":"grader"})=="verification_system"
 assert classify_failure({"failed_mechanism":"component_interface"})=="design"
 assert classify_failure({"failed_mechanism":"state_authority"})=="architect"
-assert classify_tool_event({"state":"UNCERTAIN"},{})=="reconcile"
-assert classify_tool_event({"state":"BLOCKED"},{"risk_changed":True})=="replan"
-assert classify_tool_event({"state":"FAILED"},{"failed_mechanism":"recovery_model"})=="architect"
-assert classify_tool_event({"state":"FAILED"},{"failed_mechanism":"malformed_evidence"})=="verify"
-assert classify_tool_event({"state":"FAILED"},{"failed_mechanism":"implementation"})=="implement"
 plan=create_plan("W1",["iterative_incremental"],"a"*64,[{"task_id":"T1","owner":"architecture-review","dependencies":[],"outputs":["architecture"],"risk_class":"medium","review_level":"L2_SINGLE_FAMILY_QUAD"}])
 changed=replan(plan,{"kind":"authority_boundary_changed","evidence_hash":"b"*64},{"risk_class":"high"},{"invalidate":["T1"],"reuse":[]})
 assert changed["revision"]==2 and changed["tasks_invalidated"]==["T1"] and changed["required_review_level"]=="L1_CROSS_FAMILY_2X2"

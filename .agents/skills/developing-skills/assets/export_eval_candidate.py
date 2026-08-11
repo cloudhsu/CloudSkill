@@ -189,26 +189,28 @@ def safe_component(value: str) -> str:
     return result
 
 
-def resolve_project_name(args: argparse.Namespace) -> str:
+def resolve_export_identity(args: argparse.Namespace) -> tuple[str, str]:
     config_path = Path(args.project_path).expanduser().resolve() / '.cloudskill' / 'config.local.json'
     config: dict[str, Any] = {}
     if config_path.is_file():
         value = json.loads(config_path.read_text(encoding='utf-8'))
         if isinstance(value, dict):
             config = value
-    name = args.project_name or config.get('export_project_name')
-    if not name:
+    project_name = args.project_name or config.get('export_project_name')
+    if not project_name:
         if args.non_interactive or not sys.stdin.isatty():
             raise ValueError('export_project_name is missing; run interactively with --project-name NAME once')
-        name = input('Export project name: ').strip()
-    name = safe_component(str(name))
-    if config.get('export_project_name') != name:
-        config['export_project_name'] = name
+        project_name = input('Export project name: ').strip()
+    project_name = safe_component(str(project_name))
+    agent_name = safe_component(str(args.agent_name or config.get('export_agent_name') or ('claude-code' if args.host == 'claude' else 'codex'))).replace('_', '-').lower()
+    if config.get('export_project_name') != project_name or config.get('export_agent_name') != agent_name:
+        config['export_project_name'] = project_name
+        config['export_agent_name'] = agent_name
         config_path.parent.mkdir(parents=True, exist_ok=True)
         tmp = config_path.with_suffix('.json.tmp')
         tmp.write_text(json.dumps(config, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
         tmp.replace(config_path)
-    return name
+    return project_name, agent_name
 
 
 def package_outbox(outbox: Path, payload: Path, project_name: str, host: str, agent_name: str, cloudbox_version: str) -> Path:
@@ -288,8 +290,7 @@ def main() -> int:
         print(f'{sanitization["status"]}: {output}')
 
         if not args.no_zip:
-            project_name = resolve_project_name(args)
-            agent_name = safe_component(args.agent_name or ('claude-code' if args.host == 'claude' else 'codex')).replace('_', '-').lower()
+            project_name, agent_name = resolve_export_identity(args)
             zip_path = package_outbox(outbox, output, project_name, args.host, agent_name, str(candidate['cloudskill_version']))
             print(f'Exported archive: {zip_path}')
             print(

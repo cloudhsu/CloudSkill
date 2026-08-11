@@ -39,7 +39,7 @@ from capture_eval_candidate import (  # noqa: E402
     scan_sensitive,
     validate_candidate,
 )
-from eval_bundle_contract import validate_bundle_manifest  # noqa: E402
+from eval_bundle_contract import bundle_filename, validate_bundle_manifest  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -150,6 +150,9 @@ def import_zip(zip_path: Path, inbox: Path, terms: list[str], seen_keys: set[str
                 if not isinstance(manifest, dict) or validate_bundle_manifest(manifest):
                     counts["unsupported"] = 1
                     return counts
+                if zip_path.name != bundle_filename(manifest):
+                    counts["unsupported"] = 1
+                    return counts
                 if set(names) != {"manifest.json", *manifest["payload_hashes"].keys()}:
                     raise ValueError("archive contains undeclared or missing payload members")
                 for name, digest in manifest["payload_hashes"].items():
@@ -258,45 +261,6 @@ def import_archives(inbox: Path, terms: list[str], dry_run: bool) -> dict[str, i
     if dry_run:
         print("DRY RUN: no files were written or moved.")
     return {"archives": len(zips), **totals}
-
-
-def import_selected_archives(inbox: Path, targets: list[dict[str, Any]], terms: list[str], dry_run: bool) -> dict[str, Any]:
-    """Import exactly the preflighted content-addressed archives in target order."""
-    selected: list[tuple[Path, dict[str, Any]]] = []
-    for target in targets:
-        relative = Path(target["relative_path"])
-        path = (inbox / relative).resolve()
-        imports = (inbox / "imports").resolve()
-        if path.parent != imports or path.suffix != ".zip" or path.is_symlink() or not path.is_file():
-            raise ValueError("prepared bundle archive is missing or escapes imports root")
-        payload = path.read_bytes()
-        if len(payload) != target["size_bytes"] or hashlib.sha256(payload).hexdigest() != target["sha256"]:
-            raise ValueError("prepared bundle archive identity changed")
-        selected.append((path, target))
-    if not dry_run:
-        for folder in ("candidates", "manual-review", "rejected", "imports/processed", "imports/unsupported"):
-            (inbox / folder).mkdir(parents=True, exist_ok=True)
-    seen_keys = existing_content_keys(inbox)
-    totals: dict[str, Any] = {"archives": len(selected), "candidates": 0, "manual_review": 0, "rejected": 0, "duplicate": 0, "skipped": 0, "unsupported": 0, "target_evidence": []}
-    for path, target in selected:
-        counts = import_zip(path, inbox, terms, seen_keys, dry_run)
-        for key, value in counts.items():
-            totals[key] += value
-        outcome = "DRY_RUN"
-        if not dry_run and counts["unsupported"]:
-            destination = inbox / "imports" / "unsupported" / path.name
-            shutil.move(str(path), str(destination))
-            sidecar = destination.with_suffix(destination.suffix + ".status.json")
-            sidecar.write_text(json.dumps({"sha256": target["sha256"], "status": "UNSUPPORTED", "archive": destination.name}, indent=2) + "\n", encoding="utf-8")
-            outcome = "UNSUPPORTED"
-        elif not dry_run and not counts["skipped"]:
-            destination = inbox / "imports" / "processed" / path.name
-            shutil.move(str(path), str(destination))
-            outcome = "PROCESSED"
-        elif counts["skipped"]:
-            outcome = "SKIPPED"
-        totals["target_evidence"].append({"relative_path": target["relative_path"], "sha256": target["sha256"], "outcome": outcome})
-    return totals
 
 
 def main() -> int:

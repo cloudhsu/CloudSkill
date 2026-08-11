@@ -42,8 +42,6 @@ Long evolution work can span conversations or agents. Root handoff and history d
 User request
   -> using-cloudskill routes by decision/failure boundary
   -> selected Skill instructions and references are loaded
-  -> lifecycle owner plans and authorizes any reusable external capability
-  -> controlled broker invokes only a registered adapter and persists evidence
   -> model produces a structured final deliverable
   -> deterministic routing and behavior graders evaluate explicit evidence
   -> local runner packages source hashes, reports, environment, raw output, and status
@@ -54,12 +52,6 @@ User request
   -> cloudskill-resume commits, pushes, updates the Draft PR, and watches CI
   -> handoff and change history are updated
 ```
-
-External tool execution is not owned by the Skill or chat transcript. The host
-owns authority, roots, secret resolution, and process selection; the lifecycle
-owner owns plan changes; the adapter returns bounded evidence. External state
-remains authoritative, so ambiguous completion enters reconciliation before
-retry. See `docs/CONTROLLED_TOOL_ADAPTERS.md`.
 
 ## Skill lifecycle
 

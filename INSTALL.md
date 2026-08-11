@@ -323,21 +323,17 @@ Gemini CLI 官方文件宣稱原生支援 `.agents/skills/` 這個路徑別名�
 
 ## 10d. 版本化匯出與 Git 優化來源
 
-CloudBox 6.1 的手動匯出包含版本 manifest，檔名為
-`<project>-<host>-<agent>-<UTC時間>-<短ID>.zip`。第一次匯出詢問專案輸出名稱並
-保存於不提交的 `.cloudskill/config.local.json`。舊的未匯入 bundle 不自動轉換或
-刪除；新版 importer 會移到 `imports/unsupported/` 供人工檢查。
+CloudBox 的手動匯出包含版本 manifest，檔名固定為
+`<project>-<host>-<agent>-<YYYYMMDDTHHMMSSZ>-<bundle-id8>.zip`。第一次匯出設定
+專案名稱與代理別名，兩者保存於不提交的 `.cloudskill/config.local.json`。將一個
+或多個 ZIP 直接放入 `.local/eval-inbox/imports/`，再說「匯入優化案例」或執行
+`python3 scripts/import_eval_candidates.py`。檔名與 manifest 不一致或版本不支援的
+bundle 會移到 `imports/unsupported/`；損壞或不安全的檔案保留原處供人工檢查，
+不自動刪除。匯入不會修改正式 Eval、Skill 或 Git。
 
 `同步優化來源` 使用可攜 CLI 比對 Git commit/content；沒有變更時不呼叫模型。
 實際 URL 與帳密只能由 secret reference 注入。完整操作見
 [docs/AUTOMATIC_EVOLUTION_SOURCES.md](docs/AUTOMATIC_EVOLUTION_SOURCES.md)。
-
-## 10e. 受控 CLI Tool Adapter
-
-CloudBox 6.3 的候選能力先以唯讀 `tool prepare` 固定 contract-v2 目標摘要，再用版本化 registry 執行窄化的 Git inspect、fetch
-與 bundle import。Host 必須明確提供允許的 root、authority 與 secret
-reference；不支援模型自行輸入任意 shell。安裝、測試、續跑與既有手動匯入
-方式見 [docs/CONTROLLED_TOOL_ADAPTERS.md](docs/CONTROLLED_TOOL_ADAPTERS.md)。
 
 ## 11. 驗證
 
