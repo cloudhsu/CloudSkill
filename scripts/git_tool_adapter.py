@@ -46,6 +46,8 @@ def _execute(capability: str, arguments: dict[str, Any], secrets: dict[str, str]
         registered = set(_git(["remote"], repository).splitlines())
         if remote not in registered:
             raise ValueError("requested remote is not registered in repository")
+        if _git(["remote", "get-url", remote], repository) != secrets["SOURCE_REMOTE_URL"]:
+            raise ValueError("registered remote URL is not host-authorized")
         before = _ref_fingerprint(repository, remote)
         _git(["fetch", "--no-tags", "--prune", remote], repository)
         after = _ref_fingerprint(repository, remote)
@@ -62,12 +64,14 @@ def _execute(capability: str, arguments: dict[str, Any], secrets: dict[str, str]
     raise ValueError("unknown registered Git capability")
 
 
-def _reconcile(capability: str, arguments: dict[str, Any]) -> tuple[str, str, dict[str, Any], list[str]]:
+def _reconcile(capability: str, arguments: dict[str, Any], secrets: dict[str, str]) -> tuple[str, str, dict[str, Any], list[str]]:
     if capability == "git.fetch":
         repository = Path(arguments["repository"])
         remote = arguments["remote"]
         if remote not in set(_git(["remote"], repository).splitlines()):
             raise ValueError("requested remote is not registered in repository")
+        if _git(["remote", "get-url", remote], repository) != secrets["SOURCE_REMOTE_URL"]:
+            raise ValueError("registered remote URL is not host-authorized")
         advertised: dict[str, str] = {}
         for row in _git(["ls-remote", "--heads", remote], repository).splitlines():
             object_id, ref = row.split(None, 1)
@@ -81,7 +85,7 @@ def _reconcile(capability: str, arguments: dict[str, Any]) -> tuple[str, str, di
             branch = ref[len(prefix):] if ref.startswith(prefix) else ref
             if branch != "HEAD":
                 local[branch] = object_id
-        complete = bool(advertised) and all(local.get(branch) == object_id for branch, object_id in advertised.items())
+        complete = advertised == local
         state = "SUCCEEDED" if complete else "FAILED"
         return state, "Git fetch reconciliation completed", {"status": "OBSERVED_COMPLETE" if complete else "OBSERVED_INCOMPLETE"}, []
     if capability == "git.import_bundle":
@@ -120,7 +124,7 @@ def main() -> int:
         if operation not in {"execute", "reconcile"}:
             raise ValueError("unsupported adapter operation")
         if operation == "reconcile":
-            state, summary, output, effects = _reconcile(request["capability_id"], request["arguments"])
+            state, summary, output, effects = _reconcile(request["capability_id"], request["arguments"], request.get("secrets", {}))
         else:
             state, summary, output, effects = _execute(request["capability_id"], request["arguments"], request.get("secrets", {}))
         result = make_result(request, state, summary, output, effects, [], int((time.monotonic() - started) * 1000))

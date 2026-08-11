@@ -269,8 +269,10 @@ def execute_prepared(prepared: PreparedInvocation, action_path: Path, context: E
             raise ValueError("existing action identity conflicts with prepared invocation")
         if current.get("state") in {"RUNNING", "UNCERTAIN"}:
             return _blocked_result(prepared, "existing action may have completed; reconcile before retry")
-        if current.get("state") in {"SUCCEEDED", "FAILED", "BLOCKED"}:
+        if current.get("state") in {"SUCCEEDED", "BLOCKED"}:
             return _blocked_result(prepared, f"existing action is {current['state']}; lifecycle-owner transition required")
+        if current.get("state") == "FAILED" and current.get("attempt", 0) >= current.get("max_attempts", 0):
+            return _blocked_result(prepared, "existing action exhausted its confirmed-failure retry budget")
         action = current
     else:
         action = save_action_atomic(
@@ -283,6 +285,9 @@ def execute_prepared(prepared: PreparedInvocation, action_path: Path, context: E
         )
     persistence = {"owner_id": context.owner_id, "fencing_token": context.fencing_token, "now": context.now_epoch}
     action = _claim_expired_lease(action, prepared, action_path, context)
+    if action["state"] == "FAILED":
+        action = transition_action(action, "AUTHORIZED", {"retry": "confirmed failure", "authority_grant_id": action["authority_grant_id"]})
+        action = save_action_atomic(action_path, action, action["revision"], **persistence)
     if action["state"] == "PLANNED":
         action = transition_action(action, "AUTHORIZED", {"authority_grant_id": action["authority_grant_id"]})
         action = save_action_atomic(action_path, action, action["revision"], **persistence)

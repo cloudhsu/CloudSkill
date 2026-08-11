@@ -9,7 +9,7 @@
       "provenance": {
         "kind": "repository-script",
         "path": "scripts/git_tool_adapter.py",
-        "sha256": "6f075f6b6935757946cff0c80d10c3c3608cce7a590b42f6fd3c4170fd1fc961"
+        "sha256": "8d385dc605441eb351107a4e99c1c65abfbfd9933e9bcd6a0ffdd0bcbb3343a0"
       },
       "capabilities": [
         {
@@ -30,7 +30,7 @@
           "risk": "local-mutating",
           "required_authority": ["git.fetch"],
           "allowed_root_refs": ["REPOSITORY_ROOT"],
-          "secret_refs": [],
+          "secret_refs": ["SOURCE_REMOTE_URL"],
           "timeout_seconds": 120,
           "max_attempts": 2,
           "idempotent": true,

@@ -88,6 +88,18 @@ adapter version and pinned provenance, and reconciliation rejects explicit
 version drift. Focused deterministic evidence passes; all other review cells
 were withheld and the release remains gated.
 
+## 2026-08-11 — Fifth 6.3 review bound fetch authority to its endpoint
+
+Fresh GPT-5.4 review showed that approving a mutable Git remote name did not
+authorize its actual endpoint, declared confirmed-failure retries were
+unreachable, and empty matching ref sets were misclassified. Fetch execute and
+reconcile now require the registered remote URL to equal a host-supplied secret
+reference, without exposing the URL in durable/model-visible results. The broker
+allows `FAILED` retries only while the attempt budget remains; ambiguous states
+stay outside that path. Reconciliation compares complete advertised and local
+ref maps, so equal empty sets succeed. Focused fixtures cover all three paths;
+remaining review cells and release stay gated.
+
 ## 2026-08-11 — Public/private package split deferred
 
 The user retained the public Core/private Evolution Pack design but explicitly

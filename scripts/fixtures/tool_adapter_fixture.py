@@ -24,7 +24,7 @@ result = {
     "adapter_id": request["adapter_id"],
     "capability_id": request["capability_id"],
     "action_id": request["action_id"],
-    "state": "SUCCEEDED",
+    "state": "FAILED" if mode == "failed" else "SUCCEEDED",
     "summary": "fixture reconciled" if request.get("operation") == "reconcile" else "fixture complete",
     "output": output,
     "artifact_refs": [],

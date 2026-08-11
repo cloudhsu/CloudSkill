@@ -15,7 +15,7 @@ from tool_action_store import load_action  # noqa: E402
 FIXTURE = ROOT / "scripts/fixtures/tool_adapter_fixture.py"
 
 
-def registry(timeout: int = 1, maximum: int = 1024) -> dict:
+def registry(timeout: int = 1, maximum: int = 1024, attempts: int = 1) -> dict:
     return {
         "schema_version": 1,
         "protocol_version": "1.0",
@@ -31,11 +31,11 @@ def registry(timeout: int = 1, maximum: int = 1024) -> dict:
                 "allowed_root_refs": ["FIXTURE_ROOT"],
                 "secret_refs": ["FIXTURE_SECRET"],
                 "timeout_seconds": timeout,
-                "max_attempts": 1,
+                "max_attempts": attempts,
                 "idempotent": True,
                 "supports_reconciliation": True,
                 "max_output_bytes": maximum,
-                "argument_schema": {"type": "object", "additionalProperties": False, "required": ["repository", "mode"], "properties": {"repository": {"type": "string", "minLength": 1}, "mode": {"enum": ["success", "timeout", "malformed", "oversized", "leak", "no-change"]}}},
+                "argument_schema": {"type": "object", "additionalProperties": False, "required": ["repository", "mode"], "properties": {"repository": {"type": "string", "minLength": 1}, "mode": {"enum": ["success", "failed", "timeout", "malformed", "oversized", "leak", "no-change"]}}},
             }],
         }],
     }
@@ -177,6 +177,19 @@ with tempfile.TemporaryDirectory(prefix="cloudbox-tool-broker-") as temp_name:
     duplicate_result = execute_prepared(prepare_invocation(duplicate, registry(), context), root / "actions/act-00000007.json", context)
     if duplicate_result["state"] != "BLOCKED" or (root / "actions/act-00000007.json").exists():
         errors.append("duplicate idempotency key executed under a second action identity")
+
+    retry = invocation("failed")
+    retry["action_id"] = "act-00000008"
+    retry["idempotency_key"] = "idem-00000008"
+    retry_path = root / "actions/act-00000008.json"
+    retry_prepared = prepare_invocation(retry, registry(attempts=2), context)
+    first_failure = execute_prepared(retry_prepared, retry_path, context)
+    second_failure = execute_prepared(retry_prepared, retry_path, context)
+    exhausted = execute_prepared(retry_prepared, retry_path, context)
+    if first_failure["state"] != "FAILED" or second_failure["state"] != "FAILED" or exhausted["state"] != "BLOCKED":
+        errors.append("confirmed failure did not consume exactly the declared retry budget")
+    if load_action(retry_path)["attempt"] != 2:
+        errors.append("confirmed-failure retry attempt accounting drifted")
 
     no_change = invocation("no-change")
     no_change["action_id"] = "act-00000006"

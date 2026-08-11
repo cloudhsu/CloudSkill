@@ -87,7 +87,7 @@ with tempfile.TemporaryDirectory(prefix="cloudbox-git-adapter-") as temp_name:
     registry["adapters"][0]["provenance"]["sha256"] = hashlib.sha256(ADAPTER.read_bytes()).hexdigest()
     context = ExecutionContext(
         root_refs={"REPOSITORY_ROOT": root, "EVAL_INBOX_ROOT": root},
-        secret_values={"CLOUDSKILL_CONFIG_PATH": str(config_path)},
+        secret_values={"CLOUDSKILL_CONFIG_PATH": str(config_path), "SOURCE_REMOTE_URL": str(remote)},
         approved_authority={"git.fetch", "git.import_bundle"},
         repository_root=ROOT,
         owner_id="git-fixture-owner",
@@ -112,6 +112,20 @@ with tempfile.TemporaryDirectory(prefix="cloudbox-git-adapter-") as temp_name:
         errors.append("git.fetch did not update the registered remote-tracking ref")
     if git(["rev-parse", "HEAD"], clone) != before:
         errors.append("git.fetch changed the checked-out branch")
+
+    wrong_endpoint_context = ExecutionContext(
+        root_refs=context.root_refs,
+        secret_values={**context.secret_values, "SOURCE_REMOTE_URL": str(root / "not-authorized.git")},
+        approved_authority=context.approved_authority,
+        repository_root=ROOT,
+        owner_id=context.owner_id,
+        fencing_token=context.fencing_token,
+        now_epoch=context.now_epoch,
+    )
+    wrong_endpoint = invocation("git.fetch", 9, {"repository": "clone", "remote": "origin"}, "grant-000001")
+    wrong_result = execute_prepared(prepare_invocation(wrong_endpoint, registry, wrong_endpoint_context), root / "actions/wrong-endpoint.json", wrong_endpoint_context)
+    if wrong_result["state"] != "FAILED":
+        errors.append("git.fetch accepted a remote URL outside host authorization")
 
     reconcile_invocation = invocation("git.fetch", 4, {"repository": "clone", "remote": "origin"}, "grant-000001")
     reconcile_preparation = prepare_invocation(reconcile_invocation, registry, context)
@@ -142,6 +156,33 @@ with tempfile.TemporaryDirectory(prefix="cloudbox-git-adapter-") as temp_name:
     if observation["state"] != "UNCERTAIN" or load_action(observation_path)["state"] != "UNCERTAIN":
         errors.append("reconciliation observation failure was misclassified as terminal")
     git(["remote", "set-url", "origin", str(remote)], clone)
+
+    empty_remote = root / "empty.git"
+    empty_clone = root / "empty-clone"
+    git(["init", "--bare", str(empty_remote)])
+    git(["clone", str(empty_remote), str(empty_clone)])
+    empty_context = ExecutionContext(
+        root_refs=context.root_refs,
+        secret_values={**context.secret_values, "SOURCE_REMOTE_URL": str(empty_remote)},
+        approved_authority=context.approved_authority,
+        repository_root=ROOT,
+        owner_id=context.owner_id,
+        fencing_token=context.fencing_token,
+        now_epoch=context.now_epoch,
+    )
+    empty_invocation = invocation("git.fetch", 10, {"repository": "empty-clone", "remote": "origin"}, "grant-000001")
+    empty_preparation = prepare_invocation(empty_invocation, registry, empty_context)
+    empty_path = root / "actions/reconcile-empty-fetch.json"
+    uncertain = save_action_atomic(empty_path, empty_preparation.action, 0, owner_id=empty_context.owner_id, fencing_token=empty_context.fencing_token, now=empty_context.now_epoch)
+    uncertain = transition_action(uncertain, "AUTHORIZED", {"authority_grant_id": "grant-000001"})
+    uncertain = save_action_atomic(empty_path, uncertain, uncertain["revision"], owner_id=empty_context.owner_id, fencing_token=empty_context.fencing_token, now=empty_context.now_epoch)
+    uncertain = transition_action(uncertain, "RUNNING", {"adapter_version": "1.0.0"})
+    uncertain = save_action_atomic(empty_path, uncertain, uncertain["revision"], owner_id=empty_context.owner_id, fencing_token=empty_context.fencing_token, now=empty_context.now_epoch)
+    uncertain = transition_action(uncertain, "UNCERTAIN", {"reason": "fixture transport loss"})
+    save_action_atomic(empty_path, uncertain, uncertain["revision"], owner_id=empty_context.owner_id, fencing_token=empty_context.fencing_token, now=empty_context.now_epoch)
+    empty_result = reconcile_prepared(empty_preparation, empty_path, empty_context)
+    if empty_result["state"] != "SUCCEEDED" or empty_result["output"].get("status") != "OBSERVED_COMPLETE":
+        errors.append("empty remote/local ref sets were not reconciled as matching")
 
     bad = invocation("git.fetch", 3, {"repository": "clone", "remote": "unregistered"}, "grant-000001")
     result = execute_prepared(prepare_invocation(bad, registry, context), root / "actions/bad-fetch.json", context)

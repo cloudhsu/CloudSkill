@@ -66,6 +66,11 @@ python3 scripts/cloudskill_evolution.py tool invoke \
   --secret-ref CLOUDSKILL_CONFIG_PATH=CLOUDBOX_CONFIG_PATH
 ```
 
+`git.fetch` similarly requires
+`--secret-ref SOURCE_REMOTE_URL=CLOUDBOX_SOURCE_REMOTE`; the registered remote's
+resolved URL must exactly match that host-provided value before execution or
+reconciliation. This authorizes the endpoint, not merely a mutable remote name.
+
 The environment variable value is not written to the invocation, registry,
 action state, or model-visible result. Do not put a literal URL or credential
 after `--secret-ref`.
@@ -103,6 +108,9 @@ one action/input/file identity. After lease expiry, only a replacement owner wit
 a higher fencing token can claim the action. If reconciliation cannot observe
 the external system, the action remains `UNCERTAIN`; observation failure is not
 proof that the original side effect failed.
+
+A confirmed `FAILED` action may consume only its declared remaining retry
+budget. `RUNNING` or `UNCERTAIN` actions never enter that retry path.
 
 The lifecycle owner reads the plan revision and action checkpoint, preserves
 completed evidence, and chooses reconciliation, re-plan, architecture re-entry,
