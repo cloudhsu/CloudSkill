@@ -235,6 +235,19 @@ This is the operational entry point for a new conversation or coding agent that 
   `L1_CROSS_FAMILY_2X2` cells fresh beginning with GPT-5.4. Version remains 6.2.0
   and publication stays prohibited until the panel passes.
 
+### CloudBox 6.3 immutable-target first review correction (2026-08-11)
+
+- GPT-5.4 review of `86540d3` returned FAIL; remaining L1 cells were stopped.
+  Raw output is `.local/reviews/cloudbox-6.3/gpt-5.4-v2-r1.txt`, SHA-256
+  `abbd68c6b6a3c1b517ef82a96e903025daa948ba8627fcd7d58fb7e223c8186c`.
+- RED reproduced that interrupted `RUNNING` checkpoints could not reconcile,
+  plan revision/authority grant changes did not alter action identity, and an
+  invalid skipped bundle target was closed as successful.
+- GREEN allows `RUNNING` or `UNCERTAIN` reconciliation, fingerprints plan and
+  authority identity, transitions failed RUNNING observations to `UNCERTAIN`,
+  and returns `BLOCKED` for skipped prepared archives. Focused broker, Git, and
+  recovery validators pass. Complete-suite reruns and fresh L1 review remain.
+
 ### CloudBox 6.2.0 published and remotely verified (2026-08-11)
 
 - PR `#10` merged as `6be22cd`; annotated tag `v6.2.0` peels to that

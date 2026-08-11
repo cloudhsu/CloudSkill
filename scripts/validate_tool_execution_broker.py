@@ -11,7 +11,7 @@ sys.path.insert(0, str(ROOT / "scripts"))
 
 from tool_adapter_contract import canonical_target_digest  # noqa: E402
 from tool_execution_broker import ExecutionContext, execute_prepared, prepare_invocation, prepare_reconciliation, reconcile_prepared  # noqa: E402
-from tool_action_store import load_action  # noqa: E402
+from tool_action_store import load_action, save_action_atomic, transition_action  # noqa: E402
 
 FIXTURE = ROOT / "scripts/fixtures/tool_adapter_fixture.py"
 
@@ -169,6 +169,17 @@ with tempfile.TemporaryDirectory(prefix="cloudbox-tool-broker-") as temp_name:
                     errors.append("adapter-version drift failed for the wrong reason")
             else:
                 errors.append("reconciliation accepted adapter-version drift")
+            changed_plan = dict(value)
+            changed_plan["plan_revision"] = value["plan_revision"] + 1
+            changed_plan["authority_grant_id"] = "grant-replanned01"
+            changed_identity = prepare_reconciliation(changed_plan, registry(), later_context)
+            try:
+                reconcile_prepared(changed_identity, root / "actions" / f"act-0000000{index}.json", later_context)
+            except ValueError as exc:
+                if "conflicts" not in str(exc):
+                    errors.append("plan/authority drift failed for the wrong reason")
+            else:
+                errors.append("reconciliation accepted changed plan/authority identity")
             reconciliation_prepared = prepare_reconciliation(value, registry(), later_context)
             reconciled = reconcile_prepared(reconciliation_prepared, root / "actions" / f"act-0000000{index}.json", later_context)
             reconciled_state = load_action(root / "actions" / f"act-0000000{index}.json")
@@ -196,6 +207,20 @@ with tempfile.TemporaryDirectory(prefix="cloudbox-tool-broker-") as temp_name:
         errors.append("confirmed failure did not consume exactly the declared retry budget")
     if load_action(retry_path)["attempt"] != 2:
         errors.append("confirmed-failure retry attempt accounting drifted")
+
+    running = invocation("timeout")
+    running["action_id"] = "act-00000009"
+    running["idempotency_key"] = "idem-00000009"
+    running_path = root / "actions/act-00000009.json"
+    running_prepared = prepare_invocation(running, registry(), context)
+    running_state = save_action_atomic(running_path, running_prepared.action, 0, owner_id=context.owner_id, fencing_token=context.fencing_token, now=context.now_epoch)
+    running_state = transition_action(running_state, "AUTHORIZED", {"authority_grant_id": running_state["authority_grant_id"]})
+    running_state = save_action_atomic(running_path, running_state, running_state["revision"], owner_id=context.owner_id, fencing_token=context.fencing_token, now=context.now_epoch)
+    running_state = transition_action(running_state, "RUNNING", {"adapter_version": "1.0.0"})
+    save_action_atomic(running_path, running_state, running_state["revision"], owner_id=context.owner_id, fencing_token=context.fencing_token, now=context.now_epoch)
+    running_result = reconcile_prepared(running_prepared, running_path, context)
+    if running_result["state"] != "SUCCEEDED" or load_action(running_path)["state"] != "SUCCEEDED":
+        errors.append("interrupted RUNNING checkpoint could not reconcile")
 
     no_change = invocation("no-change")
     no_change["action_id"] = "act-00000006"

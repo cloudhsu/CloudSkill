@@ -105,7 +105,9 @@ def _execute(capability: str, arguments: dict[str, Any], targets: dict[str, Any]
         captured = io.StringIO()
         with contextlib.redirect_stdout(captured):
             totals = import_selected_archives(inbox, targets["items"], terms, bool(arguments.get("dry_run", False)))
-        return "SUCCEEDED", "versioned bundle import inspected", totals, ["local Eval Inbox import queues evaluated"]
+        state = "BLOCKED" if totals.get("skipped") else "SUCCEEDED"
+        summary = "prepared bundle target requires operator review" if state == "BLOCKED" else "versioned bundle import completed"
+        return state, summary, totals, ["local Eval Inbox import queues evaluated"]
     raise ValueError("unknown registered Git capability")
 
 

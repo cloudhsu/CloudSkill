@@ -251,6 +251,14 @@ with tempfile.TemporaryDirectory(prefix="cloudbox-git-adapter-") as temp_name:
         errors.append("same-name bundle replacement was not rejected before import")
     replacement.unlink()
 
+    invalid_archive = imports / "invalid.zip"
+    invalid_archive.write_bytes(b"not a valid bundle archive")
+    invalid_request = invocation("git.import_bundle", 12, {"inbox": "inbox", "dry_run": False}, "grant-000001")
+    invalid_result = execute_prepared(prepare_v2(invalid_request, registry, context), root / "actions/invalid.json", context)
+    if invalid_result["state"] != "BLOCKED" or not invalid_archive.is_file():
+        errors.append("skipped prepared bundle target was incorrectly closed as successful")
+    invalid_archive.unlink()
+
     totals = import_archives(inbox, ["PrivateFixtureTerm"], True)
     if totals.get("archives") != 0:
         errors.append("manual import compatibility function changed empty-inbox behavior")

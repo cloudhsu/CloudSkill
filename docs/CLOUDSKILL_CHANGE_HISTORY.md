@@ -174,6 +174,17 @@ isolation. The complete deterministic suite passes twice consecutively. This is
 implementation evidence only; version synchronization and publication remain
 gated on a fresh exact-tip L1 cross-family 2x2 review.
 
+## 2026-08-11 — First immutable-target review correction
+
+The first fresh GPT-5.4 cell found three recovery/identity gaps and stopped the
+panel. An interrupted checkpoint persisted at `RUNNING` had no reconciliation
+entry, replan or authority-grant changes were absent from `input_hash`, and a
+syntactically invalid prepared bundle could remain pending while the action
+reported success. RED/GREEN now permits RUNNING reconciliation, binds plan and
+grant identity, moves uncertain RUNNING observations into `UNCERTAIN`, and
+classifies skipped archives as `BLOCKED`. Focused evidence passes; complete
+regression and a fresh panel remain required.
+
 ## 2026-08-11 — Public/private package split deferred
 
 The user retained the public Core/private Evolution Pack design but explicitly

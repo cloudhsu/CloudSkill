@@ -130,6 +130,9 @@ def prepare_invocation(invocation: dict[str, Any], registry: dict[str, Any], con
         "secrets": secret_fingerprints,
         "adapter_version": adapter["adapter_version"],
         "adapter_provenance_sha256": provenance["sha256"],
+        "plan_id": invocation["plan_id"],
+        "plan_revision": invocation["plan_revision"],
+        "authority_grant_id": invocation["authority_grant_id"],
     }
     input_hash = hashlib.sha256(json.dumps(identity, sort_keys=True).encode("utf-8")).hexdigest()
     action = {
@@ -341,8 +344,8 @@ def execute_prepared(prepared: PreparedInvocation, action_path: Path, context: E
 
 def reconcile_prepared(prepared: PreparedInvocation, action_path: Path, context: ExecutionContext) -> dict[str, Any]:
     action = load_action(action_path)
-    if action.get("state") != "UNCERTAIN":
-        raise ValueError("only UNCERTAIN actions require reconciliation")
+    if action.get("state") not in {"RUNNING", "UNCERTAIN"}:
+        raise ValueError("only RUNNING or UNCERTAIN actions require reconciliation")
     if not prepared.capability.get("supports_reconciliation"):
         raise ValueError("capability does not support reconciliation")
     if (
@@ -357,8 +360,11 @@ def reconcile_prepared(prepared: PreparedInvocation, action_path: Path, context:
     action = _append_target_evidence(action, prepared, result)
     reconciliation = {"result_hash": result["output_hash"], "state": result["state"], "diagnostics": result["diagnostics"]}
     if result["state"] == "UNCERTAIN":
-        action = json.loads(json.dumps(action))
-        action.setdefault("evidence", []).append({"target_state": "UNCERTAIN", "reconciliation": reconciliation})
+        if action["state"] == "RUNNING":
+            action = transition_action(action, "UNCERTAIN", {"reconciliation": reconciliation})
+        else:
+            action = json.loads(json.dumps(action))
+            action.setdefault("evidence", []).append({"target_state": "UNCERTAIN", "reconciliation": reconciliation})
     else:
         action = transition_action(action, result["state"], {"reconciliation": reconciliation})
     save_action_atomic(action_path, action, action["revision"], **persistence)
