@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "CloudBox controlled tool result",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contract_version", "adapter_id", "capability_id", "action_id", "state", "summary", "output", "artifact_refs", "observed_side_effects", "diagnostics", "output_hash", "latency_ms", "model_calls"],
+  "properties": {
+    "contract_version": {"const": "1.0"},
+    "adapter_id": {"type": "string", "pattern": "^[a-z][a-z0-9._-]{2,63}$"},
+    "capability_id": {"type": "string", "pattern": "^[a-z][a-z0-9._-]{2,63}$"},
+    "action_id": {"type": "string", "pattern": "^act-[a-z0-9][a-z0-9-]{7,63}$"},
+    "state": {"enum": ["SUCCEEDED", "FAILED", "UNCERTAIN", "BLOCKED"]},
+    "summary": {"type": "string", "maxLength": 1024},
+    "output": {"type": "object", "maxProperties": 64},
+    "artifact_refs": {"type": "array", "maxItems": 32, "items": {"type": "string", "maxLength": 512}},
+    "observed_side_effects": {"type": "array", "maxItems": 32, "items": {"type": "string", "maxLength": 512}},
+    "diagnostics": {"type": "array", "maxItems": 32, "items": {"type": "string", "maxLength": 1024}},
+    "output_hash": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "latency_ms": {"type": "integer", "minimum": 0},
+    "model_calls": {"type": "integer", "minimum": 0}
+  }
+}

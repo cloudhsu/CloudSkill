@@ -1,0 +1,57 @@
+{
+  "schema_version": 1,
+  "protocol_version": "1.0",
+  "adapters": [
+    {
+      "adapter_id": "git-local",
+      "adapter_version": "1.0.0",
+      "transport": "local-cli",
+      "provenance": {
+        "kind": "repository-script",
+        "path": "scripts/git_tool_adapter.py",
+        "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+      },
+      "capabilities": [
+        {
+          "capability_id": "git.inspect",
+          "risk": "read-only",
+          "required_authority": [],
+          "allowed_root_refs": ["REPOSITORY_ROOT"],
+          "secret_refs": [],
+          "timeout_seconds": 30,
+          "max_attempts": 1,
+          "idempotent": true,
+          "supports_reconciliation": false,
+          "max_output_bytes": 4096,
+          "argument_schema": {"type": "object", "additionalProperties": false, "required": ["repository"], "properties": {"repository": {"type": "string", "minLength": 1, "maxLength": 128}}}
+        },
+        {
+          "capability_id": "git.fetch",
+          "risk": "local-mutating",
+          "required_authority": ["git.fetch"],
+          "allowed_root_refs": ["REPOSITORY_ROOT"],
+          "secret_refs": [],
+          "timeout_seconds": 120,
+          "max_attempts": 2,
+          "idempotent": true,
+          "supports_reconciliation": true,
+          "max_output_bytes": 4096,
+          "argument_schema": {"type": "object", "additionalProperties": false, "required": ["repository", "remote"], "properties": {"repository": {"type": "string", "minLength": 1, "maxLength": 128}, "remote": {"type": "string", "pattern": "^[A-Za-z0-9._-]{1,64}$"}}}
+        },
+        {
+          "capability_id": "git.import_bundle",
+          "risk": "local-mutating",
+          "required_authority": ["git.import_bundle"],
+          "allowed_root_refs": ["EVAL_INBOX_ROOT"],
+          "secret_refs": [],
+          "timeout_seconds": 120,
+          "max_attempts": 1,
+          "idempotent": true,
+          "supports_reconciliation": true,
+          "max_output_bytes": 8192,
+          "argument_schema": {"type": "object", "additionalProperties": false, "required": ["inbox"], "properties": {"inbox": {"type": "string", "minLength": 1, "maxLength": 128}, "dry_run": {"type": "boolean"}}}
+        }
+      ]
+    }
+  ]
+}
