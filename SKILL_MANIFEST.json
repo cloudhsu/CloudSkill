@@ -11,7 +11,7 @@
       "name": "application-client-server-architecture",
       "description": "Use when an application crosses client/server, API, persistence, identity, transaction, state-authority, data-history, deployment, or operational boundaries.",
       "path": ".agents/skills/application-client-server-architecture/SKILL.md",
-      "file_count": 6
+      "file_count": 7
     },
     {
       "name": "architecture-review",

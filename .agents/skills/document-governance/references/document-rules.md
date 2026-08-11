@@ -15,6 +15,18 @@ Include as appropriate:
 - Classification.
 - Superseded document.
 
+For historical evidence, keep container and observation provenance separate:
+
+- **Container version** identifies the report, template, export, or package.
+- **Observation version** identifies the system, product, schema, firmware, or
+  other subject actually observed when the evidence was captured.
+- **Transformation provenance** identifies later normalization, aggregation,
+  or presentation changes without rewriting the original observation.
+
+A later container revision or edit time does not update the version or time of
+the fact it contains. If observation applicability was not captured, mark it
+unknown; do not inherit the container version.
+
 ## Normative Language
 
 Use:

@@ -93,6 +93,33 @@
         "agent provides a target diagram but no safe path"
       ],
       "review_notes": "Review semantic relationships, authority, lifecycle, failure behavior, and evidence; keyword presence alone is insufficient."
+    },
+    {
+      "id": "REF-BEH-005",
+      "skill": "safe-incremental-refactoring",
+      "type": "application",
+      "prompt": "Extract a small policy from a legacy service whose tests monkeypatch a method, whose constructor eagerly opens an external client, and whose HTTP façade currently performs authentication before calling the service.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "chooses an extraction seam from the pressure rather than mechanically adding a class",
+        "preserves a stable monkeypatch or fault-injection seam without freezing unrelated internals",
+        "keeps external dependency creation lazy or injectable so import and unit tests remain isolated",
+        "keeps authentication and authorization at their authoritative boundary while passing only the identity or capability the extracted policy requires"
+      ],
+      "forbidden_behaviors": [
+        "moves authentication into a pure policy component",
+        "opens the external client during module import or every unit-test construction",
+        "removes the test seam before equivalent fault-injection evidence exists"
+      ],
+      "required_artifacts": [
+        "extraction decision table",
+        "characterization and fault-injection test shape"
+      ],
+      "baseline_expected_failure": [
+        "existing guidance lists seams and narrow ports but does not jointly decide seam, test shape, dependency bootstrap and authentication ownership"
+      ],
+      "review_notes": "Review whether each pressure changes the extraction boundary and tests; keyword presence alone is insufficient."
     }
   ]
 }

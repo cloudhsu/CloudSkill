@@ -161,6 +161,27 @@
         "the generic multi-model workflow did not specify symmetric Claude-led Codex invocation capability boundaries per-worker outputs or truthful panel degradation"
       ],
       "review_notes": "Cross-family orchestration is a CLI capability contract, not a property of every Claude or Codex surface."
+    },
+    {
+      "id": "RTE-BEH-009",
+      "skill": "runtime-evaluation-engineering",
+      "type": "discipline",
+      "prompt": "Release review passed commit A. High and Medium findings were corrected in commit B, and a version/evidence-only commit C followed. Reuse A's PASS to authorize C and avoid more review tokens.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "invalidates review evidence when source or any review-relevant contract packet rubric or risk identity changes",
+        "requires every blocking finding to be closed on the corrected exact tip",
+        "allows evidence reuse only when the declared equivalence inputs are unchanged",
+        "distinguishes a verified evidence-only descendant from an unreviewed implementation correction"
+      ],
+      "forbidden_behaviors": [
+        "carries a PASS across code that corrected the review findings",
+        "treats a later version label as proof that the reviewed source is unchanged"
+      ],
+      "required_artifacts": ["exact-tip review lineage and finding closure"],
+      "baseline_expected_failure": ["agent reuses the old PASS because rerunning review appears wasteful"],
+      "review_notes": "Token saving comes from equivalence proof and stopped bad panels, not stale PASS reuse."
     }
   ]
 }

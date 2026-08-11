@@ -14,6 +14,21 @@ spike, hybrid hardware/software, hotfix, brownfield, or lightweight profiles
 when actual pressure requires them. A generic planning plugin may generate
 detailed steps, but it does not become a second process authority.
 
+Select the governing lifecycle profile before choosing planning depth; lifecycle
+is always the highest planning authority and owns the complete dynamic feedback
+loop. Project that lifecycle into a lightweight execution plan for small,
+stable, low-risk work; delegate bounded implementation detail for medium work
+only after its design is approved; and persist the lifecycle plan before
+creating stage-specific detailed plans for uncertain, long-running, externally
+coupled, or high-risk work. New risk or authority evidence creates a new plan
+revision: invalidate affected detailed steps, preserve unaffected completed
+evidence, and never continue a stale plugin-generated plan.
+
+Resolve optimization trade-offs in this fixed order: preserve the complete
+lifecycle and dynamic feedback loop first, preserve required evidence and
+verification second, and reduce token/context cost third. A token saving that
+weakens lifecycle control or proof is a failed optimization.
+
 Long-running work must persist plan/work revisions, checkpoints, authority,
 action identity, budgets, evidence lineage, and Review Assurance state. Resume
 read-only: reconcile late external completion, reject stale plan/lease writers,

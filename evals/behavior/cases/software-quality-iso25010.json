@@ -68,8 +68,8 @@
       ],
       "review_notes": "Review semantic relationships, evidence, and omissions; keyword presence alone is insufficient."
     },
-    {
-      "id": "ISO-BEH-004",
+        {
+            "id": "ISO-BEH-004",
       "skill": "software-quality-iso25010",
       "type": "application",
       "prompt": "Define release gates for a config-driven distributed equipment prototype moving from simulated IO to real chamber hardware.",
@@ -90,7 +90,34 @@
       "baseline_expected_failure": [
         "agent lists ISO characteristics but no executable evidence"
       ],
-      "review_notes": "Review semantic relationships, authority, lifecycle, failure behavior, and evidence; keyword presence alone is insufficient."
-    }
+            "review_notes": "Review semantic relationships, authority, lifecycle, failure behavior, and evidence; keyword presence alone is insufficient."
+        },
+        {
+            "id": "ISO-BEH-005",
+            "skill": "software-quality-iso25010",
+            "type": "application",
+            "prompt": "Define release evidence for a real-time native application whose emulator tests pass but whose decisions combine asynchronous sensor and command results on several supported builds.",
+            "expected_routing": true,
+            "expected_alternative_skill": null,
+            "required_behaviors": [
+                "defines freshness, timestamp-domain, correlation and maximum-skew criteria at the decision point",
+                "preserves denominators and reports stale, missing, duplicate and out-of-order samples separately",
+                "distinguishes emulator evidence from native platform, architecture, build-mode and hardware evidence",
+                "defines a risk-based release matrix with explicit unsupported cells, owners and hard or conditional gates"
+            ],
+            "forbidden_behaviors": [
+                "uses average latency alone to prove real-time alignment",
+                "treats emulator success as evidence for native ABI, timing or device behavior",
+                "silently removes failing or unexecuted matrix cells from the denominator"
+            ],
+            "required_artifacts": [
+                "freshness and correlation quality scenarios",
+                "native release evidence matrix"
+            ],
+            "baseline_expected_failure": [
+                "agent reports throughput and emulator pass rate without decision-time correlation or native matrix evidence"
+            ],
+            "review_notes": "Use system-specific thresholds supplied by the project; do not invent timing or safety limits."
+        }
   ]
 }

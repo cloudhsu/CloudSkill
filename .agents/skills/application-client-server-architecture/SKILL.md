@@ -13,6 +13,7 @@ Read:
 - `references/full-stack-boundaries.md`
 - `references/client-server-checklist.md`
 - `references/production-small-system-case.md`
+- `references/durable-state-contracts.md`
 
 ## Workflow
 

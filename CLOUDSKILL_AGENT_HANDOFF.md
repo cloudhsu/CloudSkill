@@ -15,6 +15,40 @@ This is the operational entry point for a new conversation or coding agent that 
 
 ## Current repository state
 
+### Developing Skills token-refactor candidate (2026-08-11)
+
+- `developing-skills` now uses explicit progressive disclosure: its default
+  main file fell from 15,062 to 7,662 UTF-8 bytes while mandatory lifecycle,
+  privacy, manual-review, and evidence safeguards remained default-loaded.
+- Focused semantic forward tests passed 6/6 for Skill evolution and 1/1 for
+  proportional planning. Provider-backed Runtime Eval remains `NOT RUN`.
+- `development-process-tailoring` is the single, highest Plan Owner. It selects
+  the lifecycle profile first, then projects lightweight or bounded detailed
+  planning inside that dynamic lifecycle according to risk.
+- Fixed optimization order: lifecycle/dynamic loop, then evidence/verification,
+  then token/context savings. Lower priorities may not weaken higher ones.
+- The complete deterministic suite passed after two information-loss
+  regressions were found and corrected. Evidence is in
+  `docs/evolution/2026-08-11-developing-skills-token-refactor-evidence.md`.
+- Exact-tip `ed9fca6` independent review passed with no High/Medium findings.
+  Do not version, push, merge, or release before user approval.
+
+### Inbox/session Skill optimization candidate (2026-08-11)
+
+- Branch `feat/cloudbox-skill-optimization` converts 45 private review records
+  and current-session evidence into deduplicated owner changes without removing
+  the manual review/legacy path.
+- Eight owner Skills have targeted intake, native, framework, quality,
+  refactoring, durable-state, and document-provenance changes. Existing process,
+  release, plugin, and token behavior that passed no-Skill baselines was not
+  duplicated.
+- Accounting is in
+  `docs/evolution/2026-08-11-inbox-session-optimization-accounting.md`.
+- Combined targeted semantic GREEN passed 10/10 with no High/Medium boundary
+  omission, and the integrated deterministic suite passed twice. Independent
+  exact-tip review passed with no High/Medium findings. The candidate is ready
+  for user review before any version, push, or release action.
+
 ### CloudBox 6.3.0 published and remotely verified (2026-08-11)
 
 - PR `#13` merged as `65e89b3`; annotated tag `v6.3.0` peels to that merge.

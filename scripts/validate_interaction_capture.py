@@ -9,6 +9,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+from types import SimpleNamespace
 import zipfile
 
 # Loading capture_eval_candidate.py/export_eval_candidate.py below via
@@ -201,6 +202,27 @@ if not export_script_path.is_file():
     fail('missing portable export asset: .agents/skills/developing-skills/assets/export_eval_candidate.py')
 if not import_script_path.is_file():
     fail('missing Eval Inbox import tool: scripts/import_eval_candidates.py')
+
+if import_script_path.is_file():
+    import_module = load_module('cloudskill_import_eval_candidates', import_script_path)
+    with tempfile.TemporaryDirectory(prefix='cloudskill-explicit-inbox-policy-') as tmp_name:
+        tmp = Path(tmp_name)
+        owned_inbox = (tmp / 'owned-inbox').resolve()
+        terms_path = tmp / 'private-terms.txt'
+        terms_path.write_text('private-marker\n', encoding='utf-8')
+        config_path = tmp / 'config.json'
+        config_path.write_text(json.dumps({
+            'schema_version': '1.0', 'cloudskill_version': '6.3.0',
+            'cloudskill_repository': str(ROOT), 'eval_inbox': str(owned_inbox),
+            'sensitive_terms_path': str(terms_path), 'default_sanitization': True,
+            'save_raw_transcript': False, 'auto_modify_skills': False,
+            'auto_commit': False, 'auto_push': False,
+        }), encoding='utf-8')
+        resolved_inbox, resolved_terms = import_module.resolve_inbox(SimpleNamespace(
+            eval_inbox=str(owned_inbox), config=str(config_path), dry_run=False,
+        ))
+        if resolved_inbox != owned_inbox or resolved_terms != ['private-marker']:
+            fail('explicit Eval Inbox did not preserve its owning config private-term policy')
 
 if export_script_path.is_file():
     capture_module = load_module('cloudskill_capture_eval_candidate', ROOT / 'scripts/capture_eval_candidate.py')

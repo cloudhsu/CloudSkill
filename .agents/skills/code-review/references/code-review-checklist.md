@@ -15,6 +15,7 @@
 
 - Are message boundaries explicit?
 - Is partial read/write handled?
+- Before decoding a binary field, are declared lengths and offsets bounded, and are byte order, signedness, width, and alignment explicit rather than inferred from representative messages?
 - Is correlation identity validated?
 - Are duplicate, delayed, malformed, or out-of-order messages handled?
 - Are disconnect and reconnect transitions explicit?
@@ -25,6 +26,7 @@
 ## Resource Lifetime
 
 - Who owns streams, sockets, handles, timers, threads, tasks, buffers, and native resources?
+- Does every worker have an owner, cancellation and wake-up path, and bounded join before dependencies are destroyed? Treat detach/fire-and-forget as an explicit lifetime transfer, not as cleanup.
 - Can dispose race with active operations?
 - Are event handlers detached?
 - Can background work retain dead objects?
@@ -51,6 +53,7 @@
 
 - Is UI-thread affinity respected?
 - Is long-running work kept off the UI thread?
+- Are transport connected, protocol ready, command accepted, correlated completion, and authoritative readback represented as different states where the system exposes those boundaries?
 - Does the UI reflect authoritative state rather than optimistic local state?
 - Are operator commands validated against current equipment state?
 - Is manual intervention represented in the state model?

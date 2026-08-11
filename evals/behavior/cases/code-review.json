@@ -48,8 +48,8 @@
       ],
       "review_notes": "Review semantic relationships, evidence, and omissions; keyword presence alone is insufficient."
     },
-    {
-      "id": "CR-BEH-003",
+        {
+            "id": "CR-BEH-003",
       "skill": "code-review",
       "type": "counterexample",
       "prompt": "Design a reusable command/state/device framework for several products.",
@@ -66,7 +66,33 @@
       "baseline_expected_failure": [
         "agent uses code-review for a greenfield framework design"
       ],
-      "review_notes": "Review semantic relationships, evidence, and omissions; keyword presence alone is insufficient."
-    }
+            "review_notes": "Review semantic relationships, evidence, and omissions; keyword presence alone is insufficient."
+        },
+        {
+            "id": "CR-BEH-004",
+            "skill": "code-review",
+            "type": "application",
+            "prompt": "Review a binary-protocol worker that decodes fields successfully in most messages, reports connected as ready, and detaches its thread during shutdown.",
+            "expected_routing": true,
+            "expected_alternative_skill": null,
+            "required_behaviors": [
+                "checks byte order, signedness, field offsets, declared lengths and bounds before decoding",
+                "requires owned joinable shutdown with cancellation, wake-up and a bounded join before dependent resources are destroyed",
+                "distinguishes transport connected, protocol ready, command accepted, correlated completion and physical readback"
+            ],
+            "forbidden_behaviors": [
+                "accepts representative parser examples without boundary and malformed-frame tests",
+                "treats a detached worker as safe merely because process exit eventually reclaims it",
+                "equates a live connection with operation completion"
+            ],
+            "required_artifacts": [
+                "ranked correctness findings",
+                "boundary and shutdown tests"
+            ],
+            "baseline_expected_failure": [
+                "agent reviews happy-path decoding but misses byte-order, lifetime and readiness-state ambiguity"
+            ],
+            "review_notes": "Keep protocol constants generic; review ordering, ownership and state semantics rather than inventing a wire format."
+        }
   ]
 }

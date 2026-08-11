@@ -57,6 +57,20 @@ Watch for:
 - Frameworks that require copying internal code to support a new product.
 - A generic core that is harder to understand than each duplicated product implementation.
 
+## Capability and Registry Contracts
+
+When implementations use different transports, define the reusable contract in
+terms of product capabilities, then attach transport-specific limits, lifecycle,
+error and cancellation semantics. Do not erase a difference that affects what a
+caller may safely request or conclude.
+
+If discovery or registration is an authoritative contract, name one source,
+one shared executable adapter, and every required consumer. Match the closest
+existing authoritative-contract pattern: test positive propagation so a new
+entry reaches every consumer without copied edits, and inject negative drift so
+a copied registry, switch or stale consumer is rejected. A centralized file
+without both mutation directions is only a proposed authority.
+
 ## Success Criteria
 
 A framework is successful when:

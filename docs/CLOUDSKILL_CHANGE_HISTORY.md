@@ -2,6 +2,47 @@
 
 This document records the evolution rationale and evidence chain for work that may span multiple conversations. Git commits and tags remain the authoritative source history.
 
+## 2026-08-11 — Token-refactor exact-tip review passed
+
+Independent exact-tip review passed at `ed9fca6` after two Medium evidence
+findings were corrected. The evidence record now identifies static/manual
+semantic method, independent reviewers, exact source tips, per-case
+dispositions, and provider-backed Runtime Eval as `NOT RUN`. Deterministic
+priority validation now checks both the positive sole-Plan-Owner declaration
+and negative owner-removal mutation, in addition to lifecycle-first,
+evidence-second, token-third ordering and retained intake safeguards. No
+High/Medium findings remained; version, push, merge, and release stay pending
+user authorization.
+
+## 2026-08-11 — Developing Skills context and planning authority pilot
+
+The user approved a token-oriented progressive-disclosure pilot for
+`developing-skills` and a bounded clarification of Plan Owner composition. The
+main Skill was reduced by about half in UTF-8 bytes while conditional capture,
+mining, and lifecycle mechanics remained in directly routed references. Full
+regression exposed two universal invariants that could not safely move out of
+default context—lifecycle markers and manual/raw-transcript safeguards—and both
+were restored before the suite passed. `development-process-tailoring` now
+chooses planning depth by risk while generic detailed-planning tools remain
+subordinate. Lifecycle is selected first for every planned increment so the
+complete feedback/replan loop remains authoritative even when the resulting
+execution plan is lightweight. The user fixed the priority as lifecycle first,
+evidence and verification second, and token reduction third. Exact measurements
+and truthful status are in
+`docs/evolution/2026-08-11-developing-skills-token-refactor-evidence.md`.
+
+## 2026-08-11 — Inbox and session optimization owner pass
+
+The user authorized formal optimization of the imported review Inbox and the
+current session, with token conservation as an explicit quality constraint.
+Forty-five private records were deduplicated into thirty generalized pressures.
+Owner audits avoided changes where baseline behavior already complied and made
+targeted changes only for demonstrated intake, native/code/framework, quality,
+brownfield, durable-state, and document-provenance gaps. The manual review,
+unsupported, and legacy recovery paths remain part of the product until the
+exchange format is separately declared stable. Detailed sanitized accounting is
+in `docs/evolution/2026-08-11-inbox-session-optimization-accounting.md`.
+
 ## 2026-08-11 — CloudBox 6.3.0 publication verified
 
 PR `#13` merged the reviewed manual-only Eval ZIP exchange into `main` as

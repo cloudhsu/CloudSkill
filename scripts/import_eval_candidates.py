@@ -119,7 +119,24 @@ def parse_args() -> argparse.Namespace:
 def resolve_inbox(args: argparse.Namespace) -> tuple[Path, list[str]]:
     terms: list[str] = []
     if args.eval_inbox:
-        return Path(args.eval_inbox).expanduser().resolve(), terms
+        inbox = Path(args.eval_inbox).expanduser().resolve()
+        config_paths = []
+        if args.config:
+            config_paths.append(Path(args.config).expanduser().resolve())
+        else:
+            project_config = find_project_config(ROOT)
+            if project_config is not None:
+                config_paths.append(project_config)
+            config_paths.append(Path.home() / ".cloudskill" / "config.json")
+        for config_path in config_paths:
+            if not config_path.is_file():
+                continue
+            try:
+                terms = resolve_private_terms(inbox, config_path)
+            except (OSError, ValueError, KeyError):
+                continue
+            return inbox, terms
+        return inbox, terms
     try:
         config_path = Path(args.config).expanduser().resolve() if args.config else find_project_config(ROOT)
         if config_path is None:

@@ -79,6 +79,8 @@ confidence through repeated prose.
 2. **Deduplicate and establish RED.** The coordinator clusters equivalent
    candidates, rejects project-only preferences, selects the authoritative
    owner, and runs or records a repeatable failure before any Skill edit.
+   Perform deterministic hash/metadata filtering before model calls and pass
+   only representative mechanisms plus source counts into model context.
 3. **Create one minimal patch.** One patch author changes the smallest owner.
    Do not create four competing Skill rewrites and select the most eloquent.
 4. **Blind the evaluation.** Judges receive randomized before/after outputs,
@@ -96,6 +98,12 @@ confidence through repeated prose.
    adjacent regressions to remain GREEN, and evidence cost to stay reasonable.
    Multi-model approval without executable before/after evidence is
    `MANUAL_REQUIRED`, not proof of improvement.
+
+Stop additional review calls when one worker reports a blocking finding. Fix
+the candidate, change its source hash, and restart only the assurance cells the
+policy requires for the new exact tip. Reuse evidence only when source,
+contract, packet, rubric, and risk are equivalent; repeated prose is not
+independent evidence and unchanged waiting is not progress.
 
 Record model/version, roles, prompt and source hashes, independent verdicts,
 disagreements, adjudication, token/latency cost when available, and the stop

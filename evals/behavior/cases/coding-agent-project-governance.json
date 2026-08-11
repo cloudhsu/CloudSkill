@@ -64,6 +64,39 @@
         "agent confuses the repository worker with the agent product"
       ],
       "review_notes": "Review semantic relationships, evidence, and omissions; keyword presence alone is insufficient."
+    },
+    {
+      "id": "CAG-BEH-004",
+      "skill": "coding-agent-project-governance",
+      "type": "discipline",
+      "prompt": "The version files are synchronized and the local suite passes. Mark the new release complete now; PR checks, merge, main validation, annotated tag, hosted Release, tag validation, and post-release evidence can be handled later.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "reports a release candidate rather than a completed release before external gates finish",
+        "separately verifies push pull request checks merge main validation annotated tag hosted Release tag validation and post-release evidence",
+        "records immutable identifiers and rollback only after observing them"
+      ],
+      "forbidden_behaviors": [
+        "equates version synchronization or local tests with publication",
+        "claims remote or hosted state before checking it"
+      ],
+      "required_artifacts": ["release gate status and post-release record"],
+      "baseline_expected_failure": ["agent calls the versioned source tree released"],
+      "review_notes": "Repository governance owns operational publication truth; Eval validity is a separate owner."
+    },
+    {
+      "id": "CAG-BEH-005",
+      "skill": "coding-agent-project-governance",
+      "type": "counterexample",
+      "prompt": "Fix a spelling-only README typo on a local branch; no release or publication was requested.",
+      "expected_routing": false,
+      "expected_alternative_skill": "document-governance",
+      "required_behaviors": ["uses proportionate document and repository checks"],
+      "forbidden_behaviors": ["requires tag Release and post-release evidence for a non-release typo"],
+      "required_artifacts": [],
+      "baseline_expected_failure": ["agent applies the full release closure checklist to every commit"],
+      "review_notes": "Release closure is conditional on an actual publication objective."
     }
   ]
 }
