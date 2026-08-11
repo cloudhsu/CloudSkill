@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Reduce the default-loaded size of `developing-skills` while preserving its routing, privacy, intake, RED/GREEN, manual-exchange, and release behavior.
+**Goal:** Reduce the default-loaded size of `developing-skills` while preserving its behavior, and clarify how the CloudBox Plan Owner proportionally delegates detailed planning without surrendering authority.
 
 **Architecture:** Keep universal decisions and safeguards in `SKILL.md`; place conditional mechanics in direct, explicitly routed references. A deterministic validator measures the main file and proves every moved contract remains reachable from a named workflow before semantic and full-suite regression.
 
@@ -15,6 +15,7 @@
 - Preserve privacy, evidence-truth, RED/GREEN, authoritative-owner, and stop conditions in default-loaded text when they apply to every workflow.
 - Report provider-backed Runtime Eval as `NOT RUN` unless it is actually executed.
 - Treat token counts as comparative estimates, not provider billing measurements.
+- Keep `development-process-tailoring` as the only lifecycle/plan authority; generic planning tools produce bounded details only.
 
 ---
 
@@ -122,7 +123,47 @@ git add .agents/skills/developing-skills SKILL_MANIFEST.json
 git commit -m "refactor: reduce developing skill context cost"
 ```
 
-### Task 3: Evidence, full regression, and review
+### Task 3: Proportional planning composition
+
+**Files:**
+- Modify: `evals/behavior/cases/development-process-tailoring.json`
+- Modify: `.agents/skills/development-process-tailoring/SKILL.md`
+- Modify: `.agents/skills/development-process-tailoring/lifecycle.json`
+- Modify: `SKILL_MANIFEST.json`
+
+**Interfaces:**
+- Consumes: existing lifecycle plan, risk/replan, resume, and review-assurance contracts.
+- Produces: one authoritative proportional-planning rule and focused Behavior evidence.
+
+- [ ] **Step 1: Add RED behavior cases**
+
+Add cases requiring lightweight planning for small stable work, bounded detailed
+planning for an approved medium increment, and lifecycle-first stage planning
+for uncertain/high-risk work. Require new risk to invalidate only affected
+detailed steps while preserving unaffected evidence. Forbid dual plan authority.
+
+- [ ] **Step 2: Verify RED**
+
+Run the cases without the proposed Skill change and record the exact omission.
+If baseline behavior already satisfies every case, mark the change
+`NO_CHANGE_JUSTIFIED` and do not add duplicate prose.
+
+- [ ] **Step 3: Make the minimum GREEN change**
+
+Only if RED is demonstrated, add one compact proportional-planning section to
+`development-process-tailoring` and register its cases in lifecycle evidence.
+
+- [ ] **Step 4: Verify and commit independently**
+
+```bash
+python3 scripts/validate_behavior_evals.py
+python3 scripts/manage_skill.py audit --check
+python3 scripts/validate_pack.py
+git add .agents/skills/development-process-tailoring evals/behavior/cases/development-process-tailoring.json SKILL_MANIFEST.json
+git commit -m "feat: tailor detailed planning by risk"
+```
+
+### Task 4: Evidence, full regression, and review
 
 **Files:**
 - Create: `docs/evolution/2026-08-11-developing-skills-token-refactor-evidence.md`
@@ -132,7 +173,7 @@ git commit -m "refactor: reduce developing skill context cost"
 
 **Interfaces:**
 - Consumes: before/after metrics, structural results, semantic verdicts, and exact source tip.
-- Produces: reviewable candidate evidence and continuation state.
+- Produces: reviewable candidate evidence and continuation state for both independent increments.
 
 - [ ] **Step 1: Record comparative evidence**
 

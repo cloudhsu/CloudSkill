@@ -10,11 +10,35 @@ release truthfulness.
 
 ## Scope
 
-This increment is a single-Skill pilot. It may reorganize
+The primary increment is a single-Skill pilot. It may reorganize
 `.agents/skills/developing-skills/SKILL.md` and its existing direct references,
 plus Behavior cases, lifecycle evidence, validators, manifest, and handoff
-records required to prove the refactor. It does not refactor other large Skills,
-change the manual ZIP/legacy workflow, version the product, push, or release.
+records required to prove the refactor. A second bounded increment may clarify
+the existing `development-process-tailoring` Plan Owner contract and its
+composition with a generic detailed-planning plugin. It does not refactor other
+large Skills, change the manual ZIP/legacy workflow, version the product, push,
+or release.
+
+## Planning authority composition
+
+`development-process-tailoring` remains the sole lifecycle and plan authority.
+It selects the lifecycle profile, stages, gates, risk response, plan revision,
+resume behavior, and review assurance. A generic tool such as `writing-plans`
+may produce detailed implementation work packages only within that selected
+profile and current plan revision.
+
+Use proportional planning:
+
+- small, stable, low-risk work uses a lightweight execution plan;
+- medium work with an approved stable design may use a detailed writing-plan;
+- uncertain, long-running, externally coupled, or high-risk work uses the
+  CloudBox lifecycle plan first and creates detailed plans only per bounded
+  stage.
+
+New evidence or risk invalidates affected detailed steps through a CloudBox
+replan. Preserve completed unaffected evidence. Never allow a generic planning
+plugin to become a second authority or force heavyweight artifacts on trivial
+work.
 
 ## Content boundary
 
@@ -92,4 +116,5 @@ at disproportionate maintenance cost.
 Commit the pilot as an independently reviewable candidate on the existing
 feature branch. Present evidence before any version, push, merge, or release.
 Other Skills over 200 lines remain future candidates and require their own
-evidence before applying this pattern.
+evidence before applying this pattern. The bounded Plan Owner clarification is
+committed and reviewed independently from the content-refactor pilot.
