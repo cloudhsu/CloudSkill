@@ -100,6 +100,19 @@ stay outside that path. Reconciliation compares complete advertised and local
 ref maps, so equal empty sets succeed. Focused fixtures cover all three paths;
 remaining review cells and release stay gated.
 
+## 2026-08-11 — Sixth 6.3 review returned external-resource identity to architecture
+
+Fresh GPT-5.4 review exposed two coupled identity defects. Fetch reconciliation
+uses current remote heads, which cannot prove the completion condition of an
+earlier fetch after the remote advances. Bundle import identifies only the inbox
+directory, allowing later arrivals to be consumed by an older action and making
+an empty queue insufficient completion evidence. The increment is stopped at
+architecture: fetch must bind an immutable bounded target snapshot, and import
+must bind explicit archive names/content hashes with per-resource evidence.
+Contracts, compatibility, implementation, and RED fixtures must move together.
+No remaining L1 cells, version synchronization, push, merge, tag, or release are
+authorized from this candidate.
+
 ## 2026-08-11 — Public/private package split deferred
 
 The user retained the public Core/private Evolution Pack design but explicitly

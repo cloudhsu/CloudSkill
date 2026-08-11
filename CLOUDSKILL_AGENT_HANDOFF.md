@@ -142,6 +142,23 @@ This is the operational entry point for a new conversation or coding agent that 
 - Next: complete-suite passes, exact-tip commit, then restart L1 from four fresh
   cells. Version synchronization and release remain prohibited.
 
+### CloudBox 6.3 sixth release review architecture stop (2026-08-11)
+
+- Fresh GPT-5.4 review of `6b925ab` returned FAIL; remaining L1 cells were
+  stopped. Raw output is `.local/reviews/cloudbox-6.3/gpt-5.4-r6.txt`, SHA-256
+  `17e7f2c55139cf340881926167452b1b94502452b7931e1d19af2447eee5f0f4`.
+- This is an architecture-level stop, not another local repair. Fetch
+  reconciliation compares against live remote heads, so a later remote advance
+  can falsely disprove an already-completed original fetch. Bundle import binds
+  only an inbox path, so archives arriving after action creation can be consumed
+  under the old identity.
+- Required redesign: capture a bounded fetch target/ref snapshot before mutation
+  and reconcile that immutable target; require bundle actions to enumerate
+  archive names plus content hashes and persist per-archive completion evidence.
+  Update invocation/action contracts, compatibility rules, adapters, and RED
+  fixtures together before resuming release review.
+- Version remains 6.2.0. Do not push, merge, tag, or release 6.3 from this state.
+
 ### CloudBox 6.2.0 published and remotely verified (2026-08-11)
 
 - PR `#10` merged as `6be22cd`; annotated tag `v6.2.0` peels to that
