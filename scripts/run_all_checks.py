@@ -10,6 +10,7 @@ commands = [
     [sys.executable, 'scripts/validate_behavior_evals.py'],
     [sys.executable, 'scripts/validate_skill_lifecycle.py'],
     [sys.executable, 'scripts/validate_skill_context_budget.py'],
+    [sys.executable, 'scripts/validate_planning_priority.py'],
     [sys.executable, 'scripts/validate_interaction_capture.py'],
     [sys.executable, 'scripts/validate_eval_bundle_contract.py'],
     [sys.executable, 'scripts/validate_evolution_source_sync.py'],

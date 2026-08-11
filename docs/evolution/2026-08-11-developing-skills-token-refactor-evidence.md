@@ -37,16 +37,37 @@ direct references.
 
 ## Semantic forward tests
 
-- `DEVSK-BEH-011` through `DEVSK-BEH-016`: 6/6 PASS using only the main Skill
-  and the direct reference selected for each prompt.
+- Method: independent static/manual semantic adjudication, read-only, without a
+  provider/model Behavior execution. This is distinct from deterministic case
+  schema validation and from the provider-backed corpus marked `NOT RUN`.
+- Reviewer `/root/token_refactor_forward_test`, source tip `3684eb1`:
+  `DEVSK-BEH-011` through `DEVSK-BEH-016` passed 6/6 using only the main Skill,
+  each case, and its directly selected reference.
 - Correct reference selection: interaction capture for 011–014, conversation
   optimization for 015, lifecycle standard for 016.
+- Per-case dispositions: 011 real-importer compatibility and manual retention;
+  012 whole-archive planning/no partial publication; 013 untrusted bounded
+  intake; 014 owning-config privacy or disclosed fail-closed/manual routing;
+  015 deterministic mining/deduplication without unrelated references; 016
+  lifecycle/release evidence without capture mechanics. All were PASS.
 - Hidden mandatory safeguard/information loss: none found.
-- `PROC-BEH-008`: PASS after the user's priority correction for lifecycle-first
-  ownership, evidence-driven transitions, proportional planning, bounded
-  detail, risk replan, stale-step invalidation, and evidence preservation.
+- Reviewer `/root/plan_owner_forward_test`, source tip
+  `3684eb1cc5cbedc3c5646c2b5b4c99786dd8e6bc`: `PROC-BEH-008` PASS by the same
+  static/manual, no-provider method after the user's priority correction. It
+  preserved lifecycle-first ownership, evidence-driven transitions,
+  proportional detail, risk replan, stale-step invalidation, and unaffected
+  evidence.
 - High/Medium semantic findings: none.
 - Provider-backed Runtime Eval corpus: NOT RUN.
+
+## Deterministic priority enforcement
+
+`scripts/validate_planning_priority.py` is part of `run_all_checks.py`. It checks
+the sole Plan Owner, lifecycle-first/evidence-second/token-third relationship,
+risk-created plan revisions, and default-visible manual-review,
+unsupported/legacy retention, and raw-transcript safeguards. Its built-in
+negative mutation removes highest-authority wording and must be detected, so the
+check proves drift detection rather than file readability alone.
 
 ## Planning authority result
 
