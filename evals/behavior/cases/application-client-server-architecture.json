@@ -90,6 +90,94 @@
         "agent draws connections without lifecycle and operations"
       ],
       "review_notes": "Review semantic relationships, authority, lifecycle, failure behavior, and evidence; keyword presence alone is insufficient."
+    },
+    {
+      "id": "APP-BEH-005",
+      "skill": "application-client-server-architecture",
+      "type": "application",
+      "prompt": "An embedded database transaction commits in memory, but exporting the durable file can fail. Define success, failure and restart behavior.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "distinguishes logical transaction commit from durable external persistence",
+        "does not report success while authoritative durable state is divergent",
+        "defines fail-stop or degraded admission behavior and restart reconciliation"
+      ],
+      "forbidden_behaviors": [
+        "treats SQL commit as proof that the durable file was updated",
+        "continues accepting dependent writes after unexplained persistence divergence"
+      ],
+      "required_artifacts": ["durability state and recovery contract"],
+      "baseline_expected_failure": [
+        "existing guidance names post-commit persistence but does not define divergence as an explicit fail-stop state"
+      ],
+      "review_notes": "Keep durability divergence distinct from migration versioning and external side-effect reconciliation."
+    },
+    {
+      "id": "APP-BEH-006",
+      "skill": "application-client-server-architecture",
+      "type": "application",
+      "prompt": "Product release 9.4 opens a database marked schema 12, while the newest software schema it supports is 11. Decide startup behavior.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "treats product version and schema version as independent contracts",
+        "compares the stored schema only with an explicit supported schema range",
+        "fails before writes when the stored schema is newer than supported"
+      ],
+      "forbidden_behaviors": [
+        "derives schema compatibility from product release numbering",
+        "attempts a downgrade or normalization write before compatibility is proven"
+      ],
+      "required_artifacts": ["schema compatibility and startup gate"],
+      "baseline_expected_failure": [
+        "existing guidance mentions schema gates but does not explicitly prevent product-version inference"
+      ],
+      "review_notes": "Keep schema compatibility distinct from document and release version lineage."
+    },
+    {
+      "id": "APP-BEH-007",
+      "skill": "application-client-server-architecture",
+      "type": "application",
+      "prompt": "A posted financial history record is wrong, but audit policy forbids rewriting committed history. Design the correction.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "keeps committed historical facts immutable",
+        "records a correlated compensating entry and the correction authority",
+        "defines how current projections include both original and compensation without erasing provenance"
+      ],
+      "forbidden_behaviors": [
+        "updates or deletes the original history row in place",
+        "silently substitutes current master data for the historical snapshot"
+      ],
+      "required_artifacts": ["immutable history and compensation contract"],
+      "baseline_expected_failure": [
+        "existing guidance asks whether history is compensating but does not define correlation, authority and projection behavior"
+      ],
+      "review_notes": "Keep immutable correction distinct from ordinary CRUD and retention."
+    },
+    {
+      "id": "APP-BEH-008",
+      "skill": "application-client-server-architecture",
+      "type": "application",
+      "prompt": "A local transaction commits, then the external payment service times out; a late external success may arrive after restart. Define the operation lifecycle.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "models local commit, external request, acknowledgement and reconciliation as explicit states",
+        "uses durable correlation and idempotency identity across timeout and restart",
+        "defines admission, retry, compensation and late-completion handling for unresolved operations"
+      ],
+      "forbidden_behaviors": [
+        "rolls back the already committed local fact in memory and assumes the external effect disappeared",
+        "blindly retries without checking durable operation state or external outcome"
+      ],
+      "required_artifacts": ["post-commit operation lifecycle and reconciliation contract"],
+      "baseline_expected_failure": [
+        "existing guidance lists side-effect sequencing and partial failure but does not require a durable post-commit lifecycle"
+      ],
+      "review_notes": "Keep external commitment uncertainty distinct from embedded-file durability divergence."
     }
   ]
 }

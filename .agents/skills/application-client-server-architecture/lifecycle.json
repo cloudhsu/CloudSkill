@@ -20,7 +20,11 @@
     "APP-BEH-001",
     "APP-BEH-002",
     "APP-BEH-003",
-    "APP-BEH-004"
+    "APP-BEH-004",
+    "APP-BEH-005",
+    "APP-BEH-006",
+    "APP-BEH-007",
+    "APP-BEH-008"
   ],
   "behavior_case_types": [
     "application",
@@ -37,5 +41,5 @@
     "the skill has not been reviewed for two feature releases"
   ],
   "replacement_skill": null,
-  "notes": "Baseline lifecycle evidence generated from committed routing and behavior cases."
+  "notes": "6.3 evolution keeps four durable-state pressures independently testable: persistence divergence, schema compatibility, immutable compensation, and post-external-commit reconciliation."
 }
