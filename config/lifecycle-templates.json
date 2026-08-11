@@ -193,9 +193,9 @@
       ],
       "stages": [
         "analyze",
-        "verify",
+        "verify_red",
         "implement",
-        "verify",
+        "verify_green",
         "release",
         "learn"
       ],
@@ -207,17 +207,38 @@
             "sanitized and deduplicated evidence inventory"
           ],
           "transition": {
-            "on_pass": "verify",
+            "on_pass": "verify_red",
             "on_fail": "escalation_required"
           }
         },
         {
-          "gate_id": "red-green-regression",
+          "gate_id": "red-baseline",
           "owner": "developing-skills",
           "required_evidence": [
-            "RED baseline result",
+            "RED baseline result"
+          ],
+          "transition": {
+            "on_pass": "implement",
+            "on_fail": "escalation_required"
+          }
+        },
+        {
+          "gate_id": "green-adjacent-regression",
+          "owner": "developing-skills",
+          "required_evidence": [
             "minimum change",
             "GREEN and adjacent regression result"
+          ],
+          "transition": {
+            "on_pass": "verify_green",
+            "on_fail": "escalation_required"
+          }
+        },
+        {
+          "gate_id": "release-boundary",
+          "owner": "developing-skills",
+          "required_evidence": [
+            "review and release-boundary decision"
           ],
           "transition": {
             "on_pass": "release",

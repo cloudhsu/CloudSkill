@@ -172,7 +172,9 @@ def registry_errors(registry: Any) -> list[str]:
         if not is_unique_nonempty_string_list(required_evidence):
             fail(errors, f"{prefix}: required_evidence must be unique non-empty strings")
         evidence_set = set(required_evidence) if is_unique_nonempty_string_list(required_evidence) else set()
-        stage_set = set(entry["stages"]) if is_nonempty_string_list(entry["stages"]) else set()
+        if not is_unique_nonempty_string_list(entry["stages"]):
+            fail(errors, f"{prefix}: stages must be unique non-empty identifiers")
+        stage_set = set(entry["stages"]) if is_unique_nonempty_string_list(entry["stages"]) else set()
         gate_ids: set[str] = set()
         gates = entry["gates"] if isinstance(entry["gates"], list) else []
         for gate in gates:
@@ -409,6 +411,12 @@ def main() -> int:
         gate_transition_weakened = copy.deepcopy(registry)
         gate_transition_weakened["templates"]["lightweight-change"]["gates"][0]["transition"]["on_fail"] = "complete"
         mutation_must_fail(gate_transition_weakened, "gate failure transition weakened")
+        duplicate_stage = copy.deepcopy(registry)
+        duplicate_stage["templates"]["skill-evolution"]["stages"][3] = "verify_red"
+        mutation_must_fail(duplicate_stage, "duplicate stage identity accepted")
+        ambiguous_stage_target = copy.deepcopy(registry)
+        ambiguous_stage_target["templates"]["skill-evolution"]["gates"][0]["transition"]["on_pass"] = "verify"
+        mutation_must_fail(ambiguous_stage_target, "ambiguous stage target accepted")
         resume_reconciliation_removed = copy.deepcopy(registry)
         resume_reconciliation_removed["templates"]["bounded-feature"]["resume_reconciliation"]["reconcile_before_resume"] = False
         mutation_must_fail(resume_reconciliation_removed, "resume reconciliation weakened")
