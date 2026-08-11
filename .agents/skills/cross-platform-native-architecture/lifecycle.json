@@ -27,7 +27,8 @@
   "behavior_case_ids": [
     "XPLAT-BEH-001",
     "XPLAT-BEH-002",
-    "XPLAT-BEH-003"
+    "XPLAT-BEH-003",
+    "XPLAT-BEH-004"
   ],
   "behavior_case_types": [
     "application",

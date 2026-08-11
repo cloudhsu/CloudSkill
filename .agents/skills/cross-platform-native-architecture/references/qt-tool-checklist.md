@@ -20,6 +20,7 @@
 - `includeFile()` and forwarding-header compatibility.
 - Resource URL and icon availability inside the Designer process.
 - Plug-in binary name, ABI, Qt version, debug/release mode, and install/discovery path.
+- Designer host architecture, compiler/runtime ABI and toolkit ABI verified independently from the application runtime; successful application linking does not prove host loadability.
 - Existing `.ui` samples load without promotion/substitution warnings.
 - Disabled, experimental, and archived components are not silently registered.
 
@@ -44,6 +45,13 @@
 - Imported dependency targets instead of developer-specific absolute paths.
 - Optional OpenCV/Eigen/Charts/Multimedia/3D feature targets.
 - Packaging shared libraries and Designer plug-ins.
+- Release matrix covers platform, CPU/ABI, toolkit, debug/release mode, Designer host where applicable, packaging, clean install, upgrade, downgrade/rollback, and explicitly unsupported cells.
 - Android permissions and lifecycle.
 - Windows/Linux/macOS path, driver, signing, and runtime deployment differences.
 - Upgrade, rollback, source compatibility, `.ui` compatibility, and ABI compatibility.
+
+## Process, Startup, and Local Secrets
+
+- Process identity records more than a recycled numeric PID when stale-owner recovery matters; liveness is verified through the target OS rather than a shell-specific syntax or signal convention.
+- Per-user startup, machine-wide startup, service installation, and privileged helpers have distinct owners, authorization, reconciliation, removal, and rollback behavior.
+- Credentials and tokens are owned by an OS-appropriate protected store or explicit secret provider, not portable configuration, logs, bundles, source files, or UI state. Define account scope, least privilege, rotation, deletion, and unavailable-store behavior without hard-coding a vendor backend.
