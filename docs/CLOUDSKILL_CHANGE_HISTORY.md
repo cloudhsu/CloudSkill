@@ -2,6 +2,18 @@
 
 This document records the evolution rationale and evidence chain for work that may span multiple conversations. Git commits and tags remain the authoritative source history.
 
+## 2026-08-11 — Inbox and session optimization owner pass
+
+The user authorized formal optimization of the imported review Inbox and the
+current session, with token conservation as an explicit quality constraint.
+Forty-five private records were deduplicated into thirty generalized pressures.
+Owner audits avoided changes where baseline behavior already complied and made
+targeted changes only for demonstrated intake, native/code/framework, quality,
+brownfield, durable-state, and document-provenance gaps. The manual review,
+unsupported, and legacy recovery paths remain part of the product until the
+exchange format is separately declared stable. Detailed sanitized accounting is
+in `docs/evolution/2026-08-11-inbox-session-optimization-accounting.md`.
+
 ## 2026-08-11 — CloudBox 6.3.0 publication verified
 
 PR `#13` merged the reviewed manual-only Eval ZIP exchange into `main` as

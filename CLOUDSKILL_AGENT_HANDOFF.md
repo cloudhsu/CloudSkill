@@ -15,6 +15,21 @@ This is the operational entry point for a new conversation or coding agent that 
 
 ## Current repository state
 
+### Inbox/session Skill optimization candidate (2026-08-11)
+
+- Branch `feat/cloudbox-skill-optimization` converts 45 private review records
+  and current-session evidence into deduplicated owner changes without removing
+  the manual review/legacy path.
+- Eight owner Skills have targeted intake, native, framework, quality,
+  refactoring, durable-state, and document-provenance changes. Existing process,
+  release, plugin, and token behavior that passed no-Skill baselines was not
+  duplicated.
+- Accounting is in
+  `docs/evolution/2026-08-11-inbox-session-optimization-accounting.md`.
+- Combined targeted semantic GREEN passed 11/11 with no High/Medium boundary
+  omission, and the integrated deterministic suite passed twice. Finish an
+  exact-tip review, then present the candidate before version/push/release.
+
 ### CloudBox 6.3.0 published and remotely verified (2026-08-11)
 
 - PR `#13` merged as `65e89b3`; annotated tag `v6.3.0` peels to that merge.
