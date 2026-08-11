@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+import hashlib
 import importlib.util
 import json
 import os
@@ -237,6 +238,9 @@ if export_script_path.is_file():
             '--input', str(draft_path), '--outbox', str(external_project / '.cloudskill/eval-outbox'),
             '--project-name', 'validator-smoke', '--non-interactive',
         ], cwd=external_project)
+        export_config = json.loads((external_project / '.cloudskill/config.local.json').read_text(encoding='utf-8'))
+        if export_config.get('export_project_name') != 'validator-smoke' or export_config.get('export_agent_name') != 'codex':
+            fail('portable exporter did not persist project and agent aliases')
         exported_zips = list(external_project.glob('validator-smoke-codex-codex-*.zip'))
         if len(exported_zips) != 1:
             fail('export_eval_candidate.py did not produce exactly one zip archive')
@@ -268,12 +272,176 @@ if export_script_path.is_file():
             if len(list((repo_inbox / 'imports/processed').glob('*.zip'))) != 1:
                 fail('import_eval_candidates.py did not move the processed zip into imports/processed/')
 
+            renamed = repo_inbox / 'imports' / 'renamed.zip'
+            shutil.copy2(exported_zips[0], renamed)
+            renamed_result = run([
+                sys.executable, str(import_script_path), '--eval-inbox', str(repo_inbox),
+            ], cwd=ROOT)
+            if 'unsupported=1' not in renamed_result.stdout or not (repo_inbox / 'imports/unsupported/renamed.zip').is_file():
+                fail('manifest-valid archive with a mismatched filename was not routed to unsupported/')
+
             # Re-running import on an inbox with no new zips must be a no-op, not an error.
             rerun = run([
                 sys.executable, str(import_script_path), '--eval-inbox', str(repo_inbox),
             ], cwd=ROOT)
             if 'No import archives found' not in rerun.stdout:
                 fail('re-running import_eval_candidates.py with nothing new to import did not report a no-op')
+
+            # One real mixed batch proves that shared seen_keys, totals, and
+            # archive disposition work together rather than only in isolated runs.
+            batch_inbox = tmp / 'batch-inbox'
+            batch_imports = batch_inbox / 'imports'
+            batch_imports.mkdir(parents=True)
+            shutil.copy2(exported_zips[0], batch_imports / exported_zips[0].name)
+            with zipfile.ZipFile(exported_zips[0]) as source:
+                members = {name: source.read(name) for name in source.namelist()}
+            duplicate_manifest = json.loads(members['manifest.json'])
+            duplicate_manifest['bundle_id'] = 'd' * 32
+            duplicate_name = (
+                f"{duplicate_manifest['export_project_name']}-{duplicate_manifest['host']}-"
+                f"{duplicate_manifest['agent_name']}-{duplicate_manifest['created_at_utc']}-dddddddd.zip"
+            )
+            with zipfile.ZipFile(batch_imports / duplicate_name, 'w', zipfile.ZIP_DEFLATED) as archive:
+                archive.writestr('manifest.json', json.dumps(duplicate_manifest, ensure_ascii=False, indent=2) + '\n')
+                for name, payload in members.items():
+                    if name != 'manifest.json':
+                        archive.writestr(name, payload)
+            shutil.copy2(exported_zips[0], batch_imports / 'wrong-name.zip')
+            (batch_imports / 'malformed.zip').write_bytes(b'not a zip')
+
+            batch = run([
+                sys.executable, str(import_script_path), '--eval-inbox', str(batch_inbox),
+            ], cwd=ROOT)
+            expected_totals = ('TOTAL: 4 archive(s)', 'manual_review=1', 'duplicate=1', 'skipped=1', 'unsupported=1')
+            if any(value not in batch.stdout for value in expected_totals):
+                fail('mixed multi-zip batch totals did not preserve valid, duplicate, malformed, and unsupported outcomes')
+            if len(list((batch_inbox / 'imports/processed').glob('*.zip'))) != 2:
+                fail('mixed batch did not process both supported archives')
+            if not (batch_inbox / 'imports/unsupported/wrong-name.zip').is_file():
+                fail('mixed batch did not retain the filename-mismatched archive as unsupported')
+            if not (batch_imports / 'malformed.zip').is_file():
+                fail('mixed batch did not retain the malformed archive for manual review')
+            if len(list((batch_inbox / 'manual-review').glob('*.json'))) != 1:
+                fail('mixed batch partially imported unsupported/malformed content or failed to deduplicate')
+            # Reusing archive names must preserve both old and new audit inputs.
+            shutil.copy2(exported_zips[0], batch_imports / exported_zips[0].name)
+            shutil.copy2(exported_zips[0], batch_imports / 'wrong-name.zip')
+            run([sys.executable, str(import_script_path), '--eval-inbox', str(batch_inbox)], cwd=ROOT)
+            if len(list((batch_inbox / 'imports/processed').glob('validator-smoke-*.zip'))) != 3:
+                fail('same-name processed archive overwrote retained evidence')
+            if len(list((batch_inbox / 'imports/unsupported').glob('wrong-name*.zip'))) != 2:
+                fail('same-name unsupported archive overwrote retained evidence')
+
+            bomb_inbox = tmp / 'bomb-inbox'
+            bomb_imports = bomb_inbox / 'imports'
+            bomb_imports.mkdir(parents=True)
+            bomb_path = bomb_imports / 'oversized.zip'
+            with zipfile.ZipFile(bomb_path, 'w', zipfile.ZIP_DEFLATED) as archive:
+                archive.writestr('manifest.json', '{}')
+                archive.writestr('payload.bin', b'0' * (4 * 1024 * 1024 + 1))
+            bomb = run([sys.executable, str(import_script_path), '--eval-inbox', str(bomb_inbox)], cwd=ROOT)
+            if 'skipped=1' not in bomb.stdout or not bomb_path.is_file():
+                fail('resource-limit archive was not retained for manual review')
+            if list((bomb_inbox / 'manual-review').glob('*.json')):
+                fail('resource-limit archive produced partial candidate output')
+
+            partial_inbox = tmp / 'partial-inbox'
+            partial_imports = partial_inbox / 'imports'
+            partial_imports.mkdir(parents=True)
+            valid_payload_name = next(name for name in members if name != 'manifest.json')
+            valid_payload = members[valid_payload_name]
+            malformed_payload = b'{not-json'
+            partial_manifest = dict(duplicate_manifest)
+            partial_manifest['bundle_id'] = 'e' * 32
+            partial_manifest['payload_hashes'] = {
+                valid_payload_name: hashlib.sha256(valid_payload).hexdigest(),
+                'manual-review/zz-malformed.json': hashlib.sha256(malformed_payload).hexdigest(),
+            }
+            partial_name = (
+                f"{partial_manifest['export_project_name']}-{partial_manifest['host']}-"
+                f"{partial_manifest['agent_name']}-{partial_manifest['created_at_utc']}-eeeeeeee.zip"
+            )
+            with zipfile.ZipFile(partial_imports / partial_name, 'w', zipfile.ZIP_DEFLATED) as archive:
+                archive.writestr('manifest.json', json.dumps(partial_manifest))
+                archive.writestr(valid_payload_name, valid_payload)
+                archive.writestr('manual-review/zz-malformed.json', malformed_payload)
+            partial = run([sys.executable, str(import_script_path), '--eval-inbox', str(partial_inbox)], cwd=ROOT)
+            if 'skipped=1' not in partial.stdout or list((partial_inbox / 'manual-review').glob('*.json')):
+                fail('manifest-valid archive published a partial candidate before later payload failure')
+
+            unsafe_id_inbox = tmp / 'unsafe-id-inbox'
+            unsafe_id_imports = unsafe_id_inbox / 'imports'
+            unsafe_id_imports.mkdir(parents=True)
+            base_candidate = json.loads(valid_payload)
+            absolute_target = tmp / 'absolute-owned'
+            unsafe_candidates = []
+            for candidate_id in (str(absolute_target), '../../traversal-owned'):
+                value = dict(base_candidate)
+                value['candidate_id'] = candidate_id
+                unsafe_candidates.append(value)
+            rejected_value = dict(base_candidate)
+            rejected_value['candidate_id'] = '../../rejected-owned'
+            rejected_value['case_kind'] = '../../unsafe-kind'
+            unsafe_candidates.append(rejected_value)
+            unsafe_candidates.append(dict(rejected_value))
+            unsafe_payloads = {
+                f'manual-review/unsafe-{index}.json': json.dumps(value).encode('utf-8')
+                for index, value in enumerate(unsafe_candidates)
+            }
+            unsafe_manifest = dict(duplicate_manifest)
+            unsafe_manifest['bundle_id'] = 'f' * 32
+            unsafe_manifest['payload_hashes'] = {
+                name: hashlib.sha256(payload).hexdigest() for name, payload in unsafe_payloads.items()
+            }
+            unsafe_name = (
+                f"{unsafe_manifest['export_project_name']}-{unsafe_manifest['host']}-"
+                f"{unsafe_manifest['agent_name']}-{unsafe_manifest['created_at_utc']}-ffffffff.zip"
+            )
+            with zipfile.ZipFile(unsafe_id_imports / unsafe_name, 'w', zipfile.ZIP_DEFLATED) as archive:
+                archive.writestr('manifest.json', json.dumps(unsafe_manifest))
+                for name, payload in unsafe_payloads.items():
+                    archive.writestr(name, payload)
+            run([sys.executable, str(import_script_path), '--eval-inbox', str(unsafe_id_inbox)], cwd=ROOT)
+            if Path(str(absolute_target) + '-positive.json').exists() or (tmp / 'traversal-owned-positive.json').exists() or (tmp / 'rejected-owned-candidate.json').exists():
+                fail('imported candidate fields escaped the selected Inbox queue')
+            published = list((unsafe_id_inbox / 'manual-review').glob('*.json')) + list((unsafe_id_inbox / 'rejected').glob('*.json'))
+            if not published or any(path.resolve().parent not in {(unsafe_id_inbox / 'manual-review').resolve(), (unsafe_id_inbox / 'rejected').resolve()} for path in published):
+                fail('unsafe candidate identifiers were not published under safe local queue names')
+            if len(list((unsafe_id_inbox / 'rejected').glob('*.json'))) != 2:
+                fail('identical rejected candidates did not retain collision-safe outputs')
+
+            symlink_inbox = tmp / 'symlink-inbox'
+            symlink_imports = symlink_inbox / 'imports'
+            external_queue = tmp / 'external-queue'
+            symlink_imports.mkdir(parents=True)
+            external_queue.mkdir()
+            try:
+                (symlink_inbox / 'manual-review').symlink_to(external_queue, target_is_directory=True)
+            except (OSError, NotImplementedError):
+                pass
+            else:
+                shutil.copy2(exported_zips[0], symlink_imports / exported_zips[0].name)
+                symlink_result = subprocess.run(
+                    [sys.executable, str(import_script_path), '--eval-inbox', str(symlink_inbox)],
+                    cwd=ROOT, text=True, capture_output=True,
+                )
+                if symlink_result.returncode == 0 or list(external_queue.glob('*.json')):
+                    fail('symlinked candidate queue was followed outside the Inbox')
+
+            continuation_inbox = tmp / 'continuation-inbox'
+            continuation_imports = continuation_inbox / 'imports'
+            continuation_imports.mkdir(parents=True)
+            with zipfile.ZipFile(continuation_imports / 'a-long-path.zip', 'w', zipfile.ZIP_DEFLATED) as archive:
+                archive.writestr('x' * 256 + '.json', '{}')
+            shutil.copy2(exported_zips[0], continuation_imports / exported_zips[0].name)
+            continuation = run([sys.executable, str(import_script_path), '--eval-inbox', str(continuation_inbox)], cwd=ROOT)
+            if 'skipped=1' not in continuation.stdout or len(list((continuation_inbox / 'imports/processed').glob('*.zip'))) != 1:
+                fail('bad archive path aborted processing of a later valid archive')
+            if not (continuation_imports / 'a-long-path.zip').is_file():
+                fail('bad archive path was not retained for manual review')
+            importer_source = import_script_path.read_text(encoding='utf-8')
+            if any(marker in importer_source for marker in ('openai', 'anthropic', 'ollama', 'subprocess')):
+                fail('manual importer acquired a model/provider execution dependency')
 
 sync_script_path = ROOT / 'scripts/sync_eval_exchange.py'
 if not sync_script_path.is_file():

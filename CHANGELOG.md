@@ -1,5 +1,15 @@
 # Changelog
 
+## 6.3.0
+
+### Manual Eval ZIP exchange
+
+- Fixed exported bundle names to `<project>-<host>-<agent>-<YYYYMMDDTHHMMSSZ>-<bundle-id8>.zip`, with project and agent aliases retained only in ignored project-local configuration.
+- Required ZIP filenames to match their versioned manifest before any candidate is imported.
+- Added one-run mixed batch coverage for supported, duplicate, unsupported, and malformed archives, including deterministic disposition and zero model/provider dependencies.
+- Withdrew the unreleased controlled-tool broker and adapter experiment; its concurrency, filesystem-confinement, staging, and NAS lessons remain future research rather than shipped authority.
+- Preserved manual import, Git source synchronization, unsupported archive retention, and the separate explicit review required before formal Skill or Eval changes.
+
 ## 6.2.0
 
 ### Adaptive lifecycle and review assurance

@@ -2,6 +2,20 @@
 
 This document records the evolution rationale and evidence chain for work that may span multiple conversations. Git commits and tags remain the authoritative source history.
 
+## 2026-08-11 — Controlled automation withdrawn; manual ZIP exchange retained
+
+Repeated review showed that the unreleased controlled-tool candidate required
+real concurrent-write serialization and descriptor-relative filesystem
+confinement before it could honestly provide its claimed recovery and security
+boundary. The user selected the smaller operational model: no automated broker
+or adapter, and one deterministic manual batch importer. Export filenames are
+manifest-bound as `<project>-<host>-<agent>-<YYYYMMDDTHHMMSSZ>-<bundle-id8>.zip`;
+project and agent aliases persist only in ignored local configuration. Operators
+copy any number of ZIPs into the Inbox and explicitly request import. Import does
+not call a model, mutate formal Evals/Skills, or operate Git. The discarded
+architecture remains future research only; because it was never released,
+there is no runtime migration.
+
 ## 2026-08-11 — Public/private package split deferred
 
 The user retained the public Core/private Evolution Pack design but explicitly

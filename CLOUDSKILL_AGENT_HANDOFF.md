@@ -15,6 +15,30 @@ This is the operational entry point for a new conversation or coding agent that 
 
 ## Current repository state
 
+### Manual Eval ZIP exchange candidate (2026-08-11)
+
+- The unreleased 6.3 controlled-tool experiment was withdrawn after review
+  exposed unresolved concurrent-persistence and filesystem-confinement
+  boundaries. No broker, adapter, action store, or controlled import is shipped.
+- The supported path is manual batch transfer: export ZIPs named
+  `<project>-<host>-<agent>-<YYYYMMDDTHHMMSSZ>-<bundle-id8>.zip`, place them
+  directly in `.local/eval-inbox/imports/`, then run the manual importer.
+- Filename and manifest identity must match exactly. Unsupported bundles are
+  retained under `imports/unsupported/`; malformed archives remain pending for
+  manual review. Formal Eval/Skill changes still require explicit review.
+- Continue from `docs/superpowers/plans/2026-08-11-cloudbox-manual-eval-exchange.md`.
+
+### CloudBox 6.3.0 release correction in progress (2026-08-11)
+
+- Review corrections add collision-free archive retention, bounded ZIP
+  resources and member paths, whole-archive planning before candidate
+  publication, per-archive failure containment, and content-derived candidate
+  output names confined to the selected Inbox queue.
+- Version surfaces are synchronized to 6.3.0. Exact-tip `50a4beb` passed focused
+  and complete deterministic checks plus two independent reviews with no High
+  or Medium finding. Push, PR/CI, merge, tag, Release, and post-release
+  verification remain the next operational gates.
+
 ### CloudBox 6.2.0 published and remotely verified (2026-08-11)
 
 - PR `#10` merged as `6be22cd`; annotated tag `v6.2.0` peels to that

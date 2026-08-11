@@ -6,4 +6,3 @@
     {"id":"PROC-BEH-007","skill":"development-process-tailoring","type":"counterexample","prompt":"Fix one isolated local typo with no semantic change.","expected_routing":false,"expected_alternative_skill":null,"required_behaviors":["uses a lightweight direct path"],"forbidden_behaviors":["constructs a full lifecycle plan and review panel"],"required_artifacts":[],"baseline_expected_failure":["process orchestration triggers on trivial work"],"review_notes":"Negative control for process overhead."}
   ]
 }
-

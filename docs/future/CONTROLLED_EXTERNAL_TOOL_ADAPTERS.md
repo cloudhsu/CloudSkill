@@ -53,3 +53,21 @@ acknowledgement.
 Before implementation, compare at least direct CLI, MCP server, and a thin
 local broker. Select based on actual deployment, secret, offline, and recovery
 pressures rather than treating one transport as universally preferable.
+
+## Evidence retained from the withdrawn prototype
+
+Any renewed design must first choose its supported filesystem and threat model.
+For single-host local persistence, each read-modify-write needs a bounded OS
+advisory lock, in-lock revision/lease/fence validation, atomic replacement, and
+directory durability; adapter execution must stay outside that lock. NAS or
+multi-host writers require a different authority such as a transactional
+service or qualified database rather than assuming local rename/lock semantics.
+
+Archive ingestion needs no-follow, descriptor-relative access and a
+broker-owned staging/claim boundary if same-user path swaps are in scope.
+Resolving a path and reopening it later is not confinement. Fault injection must
+cover concurrent writers, crash points around publication, takeover fencing,
+symlinked or swapped source/destination directories, same-name archive races,
+partial candidate publication, and reconciliation after every crash boundary.
+Do not reintroduce controlled import until the manual importer and automation
+share one safe claim protocol or are explicitly mutually exclusive.
