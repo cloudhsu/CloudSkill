@@ -24,6 +24,7 @@ This file defines the authoritative location for each concern.
 | Skill routing evaluation | `/evals/skill-routing-cases.csv` | Add cases; do not copy the matrix elsewhere |
 | Skill behavior evaluation contracts | `/evals/behavior/` | Execution reports must state actual run status |
 | Runtime Behavior output contract | `/evals/runtime/contracts/behavior-output-contract.json` | `scripts/behavior_output_contract.py` loads it; prompts, schemas, extraction, and validators must import it rather than copy marker text |
+| Lifecycle template definitions | `/config/lifecycle-templates.json` | `LIFECYCLE_TEMPLATE_CATALOG.md` explains use; it must not copy mutable template bodies |
 
 ## Document classes
 

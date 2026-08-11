@@ -15,6 +15,31 @@ This is the operational entry point for a new conversation or coding agent that 
 
 ## Current repository state
 
+### Composable lifecycle-template pilot candidate (2026-08-12)
+
+- Branch `feat/cloudbox-skill-optimization` contains a three-template pilot at
+  implementation source tip `0d17f40`: `lightweight-change`,
+  `bounded-feature`, and `skill-evolution`. Seven registered template IDs remain
+  deferred and return `unsupported`.
+- `config/lifecycle-templates.json` is the sole registry authority. The pure
+  selector/composer has no model, task-execution, persistence, Git, or release
+  authority; existing lifecycle orchestration remains the durable owner.
+- Exact canonical matches for the three implemented templates return
+  `selected` with `full_risk_calculation_required: false`. True or unknown
+  deltas escalate. The current authoritative `bounded-feature +
+  skill-evolution` composition returns `conflict` because its owners differ.
+- Task 4 static/manual semantic adjudication passed the post-change cases. The
+  complete deterministic suite and `git diff --check` passed after Task 5
+  documentation. Provider-backed Runtime Eval remains `NOT RUN`.
+- Candidate evidence is in
+  `docs/evolution/2026-08-11-lifecycle-template-pilot-evidence.md`; operating
+  guidance is in `docs/LIFECYCLE_TEMPLATE_CATALOG.md`. Final independent
+  exact-tip review is assigned to the controller's reviewer after the Task 5
+  commit. Do not self-certify it from this handoff.
+- Version synchronization, push, PR, merge, tag, Release, and host reload are
+  `NOT RUN`. Continue with exact-tip review and correct every High/Medium
+  finding before any publication decision.
+
 ### Developing Skills token refactor merged (2026-08-11)
 
 - `developing-skills` now uses explicit progressive disclosure: its default

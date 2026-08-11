@@ -2,6 +2,32 @@
 
 This document records the evolution rationale and evidence chain for work that may span multiple conversations. Git commits and tags remain the authoritative source history.
 
+## 2026-08-12 — Composable lifecycle-template pilot candidate
+
+The pilot adds one authoritative registry, a pure deterministic selector/
+composer, sealed lifecycle-plan integration, and minimum Skill routing for
+`lightweight-change`, `bounded-feature`, and `skill-evolution`. Seven planned
+IDs remain explicitly deferred. Exact matches answer all exclusions and six
+deltas with literal booleans; all false avoids only the repeated full-risk
+calculation. Lifecycle authority, evidence, verification, Review Assurance,
+resume, reconciliation, and replan remain intact.
+
+Deterministic RED/GREEN corrected typed exclusions, owner/gate conflict,
+resolution provenance and integrity, invalidation-safe replan, deferred-ID
+forgery, selective evidence invalidation, and complete lineage. Static/manual
+semantic adjudication passed the final ten Skill cases while preserving two
+pre-existing controls as regression-only. The current authoritative
+`bounded-feature + skill-evolution` pair truthfully returns `conflict` because
+its policy/action/evidence owners differ; only an owner-aligned synthetic
+fixture proves successful strongest-gate composition.
+
+Task 5 adds a human catalog and evidence record without duplicating the
+registry. Provider-backed Runtime Eval, final independent exact-tip review,
+version synchronization, push, PR, merge, tag, Release, and host reload remain
+`NOT RUN` at this checkpoint. Exact measurements, evidence limitations, and
+continuation are in
+`docs/evolution/2026-08-11-lifecycle-template-pilot-evidence.md`.
+
 ## 2026-08-11 — Skill optimization and token pilot merged
 
 PR `#15` merged the reviewed Inbox/session Skill optimization, the
