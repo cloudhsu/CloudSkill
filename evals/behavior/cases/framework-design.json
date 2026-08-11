@@ -68,8 +68,8 @@
       ],
       "review_notes": "Review semantic relationships, evidence, and omissions; keyword presence alone is insufficient."
     },
-    {
-      "id": "FW-BEH-004",
+        {
+            "id": "FW-BEH-004",
       "skill": "framework-design",
       "type": "application",
       "prompt": "Create a shared equipment kernel for several products whose chamber composition, UI and workflows vary by configuration.",
@@ -91,7 +91,33 @@
       "baseline_expected_failure": [
         "agent centralizes all product behavior into one framework"
       ],
-      "review_notes": "Review semantic relationships, authority, lifecycle, failure behavior, and evidence; keyword presence alone is insufficient."
-    }
+            "review_notes": "Review semantic relationships, authority, lifecycle, failure behavior, and evidence; keyword presence alone is insufficient."
+        },
+        {
+            "id": "FW-BEH-005",
+            "skill": "framework-design",
+            "type": "application",
+            "prompt": "Design one reusable device framework for products that use different transports and discover implementations through a registry consumed by several hosts.",
+            "expected_routing": true,
+            "expected_alternative_skill": null,
+            "required_behaviors": [
+                "models transport-independent capabilities and preserves transport-specific limits, lifecycle and failure semantics",
+                "defines one authoritative registry with a shared adapter and enumerated consumers",
+                "requires positive propagation and negative drift-injection tests for registry changes"
+            ],
+            "forbidden_behaviors": [
+                "forces every transport into a lowest-common-denominator interface",
+                "copies registry entries or switch statements into each consumer",
+                "claims registry centralization is sufficient without mutation evidence"
+            ],
+            "required_artifacts": [
+                "capability and transport-variation map",
+                "registry authority and anti-drift test plan"
+            ],
+            "baseline_expected_failure": [
+                "agent centralizes a registry structurally but does not prove propagation or detect consumer drift"
+            ],
+            "review_notes": "The closest authoritative-contract pattern requires both positive propagation and negative injected-drift coverage."
+        }
   ]
 }
