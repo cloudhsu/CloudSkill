@@ -1,4 +1,4 @@
-"""Pure, deterministic selection for the authoritative lifecycle templates.
+"""Pure, deterministic selection and composition for lifecycle templates.
 
 This module only turns explicit task facts and the versioned registry into an
 evidence record.  It does not execute work, persist state, or invoke models.
@@ -51,6 +51,13 @@ REQUIRED_REUSE_FIELDS = {
     "unaffected_evidence",
     "on_invalidation",
 }
+REVIEW_LEVELS = (
+    "L0_NONE",
+    "L0_SINGLE_REVIEW",
+    "L3_SINGLE_FAMILY_PAIR",
+    "L2_SINGLE_FAMILY_QUAD",
+    "L1_CROSS_FAMILY_2X2",
+)
 
 
 def load_templates(path: Path) -> dict[str, Any]:
@@ -132,6 +139,251 @@ def assess_template(
     )
 
 
+def compose_templates(
+    base_id: str,
+    overlay_ids: list[str],
+    facts: dict[str, Any],
+    registry: dict[str, Any],
+) -> dict[str, Any]:
+    """Resolve one base and declared overlays without weakening constraints."""
+    _validate_registry(registry)
+    if not isinstance(base_id, str) or not base_id:
+        return _composition_result("unsupported", [], {}, ["base:template_unknown"])
+    if not isinstance(overlay_ids, list) or any(
+        not isinstance(template_id, str) or not template_id for template_id in overlay_ids
+    ):
+        return _composition_result("conflict", [base_id], {}, ["overlay_ids_invalid"])
+
+    duplicate = next(
+        (template_id for template_id in overlay_ids if overlay_ids.count(template_id) > 1),
+        None,
+    )
+    if duplicate is not None:
+        return _composition_result(
+            "conflict", [base_id, *overlay_ids], {}, [f"overlay_duplicate:{duplicate}"]
+        )
+    if base_id in overlay_ids:
+        return _composition_result(
+            "conflict",
+            [base_id, *overlay_ids],
+            {},
+            [f"overlay_duplicates_base:{base_id}"],
+        )
+
+    template_ids = [base_id, *overlay_ids]
+    assessments: dict[str, dict[str, Any]] = {}
+    unsupported_reasons: list[str] = []
+    escalation_reasons: list[str] = []
+    for index, template_id in enumerate(template_ids):
+        assessment = assess_template(template_id, facts, registry)
+        assessments[template_id] = assessment
+        prefix = "base" if index == 0 else f"overlay:{template_id}"
+        if assessment["status"] == "unsupported":
+            unsupported_reasons.extend(f"{prefix}:{reason}" for reason in assessment["reasons"])
+        elif assessment["status"] == "escalation_required":
+            escalation_reasons.extend(f"{prefix}:{reason}" for reason in assessment["reasons"])
+    contract_versions = {
+        template_id: assessments[template_id]["contract_version"] for template_id in template_ids
+    }
+    if unsupported_reasons:
+        return _composition_result(
+            "unsupported", template_ids, contract_versions, unsupported_reasons, assessments
+        )
+
+    templates = registry["templates"]
+    base = templates[base_id]
+    incompatible = [
+        overlay_id
+        for overlay_id in overlay_ids
+        if overlay_id not in base["compatible_overlays"]
+    ]
+    if incompatible:
+        return _composition_result(
+            "conflict",
+            template_ids,
+            contract_versions,
+            [f"overlay_incompatible:{base_id}:{overlay_id}" for overlay_id in incompatible],
+            assessments,
+        )
+    if escalation_reasons:
+        return _composition_result(
+            "escalation_required",
+            template_ids,
+            contract_versions,
+            escalation_reasons,
+            assessments,
+        )
+
+    owner_conflicts = _owner_conflicts(template_ids, templates)
+    gate_conflicts, resolved_gates = _resolve_gates(template_ids, templates)
+    scalar_conflicts = _completion_scalar_conflicts(template_ids, templates)
+    conflicts = owner_conflicts + gate_conflicts + scalar_conflicts
+    if conflicts:
+        return _composition_result(
+            "conflict", template_ids, contract_versions, conflicts, assessments
+        )
+
+    resolved_stages = _merge_template_lists(template_ids, templates, "stages")
+    resolved_evidence = _merge_template_lists(template_ids, templates, "required_evidence")
+    review_level = max(
+        (templates[template_id]["review_level"] for template_id in template_ids),
+        key=REVIEW_LEVELS.index,
+    )
+    delta_evidence = {
+        "composition_order": template_ids,
+        "contract_versions": contract_versions,
+        "templates": {
+            template_id: {
+                "matched_conditions": assessments[template_id]["matched_conditions"],
+                "matched_exclusions": assessments[template_id]["matched_exclusions"],
+                "exclusion_answers": assessments[template_id]["exclusion_answers"],
+                "delta_answers": assessments[template_id]["delta_answers"],
+            }
+            for template_id in template_ids
+        },
+    }
+    delta_evidence_hash = _canonical_hash(delta_evidence)
+    result = _composition_result(
+        "selected", template_ids, contract_versions, [], assessments
+    )
+    result.update(
+        {
+            "delta_evidence_hash": delta_evidence_hash,
+            "resolved_owners": copy.deepcopy(base["owners"]),
+            "resolved_required_evidence": resolved_evidence,
+            "resolved_stages": resolved_stages,
+            "resolved_gates": resolved_gates,
+            "resolved_review_level": review_level,
+            "resolved_resume_reconciliation": _resolve_resume(template_ids, templates),
+            "resolved_reuse_invalidation": _resolve_reuse(template_ids, templates),
+        }
+    )
+    return result
+
+
+def _composition_result(
+    status: str,
+    template_ids: list[str],
+    contract_versions: dict[str, int | None],
+    reasons: list[str],
+    assessments: dict[str, dict[str, Any]] | None = None,
+) -> dict[str, Any]:
+    return {
+        "status": status,
+        "template_ids": copy.deepcopy(template_ids),
+        "contract_versions": copy.deepcopy(contract_versions),
+        "composition_order": copy.deepcopy(template_ids),
+        "assessments": copy.deepcopy(assessments or {}),
+        "reasons": reasons,
+        "full_risk_calculation_required": status != "selected",
+    }
+
+
+def _owner_conflicts(
+    template_ids: list[str], templates: dict[str, dict[str, Any]]
+) -> list[str]:
+    base_owners = templates[template_ids[0]]["owners"]
+    return [
+        f"owner_conflict:{owner}:{template_ids[0]}:{overlay_id}"
+        for overlay_id in template_ids[1:]
+        for owner in base_owners
+        if templates[overlay_id]["owners"][owner] != base_owners[owner]
+    ]
+
+
+def _resolve_gates(
+    template_ids: list[str], templates: dict[str, dict[str, Any]]
+) -> tuple[list[str], list[dict[str, Any]]]:
+    conflicts: list[str] = []
+    resolved: list[dict[str, Any]] = []
+    positions: dict[str, int] = {}
+    for template_id in template_ids:
+        for gate in templates[template_id]["gates"]:
+            gate_id = gate["gate_id"]
+            if gate_id not in positions:
+                positions[gate_id] = len(resolved)
+                resolved.append(copy.deepcopy(gate))
+                continue
+            current = resolved[positions[gate_id]]
+            if current["owner"] != gate["owner"]:
+                conflicts.append(f"gate_owner_conflict:{gate_id}")
+                continue
+            if current["transition"] != gate["transition"]:
+                conflicts.append(f"gate_transition_conflict:{gate_id}")
+                continue
+            current["required_evidence"] = list(
+                dict.fromkeys(current["required_evidence"] + gate["required_evidence"])
+            )
+    return conflicts, resolved
+
+
+def _completion_scalar_conflicts(
+    template_ids: list[str], templates: dict[str, dict[str, Any]]
+) -> list[str]:
+    conflicts: list[str] = []
+    checks = (
+        ("resume_reconciliation", "checkpoint_owner"),
+        ("resume_reconciliation", "reconcile_before_resume"),
+        ("resume_reconciliation", "on_unreconciled"),
+        ("reuse_invalidation", "unaffected_evidence"),
+        ("reuse_invalidation", "on_invalidation"),
+    )
+    for section, key in checks:
+        expected = templates[template_ids[0]][section][key]
+        for overlay_id in template_ids[1:]:
+            if templates[overlay_id][section][key] != expected:
+                conflicts.append(f"completion_semantics_conflict:{section}:{key}:{overlay_id}")
+    return conflicts
+
+
+def _merge_template_lists(
+    template_ids: list[str], templates: dict[str, dict[str, Any]], key: str
+) -> list[Any]:
+    return list(
+        dict.fromkeys(
+            item
+            for template_id in template_ids
+            for item in templates[template_id][key]
+        )
+    )
+
+
+def _resolve_resume(
+    template_ids: list[str], templates: dict[str, dict[str, Any]]
+) -> dict[str, Any]:
+    resolved = copy.deepcopy(templates[template_ids[0]]["resume_reconciliation"])
+    resolved["required_evidence"] = list(
+        dict.fromkeys(
+            evidence
+            for template_id in template_ids
+            for evidence in templates[template_id]["resume_reconciliation"]["required_evidence"]
+        )
+    )
+    return resolved
+
+
+def _resolve_reuse(
+    template_ids: list[str], templates: dict[str, dict[str, Any]]
+) -> dict[str, Any]:
+    resolved = copy.deepcopy(templates[template_ids[0]]["reuse_invalidation"])
+    for key in ("reuse_when", "invalidate_when"):
+        resolved[key] = list(
+            dict.fromkeys(
+                condition
+                for template_id in template_ids
+                for condition in templates[template_id]["reuse_invalidation"][key]
+            )
+        )
+    return resolved
+
+
+def _canonical_hash(value: Any) -> str:
+    import hashlib
+
+    encoded = json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
+    return hashlib.sha256(encoded.encode("utf-8")).hexdigest()
+
+
 def _validate_registry(registry: Any) -> None:
     if not isinstance(registry, dict) or type(registry.get("schema_version")) is not int or registry.get("schema_version") != 1:
         _invalid_registry()
@@ -186,7 +438,7 @@ def _validate_implemented_template(template: dict[str, Any]) -> None:
         _invalid_registry()
     if not _is_unique_nonempty_string_list(template["compatible_overlays"], allow_empty=True):
         _invalid_registry()
-    if not isinstance(template["review_level"], str) or not template["review_level"]:
+    if template["review_level"] not in REVIEW_LEVELS:
         _invalid_registry()
 
     owners = template["owners"]

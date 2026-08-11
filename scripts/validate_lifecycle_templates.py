@@ -82,6 +82,13 @@ DELTA_FIELDS = (
     "irreversible_or_unreconciled",
     "outside_verified_envelope",
 )
+REVIEW_LEVELS = (
+    "L0_NONE",
+    "L0_SINGLE_REVIEW",
+    "L3_SINGLE_FAMILY_PAIR",
+    "L2_SINGLE_FAMILY_QUAD",
+    "L1_CROSS_FAMILY_2X2",
+)
 
 
 def fail(errors: list[str], message: str) -> None:
@@ -198,8 +205,8 @@ def registry_errors(registry: Any) -> list[str]:
                     fail(errors, f"{prefix}: owners/{owner_name} must be a non-empty string")
             if owners.get("lifecycle_plan") != "development-process-tailoring":
                 fail(errors, f"{prefix}: lifecycle ownership must remain development-process-tailoring")
-        if not isinstance(entry["review_level"], str) or not entry["review_level"]:
-            fail(errors, f"{prefix}: review_level must be a non-empty string")
+        if entry["review_level"] not in REVIEW_LEVELS:
+            fail(errors, f"{prefix}: review_level must be a declared assurance level")
 
         required_evidence = entry["required_evidence"]
         if not is_unique_nonempty_string_list(required_evidence):
@@ -394,7 +401,7 @@ def run_contract_mutations(registry: dict[str, Any]) -> list[str]:
         contract = importlib.import_module("lifecycle_template_contract")
     except Exception as exc:  # pragma: no cover - guarded by the RED prerequisite
         return [f"cannot load shared lifecycle template contract: {exc}"]
-    for name in ("load_templates", "assess_template"):
+    for name in ("load_templates", "assess_template", "compose_templates"):
         if not callable(getattr(contract, name, None)):
             fail(errors, f"shared lifecycle template contract is missing {name}()")
     if errors:
@@ -407,11 +414,124 @@ def run_contract_mutations(registry: dict[str, Any]) -> list[str]:
         fail(errors, "shared lifecycle template loader changed authoritative registry content")
     errors.extend(loader_lifecycle_structure_errors(registry, contract.load_templates))
     errors.extend(selector_contract_errors(registry, contract.assess_template))
+    errors.extend(composition_contract_errors(registry, contract.compose_templates))
     return errors + selector_propagation_errors(
         registry,
         contract.load_templates,
         contract.assess_template,
     )
+
+
+def composition_contract_errors(registry: dict[str, Any], compose_templates: Any) -> list[str]:
+    """Exercise deterministic composition and every fail-closed boundary."""
+    errors: list[str] = []
+    templates = registry["templates"]
+    base_id = "bounded-feature"
+    overlay_id = "skill-evolution"
+    facts = {
+        **selection_facts(templates[base_id]),
+        **selection_facts(templates[overlay_id]),
+    }
+
+    unsupported_cases = (
+        ("unknown-template", [], "base:template_unknown"),
+        ("release", [], "base:template_deferred"),
+        (base_id, ["unknown-template"], "overlay:unknown-template:template_unknown"),
+        (base_id, ["release"], "overlay:release:template_deferred"),
+    )
+    for requested_base, overlays, reason in unsupported_cases:
+        result = compose_templates(requested_base, overlays, facts, registry)
+        if result.get("status") != "unsupported" or reason not in result.get("reasons", []):
+            fail(errors, f"composition did not reject unsupported request {requested_base!r}/{overlays!r}")
+
+    duplicate = compose_templates(base_id, [overlay_id, overlay_id], facts, registry)
+    if duplicate.get("status") != "conflict" or duplicate.get("reasons") != [
+        f"overlay_duplicate:{overlay_id}"
+    ]:
+        fail(errors, "composition accepted a duplicated overlay")
+
+    repeated_base = compose_templates(base_id, [base_id], facts, registry)
+    if repeated_base.get("status") != "conflict" or repeated_base.get("reasons") != [
+        f"overlay_duplicates_base:{base_id}"
+    ]:
+        fail(errors, "composition accepted its base as an overlay")
+
+    incompatible = compose_templates("lightweight-change", [overlay_id], facts, registry)
+    if incompatible.get("status") != "conflict" or incompatible.get("reasons") != [
+        f"overlay_incompatible:lightweight-change:{overlay_id}"
+    ]:
+        fail(errors, "composition accepted an undeclared overlay")
+
+    owner_conflict = compose_templates(base_id, [overlay_id], facts, registry)
+    if owner_conflict.get("status") != "conflict" or not any(
+        reason.startswith("owner_conflict:") for reason in owner_conflict.get("reasons", [])
+    ):
+        fail(errors, "composition accepted conflicting scalar owners")
+
+    escalated_facts = {**facts, "outside_verified_envelope": True}
+    escalated = compose_templates(base_id, [], escalated_facts, registry)
+    if escalated.get("status") != "escalation_required" or (
+        "base:delta:outside_verified_envelope:true" not in escalated.get("reasons", [])
+    ):
+        fail(errors, "composition normalized a true bounded delta to selected")
+
+    compatible = copy.deepcopy(registry)
+    base_owners = copy.deepcopy(compatible["templates"][base_id]["owners"])
+    compatible_overlay = compatible["templates"][overlay_id]
+    compatible_overlay["owners"] = base_owners
+    for gate in compatible_overlay["gates"]:
+        gate["owner"] = base_owners["policy"]
+    if registry_errors(compatible):
+        fail(errors, "validator fixture could not express a compatible owner overlay")
+        return errors
+
+    selected = compose_templates(base_id, [overlay_id], facts, compatible)
+    repeated = compose_templates(base_id, [overlay_id], facts, compatible)
+    if selected != repeated:
+        fail(errors, "composition was not deterministic for identical normalized input")
+    if selected.get("status") != "selected":
+        fail(errors, "declared compatible overlay did not compose")
+        return errors
+    if selected.get("template_ids") != [base_id, overlay_id]:
+        fail(errors, "composition did not retain base-first template IDs")
+    if selected.get("composition_order") != [base_id, overlay_id]:
+        fail(errors, "composition did not persist its deterministic order")
+    if selected.get("contract_versions") != {base_id: 1, overlay_id: 1}:
+        fail(errors, "composition did not retain every template contract version")
+    expected_stages = list(dict.fromkeys(templates[base_id]["stages"] + templates[overlay_id]["stages"]))
+    if selected.get("resolved_stages") != expected_stages:
+        fail(errors, "composition did not merge stages in precedence order")
+    expected_evidence = list(
+        dict.fromkeys(
+            templates[base_id]["required_evidence"] + templates[overlay_id]["required_evidence"]
+        )
+    )
+    if selected.get("resolved_required_evidence") != expected_evidence:
+        fail(errors, "composition dropped or reordered required evidence")
+    if selected.get("resolved_owners") != base_owners:
+        fail(errors, "composition did not resolve owners deterministically")
+    if selected.get("resolved_review_level") != "L2_SINGLE_FAMILY_QUAD":
+        fail(errors, "composition weakened the strongest review level")
+    if {gate.get("gate_id") for gate in selected.get("resolved_gates", [])} != {
+        gate["gate_id"]
+        for template_id in (base_id, overlay_id)
+        for gate in templates[template_id]["gates"]
+    }:
+        fail(errors, "composition dropped a required gate")
+    delta_hash = selected.get("delta_evidence_hash")
+    if not isinstance(delta_hash, str) or len(delta_hash) != 64:
+        fail(errors, "composition did not produce a deterministic delta evidence hash")
+
+    gate_conflict_registry = copy.deepcopy(compatible)
+    conflicting_gate = gate_conflict_registry["templates"][overlay_id]["gates"][0]
+    conflicting_gate["gate_id"] = "verification"
+    conflicting_gate["owner"] = base_owners["evidence"]
+    gate_conflict = compose_templates(base_id, [overlay_id], facts, gate_conflict_registry)
+    if gate_conflict.get("status") != "conflict" or (
+        "gate_transition_conflict:verification" not in gate_conflict.get("reasons", [])
+    ):
+        fail(errors, "composition accepted conflicting gate completion semantics")
+    return errors
 
 
 def selection_facts(template: dict[str, Any]) -> dict[str, Any]:
@@ -451,6 +571,9 @@ def loader_lifecycle_structure_errors(registry: dict[str, Any], load_templates: 
         "weakened reuse invalidation": lambda value: value["templates"]["lightweight-change"][
             "reuse_invalidation"
         ].__setitem__("on_invalidation", "ignore"),
+        "unknown review level": lambda value: value["templates"]["lightweight-change"].__setitem__(
+            "review_level", "L9_UNKNOWN"
+        ),
     }
     for label, mutate in mutations.items():
         altered = copy.deepcopy(registry)
