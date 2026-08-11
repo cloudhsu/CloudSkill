@@ -24,7 +24,8 @@
     "REF-BEH-001",
     "REF-BEH-002",
     "REF-BEH-003",
-    "REF-BEH-004"
+    "REF-BEH-004",
+    "REF-BEH-005"
   ],
   "behavior_case_types": [
     "application",
@@ -41,5 +42,5 @@
     "the skill has not been reviewed for two feature releases"
   ],
   "replacement_skill": null,
-  "notes": "Baseline lifecycle evidence generated from committed routing and behavior cases."
+  "notes": "6.3 evolution adds a compact extraction decision contract spanning compatibility seams, test shape, lazy dependency bootstrap, and authentication authority."
 }
