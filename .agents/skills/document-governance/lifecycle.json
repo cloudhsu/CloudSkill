@@ -26,7 +26,8 @@
     "DOC-BEH-001",
     "DOC-BEH-002",
     "DOC-BEH-003",
-    "DOC-BEH-004"
+    "DOC-BEH-004",
+    "DOC-BEH-005"
   ],
   "behavior_case_types": [
     "application",
@@ -43,5 +44,5 @@
     "the skill has not been reviewed for two feature releases"
   ],
   "replacement_skill": null,
-  "notes": "Baseline lifecycle evidence generated from committed routing and behavior cases."
+  "notes": "6.3 evolution distinguishes historical evidence container versions from the versions and capture times of observed facts."
 }

@@ -94,6 +94,28 @@
         "agent republishes sensitive detail or loses evidence provenance"
       ],
       "review_notes": "Review semantic relationships, authority, lifecycle, failure behavior, and evidence; keyword presence alone is insufficient."
+    },
+    {
+      "id": "DOC-BEH-005",
+      "skill": "document-governance",
+      "type": "application",
+      "prompt": "A report created in release 8 contains measurements captured from release 6 equipment, and a later editor wants to label every fact as version 8 because that is the report container version.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "records the document container or template version separately from each observation's subject version and capture time",
+        "preserves unknown observation applicability as unknown rather than inheriting the container version",
+        "keeps transformations traceable to the historical source record"
+      ],
+      "forbidden_behaviors": [
+        "rewrites historical observation versions to match the current document",
+        "uses file revision or edit time as evidence of the observed system version"
+      ],
+      "required_artifacts": ["container and observation provenance map"],
+      "baseline_expected_failure": [
+        "existing metadata rules do not explicitly separate historical container version from observed-fact applicability"
+      ],
+      "review_notes": "Review temporal and version provenance; filename consistency alone is insufficient."
     }
   ]
 }
