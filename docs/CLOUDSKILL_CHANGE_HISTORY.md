@@ -2,6 +2,18 @@
 
 This document records the evolution rationale and evidence chain for work that may span multiple conversations. Git commits and tags remain the authoritative source history.
 
+## 2026-08-11 — CloudBox 6.3 controlled-tool adapter RED baseline
+
+The user approved a 6.3 vertical slice in which `development-process-tailoring`
+acts as the plan/lifecycle owner and `agent-development-process` owns a narrow
+tool contract. The selected implementation is a transport-neutral registry,
+controlled local CLI broker, and temporary-repository Git adapter; MCP, live
+GitHub mutation, NAS polling, arbitrary shell, and public/private splitting are
+excluded. Four agent-tool Behavior cases and one process-owner case preserve
+the expected boundary. The initial executable validator intentionally fails on
+the missing `tool_adapter_contract` module, establishing RED before production
+code.
+
 ## 2026-08-11 — Public/private package split deferred
 
 The user retained the public Core/private Evolution Pack design but explicitly

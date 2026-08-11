@@ -15,6 +15,21 @@ This is the operational entry point for a new conversation or coding agent that 
 
 ## Current repository state
 
+### CloudBox 6.3 controlled-tool adapter RED baseline (2026-08-11)
+
+- The approved design and implementation plan are committed on
+  `design/cloudbox-6.3-controlled-tool-adapters`.
+- The first vertical slice is a transport-neutral contract, controlled local
+  CLI broker, and temporary-repository Git adapter governed by the 6.2
+  lifecycle owner. MCP, live GitHub mutation, NAS polling, arbitrary shell,
+  and public/private splitting remain outside 6.3.
+- Behavior cases now preserve the intended agent-tool and process-owner
+  boundaries. The executable contract probe intentionally fails because
+  `scripts/tool_adapter_contract.py` does not exist; this is RED, not a
+  product regression or completed behavior evaluation.
+- Continue with Task 2 in
+  `docs/superpowers/plans/2026-08-11-cloudbox-6.3-controlled-tool-adapters.md`.
+
 ### CloudBox 6.2.0 published and remotely verified (2026-08-11)
 
 - PR `#10` merged as `6be22cd`; annotated tag `v6.2.0` peels to that

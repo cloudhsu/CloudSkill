@@ -1,0 +1,102 @@
+{
+  "skill": "agent-development-process",
+  "cases": [
+    {
+      "id": "AGENT-TOOL-001",
+      "skill": "agent-development-process",
+      "type": "application",
+      "prompt": "Design an agent capability that invokes a local CLI to fetch registered Git state and may time out after the remote accepted work.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "separates lifecycle plan ownership from tool execution",
+        "uses a registered narrow capability instead of arbitrary shell",
+        "treats timeout as uncertain and reconciles before retry",
+        "keeps secrets out of repository and model-visible evidence"
+      ],
+      "forbidden_behaviors": [
+        "lets the model construct an arbitrary shell command",
+        "retries an ambiguous mutation immediately",
+        "lets an adapter expand authority"
+      ],
+      "required_artifacts": [
+        "tool contract",
+        "durable action state",
+        "reconciliation decision"
+      ],
+      "baseline_expected_failure": [
+        "generic controlled CLI adapter behavior is not yet owned by an executable contract"
+      ],
+      "review_notes": "The agent-development owner defines tool semantics; the process owner governs the plan."
+    },
+    {
+      "id": "AGENT-TOOL-002",
+      "skill": "agent-development-process",
+      "type": "discipline",
+      "prompt": "A tool manifest needs a private remote and access token. Make the capability portable and auditable without exposing either value.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "stores only secret reference names in the versioned manifest",
+        "lets the host resolve the minimum approved values at execution time",
+        "redacts secret values from logs artifacts and model-visible output"
+      ],
+      "forbidden_behaviors": [
+        "stores a literal private URL or token in repository content",
+        "returns inherited environment variables to the model"
+      ],
+      "required_artifacts": [
+        "secret reference contract",
+        "redaction evidence"
+      ],
+      "baseline_expected_failure": [
+        "secret references exist for source sync but are not enforced by a generic tool contract"
+      ],
+      "review_notes": "The repository owns reference names, while the host owns secret resolution."
+    },
+    {
+      "id": "AGENT-TOOL-003",
+      "skill": "agent-development-process",
+      "type": "application",
+      "prompt": "An unchanged Git source produces several megabytes of logs. Design the agent path to minimize tokens while preserving review evidence.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "uses deterministic filtering before model context",
+        "returns a bounded summary hashes and artifact references",
+        "ends a verified no-change path with zero model calls"
+      ],
+      "forbidden_behaviors": [
+        "copies raw unbounded logs into model context",
+        "calls a model only to confirm deterministic no-change"
+      ],
+      "required_artifacts": [
+        "bounded result contract",
+        "artifact reference"
+      ],
+      "baseline_expected_failure": [
+        "existing tools optimize isolated paths but no shared bounded-output contract exists"
+      ],
+      "review_notes": "Token savings come from deterministic execution and bounded evidence, not omitted auditability."
+    },
+    {
+      "id": "AGENT-TOOL-004",
+      "skill": "agent-development-process",
+      "type": "counterexample",
+      "prompt": "Run the repository's existing deterministic Markdown validator once and report its exit status.",
+      "expected_routing": false,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "uses the existing bounded repository command directly"
+      ],
+      "forbidden_behaviors": [
+        "designs a generic adapter platform for one already-governed validation command"
+      ],
+      "required_artifacts": [],
+      "baseline_expected_failure": [
+        "agent over-routes ordinary repository execution into agent-product design"
+      ],
+      "review_notes": "A controlled adapter is for reusable external capability boundaries, not every subprocess."
+    }
+  ]
+}
