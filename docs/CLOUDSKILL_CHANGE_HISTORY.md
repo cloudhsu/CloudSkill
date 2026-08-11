@@ -2,6 +2,18 @@
 
 This document records the evolution rationale and evidence chain for work that may span multiple conversations. Git commits and tags remain the authoritative source history.
 
+## 2026-08-11 — Token-refactor exact-tip review passed
+
+Independent exact-tip review passed at `ed9fca6` after two Medium evidence
+findings were corrected. The evidence record now identifies static/manual
+semantic method, independent reviewers, exact source tips, per-case
+dispositions, and provider-backed Runtime Eval as `NOT RUN`. Deterministic
+priority validation now checks both the positive sole-Plan-Owner declaration
+and negative owner-removal mutation, in addition to lifecycle-first,
+evidence-second, token-third ordering and retained intake safeguards. No
+High/Medium findings remained; version, push, merge, and release stay pending
+user authorization.
+
 ## 2026-08-11 — Developing Skills context and planning authority pilot
 
 The user approved a token-oriented progressive-disclosure pilot for
