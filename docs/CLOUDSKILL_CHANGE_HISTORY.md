@@ -185,6 +185,17 @@ grant identity, moves uncertain RUNNING observations into `UNCERTAIN`, and
 classifies skipped archives as `BLOCKED`. Focused evidence passes; complete
 regression and a fresh panel remain required.
 
+## 2026-08-11 — Second immutable-target review stopped at persistence and root security
+
+Fresh GPT-5.4 review reproduced two P1 failures. Concurrent writers can both
+pass the current revision check before separate atomic replacements, producing
+last-writer-wins evidence loss rather than compare-and-swap. A symlinked
+`inbox/imports` directory can also route prepared archive reads/moves outside the
+approved Inbox root. The increment returns to architecture for an inter-process
+lock with stale-owner recovery and in-lock revalidation, plus physical path-chain
+validation at prepare, preflight, and move boundaries. Remaining review cells,
+version synchronization, and publication are stopped.
+
 ## 2026-08-11 — Public/private package split deferred
 
 The user retained the public Core/private Evolution Pack design but explicitly

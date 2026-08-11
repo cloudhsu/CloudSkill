@@ -248,6 +248,22 @@ This is the operational entry point for a new conversation or coding agent that 
   and returns `BLOCKED` for skipped prepared archives. Focused broker, Git, and
   recovery validators pass. Complete-suite reruns and fresh L1 review remain.
 
+### CloudBox 6.3 immutable-target second review architecture stop (2026-08-11)
+
+- GPT-5.4 review of `6c0d478` returned FAIL; remaining L1 cells were stopped.
+  Raw output is `.local/reviews/cloudbox-6.3/gpt-5.4-v2-r2.txt`, SHA-256
+  `3139ace549af471b19c5bb10e531a47c9dfb4b28d61ed5361d26b73ecdc5b6db`.
+- Two P1 boundaries require deliberate correction: action revision validation
+  and publication are not one mutually exclusive transaction, allowing two
+  concurrent writers to both succeed; and a symlinked `inbox/imports` directory
+  can escape the approved Eval Inbox root during prepare/import.
+- Required next increment: add an inter-process action lock with bounded wait,
+  stale-owner recovery, in-lock revision/lease revalidation, and concurrency RED;
+  reject symlinks/resolved-root escape at bundle prepare, preflight, and move
+  boundaries with corresponding RED. Rerun complete suite twice and restart all
+  L1 cells fresh only after both are GREEN.
+- Version remains 6.2.0. Push, merge, tag, and release remain prohibited.
+
 ### CloudBox 6.2.0 published and remotely verified (2026-08-11)
 
 - PR `#10` merged as `6be22cd`; annotated tag `v6.2.0` peels to that
