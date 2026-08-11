@@ -20,7 +20,7 @@ secret = request.get("secrets", {}).get("FIXTURE_SECRET", "")
 diagnostics = [f"secret={secret}"] if mode == "leak" else []
 output = {"status": "RECONCILED" if request.get("operation") == "reconcile" else ("NO_CHANGE" if mode == "no-change" else "OK")}
 result = {
-    "contract_version": "1.0",
+    "contract_version": "2.0",
     "adapter_id": request["adapter_id"],
     "capability_id": request["capability_id"],
     "action_id": request["action_id"],

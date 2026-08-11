@@ -14,7 +14,7 @@ sys.path.insert(0, str(ROOT / "scripts"))
 from import_eval_candidates import import_archives, resolve_private_terms  # noqa: E402
 from eval_bundle_contract import build_bundle_manifest  # noqa: E402
 from tool_action_store import load_action, save_action_atomic, transition_action  # noqa: E402
-from tool_execution_broker import ExecutionContext, execute_prepared, prepare_invocation, reconcile_prepared  # noqa: E402
+from tool_execution_broker import ExecutionContext, execute_prepared, prepare_invocation, prepare_targets, reconcile_prepared  # noqa: E402
 
 ADAPTER = ROOT / "scripts/git_tool_adapter.py"
 
@@ -28,7 +28,7 @@ def git(args: list[str], cwd: Path | None = None) -> str:
 
 def invocation(capability: str, action: int, arguments: dict, authority: str | None) -> dict:
     return {
-        "contract_version": "1.0",
+        "contract_version": "2.0",
         "adapter_id": "git-local",
         "capability_id": capability,
         "action_id": f"act-000000{action:02d}",
@@ -41,6 +41,10 @@ def invocation(capability: str, action: int, arguments: dict, authority: str | N
     }
 
 
+def prepare_v2(value: dict, registry: dict, context: ExecutionContext):
+    return prepare_invocation(prepare_targets(value, registry, context), registry, context)
+
+
 errors: list[str] = []
 tool_help = subprocess.run([sys.executable, str(ROOT / "scripts/cloudskill_evolution.py"), "tool", "invoke", "--help"], text=True, capture_output=True)
 if tool_help.returncode or any(flag not in tool_help.stdout for flag in ("--root-ref", "--authority", "--owner-id", "--fencing-token")):
@@ -48,6 +52,9 @@ if tool_help.returncode or any(flag not in tool_help.stdout for flag in ("--root
 reconcile_help = subprocess.run([sys.executable, str(ROOT / "scripts/cloudskill_evolution.py"), "tool", "reconcile", "--help"], text=True, capture_output=True)
 if reconcile_help.returncode or "--state-dir" not in reconcile_help.stdout:
     errors.append("controlled tool reconciliation CLI is unavailable")
+prepare_help = subprocess.run([sys.executable, str(ROOT / "scripts/cloudskill_evolution.py"), "tool", "prepare", "--help"], text=True, capture_output=True)
+if prepare_help.returncode or "--state-dir" in prepare_help.stdout or "--invocation" not in prepare_help.stdout:
+    errors.append("read-only controlled target preparation CLI is unavailable")
 with tempfile.TemporaryDirectory(prefix="cloudbox-git-adapter-") as temp_name:
     root = Path(temp_name)
     remote = root / "remote.git"
@@ -95,7 +102,7 @@ with tempfile.TemporaryDirectory(prefix="cloudbox-git-adapter-") as temp_name:
         now_epoch=1760000000,
     )
     inspect = invocation("git.inspect", 1, {"repository": "clone"}, None)
-    result = execute_prepared(prepare_invocation(inspect, registry, context), root / "actions/inspect.json", context)
+    result = execute_prepared(prepare_v2(inspect, registry, context), root / "actions/inspect.json", context)
     if result["state"] != "SUCCEEDED" or len(result["output"].get("head", "")) != 40:
         errors.append("git.inspect did not return a bounded HEAD fingerprint")
     if str(remote) in json.dumps(result):
@@ -106,7 +113,10 @@ with tempfile.TemporaryDirectory(prefix="cloudbox-git-adapter-") as temp_name:
     git(["push", "origin", "HEAD:main"], seed)
     before = git(["rev-parse", "refs/remotes/origin/main"], clone)
     fetch = invocation("git.fetch", 2, {"repository": "clone", "remote": "origin"}, "grant-000001")
-    result = execute_prepared(prepare_invocation(fetch, registry, context), root / "actions/fetch.json", context)
+    prepared_fetch = prepare_v2(fetch, registry, context)
+    if git(["rev-parse", "refs/remotes/origin/main"], clone) != before or (root / "actions/fetch.json").exists():
+        errors.append("target preparation mutated Git state or created action state")
+    result = execute_prepared(prepared_fetch, root / "actions/fetch.json", context)
     after = git(["rev-parse", "refs/remotes/origin/main"], clone)
     if result["state"] != "SUCCEEDED" or before == after:
         errors.append("git.fetch did not update the registered remote-tracking ref")
@@ -123,12 +133,15 @@ with tempfile.TemporaryDirectory(prefix="cloudbox-git-adapter-") as temp_name:
         now_epoch=context.now_epoch,
     )
     wrong_endpoint = invocation("git.fetch", 9, {"repository": "clone", "remote": "origin"}, "grant-000001")
-    wrong_result = execute_prepared(prepare_invocation(wrong_endpoint, registry, wrong_endpoint_context), root / "actions/wrong-endpoint.json", wrong_endpoint_context)
-    if wrong_result["state"] != "FAILED":
-        errors.append("git.fetch accepted a remote URL outside host authorization")
+    try:
+        prepare_v2(wrong_endpoint, registry, wrong_endpoint_context)
+    except ValueError:
+        pass
+    else:
+        errors.append("git.fetch prepared a remote URL outside host authorization")
 
     reconcile_invocation = invocation("git.fetch", 4, {"repository": "clone", "remote": "origin"}, "grant-000001")
-    reconcile_preparation = prepare_invocation(reconcile_invocation, registry, context)
+    reconcile_preparation = prepare_v2(reconcile_invocation, registry, context)
     reconcile_path = root / "actions/reconcile-fetch.json"
     uncertain = save_action_atomic(reconcile_path, reconcile_preparation.action, 0, owner_id=context.owner_id, fencing_token=context.fencing_token, now=context.now_epoch)
     uncertain = transition_action(uncertain, "AUTHORIZED", {"authority_grant_id": "grant-000001"})
@@ -141,9 +154,9 @@ with tempfile.TemporaryDirectory(prefix="cloudbox-git-adapter-") as temp_name:
     if reconciled["state"] != "SUCCEEDED" or reconciled["output"].get("status") != "OBSERVED_COMPLETE":
         errors.append(f"Git fetch reconciliation did not observe authoritative remote/local refs: {reconciled}")
 
-    git(["remote", "set-url", "origin", str(root / "missing-remote.git")], clone)
     observation_invocation = invocation("git.fetch", 8, {"repository": "clone", "remote": "origin"}, "grant-000001")
-    observation_preparation = prepare_invocation(observation_invocation, registry, context)
+    observation_preparation = prepare_v2(observation_invocation, registry, context)
+    git(["remote", "set-url", "origin", str(root / "missing-remote.git")], clone)
     observation_path = root / "actions/reconcile-observation-failure.json"
     uncertain = save_action_atomic(observation_path, observation_preparation.action, 0, owner_id=context.owner_id, fencing_token=context.fencing_token, now=context.now_epoch)
     uncertain = transition_action(uncertain, "AUTHORIZED", {"authority_grant_id": "grant-000001"})
@@ -171,7 +184,7 @@ with tempfile.TemporaryDirectory(prefix="cloudbox-git-adapter-") as temp_name:
         now_epoch=context.now_epoch,
     )
     empty_invocation = invocation("git.fetch", 10, {"repository": "empty-clone", "remote": "origin"}, "grant-000001")
-    empty_preparation = prepare_invocation(empty_invocation, registry, empty_context)
+    empty_preparation = prepare_v2(empty_invocation, registry, empty_context)
     empty_path = root / "actions/reconcile-empty-fetch.json"
     uncertain = save_action_atomic(empty_path, empty_preparation.action, 0, owner_id=empty_context.owner_id, fencing_token=empty_context.fencing_token, now=empty_context.now_epoch)
     uncertain = transition_action(uncertain, "AUTHORIZED", {"authority_grant_id": "grant-000001"})
@@ -185,9 +198,12 @@ with tempfile.TemporaryDirectory(prefix="cloudbox-git-adapter-") as temp_name:
         errors.append("empty remote/local ref sets were not reconciled as matching")
 
     bad = invocation("git.fetch", 3, {"repository": "clone", "remote": "unregistered"}, "grant-000001")
-    result = execute_prepared(prepare_invocation(bad, registry, context), root / "actions/bad-fetch.json", context)
-    if result["state"] != "FAILED":
-        errors.append("unregistered Git remote was not a confirmed failure")
+    try:
+        prepare_v2(bad, registry, context)
+    except ValueError:
+        pass
+    else:
+        errors.append("unregistered Git remote was prepared")
 
     candidate = json.loads((ROOT / ".agents/skills/developing-skills/assets/INTERACTION_EVAL_CANDIDATE.template.json").read_text(encoding="utf-8"))
     candidate["cloudskill_version"] = (ROOT / "VERSION").read_text(encoding="utf-8").strip()
@@ -206,7 +222,7 @@ with tempfile.TemporaryDirectory(prefix="cloudbox-git-adapter-") as temp_name:
         archive.writestr("manifest.json", json.dumps(manifest))
         archive.writestr(payload_name, payload)
     import_request = invocation("git.import_bundle", 5, {"inbox": "inbox", "dry_run": False}, "grant-000001")
-    imported = execute_prepared(prepare_invocation(import_request, registry, context), root / "actions/import.json", context)
+    imported = execute_prepared(prepare_v2(import_request, registry, context), root / "actions/import.json", context)
     if imported["state"] != "SUCCEEDED" or imported["output"].get("candidates") != 1:
         errors.append("adapter import did not preserve configured safe-candidate routing")
     if len(list((inbox / "candidates").glob("*.json"))) != 1 or list((inbox / "manual-review").glob("*.json")):

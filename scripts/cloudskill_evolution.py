@@ -7,7 +7,7 @@ import time
 from pathlib import Path
 from evolution_source_contract import load_source_registry, sync_source
 from tool_adapter_contract import load_registry
-from tool_execution_broker import ExecutionContext, execute_prepared, prepare_invocation, prepare_reconciliation, reconcile_prepared
+from tool_execution_broker import ExecutionContext, execute_prepared, prepare_invocation, prepare_reconciliation, prepare_targets, reconcile_prepared
 
 
 def _assignments(values: list[str], *, paths: bool = False) -> dict:
@@ -26,6 +26,12 @@ def main() -> int:
     source = sub.add_parser("source"); source_sub = source.add_subparsers(dest="action", required=True)
     sync = source_sub.add_parser("sync"); sync.add_argument("--registry", required=True); sync.add_argument("--exchange", required=True); sync.add_argument("--source-id", required=True)
     tool = sub.add_parser("tool"); tool_sub = tool.add_subparsers(dest="action", required=True)
+    prepare = tool_sub.add_parser("prepare")
+    prepare.add_argument("--registry", required=True)
+    prepare.add_argument("--invocation", required=True)
+    prepare.add_argument("--root-ref", action="append", default=[])
+    prepare.add_argument("--secret-ref", action="append", default=[])
+    prepare.add_argument("--authority", action="append", default=[])
     for tool_action in ("invoke", "reconcile"):
         tool_command = tool_sub.add_parser(tool_action)
         tool_command.add_argument("--registry", required=True)
@@ -55,11 +61,14 @@ def main() -> int:
             secret_values=secrets,
             approved_authority=set(args.authority),
             repository_root=Path(__file__).resolve().parents[1],
-            owner_id=args.owner_id,
-            fencing_token=args.fencing_token,
+            owner_id=getattr(args, "owner_id", None),
+            fencing_token=getattr(args, "fencing_token", None),
             now_epoch=int(time.time()),
         )
         registry = load_registry(Path(args.registry))
+        if args.action == "prepare":
+            print(json.dumps(prepare_targets(invocation, registry, context), sort_keys=True))
+            return 0
         prepared = prepare_invocation(invocation, registry, context) if args.action == "invoke" else prepare_reconciliation(invocation, registry, context)
         state_path = Path(args.state_dir).expanduser().resolve() / f"{invocation['action_id']}.json"
         result = execute_prepared(prepared, state_path, context) if args.action == "invoke" else reconcile_prepared(prepared, state_path, context)

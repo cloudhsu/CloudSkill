@@ -196,6 +196,18 @@ This is the operational entry point for a new conversation or coding agent that 
   contract validator pass. Broker/adapters and their v1 fixtures are intentionally
   the next open layer; the complete suite is not yet GREEN.
 
+### CloudBox 6.3 immutable-target prepare GREEN (2026-08-11)
+
+- `tool prepare` now resolves a draft invocation into a complete contract-v2
+  invocation without creating action state or mutating Git/the Eval Inbox.
+- Git prepare binds host-authorized advertised ref/object IDs or direct
+  non-symlink archive relative paths/hashes/sizes. The broker validates returned
+  targets against registry bounds before returning the artifact.
+- Public invoke/reconcile schemas reject v1 envelopes, and action schema 2 rejects
+  retained v1 non-terminal checkpoints. Focused contract, broker, recovery, and
+  temporary-Git validators pass. Exact-target execution/reconciliation is the
+  next open layer; full-suite GREEN is not yet claimed.
+
 ### CloudBox 6.2.0 published and remotely verified (2026-08-11)
 
 - PR `#10` merged as `6be22cd`; annotated tag `v6.2.0` peels to that

@@ -76,7 +76,7 @@ for label, value in forbidden_registry_mutations.items():
         errors.append(f"{label} registry mutation was accepted")
 
 valid_result = {
-    "contract_version": "1.0",
+    "contract_version": "2.0",
     "adapter_id": "git-local",
     "capability_id": "git.inspect",
     "action_id": "act-00000001",

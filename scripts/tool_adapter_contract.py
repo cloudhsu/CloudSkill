@@ -214,11 +214,4 @@ def validate_action_state(value: Any) -> list[str]:
         maximum = value.get("max_attempts")
         if isinstance(attempt, int) and not isinstance(attempt, bool) and isinstance(maximum, int) and not isinstance(maximum, bool) and attempt > maximum:
             errors.append("action attempt exceeds max_attempts")
-        registry = None
-        try:
-            registry = load_registry()
-        except (OSError, ValueError):
-            pass
-        if registry is not None:
-            errors.extend(validate_operation_targets(value.get("capability_id"), value.get("operation_targets"), registry))
     return errors

@@ -5,7 +5,7 @@
   "additionalProperties": false,
   "required": ["contract_version", "adapter_id", "capability_id", "action_id", "state", "summary", "output", "artifact_refs", "observed_side_effects", "diagnostics", "output_hash", "latency_ms", "model_calls"],
   "properties": {
-    "contract_version": {"const": "1.0"},
+    "contract_version": {"const": "2.0"},
     "adapter_id": {"type": "string", "pattern": "^[a-z][a-z0-9._-]{2,63}$"},
     "capability_id": {"type": "string", "pattern": "^[a-z][a-z0-9._-]{2,63}$"},
     "action_id": {"type": "string", "pattern": "^act-[a-z0-9][a-z0-9-]{7,63}$"},

@@ -10,6 +10,7 @@ sys.path.insert(0, str(ROOT / "scripts"))
 from tool_adapter_contract import (  # noqa: E402
     canonical_target_digest,
     load_registry,
+    validate_action_state,
     validate_invocation,
     validate_operation_targets,
 )
@@ -39,6 +40,20 @@ invocation = {
 errors: list[str] = []
 if validate_invocation(invocation, registry):
     errors.append("valid immutable fetch targets were rejected")
+v1_invocation = {key: value for key, value in invocation.items() if key != "operation_targets"}
+v1_invocation["contract_version"] = "1.0"
+if not validate_invocation(v1_invocation, registry):
+    errors.append("v1 invocation was accepted by the v2 execution contract")
+v1_action = {
+    "schema_version": 1, "revision": 1, "action_id": "act-immutable01",
+    "idempotency_key": "idem-immutable01", "plan_id": "plan-immutable01",
+    "plan_revision": 1, "adapter_id": "git-local", "adapter_version": "1.0.0",
+    "capability_id": "git.fetch", "state": "UNCERTAIN", "attempt": 1,
+    "max_attempts": 2, "input_hash": "0" * 64, "authority_grant_id": "grant-immutable01",
+    "evidence": [], "lease": None,
+}
+if not validate_action_state(v1_action):
+    errors.append("v1 non-terminal checkpoint was accepted by the v2 action contract")
 if validate_operation_targets("git.fetch", targets, registry):
     errors.append("valid immutable fetch target contract was rejected")
 

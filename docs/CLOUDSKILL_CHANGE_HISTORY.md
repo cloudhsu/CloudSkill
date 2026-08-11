@@ -143,6 +143,16 @@ bundle archive identity. Focused immutable-target and contract mutation evidence
 passes. Execution and reconciliation remain on the old layer and the complete
 suite is intentionally not claimed.
 
+## 2026-08-11 — Read-only immutable target preparation implemented
+
+The operator CLI and broker now provide a read-only prepare phase that emits a
+complete v2 invocation and never creates durable action state. The Git adapter
+prepares exact authorized remote ref/object IDs or direct non-symlink bundle
+archive path/hash/size identities, while the broker enforces capability bounds
+and canonical digest validity. V1 invocation/action contracts fail closed and
+are retained for manual diagnosis rather than migration. Focused executable
+evidence passes; execute/reconcile still require exact-target conversion.
+
 ## 2026-08-11 — Public/private package split deferred
 
 The user retained the public Core/private Evolution Pack design but explicitly

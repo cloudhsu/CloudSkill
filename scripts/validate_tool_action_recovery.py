@@ -14,11 +14,14 @@ from tool_action_store import (  # noqa: E402
     save_action_atomic,
     transition_action,
 )
+from tool_adapter_contract import canonical_target_digest  # noqa: E402
 
 
 def base_action() -> dict:
+    targets = {"kind": "git-fetch-refs", "items": []}
+    targets = {**targets, "digest": canonical_target_digest(targets)}
     return {
-        "schema_version": 1,
+        "schema_version": 2,
         "revision": 0,
         "action_id": "act-00000001",
         "idempotency_key": "idem-00000001",
@@ -31,6 +34,8 @@ def base_action() -> dict:
         "attempt": 0,
         "max_attempts": 2,
         "input_hash": "0" * 64,
+        "operation_targets": targets,
+        "target_evidence": [],
         "authority_grant_id": "grant-000001",
         "evidence": [],
         "lease": None,

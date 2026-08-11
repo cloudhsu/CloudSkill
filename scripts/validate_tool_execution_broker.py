@@ -9,6 +9,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 
+from tool_adapter_contract import canonical_target_digest  # noqa: E402
 from tool_execution_broker import ExecutionContext, execute_prepared, prepare_invocation, prepare_reconciliation, reconcile_prepared  # noqa: E402
 from tool_action_store import load_action  # noqa: E402
 
@@ -17,8 +18,8 @@ FIXTURE = ROOT / "scripts/fixtures/tool_adapter_fixture.py"
 
 def registry(timeout: int = 1, maximum: int = 1024, attempts: int = 1) -> dict:
     return {
-        "schema_version": 1,
-        "protocol_version": "1.0",
+        "schema_version": 2,
+        "protocol_version": "2.0",
         "adapters": [{
             "adapter_id": "fixture-cli",
             "adapter_version": "1.0.0",
@@ -35,6 +36,8 @@ def registry(timeout: int = 1, maximum: int = 1024, attempts: int = 1) -> dict:
                 "idempotent": True,
                 "supports_reconciliation": True,
                 "max_output_bytes": maximum,
+                "target_kind": "none",
+                "max_target_items": 0,
                 "argument_schema": {"type": "object", "additionalProperties": False, "required": ["repository", "mode"], "properties": {"repository": {"type": "string", "minLength": 1}, "mode": {"enum": ["success", "failed", "timeout", "malformed", "oversized", "leak", "no-change"]}}},
             }],
         }],
@@ -42,8 +45,10 @@ def registry(timeout: int = 1, maximum: int = 1024, attempts: int = 1) -> dict:
 
 
 def invocation(mode: str = "success") -> dict:
+    targets = {"kind": "none", "items": []}
+    targets = {**targets, "digest": canonical_target_digest(targets)}
     return {
-        "contract_version": "1.0",
+        "contract_version": "2.0",
         "adapter_id": "fixture-cli",
         "capability_id": "fixture.execute",
         "action_id": "act-00000001",
@@ -51,6 +56,7 @@ def invocation(mode: str = "success") -> dict:
         "plan_id": "plan-00000001",
         "plan_revision": 1,
         "arguments": {"repository": "repo", "mode": mode},
+        "operation_targets": targets,
         "authority_grant_id": "grant-000001",
         "deadline": "2099-08-11T12:00:00Z",
     }

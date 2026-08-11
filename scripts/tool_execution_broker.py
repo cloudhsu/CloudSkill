@@ -14,7 +14,7 @@ from pathlib import Path
 from typing import Any
 
 from tool_action_store import load_action, reserve_idempotency, save_action_atomic, transition_action
-from tool_adapter_contract import get_adapter, get_capability, validate_invocation, validate_registry, validate_result
+from tool_adapter_contract import canonical_target_digest, get_adapter, get_capability, validate_invocation, validate_operation_targets, validate_registry, validate_result
 
 
 @dataclass(frozen=True)
@@ -58,7 +58,7 @@ def _redact(value: Any, secrets: list[str]) -> Any:
     return value
 
 
-def prepare_invocation(invocation: dict[str, Any], registry: dict[str, Any], context: ExecutionContext, *, _allow_expired: bool = False) -> PreparedInvocation:
+def prepare_invocation(invocation: dict[str, Any], registry: dict[str, Any], context: ExecutionContext, *, _allow_expired: bool = False, _preparing: bool = False) -> PreparedInvocation:
     registry_errors = validate_registry(registry)
     if registry_errors:
         raise ValueError("invalid adapter registry: " + "; ".join(registry_errors))
@@ -78,7 +78,7 @@ def prepare_invocation(invocation: dict[str, Any], registry: dict[str, Any], con
     if deadline.tzinfo is None or (deadline.astimezone(timezone.utc).timestamp() <= now_epoch and not _allow_expired):
         raise ValueError("invocation deadline has expired")
     mutating = capability["risk"] != "read-only"
-    if mutating and (not context.owner_id or not isinstance(context.fencing_token, int) or context.fencing_token < 1):
+    if mutating and not _preparing and (not context.owner_id or not isinstance(context.fencing_token, int) or context.fencing_token < 1):
         raise ValueError("mutating invocation requires broker owner and fencing token")
 
     roots: list[Path] = []
@@ -121,6 +121,7 @@ def prepare_invocation(invocation: dict[str, Any], registry: dict[str, Any], con
         "action_id": invocation["action_id"],
         "idempotency_key": invocation["idempotency_key"],
         "arguments": resolved_arguments,
+        "operation_targets": invocation["operation_targets"],
         "secrets": secrets,
     }
     secret_fingerprints = {name: hashlib.sha256(value.encode("utf-8")).hexdigest() for name, value in secrets.items()}
@@ -132,7 +133,7 @@ def prepare_invocation(invocation: dict[str, Any], registry: dict[str, Any], con
     }
     input_hash = hashlib.sha256(json.dumps(identity, sort_keys=True).encode("utf-8")).hexdigest()
     action = {
-        "schema_version": 1,
+        "schema_version": 2,
         "revision": 0,
         "action_id": invocation["action_id"],
         "idempotency_key": invocation["idempotency_key"],
@@ -145,12 +146,32 @@ def prepare_invocation(invocation: dict[str, Any], registry: dict[str, Any], con
         "attempt": 0,
         "max_attempts": capability["max_attempts"],
         "input_hash": input_hash,
+        "operation_targets": invocation["operation_targets"],
+        "target_evidence": [],
         "authority_grant_id": invocation["authority_grant_id"],
         "evidence": [],
         "lease": ({"owner_id": context.owner_id, "fencing_token": context.fencing_token, "expires_at": now_epoch + capability["timeout_seconds"] + 30} if mutating else None),
     }
     environment = {"PATH": os.environ.get("PATH", ""), "PYTHONIOENCODING": "utf-8"}
     return PreparedInvocation(invocation, adapter, capability, [sys.executable, str(adapter_path)], repository_root, environment, request, action)
+
+
+def prepare_targets(invocation: dict[str, Any], registry: dict[str, Any], context: ExecutionContext) -> dict[str, Any]:
+    """Resolve mutable capability arguments into a bounded v2 target artifact without creating action state."""
+    adapter = get_adapter(registry, invocation.get("adapter_id"))
+    capability = get_capability(registry, invocation.get("adapter_id"), invocation.get("capability_id"))
+    placeholder = {"kind": capability["target_kind"], "items": []}
+    placeholder = {**placeholder, "digest": canonical_target_digest(placeholder)}
+    draft = {**invocation, "contract_version": "2.0", "operation_targets": placeholder}
+    prepared = prepare_invocation(draft, registry, context, _preparing=True)
+    result = _invoke_adapter(prepared, "prepare")
+    if result.get("state") != "SUCCEEDED":
+        raise ValueError("adapter target preparation did not succeed")
+    targets = result.get("output", {}).get("operation_targets")
+    errors = validate_operation_targets(draft["capability_id"], targets, registry)
+    if errors:
+        raise ValueError("adapter returned invalid operation targets: " + "; ".join(errors))
+    return {**draft, "operation_targets": targets}
 
 
 def prepare_reconciliation(invocation: dict[str, Any], registry: dict[str, Any], context: ExecutionContext) -> PreparedInvocation:
@@ -163,7 +184,7 @@ def _uncertain_result(prepared: PreparedInvocation, reason: str, latency_ms: int
     output: dict[str, Any] = {}
     digest = hashlib.sha256(json.dumps(output, sort_keys=True).encode("utf-8")).hexdigest()
     return {
-        "contract_version": "1.0",
+        "contract_version": "2.0",
         "adapter_id": prepared.invocation["adapter_id"],
         "capability_id": prepared.invocation["capability_id"],
         "action_id": prepared.invocation["action_id"],
@@ -182,7 +203,7 @@ def _uncertain_result(prepared: PreparedInvocation, reason: str, latency_ms: int
 def _blocked_result(prepared: PreparedInvocation, reason: str) -> dict[str, Any]:
     output: dict[str, Any] = {}
     return {
-        "contract_version": "1.0",
+        "contract_version": "2.0",
         "adapter_id": prepared.invocation["adapter_id"],
         "capability_id": prepared.invocation["capability_id"],
         "action_id": prepared.invocation["action_id"],

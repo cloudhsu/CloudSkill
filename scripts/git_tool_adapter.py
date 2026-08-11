@@ -13,6 +13,7 @@ from pathlib import Path
 from typing import Any
 
 from import_eval_candidates import import_archives, resolve_private_terms
+from tool_adapter_contract import canonical_target_digest
 
 
 def _git(arguments: list[str], cwd: Path, timeout: int = 90) -> str:
@@ -34,6 +35,39 @@ def _inspect(repository: Path) -> tuple[dict[str, Any], list[str]]:
     remotes = sorted(item for item in _git(["remote"], repository).splitlines() if item)
     remote_names_hash = hashlib.sha256("\n".join(remotes).encode("utf-8")).hexdigest()
     return {"head": head, "branch": branch, "dirty": dirty, "remote_names_hash": remote_names_hash}, []
+
+
+def _prepare(capability: str, arguments: dict[str, Any], secrets: dict[str, str]) -> tuple[str, str, dict[str, Any], list[str]]:
+    if capability == "git.inspect":
+        targets = {"kind": "none", "items": []}
+    elif capability == "git.fetch":
+        repository = Path(arguments["repository"])
+        remote = arguments["remote"]
+        if remote not in set(_git(["remote"], repository).splitlines()):
+            raise ValueError("requested remote is not registered in repository")
+        if _git(["remote", "get-url", remote], repository) != secrets["SOURCE_REMOTE_URL"]:
+            raise ValueError("registered remote URL is not host-authorized")
+        items = []
+        for row in _git(["ls-remote", "--heads", remote], repository).splitlines():
+            object_id, ref = row.split(None, 1)
+            items.append({"ref": ref, "object_id": object_id})
+        targets = {"kind": "git-fetch-refs", "items": sorted(items, key=lambda item: item["ref"])}
+    elif capability == "git.import_bundle":
+        imports = Path(arguments["inbox"]) / "imports"
+        items = []
+        for path in sorted(imports.glob("*.zip")) if imports.is_dir() else []:
+            if path.is_symlink() or not path.is_file():
+                raise ValueError("bundle target must be a direct non-symlink archive")
+            items.append({
+                "relative_path": f"imports/{path.name}",
+                "sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
+                "size_bytes": path.stat().st_size,
+            })
+        targets = {"kind": "eval-bundle-archives", "items": items}
+    else:
+        raise ValueError("unknown registered Git capability")
+    targets = {**targets, "digest": canonical_target_digest(targets)}
+    return "SUCCEEDED", "immutable operation targets prepared", {"operation_targets": targets}, []
 
 
 def _execute(capability: str, arguments: dict[str, Any], secrets: dict[str, str]) -> tuple[str, str, dict[str, Any], list[str]]:
@@ -100,7 +134,7 @@ def _reconcile(capability: str, arguments: dict[str, Any], secrets: dict[str, st
 def make_result(request: dict[str, Any], state: str, summary: str, output: dict[str, Any], effects: list[str], diagnostics: list[str], latency_ms: int) -> dict[str, Any]:
     digest = hashlib.sha256(json.dumps(output, sort_keys=True).encode("utf-8")).hexdigest()
     return {
-        "contract_version": "1.0",
+        "contract_version": "2.0",
         "adapter_id": request["adapter_id"],
         "capability_id": request["capability_id"],
         "action_id": request["action_id"],
@@ -121,9 +155,11 @@ def main() -> int:
     request = json.loads(sys.stdin.read())
     try:
         operation = request.get("operation")
-        if operation not in {"execute", "reconcile"}:
+        if operation not in {"prepare", "execute", "reconcile"}:
             raise ValueError("unsupported adapter operation")
-        if operation == "reconcile":
+        if operation == "prepare":
+            state, summary, output, effects = _prepare(request["capability_id"], request["arguments"], request.get("secrets", {}))
+        elif operation == "reconcile":
             state, summary, output, effects = _reconcile(request["capability_id"], request["arguments"], request.get("secrets", {}))
         else:
             state, summary, output, effects = _execute(request["capability_id"], request["arguments"], request.get("secrets", {}))
