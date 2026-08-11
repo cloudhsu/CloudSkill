@@ -3,6 +3,7 @@
   "profiles":{
     "iterative_incremental":{"stages":["analyze","architect","design","implement","verify","release","operate","learn"]},
     "eval_driven_evolution":{"stages":["analyze","verify","implement","verify","release","learn"]},
+    "controlled_tool_vertical_slice":{"stages":["analyze","architect","design","verify","implement","verify","release","learn"]},
     "stage_gated":{"stages":["explore","analyze","architect","design","implement","verify","release"]},
     "agile_incremental":{"stages":["analyze","design","implement","verify","release","learn"]},
     "discovery_spike":{"stages":["explore","analyze","verify"]},
@@ -12,4 +13,3 @@
     "lightweight_change":{"stages":["analyze","implement","verify"]}
   }
 }
-

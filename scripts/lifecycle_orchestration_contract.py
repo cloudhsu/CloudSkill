@@ -9,7 +9,8 @@ def load_profiles(path: Path)->dict[str,Any]:
     return value
 
 def select_profiles(pressure: dict[str,Any], profiles: dict[str,Any])->list[str]:
-    if pressure.get("work_type")=="skill_evolution": selected=["eval_driven_evolution"]
+    if pressure.get("work_type")=="controlled_tool_adapter": selected=["controlled_tool_vertical_slice"]
+    elif pressure.get("work_type")=="skill_evolution": selected=["eval_driven_evolution"]
     elif pressure.get("risk")=="low" and pressure.get("scope")=="local": selected=["lightweight_change"]
     else: selected=["iterative_incremental"]
     additions=[]
@@ -31,6 +32,17 @@ def classify_failure(observation: dict[str,Any])->str:
     if mechanism in mapping:return mapping[mechanism]
     if mechanism=="implementation":return "implement"
     raise ValueError("failure mechanism is insufficient for re-entry")
+
+def classify_tool_event(action:dict[str,Any],evidence:dict[str,Any])->str:
+    if action.get("state")=="UNCERTAIN": return "reconcile"
+    if evidence.get("risk_changed") or evidence.get("authority_changed"): return "replan"
+    mechanism=evidence.get("failed_mechanism")
+    if mechanism in {"state_authority","recovery_model","persistence_boundary"}: return "architect"
+    if mechanism in {"malformed_evidence","result_contract","provenance"}: return "verify"
+    if mechanism=="implementation": return "implement"
+    if action.get("state")=="BLOCKED": return "block"
+    if action.get("state")=="FAILED": return "stop"
+    raise ValueError("tool event evidence is insufficient for lifecycle re-entry")
 
 def deployment_decision(state:dict[str,Any],health_evidence:dict[str,Any])->str:
     if state.get("status") not in {"deployed","observing"}: return "AUTHORITY_REQUIRED"
