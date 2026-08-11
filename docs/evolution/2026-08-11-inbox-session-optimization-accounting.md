@@ -35,7 +35,7 @@ format and migration policy exist.
 - Task 2 and token/governance baselines: `NO_CHANGE_JUSTIFIED`.
 - Domain owners: pre-change semantic gap audit plus focused current cases.
 - Structural Behavior contracts and lifecycle audit: PASS.
-- Combined targeted semantic GREEN: 11/11 PASS; boundary audit found no
+- Combined targeted semantic GREEN: 10/10 PASS; boundary audit found no
   High/Medium omission.
 - Complete deterministic suite after integration: PASS (two passes).
 - Model-backed Runtime Eval corpus execution: not claimed; the targeted GREEN

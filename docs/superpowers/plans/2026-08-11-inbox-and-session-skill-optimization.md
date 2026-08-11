@@ -42,9 +42,9 @@
 - Modify: `.agents/skills/coding-agent-project-governance/SKILL.md`
 - Modify: affected lifecycle records
 
-- [x] Add RED cases proving an old-tip PASS and version-only update cannot authorize release.
+- [x] Added exact-tip/release-closure regression cases; the no-Skill baseline already passed, so this is regression-only rather than claimed RED.
 - [x] Record baseline behavior separately for evaluation validity and repository publication governance.
-- [x] Add exact-tip invalidation/accumulated-finding closure to the Eval owner and PR/CI/merge/tag/Release/post-record closure to repository governance.
+- [x] Audited both owners; baseline already contained the required closure, so no Skill prose was changed (`NO_CHANGE_JUSTIFIED`).
 - [x] Verify adjacent documentation-only and bounded-patch controls do not trigger full release machinery.
 - [x] Commit the increment.
 
@@ -60,13 +60,10 @@
 - Modify: `.agents/skills/developing-skills/references/conversation-derived-optimization.md`
 - Modify: affected lifecycle records
 
-- [x] Add RED cases for repeatedly patching an undefined authority/concurrency/filesystem boundary, repetitive unchanged waiting updates, full rereads of large unchanged handoffs, model review before deterministic filtering, and continuing a panel after a blocking finding.
-- [x] Add a manual-fallback/redesign stop condition to the agent-product owner.
-- [x] Add transition-only monitoring/reporting and checkpoint-summary guidance to the lifecycle owner while retaining requested status responses.
-- [x] Require deterministic filtering, candidate clustering, source/diff hashes, exact-tip review, equivalent-evidence reuse, and stop-on-blocker before additional model calls in the Eval/Skill-evolution owners.
-- [x] Require progressive context loading: current checkpoint/index first, then only the referenced section/file needed for the active failure layer; full rereads remain allowed when authority or lineage cannot otherwise be established.
-- [x] Verify counterexamples for bounded safe automation, materially changed status, genuinely changed evidence, and a small handoff whose full read is cheaper than routing overhead.
-- [x] Commit the increment.
+- [x] Audited the automation, lifecycle, and runtime-Eval owners; no new cases or owner edits were warranted (`NO_CHANGE_JUSTIFIED`).
+- [x] Consolidated only the demonstrated token gap—deterministic filtering/clustering, hashes, exact-tip review, equivalent-evidence reuse, stop-on-blocker, and progressive loading—in `developing-skills`.
+- [x] Verified the existing owners already cover manual redesign, transition-only reporting, checkpoint summaries, bounded safe automation, changed status/evidence, and cheap full reads.
+- [x] Committed the demonstrated `developing-skills` increment; did not create duplicate owner rules.
 
 ### Task 4: Host/plugin and continuation provenance (O08–O09, O26)
 
@@ -76,10 +73,8 @@
 - Modify: `.agents/skills/coding-agent-project-governance/SKILL.md`
 - Modify: `.agents/skills/using-cloudskill/SKILL.md` or its routing reference only when RED proves a gap
 
-- [x] Add RED cases distinguishing checkout, installed cache, active session, branch/worktree, remote, and generic-versus-specific Skill routing.
-- [x] Add only missing provenance/reload and routing rules; reuse existing plugin-coexistence guidance.
-- [x] Verify no false completion claim and no router over-selection.
-- [x] Commit the increment.
+- [x] Audited checkout/cache/session, branch/worktree/remote, and generic-versus-specific routing behavior; the no-Skill baseline passed (`NO_CHANGE_JUSTIFIED`).
+- [x] Verified no false completion or router over-selection; no Skill/case edit or cluster commit was made.
 
 ### Task 5: Native/code/framework clusters (O11–O20, O24–O25, O29)
 
@@ -88,7 +83,7 @@
 - Candidate owners: `code-review`, `cross-platform-native-architecture`, `framework-design`, `software-quality-iso25010`, `development-process-tailoring`.
 
 - [x] Deduplicate request identity, parser validation, worker shutdown, readiness/completion, transport capability, emulator evidence, registry drift, design-host ABI, real-time alignment, release-matrix, process identity, escape-sensitive editing, and OS-integration ownership candidates.
-- [x] Run one RED/GREEN cycle per owner Skill, not per source record.
+- [x] Ran a pre-change static/manual semantic gap audit per owner and a combined targeted semantic GREEN; no historical model-backed RED is claimed.
 - [x] Keep protocol constants, product topology, platform secrets, and local paths out of reusable content.
 - [x] Commit each owner independently after adjacent regression.
 
@@ -99,8 +94,8 @@
 
 - [x] Consolidate extraction seam/test-shape/bootstrap/auth boundaries into a compact refactoring decision table.
 - [x] Keep durability divergence, schema-versus-product version, immutable history/compensation, and post-commitment lifecycle as four distinct architecture Evals.
-- [x] Add historical container-versus-observation version governance and proportional pre-completion self-audit cases.
-- [x] Commit each owner independently after GREEN and adjacent regression.
+- [x] Added historical container-versus-observation governance; proportional self-audit was already covered and remained unchanged (`NO_CHANGE_JUSTIFIED`).
+- [x] Committed each changed owner independently after focused contract validation and later combined semantic GREEN.
 
 ### Task 7: Inbox accounting, full regression, and review
 
@@ -111,6 +106,6 @@
 
 - [x] Record each source candidate as promoted, merged, held, reassigned, or rejected without deleting the private source evidence.
 - [x] Run structural, routing, Behavior contract, install, packaging, and full deterministic checks twice.
-- [x] Run behavior execution for every changed Skill; record PASS/FAIL/BLOCKED/NOT RUN truthfully.
+- [x] Ran targeted semantic GREEN for every changed owner and recorded provider-backed Runtime Eval as `NOT RUN`.
 - [ ] Obtain exact-tip independent review selected by risk; correct findings through new RED/GREEN increments. (First review returned four Medium evidence/lineage findings; corrections are in progress.)
 - [ ] Present the candidate and evidence for user approval before version, push, or release.

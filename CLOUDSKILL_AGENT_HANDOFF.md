@@ -26,7 +26,7 @@ This is the operational entry point for a new conversation or coding agent that 
   duplicated.
 - Accounting is in
   `docs/evolution/2026-08-11-inbox-session-optimization-accounting.md`.
-- Combined targeted semantic GREEN passed 11/11 with no High/Medium boundary
+- Combined targeted semantic GREEN passed 10/10 with no High/Medium boundary
   omission, and the integrated deterministic suite passed twice. Finish an
   exact-tip review, then present the candidate before version/push/release.
 

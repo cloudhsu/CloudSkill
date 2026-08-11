@@ -24,7 +24,7 @@ Status: post-6.3 implementation candidate; provider-backed Runtime Eval not run.
 ## Combined GREEN
 
 - Reviewed source tip: `9cab43c`.
-- Independent reviewer result: 11/11 PASS.
+- Independent reviewer result: 10/10 PASS.
 - Cases: `CR-BEH-004`, `FW-BEH-005`, `XPLAT-BEH-004`, `ISO-BEH-005`,
   `REF-BEH-005`, `APP-BEH-005`, `APP-BEH-006`, `APP-BEH-007`,
   `APP-BEH-008`, and `DOC-BEH-005`.
