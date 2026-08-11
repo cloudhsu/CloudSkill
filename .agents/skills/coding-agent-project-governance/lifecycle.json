@@ -21,11 +21,14 @@
   "behavior_case_ids": [
     "CAG-BEH-001",
     "CAG-BEH-002",
-    "CAG-BEH-003"
+    "CAG-BEH-003",
+    "CAG-BEH-004",
+    "CAG-BEH-005"
   ],
   "behavior_case_types": [
     "application",
     "counterexample",
+    "discipline",
     "recognition"
   ],
   "next_review_triggers": [
