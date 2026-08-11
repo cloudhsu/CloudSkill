@@ -172,6 +172,18 @@ This is the operational entry point for a new conversation or coding agent that 
 - Next gate: user review of the written spec, then create a TDD implementation
   plan. No production implementation has begun from this redesign.
 
+### CloudBox 6.3 immutable-target RED baseline (2026-08-11)
+
+- The approved implementation plan is
+  `docs/superpowers/plans/2026-08-11-cloudbox-6.3-immutable-operation-targets.md`.
+- `scripts/validate_immutable_operation_targets.py` requires contract-v2 target
+  digest validation plus drift, duplicate, ordering, and path-escape rejection.
+  Its initial execution must fail because the v1 contract interpreter has no
+  `canonical_target_digest` or `validate_operation_targets` API.
+- Sixth-review executable evidence remains the RED source for live-head fetch
+  drift and inbox-wide late archive consumption. Production v2 edits remain
+  prohibited until this contract RED is observed.
+
 ### CloudBox 6.2.0 published and remotely verified (2026-08-11)
 
 - PR `#10` merged as `6be22cd`; annotated tag `v6.2.0` peels to that

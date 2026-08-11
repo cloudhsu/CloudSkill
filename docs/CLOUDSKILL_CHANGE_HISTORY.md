@@ -124,6 +124,15 @@ an older action. Unfinished v1 development checkpoints are blocked and retained;
 manual import remains unchanged. The approved design is recorded separately;
 implementation awaits the written-spec review and a new TDD plan.
 
+## 2026-08-11 — Immutable operation-target executable RED added
+
+The approved plan begins with a new executable validator requiring canonical v2
+target digests and rejecting digest drift, duplicates, unstable ordering, and
+bundle path escape. The existing v1 interpreter intentionally lacks the new API,
+so the first run must fail before production contract changes. The sixth review's
+temporary Git/inbox reproductions remain evidence for the two external-resource
+identity failures that caused the architecture stop.
+
 ## 2026-08-11 — Public/private package split deferred
 
 The user retained the public Core/private Evolution Pack design but explicitly
