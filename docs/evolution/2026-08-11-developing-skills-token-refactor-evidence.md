@@ -89,3 +89,9 @@ detail. New risk creates a plan revision and invalidates only affected steps.
 The Skill name, description, lifecycle stage, privacy boundary, manual ZIP,
 unsupported retention, legacy recovery, RED/GREEN discipline, and release-truth
 boundary remain unchanged. No other large Skill was structurally refactored.
+
+## Exact-tip review
+
+Independent review at `ed9fca6` passed with no High/Medium findings. Earlier
+review findings required reproducible semantic-adjudication metadata and direct
+sole-Plan-Owner drift detection; both were corrected before PASS.

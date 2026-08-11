@@ -190,19 +190,19 @@ git diff --check
 
 Expected: PASS and clean diff formatting.
 
-- [ ] **Step 3: Obtain independent exact-tip review**
+- [x] **Step 3: Obtain independent exact-tip review**
 
 Review `origin/main...HEAD` for information loss, hidden mandatory safeguards,
 reference-routing ambiguity, duplicated authority, privacy regression, and
 misleading token claims. Correct every High/Medium finding through a focused
 RED/GREEN increment.
 
-- [ ] **Step 4: Update handoff and execution status**
+- [x] **Step 4: Update handoff and execution status**
 
 Record exact commit/evidence state without marking intentionally skipped or
 `NO_CHANGE_JUSTIFIED` work as performed.
 
-- [ ] **Step 5: Commit evidence and present candidate**
+- [x] **Step 5: Commit evidence and present candidate**
 
 ```bash
 git add docs/evolution/2026-08-11-developing-skills-token-refactor-evidence.md CLOUDSKILL_AGENT_HANDOFF.md docs/CLOUDSKILL_CHANGE_HISTORY.md docs/superpowers/plans/2026-08-11-developing-skills-token-refactor.md

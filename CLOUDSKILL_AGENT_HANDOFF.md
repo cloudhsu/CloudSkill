@@ -30,8 +30,8 @@ This is the operational entry point for a new conversation or coding agent that 
 - The complete deterministic suite passed after two information-loss
   regressions were found and corrected. Evidence is in
   `docs/evolution/2026-08-11-developing-skills-token-refactor-evidence.md`.
-- Exact-tip independent review remains pending. Do not version, push, merge, or
-  release before candidate review and user approval.
+- Exact-tip `ed9fca6` independent review passed with no High/Medium findings.
+  Do not version, push, merge, or release before user approval.
 
 ### Inbox/session Skill optimization candidate (2026-08-11)
 
