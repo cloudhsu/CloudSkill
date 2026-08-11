@@ -24,6 +24,7 @@ remain deferred.
 
 ```bash
 python3 scripts/validate_tool_adapter_contract.py
+python3 scripts/validate_immutable_operation_targets.py
 python3 scripts/validate_tool_action_recovery.py
 python3 scripts/validate_tool_execution_broker.py
 python3 scripts/validate_git_tool_adapter.py
@@ -32,9 +33,24 @@ python3 scripts/validate_git_tool_adapter.py
 The Git validator creates only temporary local repositories. It does not use a
 configured GitHub remote.
 
-## Invoke a registered capability
+## Prepare and invoke a registered capability
 
-Create a contract-valid invocation JSON outside tracked source, then run:
+Create a draft invocation JSON outside tracked source, then freeze its immutable
+targets before authorization. `tool prepare` is read-only and emits a complete
+contract-v2 invocation; store that output as the invocation used by every later
+step:
+
+```bash
+python3 scripts/cloudskill_evolution.py tool prepare \
+  --registry config/tool-adapters.json \
+  --invocation .local/tool-actions/draft.json \
+  --root-ref REPOSITORY_ROOT=/approved/repository/parent \
+  --secret-ref SOURCE_REMOTE_URL=CLOUDBOX_SOURCE_REMOTE \
+  --authority git.fetch \
+  > .local/tool-actions/invocation.json
+```
+
+Inspect and authorize the emitted target digest, then run:
 
 ```bash
 python3 scripts/cloudskill_evolution.py tool invoke \
@@ -56,6 +72,11 @@ increasing fencing token. A resumed or replacement owner must reconcile the
 existing checkpoint before acquiring a higher token; it must not delete the
 checkpoint to force another execution.
 
+Fetch targets contain exact prepared ref/object IDs. Bundle targets contain
+exact direct archive relative paths, SHA-256 values, and byte sizes. Later
+remote commits or later Inbox arrivals are not part of the action and require a
+new prepare/action identity. Fetch has no implicit prune semantics.
+
 The bundle importer requires the local CloudSkill configuration path so it uses
 the same private-term policy as the manual importer. The registry stores only
 the logical reference. Bind it to an environment variable at invocation time:
@@ -69,7 +90,8 @@ python3 scripts/cloudskill_evolution.py tool invoke \
 `git.fetch` similarly requires
 `--secret-ref SOURCE_REMOTE_URL=CLOUDBOX_SOURCE_REMOTE`; the registered remote's
 resolved URL must exactly match that host-provided value before execution or
-reconciliation. This authorizes the endpoint, not merely a mutable remote name.
+preparation/execution. Reconciliation evaluates the already prepared local
+targets and does not redefine them from current live remote heads.
 
 The environment variable value is not written to the invocation, registry,
 action state, or model-visible result. Do not put a literal URL or credential
@@ -108,6 +130,10 @@ one action/input/file identity. After lease expiry, only a replacement owner wit
 a higher fencing token can claim the action. If reconciliation cannot observe
 the external system, the action remains `UNCERTAIN`; observation failure is not
 proof that the original side effect failed.
+
+Unfinished contract-v1 development checkpoints are retained but blocked. Inspect
+their external state manually and prepare a new v2 action; CloudBox never
+silently rewrites old evidence.
 
 A confirmed `FAILED` action may consume only its declared remaining retry
 budget. `RUNNING` or `UNCERTAIN` actions never enter that retry path.

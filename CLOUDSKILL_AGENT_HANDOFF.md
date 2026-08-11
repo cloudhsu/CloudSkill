@@ -223,6 +223,18 @@ This is the operational entry point for a new conversation or coding agent that 
 - Next: documentation synchronization and complete-suite regression. Release
   review/version/push remain gated.
 
+### CloudBox 6.3 immutable-target deterministic candidate (2026-08-11)
+
+- Operator documentation now defines prepare → inspect/authorize digest → invoke
+  → reconcile, v1 blocking, endpoint/config secret references, manual fallback,
+  late-work isolation, and excluded implicit prune semantics.
+- `validate_immutable_operation_targets.py` is registered in the authoritative
+  complete suite. Two consecutive `python3 scripts/run_all_checks.py` executions
+  pass on the v2 implementation candidate.
+- Next: commit exact-tip documentation/integration, then restart all four
+  `L1_CROSS_FAMILY_2X2` cells fresh beginning with GPT-5.4. Version remains 6.2.0
+  and publication stays prohibited until the panel passes.
+
 ### CloudBox 6.2.0 published and remotely verified (2026-08-11)
 
 - PR `#10` merged as `6be22cd`; annotated tag `v6.2.0` peels to that

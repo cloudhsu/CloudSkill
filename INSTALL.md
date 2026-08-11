@@ -334,7 +334,7 @@ CloudBox 6.1 的手動匯出包含版本 manifest，檔名為
 
 ## 10e. 受控 CLI Tool Adapter
 
-CloudBox 6.3 的候選能力可用版本化 registry 執行窄化的 Git inspect、fetch
+CloudBox 6.3 的候選能力先以唯讀 `tool prepare` 固定 contract-v2 目標摘要，再用版本化 registry 執行窄化的 Git inspect、fetch
 與 bundle import。Host 必須明確提供允許的 root、authority 與 secret
 reference；不支援模型自行輸入任意 shell。安裝、測試、續跑與既有手動匯入
 方式見 [docs/CONTROLLED_TOOL_ADAPTERS.md](docs/CONTROLLED_TOOL_ADAPTERS.md)。

@@ -165,6 +165,15 @@ target outcome to the action and canonical target digest. Existing manual import
 continues to scan its Inbox dynamically. Focused deterministic evidence passes;
 full regression and fresh release assurance remain pending.
 
+## 2026-08-11 — Immutable-target deterministic candidate completed
+
+Operator documentation and suite registration now cover the contract-v2
+prepare/authorize/invoke/reconcile flow, v1 blocking, endpoint/config secret
+references, no implicit prune, manual import compatibility, and late-work
+isolation. The complete deterministic suite passes twice consecutively. This is
+implementation evidence only; version synchronization and publication remain
+gated on a fresh exact-tip L1 cross-family 2x2 review.
+
 ## 2026-08-11 — Public/private package split deferred
 
 The user retained the public Core/private Evolution Pack design but explicitly
