@@ -61,8 +61,8 @@
 - Modify: affected lifecycle records
 
 - [x] Audited the automation, lifecycle, and runtime-Eval owners; no new cases or owner edits were warranted (`NO_CHANGE_JUSTIFIED`).
-- [x] Consolidated only the demonstrated token gap—deterministic filtering/clustering, hashes, exact-tip review, equivalent-evidence reuse, stop-on-blocker, and progressive loading—in `developing-skills`.
-- [x] Verified the existing owners already cover manual redesign, transition-only reporting, checkpoint summaries, bounded safe automation, changed status/evidence, and cheap full reads.
+- [x] Consolidated only the demonstrated token gap—deterministic filtering/clustering, hashes, exact-tip review, equivalent-evidence reuse, stop-on-blocker, and unchanged-wait suppression—in `developing-skills`.
+- [x] The no-Skill baseline already handled manual redesign, transition-only reporting, checkpoint summaries, progressive loading versus cheap full reads, bounded safe automation, and changed status/evidence; these remained `NO_CHANGE_JUSTIFIED` without claiming new owner text.
 - [x] Committed the demonstrated `developing-skills` increment; did not create duplicate owner rules.
 
 ### Task 4: Host/plugin and continuation provenance (O08–O09, O26)
