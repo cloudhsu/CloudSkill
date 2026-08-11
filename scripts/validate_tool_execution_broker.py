@@ -9,7 +9,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 
-from tool_execution_broker import ExecutionContext, execute_prepared, prepare_invocation  # noqa: E402
+from tool_execution_broker import ExecutionContext, execute_prepared, prepare_invocation, prepare_reconciliation, reconcile_prepared  # noqa: E402
 from tool_action_store import load_action  # noqa: E402
 
 FIXTURE = ROOT / "scripts/fixtures/tool_adapter_fixture.py"
@@ -143,6 +143,23 @@ with tempfile.TemporaryDirectory(prefix="cloudbox-tool-broker-") as temp_name:
             resumed = execute_prepared(prepared, root / "actions" / f"act-0000000{index}.json", context)
             if resumed["state"] != "BLOCKED" or load_action(root / "actions" / f"act-0000000{index}.json")["attempt"] != 1:
                 errors.append("existing uncertain checkpoint was not resumed without re-execution")
+            changed_secret_context = ExecutionContext(root_refs=context.root_refs, secret_values={"FIXTURE_SECRET": "changed-private-value"}, approved_authority=context.approved_authority, repository_root=ROOT, owner_id="fixture-owner", fencing_token=1, now_epoch=4100000000)
+            changed_prepared = prepare_reconciliation(value, registry(), changed_secret_context)
+            try:
+                reconcile_prepared(changed_prepared, root / "actions" / f"act-0000000{index}.json", changed_secret_context)
+            except ValueError as exc:
+                if "conflicts" not in str(exc):
+                    errors.append("changed secret reference failed for the wrong reason")
+            else:
+                errors.append("reconciliation accepted changed secret/config identity")
+            later_context = ExecutionContext(root_refs=context.root_refs, secret_values=context.secret_values, approved_authority=context.approved_authority, repository_root=ROOT, owner_id="fixture-owner", fencing_token=1, now_epoch=4100000000)
+            reconciliation_prepared = prepare_reconciliation(value, registry(), later_context)
+            reconciled = reconcile_prepared(reconciliation_prepared, root / "actions" / f"act-0000000{index}.json", later_context)
+            reconciled_state = load_action(root / "actions" / f"act-0000000{index}.json")
+            if reconciled["state"] != "SUCCEEDED" or reconciled["output"].get("status") != "RECONCILED":
+                errors.append("adapter reconciliation did not classify external completion")
+            if reconciled_state["state"] != "SUCCEEDED" or reconciled_state["attempt"] != 1:
+                errors.append("reconciliation re-executed or failed to close durable action")
 
     no_change = invocation("no-change")
     no_change["action_id"] = "act-00000006"

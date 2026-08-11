@@ -77,6 +77,27 @@ This is the operational entry point for a new conversation or coding agent that 
   Implement the smallest shared resolution path, rerun the complete suite, then
   restart L1 review from four fresh cells. Version/release remain prohibited.
 
+### CloudBox 6.3 second review correction candidate (2026-08-11)
+
+- RED/GREEN now provides a public `tool reconcile` path that invokes only an
+  adapter-declared, observation-only reconciliation operation. It preserves the
+  original execution identity, rejects changed path/secret inputs, and records
+  completion evidence without incrementing the execution attempt.
+- `git.fetch` reconciliation compares registered-remote heads with local
+  remote-tracking refs; bundle import reconciliation observes whether pending
+  archives remain. Neither path repeats the original mutation.
+- Adapter bundle import now resolves private terms through the same validated
+  local configuration path as the manual importer. The registry requires the
+  `CLOUDSKILL_CONFIG_PATH` secret reference; its value remains outside durable
+  state and model-visible results.
+- Contract validation now recomputes result output hashes. Focused contract,
+  broker, Git adapter, capture, recovery, and lifecycle validators pass. A
+  Python 3.7 incompatibility in the first Git reconciliation implementation was
+  caught by the executable fixture and replaced with compatible prefix slicing.
+- Next: run two complete deterministic-suite passes, commit the exact candidate,
+  then restart L1 review from four fresh cells. Version synchronization and
+  release remain prohibited until exact-tip assurance passes.
+
 ### CloudBox 6.2.0 published and remotely verified (2026-08-11)
 
 - PR `#10` merged as `6be22cd`; annotated tag `v6.2.0` peels to that

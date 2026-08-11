@@ -6,7 +6,7 @@ import os
 from pathlib import Path
 from evolution_source_contract import load_source_registry, sync_source
 from tool_adapter_contract import load_registry
-from tool_execution_broker import ExecutionContext, execute_prepared, prepare_invocation
+from tool_execution_broker import ExecutionContext, execute_prepared, prepare_invocation, prepare_reconciliation, reconcile_prepared
 
 
 def _assignments(values: list[str], *, paths: bool = False) -> dict:
@@ -25,15 +25,16 @@ def main() -> int:
     source = sub.add_parser("source"); source_sub = source.add_subparsers(dest="action", required=True)
     sync = source_sub.add_parser("sync"); sync.add_argument("--registry", required=True); sync.add_argument("--exchange", required=True); sync.add_argument("--source-id", required=True)
     tool = sub.add_parser("tool"); tool_sub = tool.add_subparsers(dest="action", required=True)
-    invoke = tool_sub.add_parser("invoke")
-    invoke.add_argument("--registry", required=True)
-    invoke.add_argument("--invocation", required=True)
-    invoke.add_argument("--state-dir", required=True)
-    invoke.add_argument("--root-ref", action="append", default=[])
-    invoke.add_argument("--secret-ref", action="append", default=[])
-    invoke.add_argument("--authority", action="append", default=[])
-    invoke.add_argument("--owner-id")
-    invoke.add_argument("--fencing-token", type=int)
+    for tool_action in ("invoke", "reconcile"):
+        tool_command = tool_sub.add_parser(tool_action)
+        tool_command.add_argument("--registry", required=True)
+        tool_command.add_argument("--invocation", required=True)
+        tool_command.add_argument("--state-dir", required=True)
+        tool_command.add_argument("--root-ref", action="append", default=[])
+        tool_command.add_argument("--secret-ref", action="append", default=[])
+        tool_command.add_argument("--authority", action="append", default=[])
+        tool_command.add_argument("--owner-id")
+        tool_command.add_argument("--fencing-token", type=int)
     for area, action in (("candidate", "review"), ("candidate", "evaluate"), ("evolution", "apply"), ("evolution", "release")):
         command = sub.choices.get(area) or sub.add_parser(area)
         children = getattr(command, "_cloudskill_children", None)
@@ -56,9 +57,10 @@ def main() -> int:
             owner_id=args.owner_id,
             fencing_token=args.fencing_token,
         )
-        prepared = prepare_invocation(invocation, load_registry(Path(args.registry)), context)
+        registry = load_registry(Path(args.registry))
+        prepared = prepare_invocation(invocation, registry, context) if args.action == "invoke" else prepare_reconciliation(invocation, registry, context)
         state_path = Path(args.state_dir).expanduser().resolve() / f"{invocation['action_id']}.json"
-        result = execute_prepared(prepared, state_path, context)
+        result = execute_prepared(prepared, state_path, context) if args.action == "invoke" else reconcile_prepared(prepared, state_path, context)
         print(json.dumps(result, sort_keys=True)); return 0
     if not args.approve:
         print(json.dumps({"status": "REFUSED", "reason": "explicit --approve is required", "operation_id": args.operation_id})); return 2

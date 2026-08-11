@@ -56,14 +56,14 @@ increasing fencing token. A resumed or replacement owner must reconcile the
 existing checkpoint before acquiring a higher token; it must not delete the
 checkpoint to force another execution.
 
-If an adapter later requires a private endpoint or token, the registry stores
-only a reference such as `SOURCE_REMOTE_URL`. Bind it to an environment variable
-at invocation time:
+The bundle importer requires the local CloudSkill configuration path so it uses
+the same private-term policy as the manual importer. The registry stores only
+the logical reference. Bind it to an environment variable at invocation time:
 
 ```bash
 python3 scripts/cloudskill_evolution.py tool invoke \
   ... \
-  --secret-ref SOURCE_REMOTE_URL=CLOUDBOX_SOURCE_REMOTE
+  --secret-ref CLOUDSKILL_CONFIG_PATH=CLOUDBOX_CONFIG_PATH
 ```
 
 The environment variable value is not written to the invocation, registry,
@@ -78,6 +78,25 @@ authority or prerequisites. `UNCERTAIN` means timeout or transport evidence
 cannot prove external completion; inspect and reconcile the external system
 before authorizing another attempt. Do not delete the checkpoint and repeat the
 command.
+
+Use the same invocation identity and action location for reconciliation:
+
+```bash
+python3 scripts/cloudskill_evolution.py tool reconcile \
+  --registry config/tool-adapters.json \
+  --invocation .local/tool-actions/invocation.json \
+  --state-dir .local/tool-actions/state \
+  --root-ref REPOSITORY_ROOT=/approved/repository/parent \
+  --authority git.fetch \
+  --owner-id operator-session-2 \
+  --fencing-token 2
+```
+
+Reconciliation invokes only a capability that declares reconciliation support,
+observes external state without repeating the original side effect, and records
+the evidence without incrementing the execution attempt. Changed inputs,
+root/secret values, or action identity are rejected rather than attached to the
+old checkpoint.
 
 The lifecycle owner reads the plan revision and action checkpoint, preserves
 completed evidence, and chooses reconciliation, re-plan, architecture re-entry,

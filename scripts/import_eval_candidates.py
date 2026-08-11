@@ -44,6 +44,22 @@ from eval_bundle_contract import validate_bundle_manifest  # noqa: E402
 ROOT = Path(__file__).resolve().parents[1]
 
 
+def resolve_private_terms(inbox: Path, config_path: Path | None = None) -> list[str]:
+    """Resolve terms only from a safe config that owns the requested inbox."""
+    selected = config_path
+    if selected is None:
+        selected = find_project_config(ROOT)
+        if selected is None:
+            user_config = Path.home() / ".cloudskill" / "config.json"
+            selected = user_config if user_config.is_file() else None
+    if selected is None or not selected.is_file():
+        return []
+    config = load_config(selected)
+    if config["_inbox_path"] != inbox.expanduser().resolve():
+        raise ValueError("CloudSkill config does not own the requested Eval Inbox")
+    return load_private_terms(config["_sensitive_terms_file"])
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Merge exported interaction Eval candidate zips into the local Eval Inbox."
@@ -67,7 +83,7 @@ def resolve_inbox(args: argparse.Namespace) -> tuple[Path, list[str]]:
             config_path = Path.home() / ".cloudskill" / "config.json"
         if config_path.is_file():
             config = load_config(config_path)
-            terms = load_private_terms(config["_sensitive_terms_file"])
+            terms = resolve_private_terms(config["_inbox_path"], config_path)
             return config["_inbox_path"], terms
     except (OSError, ValueError, KeyError):
         pass

@@ -8,7 +8,7 @@ import os
 import subprocess
 import sys
 import time
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -58,7 +58,7 @@ def _redact(value: Any, secrets: list[str]) -> Any:
     return value
 
 
-def prepare_invocation(invocation: dict[str, Any], registry: dict[str, Any], context: ExecutionContext) -> PreparedInvocation:
+def prepare_invocation(invocation: dict[str, Any], registry: dict[str, Any], context: ExecutionContext, *, _allow_expired: bool = False) -> PreparedInvocation:
     registry_errors = validate_registry(registry)
     if registry_errors:
         raise ValueError("invalid adapter registry: " + "; ".join(registry_errors))
@@ -75,7 +75,7 @@ def prepare_invocation(invocation: dict[str, Any], registry: dict[str, Any], con
         deadline = datetime.fromisoformat(invocation["deadline"].replace("Z", "+00:00"))
     except (TypeError, ValueError) as exc:
         raise ValueError("invocation deadline is not a valid timestamp") from exc
-    if deadline.tzinfo is None or deadline.astimezone(timezone.utc).timestamp() <= now_epoch:
+    if deadline.tzinfo is None or (deadline.astimezone(timezone.utc).timestamp() <= now_epoch and not _allow_expired):
         raise ValueError("invocation deadline has expired")
     mutating = capability["risk"] != "read-only"
     if mutating and (not context.owner_id or not isinstance(context.fencing_token, int) or context.fencing_token < 1):
@@ -123,7 +123,8 @@ def prepare_invocation(invocation: dict[str, Any], registry: dict[str, Any], con
         "arguments": resolved_arguments,
         "secrets": secrets,
     }
-    input_hash = hashlib.sha256(json.dumps({**request, "secrets": sorted(secrets)}, sort_keys=True).encode("utf-8")).hexdigest()
+    secret_fingerprints = {name: hashlib.sha256(value.encode("utf-8")).hexdigest() for name, value in secrets.items()}
+    input_hash = hashlib.sha256(json.dumps({**request, "secrets": secret_fingerprints}, sort_keys=True).encode("utf-8")).hexdigest()
     action = {
         "schema_version": 1,
         "revision": 0,
@@ -144,6 +145,12 @@ def prepare_invocation(invocation: dict[str, Any], registry: dict[str, Any], con
     }
     environment = {"PATH": os.environ.get("PATH", ""), "PYTHONIOENCODING": "utf-8"}
     return PreparedInvocation(invocation, adapter, capability, [sys.executable, str(adapter_path)], repository_root, environment, request, action)
+
+
+def prepare_reconciliation(invocation: dict[str, Any], registry: dict[str, Any], context: ExecutionContext) -> PreparedInvocation:
+    """Reconstruct the original action identity after its execution deadline."""
+    prepared = prepare_invocation(invocation, registry, context, _allow_expired=True)
+    return replace(prepared, request={**prepared.request, "operation": "reconcile"})
 
 
 def _uncertain_result(prepared: PreparedInvocation, reason: str, latency_ms: int) -> dict[str, Any]:
@@ -185,6 +192,46 @@ def _blocked_result(prepared: PreparedInvocation, reason: str) -> dict[str, Any]
     }
 
 
+def _invoke_adapter(prepared: PreparedInvocation, operation: str) -> dict[str, Any]:
+    started = time.monotonic()
+    process = subprocess.Popen(
+        prepared.argv,
+        cwd=prepared.cwd,
+        env=prepared.environment,
+        stdin=subprocess.PIPE,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+    )
+    request = {**prepared.request, "operation": operation}
+    try:
+        stdout, stderr = process.communicate(json.dumps(request, sort_keys=True), timeout=prepared.capability["timeout_seconds"])
+    except subprocess.TimeoutExpired:
+        process.kill()
+        process.communicate()
+        return _uncertain_result(prepared, f"adapter {operation} timeout; reconciliation remains required", int((time.monotonic() - started) * 1000))
+    latency = int((time.monotonic() - started) * 1000)
+    maximum = prepared.capability["max_output_bytes"]
+    if len(stdout.encode("utf-8")) > maximum or len(stderr.encode("utf-8")) > maximum:
+        return _uncertain_result(prepared, f"adapter {operation} output exceeded declared bound", latency)
+    if process.returncode != 0:
+        return _uncertain_result(prepared, f"adapter {operation} process failed", latency)
+    try:
+        parsed = json.loads(stdout)
+    except json.JSONDecodeError:
+        return _uncertain_result(prepared, f"adapter {operation} returned malformed JSON", latency)
+    parsed = _redact(parsed, list(prepared.request["secrets"].values()))
+    validation_errors = validate_result(parsed)
+    identity_matches = (
+        parsed.get("adapter_id") == prepared.invocation["adapter_id"]
+        and parsed.get("capability_id") == prepared.invocation["capability_id"]
+        and parsed.get("action_id") == prepared.invocation["action_id"]
+    )
+    if validation_errors or not identity_matches:
+        return _uncertain_result(prepared, f"adapter {operation} result contract or identity mismatch", latency)
+    return parsed
+
+
 def execute_prepared(prepared: PreparedInvocation, action_path: Path, context: ExecutionContext) -> dict[str, Any]:
     if action_path.exists():
         current = load_action(action_path)
@@ -211,47 +258,7 @@ def execute_prepared(prepared: PreparedInvocation, action_path: Path, context: E
     action = transition_action(action, "RUNNING", {"adapter_version": prepared.adapter["adapter_version"]})
     action = save_action_atomic(action_path, action, action["revision"], **persistence)
 
-    started = time.monotonic()
-    process = subprocess.Popen(
-        prepared.argv,
-        cwd=prepared.cwd,
-        env=prepared.environment,
-        stdin=subprocess.PIPE,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        text=True,
-    )
-    request_text = json.dumps(prepared.request, sort_keys=True)
-    try:
-        stdout, stderr = process.communicate(request_text, timeout=prepared.capability["timeout_seconds"])
-    except subprocess.TimeoutExpired:
-        process.kill()
-        process.communicate()
-        result = _uncertain_result(prepared, "adapter timeout; reconciliation required", int((time.monotonic() - started) * 1000))
-    else:
-        latency = int((time.monotonic() - started) * 1000)
-        maximum = prepared.capability["max_output_bytes"]
-        if len(stdout.encode("utf-8")) > maximum or len(stderr.encode("utf-8")) > maximum:
-            result = _uncertain_result(prepared, "adapter output exceeded declared bound", latency)
-        elif process.returncode != 0:
-            result = _uncertain_result(prepared, "adapter process failed; completion requires reconciliation", latency)
-        else:
-            try:
-                parsed = json.loads(stdout)
-            except json.JSONDecodeError:
-                result = _uncertain_result(prepared, "adapter returned malformed JSON", latency)
-            else:
-                parsed = _redact(parsed, list(prepared.request["secrets"].values()))
-                validation_errors = validate_result(parsed)
-                identity_matches = (
-                    parsed.get("adapter_id") == prepared.invocation["adapter_id"]
-                    and parsed.get("capability_id") == prepared.invocation["capability_id"]
-                    and parsed.get("action_id") == prepared.invocation["action_id"]
-                )
-                if validation_errors or not identity_matches:
-                    result = _uncertain_result(prepared, "adapter result contract or identity mismatch", latency)
-                else:
-                    result = parsed
+    result = _invoke_adapter(prepared, "execute")
 
     terminal_evidence = {"result_hash": result["output_hash"], "diagnostics": result["diagnostics"]}
     action = transition_action(action, result["state"], terminal_evidence)
@@ -259,7 +266,21 @@ def execute_prepared(prepared: PreparedInvocation, action_path: Path, context: E
     return result
 
 
-def reconcile_action(action: dict[str, Any], context: ExecutionContext) -> dict[str, Any]:
+def reconcile_prepared(prepared: PreparedInvocation, action_path: Path, context: ExecutionContext) -> dict[str, Any]:
+    action = load_action(action_path)
     if action.get("state") != "UNCERTAIN":
         raise ValueError("only UNCERTAIN actions require reconciliation")
-    return {"decision": "BLOCKED", "reason": "adapter-specific reconciliation evidence is required", "action_id": action.get("action_id")}
+    if not prepared.capability.get("supports_reconciliation"):
+        raise ValueError("capability does not support reconciliation")
+    if action.get("action_id") != prepared.action.get("action_id") or action.get("input_hash") != prepared.action.get("input_hash"):
+        raise ValueError("reconciliation invocation conflicts with durable action")
+    result = _invoke_adapter(prepared, "reconcile")
+    persistence = {"owner_id": context.owner_id, "fencing_token": context.fencing_token, "now": context.now_epoch}
+    reconciliation = {"result_hash": result["output_hash"], "state": result["state"], "diagnostics": result["diagnostics"]}
+    if result["state"] == "UNCERTAIN":
+        action = json.loads(json.dumps(action))
+        action.setdefault("evidence", []).append({"target_state": "UNCERTAIN", "reconciliation": reconciliation})
+    else:
+        action = transition_action(action, result["state"], {"reconciliation": reconciliation})
+    save_action_atomic(action_path, action, action["revision"], **persistence)
+    return result

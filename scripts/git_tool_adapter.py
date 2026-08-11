@@ -12,7 +12,7 @@ import time
 from pathlib import Path
 from typing import Any
 
-from import_eval_candidates import import_archives
+from import_eval_candidates import import_archives, resolve_private_terms
 
 
 def _git(arguments: list[str], cwd: Path, timeout: int = 90) -> str:
@@ -36,7 +36,7 @@ def _inspect(repository: Path) -> tuple[dict[str, Any], list[str]]:
     return {"head": head, "branch": branch, "dirty": dirty, "remote_names_hash": remote_names_hash}, []
 
 
-def _execute(capability: str, arguments: dict[str, Any]) -> tuple[str, str, dict[str, Any], list[str]]:
+def _execute(capability: str, arguments: dict[str, Any], secrets: dict[str, str]) -> tuple[str, str, dict[str, Any], list[str]]:
     if capability == "git.inspect":
         output, effects = _inspect(Path(arguments["repository"]))
         return "SUCCEEDED", "repository inspected", output, effects
@@ -53,11 +53,44 @@ def _execute(capability: str, arguments: dict[str, Any]) -> tuple[str, str, dict
         return "SUCCEEDED", "registered remote fetched", {"status": status, "refs_hash": after}, [f"remote-tracking refs: {status.lower()}"]
     if capability == "git.import_bundle":
         inbox = Path(arguments["inbox"])
+        config_path = Path(secrets["CLOUDSKILL_CONFIG_PATH"])
+        terms = resolve_private_terms(inbox, config_path)
         captured = io.StringIO()
         with contextlib.redirect_stdout(captured):
-            totals = import_archives(inbox, [], bool(arguments.get("dry_run", False)))
+            totals = import_archives(inbox, terms, bool(arguments.get("dry_run", False)))
         return "SUCCEEDED", "versioned bundle import inspected", totals, ["local Eval Inbox import queues evaluated"]
     raise ValueError("unknown registered Git capability")
+
+
+def _reconcile(capability: str, arguments: dict[str, Any]) -> tuple[str, str, dict[str, Any], list[str]]:
+    if capability == "git.fetch":
+        repository = Path(arguments["repository"])
+        remote = arguments["remote"]
+        if remote not in set(_git(["remote"], repository).splitlines()):
+            raise ValueError("requested remote is not registered in repository")
+        advertised: dict[str, str] = {}
+        for row in _git(["ls-remote", "--heads", remote], repository).splitlines():
+            object_id, ref = row.split(None, 1)
+            heads_prefix = "refs/heads/"
+            advertised[ref[len(heads_prefix):] if ref.startswith(heads_prefix) else ref] = object_id
+        local: dict[str, str] = {}
+        prefix = f"refs/remotes/{remote}/"
+        rows = _git(["for-each-ref", "--format=%(refname) %(objectname)", prefix], repository)
+        for row in rows.splitlines():
+            ref, object_id = row.split(None, 1)
+            branch = ref[len(prefix):] if ref.startswith(prefix) else ref
+            if branch != "HEAD":
+                local[branch] = object_id
+        complete = bool(advertised) and all(local.get(branch) == object_id for branch, object_id in advertised.items())
+        state = "SUCCEEDED" if complete else "FAILED"
+        return state, "Git fetch reconciliation completed", {"status": "OBSERVED_COMPLETE" if complete else "OBSERVED_INCOMPLETE"}, []
+    if capability == "git.import_bundle":
+        inbox = Path(arguments["inbox"])
+        pending = sorted(path.name for path in (inbox / "imports").glob("*.zip")) if (inbox / "imports").is_dir() else []
+        complete = not pending
+        state = "SUCCEEDED" if complete else "FAILED"
+        return state, "bundle import reconciliation completed", {"status": "OBSERVED_COMPLETE" if complete else "OBSERVED_PENDING", "pending_count": len(pending)}, []
+    raise ValueError("capability does not support reconciliation")
 
 
 def make_result(request: dict[str, Any], state: str, summary: str, output: dict[str, Any], effects: list[str], diagnostics: list[str], latency_ms: int) -> dict[str, Any]:
@@ -83,9 +116,13 @@ def main() -> int:
     started = time.monotonic()
     request = json.loads(sys.stdin.read())
     try:
-        if request.get("operation") not in {"execute", "reconcile"}:
+        operation = request.get("operation")
+        if operation not in {"execute", "reconcile"}:
             raise ValueError("unsupported adapter operation")
-        state, summary, output, effects = _execute(request["capability_id"], request["arguments"])
+        if operation == "reconcile":
+            state, summary, output, effects = _reconcile(request["capability_id"], request["arguments"])
+        else:
+            state, summary, output, effects = _execute(request["capability_id"], request["arguments"], request.get("secrets", {}))
         result = make_result(request, state, summary, output, effects, [], int((time.monotonic() - started) * 1000))
     except (KeyError, OSError, RuntimeError, ValueError, subprocess.TimeoutExpired) as exc:
         result = make_result(request, "FAILED", "registered Git operation did not complete", {}, [], [str(exc)], int((time.monotonic() - started) * 1000))

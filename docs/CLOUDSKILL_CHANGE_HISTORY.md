@@ -50,6 +50,22 @@ private terms, changing queue behavior from the manual importer. Both findings
 return to implementation with new RED cases. Remaining L1 cells were not spent
 on the failed candidate; version synchronization and publication remain gated.
 
+## 2026-08-11 — Second 6.3 review findings corrected
+
+New RED/GREEN fixtures require actual observation-only adapter reconciliation,
+stable execution identity across recovery, no attempt increment during
+reconciliation, and identical configured private-term routing for manual and
+adapter bundle imports. The broker now exposes `tool reconcile`, validates the
+original action and input fingerprints, invokes only declared reconciliation
+operations, and persists their evidence. Git fetch reconciliation compares the
+registered remote with remote-tracking refs; bundle reconciliation observes the
+pending import queue. The importer shares validated configuration/term
+resolution across both entry points. Contract validation also rejects forged
+output hashes. Focused deterministic evidence passes. The executable fixture
+caught and corrected an initial Python 3.7 `removeprefix` incompatibility. Full
+suite and a fresh four-cell exact-tip L1 review remain required before version
+synchronization or publication.
+
 ## 2026-08-11 — Public/private package split deferred
 
 The user retained the public Core/private Evolution Pack design but explicitly

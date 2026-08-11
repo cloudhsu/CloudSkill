@@ -9,7 +9,7 @@
       "provenance": {
         "kind": "repository-script",
         "path": "scripts/git_tool_adapter.py",
-        "sha256": "a52cbb97c02f18856765186c2406b07427116f1c25214c7f8c045359b2fc1180"
+        "sha256": "67b922ef21423634e6c3d495bfffe990e3bd508788976cc16e7f7a058d5200e7"
       },
       "capabilities": [
         {
@@ -43,7 +43,7 @@
           "risk": "local-mutating",
           "required_authority": ["git.import_bundle"],
           "allowed_root_refs": ["EVAL_INBOX_ROOT"],
-          "secret_refs": [],
+          "secret_refs": ["CLOUDSKILL_CONFIG_PATH"],
           "timeout_seconds": 120,
           "max_attempts": 1,
           "idempotent": true,

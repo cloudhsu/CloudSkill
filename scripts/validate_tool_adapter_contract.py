@@ -82,16 +82,21 @@ valid_result = {
     "artifact_refs": [],
     "observed_side_effects": [],
     "diagnostics": [],
-    "output_hash": "0" * 64,
+    "output_hash": "",
     "latency_ms": 1,
     "model_calls": 0,
 }
+valid_result["output_hash"] = __import__("hashlib").sha256(json.dumps(valid_result["output"], sort_keys=True).encode("utf-8")).hexdigest()
 if validate_result(valid_result):
     errors.append("valid result was rejected")
 bad_result = copy.deepcopy(valid_result)
 bad_result["state"] = "RUNNING"
 if not validate_result(bad_result):
     errors.append("non-terminal public result was accepted")
+bad_hash = copy.deepcopy(valid_result)
+bad_hash["output_hash"] = "0" * 64
+if not validate_result(bad_hash):
+    errors.append("result output_hash mismatch was accepted")
 
 valid_action = {
     "schema_version": 1,

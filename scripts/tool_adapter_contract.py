@@ -129,7 +129,12 @@ def validate_invocation(value: Any, registry: dict[str, Any]) -> list[str]:
 
 
 def validate_result(value: Any) -> list[str]:
-    return _schema_errors(value, RESULT_SCHEMA_PATH)
+    errors = _schema_errors(value, RESULT_SCHEMA_PATH)
+    if isinstance(value, dict) and isinstance(value.get("output"), dict):
+        observed = hashlib.sha256(json.dumps(value["output"], sort_keys=True).encode("utf-8")).hexdigest()
+        if value.get("output_hash") != observed:
+            errors.append("result output_hash does not match canonical output")
+    return errors
 
 
 def validate_action_state(value: Any) -> list[str]:
