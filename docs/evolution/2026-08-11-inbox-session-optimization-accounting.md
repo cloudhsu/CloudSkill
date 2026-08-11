@@ -40,6 +40,6 @@ format and migration policy exist.
 - Complete deterministic suite after integration: PASS (two passes).
 - Model-backed Runtime Eval corpus execution: not claimed; the targeted GREEN
   is an independent semantic execution, not a full provider-backed corpus run.
-- Exact-tip review remains the final candidate gate.
+- Independent exact-tip review: PASS; no High/Medium findings remain.
 - Case-level semantic evidence is recorded in
   `docs/evolution/2026-08-11-inbox-session-semantic-evidence.md`.

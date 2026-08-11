@@ -27,8 +27,9 @@ This is the operational entry point for a new conversation or coding agent that 
 - Accounting is in
   `docs/evolution/2026-08-11-inbox-session-optimization-accounting.md`.
 - Combined targeted semantic GREEN passed 10/10 with no High/Medium boundary
-  omission, and the integrated deterministic suite passed twice. Finish an
-  exact-tip review, then present the candidate before version/push/release.
+  omission, and the integrated deterministic suite passed twice. Independent
+  exact-tip review passed with no High/Medium findings. The candidate is ready
+  for user review before any version, push, or release action.
 
 ### CloudBox 6.3.0 published and remotely verified (2026-08-11)
 
