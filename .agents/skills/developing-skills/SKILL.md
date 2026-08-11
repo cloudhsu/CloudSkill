@@ -56,6 +56,8 @@ ownership is uncertain, use manual review or return `MANUAL_REQUIRED`.
 
 Capture never authorizes formal Eval/Skill edits, Git mutation, or publication.
 A candidate is evidence to review, not proof that behavior passed.
+Never preserve a raw or complete transcript. Use `manual-review` whenever safe
+sanitization, routing, or policy ownership remains uncertain.
 
 ## Untrusted exchange boundary
 
