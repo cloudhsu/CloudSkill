@@ -7,9 +7,12 @@ evidence record.  It does not execute work, persist state, or invoke models.
 from __future__ import annotations
 
 import copy
+import hashlib
 import json
 from pathlib import Path
 from typing import Any
+
+from review_assurance_contract import LEVELS
 
 
 DELTA_FIELDS = (
@@ -51,13 +54,7 @@ REQUIRED_REUSE_FIELDS = {
     "unaffected_evidence",
     "on_invalidation",
 }
-REVIEW_LEVELS = (
-    "L0_NONE",
-    "L0_SINGLE_REVIEW",
-    "L3_SINGLE_FAMILY_PAIR",
-    "L2_SINGLE_FAMILY_QUAD",
-    "L1_CROSS_FAMILY_2X2",
-)
+RESOLUTION_PROVENANCE = "lifecycle_template_contract.compose_templates"
 
 
 def load_templates(path: Path) -> dict[str, Any]:
@@ -227,7 +224,7 @@ def compose_templates(
     resolved_evidence = _merge_template_lists(template_ids, templates, "required_evidence")
     review_level = max(
         (templates[template_id]["review_level"] for template_id in template_ids),
-        key=REVIEW_LEVELS.index,
+        key=LEVELS.index,
     )
     delta_evidence = {
         "composition_order": template_ids,
@@ -256,9 +253,73 @@ def compose_templates(
             "resolved_review_level": review_level,
             "resolved_resume_reconciliation": _resolve_resume(template_ids, templates),
             "resolved_reuse_invalidation": _resolve_reuse(template_ids, templates),
+            "resolution_schema_version": 1,
+            "resolution_provenance": RESOLUTION_PROVENANCE,
         }
     )
+    result["resolution_integrity_hash"] = _canonical_hash(result)
     return result
+
+
+def validate_selected_resolution(resolution: Any) -> None:
+    """Reject unsealed, relabeled, or mutated composition output."""
+    if not isinstance(resolution, dict):
+        raise ValueError("plan requires composer-selected resolution provenance and integrity")
+    integrity_hash = resolution.get("resolution_integrity_hash")
+    payload = {
+        key: copy.deepcopy(value)
+        for key, value in resolution.items()
+        if key != "resolution_integrity_hash"
+    }
+    required = {
+        "status",
+        "template_ids",
+        "contract_versions",
+        "composition_order",
+        "assessments",
+        "reasons",
+        "full_risk_calculation_required",
+        "delta_evidence_hash",
+        "resolved_owners",
+        "resolved_required_evidence",
+        "resolved_stages",
+        "resolved_gates",
+        "resolved_review_level",
+        "resolved_resume_reconciliation",
+        "resolved_reuse_invalidation",
+        "resolution_schema_version",
+        "resolution_provenance",
+    }
+    template_ids = resolution.get("template_ids")
+    versions = resolution.get("contract_versions")
+    assessments = resolution.get("assessments")
+    if (
+        not required <= set(resolution)
+        or resolution.get("status") != "selected"
+        or resolution.get("full_risk_calculation_required") is not False
+        or resolution.get("reasons") != []
+        or resolution.get("resolution_schema_version") != 1
+        or resolution.get("resolution_provenance") != RESOLUTION_PROVENANCE
+        or not _is_hash(integrity_hash)
+        or integrity_hash != _canonical_hash(payload)
+        or not isinstance(template_ids, list)
+        or not template_ids
+        or any(not isinstance(value, str) or not value for value in template_ids)
+        or len(template_ids) != len(set(template_ids))
+        or resolution.get("composition_order") != template_ids
+        or not isinstance(versions, dict)
+        or set(versions) != set(template_ids)
+        or any(type(value) is not int or value < 1 for value in versions.values())
+        or not isinstance(assessments, dict)
+        or set(assessments) != set(template_ids)
+        or any(
+            not isinstance(assessment, dict) or assessment.get("status") != "selected"
+            for assessment in assessments.values()
+        )
+        or not _is_hash(resolution.get("delta_evidence_hash"))
+        or resolution.get("resolved_review_level") not in LEVELS
+    ):
+        raise ValueError("plan requires composer-selected resolution provenance and integrity")
 
 
 def _composition_result(
@@ -378,10 +439,16 @@ def _resolve_reuse(
 
 
 def _canonical_hash(value: Any) -> str:
-    import hashlib
-
     encoded = json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
     return hashlib.sha256(encoded.encode("utf-8")).hexdigest()
+
+
+def _is_hash(value: Any) -> bool:
+    return (
+        isinstance(value, str)
+        and len(value) == 64
+        and all(character in "0123456789abcdef" for character in value)
+    )
 
 
 def _validate_registry(registry: Any) -> None:
@@ -438,11 +505,11 @@ def _validate_implemented_template(template: dict[str, Any]) -> None:
         _invalid_registry()
     if not _is_unique_nonempty_string_list(template["compatible_overlays"], allow_empty=True):
         _invalid_registry()
-    if template["review_level"] not in REVIEW_LEVELS:
+    if template["review_level"] not in LEVELS:
         _invalid_registry()
 
     owners = template["owners"]
-    if not isinstance(owners, dict) or not REQUIRED_OWNER_KEYS <= set(owners):
+    if not isinstance(owners, dict) or set(owners) != REQUIRED_OWNER_KEYS:
         _invalid_registry()
     if any(not isinstance(value, str) or not value for value in owners.values()):
         _invalid_registry()

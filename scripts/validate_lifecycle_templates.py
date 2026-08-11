@@ -17,6 +17,8 @@ import tempfile
 from pathlib import Path
 from typing import Any
 
+from review_assurance_contract import LEVELS
+
 ROOT = Path(__file__).resolve().parents[1]
 SCRIPTS = ROOT / "scripts"
 REGISTRY_PATH = ROOT / "config" / "lifecycle-templates.json"
@@ -81,13 +83,6 @@ DELTA_FIELDS = (
     "platform_or_compatibility",
     "irreversible_or_unreconciled",
     "outside_verified_envelope",
-)
-REVIEW_LEVELS = (
-    "L0_NONE",
-    "L0_SINGLE_REVIEW",
-    "L3_SINGLE_FAMILY_PAIR",
-    "L2_SINGLE_FAMILY_QUAD",
-    "L1_CROSS_FAMILY_2X2",
 )
 
 
@@ -197,15 +192,14 @@ def registry_errors(registry: Any) -> list[str]:
         if not owners:
             fail(errors, f"{prefix}: owners must be an object")
         else:
-            missing_owners = REQUIRED_OWNER_KEYS - set(owners)
-            if missing_owners:
-                fail(errors, f"{prefix}: owners missing {sorted(missing_owners)!r}")
+            if set(owners) != REQUIRED_OWNER_KEYS:
+                fail(errors, f"{prefix}: owners must declare exactly {sorted(REQUIRED_OWNER_KEYS)!r}")
             for owner_name, owner_id in owners.items():
                 if not isinstance(owner_id, str) or not owner_id.strip():
                     fail(errors, f"{prefix}: owners/{owner_name} must be a non-empty string")
             if owners.get("lifecycle_plan") != "development-process-tailoring":
                 fail(errors, f"{prefix}: lifecycle ownership must remain development-process-tailoring")
-        if entry["review_level"] not in REVIEW_LEVELS:
+        if entry["review_level"] not in LEVELS:
             fail(errors, f"{prefix}: review_level must be a declared assurance level")
 
         required_evidence = entry["required_evidence"]
@@ -406,6 +400,9 @@ def run_contract_mutations(registry: dict[str, Any]) -> list[str]:
             fail(errors, f"shared lifecycle template contract is missing {name}()")
     if errors:
         return errors
+    if getattr(contract, "LEVELS", None) is not LEVELS:
+        fail(errors, "shared lifecycle template contract does not use canonical assurance LEVELS")
+        return errors
     try:
         loaded = contract.load_templates(REGISTRY_PATH)
     except Exception as exc:
@@ -467,6 +464,16 @@ def composition_contract_errors(registry: dict[str, Any], compose_templates: Any
         reason.startswith("owner_conflict:") for reason in owner_conflict.get("reasons", [])
     ):
         fail(errors, "composition accepted conflicting scalar owners")
+    owner_keyset_registry = copy.deepcopy(registry)
+    owner_keyset_registry["templates"][base_id]["owners"]["undeclared"] = "shadow-owner"
+    try:
+        compose_templates(base_id, [], facts, owner_keyset_registry)
+    except ValueError:
+        pass
+    except Exception as exc:
+        fail(errors, f"owner-keyset drift did not fail closed as ValueError: {exc}")
+    else:
+        fail(errors, "composition accepted a differing owner keyset")
 
     escalated_facts = {**facts, "outside_verified_envelope": True}
     escalated = compose_templates(base_id, [], escalated_facts, registry)
@@ -521,6 +528,13 @@ def composition_contract_errors(registry: dict[str, Any], compose_templates: Any
     delta_hash = selected.get("delta_evidence_hash")
     if not isinstance(delta_hash, str) or len(delta_hash) != 64:
         fail(errors, "composition did not produce a deterministic delta evidence hash")
+    if selected.get("resolution_schema_version") != 1:
+        fail(errors, "composition did not version its selected-resolution contract")
+    if selected.get("resolution_provenance") != "lifecycle_template_contract.compose_templates":
+        fail(errors, "composition did not identify its selected-resolution provenance")
+    integrity_hash = selected.get("resolution_integrity_hash")
+    if not isinstance(integrity_hash, str) or len(integrity_hash) != 64:
+        fail(errors, "composition did not seal its selected resolution")
 
     gate_conflict_registry = copy.deepcopy(compatible)
     conflicting_gate = gate_conflict_registry["templates"][overlay_id]["gates"][0]
@@ -561,6 +575,9 @@ def loader_lifecycle_structure_errors(registry: dict[str, Any], load_templates: 
         ),
         "missing owner": lambda value: value["templates"]["lightweight-change"]["owners"].pop(
             "lifecycle_plan"
+        ),
+        "extra owner key": lambda value: value["templates"]["lightweight-change"]["owners"].__setitem__(
+            "undeclared", "shadow-owner"
         ),
         "missing gate evidence": lambda value: value["templates"]["lightweight-change"]["gates"][
             0

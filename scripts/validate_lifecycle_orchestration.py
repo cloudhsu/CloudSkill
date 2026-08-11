@@ -41,6 +41,8 @@ template_facts={
     "outside_verified_envelope":False,
 }
 resolution=compose_templates("bounded-feature",["skill-evolution"],template_facts,compatible_registry)
+composer_integrity_hash=resolution.get("resolution_integrity_hash")
+assert isinstance(composer_integrity_hash,str) and len(composer_integrity_hash)==64
 templated_plan=create_plan("W2",["eval_driven_evolution"],"c"*64,tasks,resolution)
 assert templated_plan["template_resolution"]=={
     "status":"selected",
@@ -49,13 +51,37 @@ assert templated_plan["template_resolution"]=={
     "delta_evidence_hash":resolution["delta_evidence_hash"],
     "composition_order":["bounded-feature","skill-evolution"],
     "resolved_review_level":"L2_SINGLE_FAMILY_QUAD",
+    "resolution_schema_version":1,
+    "resolution_provenance":"lifecycle_template_contract.compose_templates",
+    "composer_resolution_integrity_hash":composer_integrity_hash,
     "plan_revision":1,
+    "full_risk_calculation_required":False,
+    "plan_resolution_integrity_hash":templated_plan["template_resolution"]["plan_resolution_integrity_hash"],
 }
 assert templated_plan["template_resolution_lineage"]==[]
 assert templated_plan["required_review_level"]=="L2_SINGLE_FAMILY_QUAD"
-stronger_resolution={**resolution,"resolved_review_level":"L1_CROSS_FAMILY_2X2"}
+stronger_registry=copy.deepcopy(compatible_registry)
+stronger_registry["templates"]["bounded-feature"]["review_level"]="L1_CROSS_FAMILY_2X2"
+stronger_resolution=compose_templates("bounded-feature",["skill-evolution"],template_facts,stronger_registry)
 stronger_plan=create_plan("W3",["eval_driven_evolution"],"f"*64,tasks,stronger_resolution)
 assert stronger_plan["required_review_level"]=="L1_CROSS_FAMILY_2X2"
+hand_built={
+    "status":"selected",
+    "template_ids":["bounded-feature"],
+    "contract_versions":{"bounded-feature":1},
+    "delta_evidence_hash":"0"*64,
+    "composition_order":["bounded-feature"],
+    "resolved_review_level":"L2_SINGLE_FAMILY_QUAD",
+    "full_risk_calculation_required":False,
+}
+deferred_relabel=compose_templates("release",[],template_facts,template_registry)
+deferred_relabel.update(hand_built)
+tampered_resolution=copy.deepcopy(resolution)
+tampered_resolution["delta_evidence_hash"]="0"*64
+for invalid_selected in (hand_built,deferred_relabel,tampered_resolution):
+    try: create_plan("W-forged",["iterative_incremental"],"0"*64,tasks,invalid_selected)
+    except ValueError as exc: assert "composer-selected" in str(exc)
+    else: raise AssertionError("non-composer or integrity-invalid selected resolution accepted")
 for rejected_resolution in (
     compose_templates("release",[],template_facts,template_registry),
     compose_templates("bounded-feature",[],{**template_facts,"outside_verified_envelope":True},template_registry),
@@ -69,11 +95,36 @@ assert changed["revision"]==2 and changed["tasks_invalidated"]==["T1"] and chang
 template_changed=replan(templated_plan,{"kind":"source_changed","evidence_hash":"e"*64},{"risk_class":"medium"},{"invalidate":["T1"],"invalidate_evidence":["delta evidence"],"reuse":["approved design","approved design"]})
 assert template_changed["template_resolution_lineage"]==[templated_plan["template_resolution"]]
 assert template_changed["template_resolution"]["plan_revision"]==2
+assert template_changed["template_resolution"]["status"]=="escalation_required"
+assert template_changed["template_resolution"]["full_risk_calculation_required"] is True
+assert template_changed["template_resolution"]["delta_evidence_hash"] is None
+assert template_changed["template_resolution"]["composer_resolution_integrity_hash"] is None
 assert template_changed["evidence_invalidated"]==["delta evidence"]
 assert template_changed["evidence_reused"]==["approved design"]
+still_unresolved=replan(template_changed,{"kind":"scope_rechecked","evidence_hash":"3"*64},{"risk_class":"medium"},{"invalidate":[],"reuse":["approved design"]})
+assert still_unresolved["template_resolution"]["status"]=="escalation_required"
+assert still_unresolved["template_resolution"]["plan_revision"]==3
+assert still_unresolved["template_resolution"]["delta_evidence_hash"] is None
+assert still_unresolved["template_resolution_lineage"]==[templated_plan["template_resolution"]]
+replacement=compose_templates("bounded-feature",[],{key:value for key,value in template_facts.items() if key not in overlay_template["applicability"] and key not in overlay_template["exclusion_facts"]},template_registry)
+reselected=replan(templated_plan,{"kind":"source_changed","evidence_hash":"1"*64},{"risk_class":"medium"},{"invalidate":["T1"],"invalidate_evidence":["delta evidence"],"reuse":[]},replacement)
+assert reselected["template_resolution"]["status"]=="selected"
+assert reselected["template_resolution"]["plan_revision"]==2
+assert reselected["template_resolution"]["delta_evidence_hash"]==replacement["delta_evidence_hash"]
+assert reselected["template_resolution_lineage"]==[templated_plan["template_resolution"]]
 try: replan(templated_plan,{"kind":"source_changed","evidence_hash":"f"*64},{"risk_class":"medium"},{"invalidate":[],"invalidate_evidence":["delta evidence"],"reuse":["delta evidence"]})
 except ValueError as exc: assert "invalidated and reused" in str(exc)
 else: raise AssertionError("replan reused invalidated evidence")
+for malformed_plan in (
+    {**templated_plan,"template_resolution_lineage":{}},
+    {**templated_plan,"template_resolution_lineage":[templated_plan["template_resolution"]]},
+    {**templated_plan,"template_resolution":{**templated_plan["template_resolution"],"plan_revision":9}},
+    {**templated_plan,"revision":"1"},
+    {**plan,"template_resolution_lineage":[]},
+):
+    try: replan(malformed_plan,{"kind":"source_changed","evidence_hash":"2"*64},{"risk_class":"medium"},{"invalidate":[],"reuse":[]})
+    except ValueError as exc: assert "template resolution lineage" in str(exc)
+    else: raise AssertionError("malformed or unordered template resolution lineage accepted")
 with tempfile.TemporaryDirectory() as name:
     path=Path(name)/"state.json"
     state={"schema_version":1,"work_id":"W1","revision":0,"plan_id":plan["plan_id"],"plan_revision":1,"status":"interrupted","stage":"verify","profiles":["iterative_incremental"],"authority":{"approved_actions":["inspect"]},"current_action":{"action_id":"A1","deduplication_key":"push:one","plan_revision":1,"authority_scope":["inspect"],"attempt":1,"max_attempts":2,"state":"uncertain"},"review":{},"budgets":{"provider_calls":{"limit":2,"used":0}}}
