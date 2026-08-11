@@ -1,0 +1,217 @@
+"""Controlled local-CLI broker for registered CloudBox tool capabilities."""
+
+from __future__ import annotations
+
+import hashlib
+import json
+import os
+import subprocess
+import sys
+import time
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Any
+
+from tool_action_store import save_action_atomic, transition_action
+from tool_adapter_contract import get_adapter, get_capability, validate_invocation, validate_registry, validate_result
+
+
+@dataclass(frozen=True)
+class ExecutionContext:
+    root_refs: dict[str, Path]
+    secret_values: dict[str, str]
+    approved_authority: set[str]
+    repository_root: Path
+    owner_id: str | None = None
+    fencing_token: int | None = None
+
+
+@dataclass(frozen=True)
+class PreparedInvocation:
+    invocation: dict[str, Any]
+    adapter: dict[str, Any]
+    capability: dict[str, Any]
+    argv: list[str]
+    cwd: Path
+    environment: dict[str, str]
+    request: dict[str, Any]
+    action: dict[str, Any]
+
+
+def _within(path: Path, root: Path) -> bool:
+    return path == root or root in path.parents
+
+
+def _redact(value: Any, secrets: list[str]) -> Any:
+    if isinstance(value, str):
+        redacted = value
+        for secret in secrets:
+            if secret:
+                redacted = redacted.replace(secret, "[REDACTED]")
+        return redacted
+    if isinstance(value, list):
+        return [_redact(item, secrets) for item in value]
+    if isinstance(value, dict):
+        return {key: _redact(item, secrets) for key, item in value.items()}
+    return value
+
+
+def prepare_invocation(invocation: dict[str, Any], registry: dict[str, Any], context: ExecutionContext) -> PreparedInvocation:
+    registry_errors = validate_registry(registry)
+    if registry_errors:
+        raise ValueError("invalid adapter registry: " + "; ".join(registry_errors))
+    errors = validate_invocation(invocation, registry)
+    if errors:
+        raise ValueError("invalid tool invocation: " + "; ".join(errors))
+    adapter = get_adapter(registry, invocation["adapter_id"])
+    capability = get_capability(registry, invocation["adapter_id"], invocation["capability_id"])
+    required_authority = set(capability["required_authority"])
+    if not required_authority <= context.approved_authority:
+        raise ValueError("tool invocation exceeds approved authority")
+
+    roots: list[Path] = []
+    for reference in capability["allowed_root_refs"]:
+        root = context.root_refs.get(reference)
+        if root is None:
+            raise ValueError(f"required root reference is unavailable: {reference}")
+        roots.append(root.resolve())
+    resolved_arguments = json.loads(json.dumps(invocation["arguments"]))
+    for key in ("repository", "inbox"):
+        relative = resolved_arguments.get(key)
+        if relative is None:
+            continue
+        candidate = (roots[0] / relative).resolve()
+        if not _within(candidate, roots[0]):
+            raise ValueError(f"{key} path escapes declared root")
+        resolved_arguments[key] = str(candidate)
+
+    secrets: dict[str, str] = {}
+    for reference in capability["secret_refs"]:
+        value = context.secret_values.get(reference)
+        if not value:
+            raise ValueError(f"required secret reference is unavailable: {reference}")
+        secrets[reference] = value
+
+    provenance = adapter["provenance"]
+    adapter_path = (context.repository_root / provenance["path"]).resolve()
+    repository_root = context.repository_root.resolve()
+    if not _within(adapter_path, repository_root) or not adapter_path.is_file():
+        raise ValueError("registered adapter path is unavailable or escapes repository")
+    observed_digest = hashlib.sha256(adapter_path.read_bytes()).hexdigest()
+    if observed_digest != provenance["sha256"]:
+        raise ValueError("registered adapter executable provenance drift")
+
+    request = {
+        "operation": "execute",
+        "contract_version": invocation["contract_version"],
+        "adapter_id": invocation["adapter_id"],
+        "capability_id": invocation["capability_id"],
+        "action_id": invocation["action_id"],
+        "idempotency_key": invocation["idempotency_key"],
+        "arguments": resolved_arguments,
+        "secrets": secrets,
+    }
+    input_hash = hashlib.sha256(json.dumps({**request, "secrets": sorted(secrets)}, sort_keys=True).encode("utf-8")).hexdigest()
+    action = {
+        "schema_version": 1,
+        "revision": 0,
+        "action_id": invocation["action_id"],
+        "idempotency_key": invocation["idempotency_key"],
+        "plan_id": invocation["plan_id"],
+        "plan_revision": invocation["plan_revision"],
+        "adapter_id": invocation["adapter_id"],
+        "adapter_version": adapter["adapter_version"],
+        "capability_id": invocation["capability_id"],
+        "state": "PLANNED",
+        "attempt": 0,
+        "max_attempts": capability["max_attempts"],
+        "input_hash": input_hash,
+        "authority_grant_id": invocation["authority_grant_id"],
+        "evidence": [],
+        "lease": None,
+    }
+    environment = {"PATH": os.environ.get("PATH", ""), "PYTHONIOENCODING": "utf-8"}
+    return PreparedInvocation(invocation, adapter, capability, [sys.executable, str(adapter_path)], repository_root, environment, request, action)
+
+
+def _uncertain_result(prepared: PreparedInvocation, reason: str, latency_ms: int) -> dict[str, Any]:
+    output: dict[str, Any] = {}
+    digest = hashlib.sha256(json.dumps(output, sort_keys=True).encode("utf-8")).hexdigest()
+    return {
+        "contract_version": "1.0",
+        "adapter_id": prepared.invocation["adapter_id"],
+        "capability_id": prepared.invocation["capability_id"],
+        "action_id": prepared.invocation["action_id"],
+        "state": "UNCERTAIN",
+        "summary": "adapter completion is uncertain",
+        "output": output,
+        "artifact_refs": [],
+        "observed_side_effects": [],
+        "diagnostics": [reason],
+        "output_hash": digest,
+        "latency_ms": latency_ms,
+        "model_calls": 0,
+    }
+
+
+def execute_prepared(prepared: PreparedInvocation, action_path: Path, context: ExecutionContext) -> dict[str, Any]:
+    if action_path.exists():
+        raise ValueError("action identity already exists; reconcile durable state")
+    action = save_action_atomic(action_path, prepared.action, 0)
+    action = transition_action(action, "AUTHORIZED", {"authority_grant_id": action["authority_grant_id"]})
+    action = save_action_atomic(action_path, action, action["revision"])
+    action = transition_action(action, "RUNNING", {"adapter_version": prepared.adapter["adapter_version"]})
+    action = save_action_atomic(action_path, action, action["revision"])
+
+    started = time.monotonic()
+    process = subprocess.Popen(
+        prepared.argv,
+        cwd=prepared.cwd,
+        env=prepared.environment,
+        stdin=subprocess.PIPE,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+    )
+    request_text = json.dumps(prepared.request, sort_keys=True)
+    try:
+        stdout, stderr = process.communicate(request_text, timeout=prepared.capability["timeout_seconds"])
+    except subprocess.TimeoutExpired:
+        process.kill()
+        process.communicate()
+        result = _uncertain_result(prepared, "adapter timeout; reconciliation required", int((time.monotonic() - started) * 1000))
+    else:
+        latency = int((time.monotonic() - started) * 1000)
+        maximum = prepared.capability["max_output_bytes"]
+        if len(stdout.encode("utf-8")) > maximum or len(stderr.encode("utf-8")) > maximum:
+            result = _uncertain_result(prepared, "adapter output exceeded declared bound", latency)
+        elif process.returncode != 0:
+            result = _uncertain_result(prepared, "adapter process failed; completion requires reconciliation", latency)
+        else:
+            try:
+                parsed = json.loads(stdout)
+            except json.JSONDecodeError:
+                result = _uncertain_result(prepared, "adapter returned malformed JSON", latency)
+            else:
+                parsed = _redact(parsed, list(prepared.request["secrets"].values()))
+                validation_errors = validate_result(parsed)
+                identity_matches = (
+                    parsed.get("adapter_id") == prepared.invocation["adapter_id"]
+                    and parsed.get("capability_id") == prepared.invocation["capability_id"]
+                    and parsed.get("action_id") == prepared.invocation["action_id"]
+                )
+                if validation_errors or not identity_matches:
+                    result = _uncertain_result(prepared, "adapter result contract or identity mismatch", latency)
+                else:
+                    result = parsed
+
+    terminal_evidence = {"result_hash": result["output_hash"], "diagnostics": result["diagnostics"]}
+    action = transition_action(action, result["state"], terminal_evidence)
+    save_action_atomic(action_path, action, action["revision"])
+    return result
+
+
+def reconcile_action(action: dict[str, Any], context: ExecutionContext) -> dict[str, Any]:
+    if action.get("state") != "UNCERTAIN":
+        raise ValueError("only UNCERTAIN actions require reconciliation")
+    return {"decision": "BLOCKED", "reason": "adapter-specific reconciliation evidence is required", "action_id": action.get("action_id")}
