@@ -14,6 +14,13 @@ Eval ZIP bundle and exporter formats remain 2.0. A new end-to-end compatibility
 fixture proves the 6.4 importer accepts a correctly named 6.3 archive; current
 6.4 export/import remains covered. Exchange stability is now recorded as a
 maturity signal rather than a reason to remove manual review prematurely.
+After the first exact-tip release PASS, the user added an explicit external-
+session compliance requirement. Export and Git Exchange now derive and bind
+CloudBox version, candidate schema, and runtime; import validates those values
+against the manifest before routing any candidate and retains mismatched
+archives without partial output. Exchange push also rejects duplicate payload
+names before remote access. The earlier PASS is stale and cannot authorize this
+descendant.
 Fresh full validation, exact-tip release review, push, PR/CI, merge, tag,
 Release, and post-release verification remain pending.
 

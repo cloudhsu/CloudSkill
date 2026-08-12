@@ -167,7 +167,13 @@ Only from the CloudSkill repository and only after explicit instruction:
 Container intake is a separate precondition to this list. The exporter must
 produce a versioned manifest with declared payload hashes and a manifest-bound
 filename, and the real importer must validate the completed ZIP. Importers plan
-the whole archive before publishing any candidate, use only locally generated
+the whole archive before publishing any candidate. Before candidate routing,
+require a supported bundle/exporter/candidate schema and exact agreement between
+manifest and payload CloudBox version, candidate schema, and host/runtime.
+Contract mismatch fails the whole archive closed and preserves it as unsupported
+evidence; do not partially import matching members. These checks prove declared
+structural-contract consistency, not that the external model reasoned correctly.
+Use only locally generated
 output names, reject queue escape/symlink and unsafe member forms, bound member
 count/path/size/expansion, preserve collisions, and leave malformed input for
 manual review. These are executable obligations; this reference does not

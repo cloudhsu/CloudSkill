@@ -21,6 +21,11 @@
 - Retained manual Eval ZIP import, unsupported/legacy recovery, privacy policy,
   lifecycle-first planning, evidence-second verification, and token reduction
   only after those higher priorities are preserved.
+- Made export/import contract identity explicit across bundle 2.0, exporter
+  2.0, candidate schema 1.0, CloudBox version, and host/runtime; mismatched
+  archives and duplicate payload names fail closed before any candidate
+  publication, while correctly declared 6.3 archives remain consumable by the
+  6.4 importer.
 
 ## 6.3.0
 

@@ -91,6 +91,33 @@ def safe_label(label: str) -> str:
     return "".join(ch if ch.isalnum() or ch in "-_" else "-" for ch in label) or "machine"
 
 
+def candidate_contract(paths: list[Path]) -> dict[str, str]:
+    """Return one manifest contract only when every pending payload agrees."""
+    names = [path.name for path in paths]
+    if len(names) != len(set(names)):
+        raise ValueError("pending candidates contain duplicate archive member names")
+    contracts: list[dict[str, str]] = []
+    for path in paths:
+        try:
+            candidate = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+            raise ValueError(f"candidate is not readable contract JSON: {path.name}") from exc
+        if not isinstance(candidate, dict):
+            raise ValueError(f"candidate is not an object: {path.name}")
+        contract = {
+            "cloudbox_version": candidate.get("cloudskill_version"),
+            "candidate_schema_version": candidate.get("schema_version"),
+            "host": candidate.get("runtime"),
+        }
+        if any(not isinstance(value, str) or not value for value in contract.values()):
+            raise ValueError(f"candidate contract metadata is missing: {path.name}")
+        contracts.append(contract)
+    authoritative = contracts[0]
+    if any(contract != authoritative for contract in contracts[1:]):
+        raise ValueError("pending candidates do not share one CloudBox/schema/runtime contract")
+    return authoritative
+
+
 def do_push(config: dict[str, Any], args: argparse.Namespace) -> int:
     exchange_repo = config.get("eval_exchange_repo")
     if not exchange_repo:
@@ -106,12 +133,18 @@ def do_push(config: dict[str, Any], args: argparse.Namespace) -> int:
         print("Nothing to push: no candidates in candidates/ or manual-review/.")
         return 0
 
+    contract = candidate_contract(pending)
+    configured_host = str(config.get("export_host", contract["host"]))
+    if configured_host != contract["host"]:
+        raise SystemExit("candidate runtime does not match configured export host")
+
     clone_dir = ensure_clone(exchange_repo, args.clone_dir)
     label = safe_label(args.label or socket.gethostname())
     payload_hashes = {path.name: hashlib.sha256(path.read_bytes()).hexdigest() for path in pending}
     manifest = build_bundle_manifest(
-        cloudbox_version=str(config.get("cloudskill_version", (ROOT / "VERSION").read_text().strip())),
-        candidate_schema_version="1.0", host=str(config.get("export_host", "codex")),
+        cloudbox_version=contract["cloudbox_version"],
+        candidate_schema_version=contract["candidate_schema_version"],
+        host=contract["host"],
         agent_name=str(config.get("export_agent_name", "codex")),
         export_project_name=str(config.get("export_project_name", label)),
         payload_hashes=payload_hashes, bundle_id=uuid.uuid4().hex,

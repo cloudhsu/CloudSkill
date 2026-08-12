@@ -8,6 +8,7 @@ from typing import Any
 BUNDLE_FORMAT_VERSION = "2.0"
 EXPORTER_VERSION = "2.0"
 SUPPORTED_BUNDLE_FORMATS = {BUNDLE_FORMAT_VERSION}
+SUPPORTED_CANDIDATE_SCHEMA_VERSIONS = {"1.0"}
 SAFE_COMPONENT = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_-]*$")
 LOWER_COMPONENT = re.compile(r"^[a-z0-9][a-z0-9-]*$")
 HEX64 = re.compile(r"^[0-9a-f]{64}$")
@@ -52,6 +53,8 @@ def validate_bundle_manifest(value: dict[str, Any]) -> list[str]:
         errors.append("unsupported bundle format")
     if value.get("exporter_version") != EXPORTER_VERSION:
         errors.append("unsupported exporter version")
+    if value.get("candidate_schema_version") not in SUPPORTED_CANDIDATE_SCHEMA_VERSIONS:
+        errors.append("unsupported candidate schema version")
     if not re.fullmatch(r"[0-9]+\.[0-9]+\.[0-9]+", str(value.get("cloudbox_version", ""))):
         errors.append("invalid CloudBox version")
     for key in ("host", "agent_name"):

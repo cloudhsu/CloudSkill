@@ -236,6 +236,17 @@ if export_script_path.is_file():
     export_patterns = {key: pattern.pattern for key, pattern in export_module.SENSITIVE_PATTERNS.items()}
     if capture_patterns != export_patterns:
         fail('export_eval_candidate.py SENSITIVE_PATTERNS has drifted from capture_eval_candidate.py')
+    for label, mutation in (
+        ('candidate schema', {'schema_version': '9.9'}),
+        ('CloudBox version', {'cloudskill_version': 'not-a-version'}),
+        ('runtime', {'runtime': 'unknown-host'}),
+    ):
+        invalid_contract_candidate = {**candidate_template, **mutation}
+        if (
+            not capture_module.validate_candidate(invalid_contract_candidate, 'positive')
+            or not export_module.validate_candidate(invalid_contract_candidate, 'positive')
+        ):
+            fail(f'capture/export validators accepted invalid {label} contract metadata')
 
     # Export-then-import round trip, simulating a fully disconnected session: no
     # .cloudskill config anywhere, an external "eval-outbox" project, a manual zip
@@ -252,6 +263,23 @@ if export_script_path.is_file():
         draft['prompt_sanitized'] = 'A device accepts a command but the hardware readback has not reached the requested value.'
         draft_path = tmp / 'export-positive.json'
         draft_path.write_text(json.dumps(draft, ensure_ascii=False, indent=2), encoding='utf-8')
+        wrong_host_draft = {**draft, 'runtime': 'claude'}
+        wrong_host_path = tmp / 'export-wrong-host.json'
+        wrong_host_path.write_text(
+            json.dumps(wrong_host_draft, ensure_ascii=False, indent=2), encoding='utf-8'
+        )
+        wrong_host_outbox = external_project / '.cloudskill/wrong-host-outbox'
+        wrong_host_result = subprocess.run([
+            sys.executable, str(export_script_path), '--kind', 'positive',
+            '--input', str(wrong_host_path), '--outbox', str(wrong_host_outbox),
+            '--project-name', 'validator-smoke', '--host', 'codex', '--non-interactive',
+        ], cwd=external_project, text=True, capture_output=True)
+        if (
+            wrong_host_result.returncode == 0
+            or list(wrong_host_outbox.rglob('*.json'))
+            or list(external_project.glob('validator-smoke-codex-*.zip'))
+        ):
+            fail('portable exporter did not reject runtime/host drift before publication')
         stale = external_project / '.cloudskill/eval-outbox/manual-review/INT-stale-negative.json'
         stale.parent.mkdir(parents=True, exist_ok=True)
         stale.write_text('{}\n', encoding='utf-8')
@@ -307,6 +335,16 @@ if export_script_path.is_file():
                 }
             compatibility_manifest = json.loads(compatibility_members['manifest.json'])
             compatibility_manifest['cloudbox_version'] = '6.3.0'
+            for payload_name in compatibility_manifest['payload_hashes']:
+                compatibility_candidate = json.loads(compatibility_members[payload_name])
+                compatibility_candidate['cloudskill_version'] = '6.3.0'
+                compatibility_payload = (
+                    json.dumps(compatibility_candidate, ensure_ascii=False, indent=2) + '\n'
+                ).encode('utf-8')
+                compatibility_members[payload_name] = compatibility_payload
+                compatibility_manifest['payload_hashes'][payload_name] = hashlib.sha256(
+                    compatibility_payload
+                ).hexdigest()
             compatibility_archive = compatibility_imports / exported_zips[0].name
             with zipfile.ZipFile(compatibility_archive, 'w', zipfile.ZIP_DEFLATED) as archive:
                 archive.writestr(
@@ -325,6 +363,52 @@ if export_script_path.is_file():
                 or len(list((compatibility_inbox / 'imports/processed').glob('*.zip'))) != 1
             ):
                 fail('6.4 importer did not preserve 6.3 bundle-format 2.0 compatibility')
+
+            mismatch_cases = {
+                'cloudbox-version': ({'cloudbox_version': '6.3.0'}, {}),
+                'candidate-schema': ({}, {'schema_version': '9.9'}),
+                'runtime-host': ({}, {'runtime': 'claude'}),
+            }
+            for mismatch_label, (manifest_changes, candidate_changes) in mismatch_cases.items():
+                mismatch_inbox = tmp / f'{mismatch_label}-mismatch-inbox'
+                mismatch_imports = mismatch_inbox / 'imports'
+                mismatch_imports.mkdir(parents=True)
+                with zipfile.ZipFile(exported_zips[0]) as source:
+                    mismatch_members = {
+                        name: source.read(name) for name in source.namelist()
+                    }
+                mismatch_manifest = json.loads(mismatch_members['manifest.json'])
+                mismatch_manifest.update(manifest_changes)
+                for payload_name in mismatch_manifest['payload_hashes']:
+                    mismatch_candidate = json.loads(mismatch_members[payload_name])
+                    mismatch_candidate.update(candidate_changes)
+                    mismatch_payload = (
+                        json.dumps(mismatch_candidate, ensure_ascii=False, indent=2) + '\n'
+                    ).encode('utf-8')
+                    mismatch_members[payload_name] = mismatch_payload
+                    mismatch_manifest['payload_hashes'][payload_name] = hashlib.sha256(
+                        mismatch_payload
+                    ).hexdigest()
+                with zipfile.ZipFile(
+                    mismatch_imports / exported_zips[0].name, 'w', zipfile.ZIP_DEFLATED
+                ) as archive:
+                    archive.writestr(
+                        'manifest.json',
+                        json.dumps(mismatch_manifest, ensure_ascii=False, indent=2) + '\n',
+                    )
+                    for name, payload in mismatch_members.items():
+                        if name != 'manifest.json':
+                            archive.writestr(name, payload)
+                mismatch_result = run([
+                    sys.executable, str(import_script_path), '--eval-inbox',
+                    str(mismatch_inbox),
+                ], cwd=ROOT)
+                if (
+                    'unsupported=1' not in mismatch_result.stdout
+                    or list((mismatch_inbox / 'manual-review').glob('*.json'))
+                    or list((mismatch_inbox / 'candidates').glob('*.json'))
+                ):
+                    fail(f'manifest/payload {mismatch_label} mismatch did not fail closed')
 
             renamed = repo_inbox / 'imports' / 'renamed.zip'
             shutil.copy2(exported_zips[0], renamed)

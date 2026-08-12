@@ -16,13 +16,13 @@ m3 = build_bundle_manifest(cloudbox_version="6.1.0", candidate_schema_version="1
 if bundle_filename(m1) == bundle_filename(m2): errors.append("same-second bundles collide")
 if bundle_filename(m1) != "engine-core-codex-codex-20260810T010203Z-aaaaaaaa.zip": errors.append("unexpected bundle filename")
 if m3["host"] != "claude-code" or m3["agent_name"] != "claude-code": errors.append("host/agent normalization drift")
-for bad in (dict(m1, bundle_format_version="1.0"), dict(m1, payload_hashes={"x": "z" * 64}), dict(m1, export_project_name="https://private")):
+for bad in (dict(m1, bundle_format_version="1.0"), dict(m1, candidate_schema_version="9.9"), dict(m1, payload_hashes={"x": "z" * 64}), dict(m1, export_project_name="https://private")):
     if not validate_bundle_manifest(bad): errors.append("invalid manifest passed")
 try: normalize_filename_component("../")
 except ValueError: pass
 else: errors.append("unsafe empty component passed")
 schema = (ROOT / "evals/interaction/contracts/eval-export-bundle.schema.json").read_text(encoding="utf-8")
-for marker in ('"const": "2.0"', '"payload_hashes"', '^[0-9a-f]{64}$'):
+for marker in ('"bundle_format_version": {"const": "2.0"}', '"candidate_schema_version": {"const": "1.0"}', '"payload_hashes"', '^[0-9a-f]{64}$'):
     if marker not in schema: errors.append(f"schema missing {marker}")
 print("Validated Eval export bundle 2.0 contract")
 for error in errors: print(f"ERROR: {error}")

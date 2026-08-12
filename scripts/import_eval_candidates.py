@@ -238,6 +238,13 @@ def import_zip(zip_path: Path, inbox: Path, terms: list[str], seen_keys: set[str
                 candidate = json.loads(archive.read(candidate_name))
                 if not isinstance(candidate, dict) or "case_kind" not in candidate:
                     raise ValueError("candidate payload is not a candidate object")
+                if (
+                    candidate.get("schema_version") != manifest["candidate_schema_version"]
+                    or candidate.get("cloudskill_version") != manifest["cloudbox_version"]
+                    or candidate.get("runtime") != manifest["host"]
+                ):
+                    counts["unsupported"] = 1
+                    return counts
                 kind = candidate.get("case_kind")
                 if kind not in ALLOWED_KINDS:
                     candidate.setdefault("sanitization", {})["import_errors"] = [f"unknown case_kind: {kind!r}"]

@@ -32,6 +32,9 @@ discovery. Use `從專案提煉優化案例` for an initial bounded pass and
 `同步優化來源` for incremental discovery. Actual URLs, credentials,
 candidates, and provenance remain in ignored/private storage; see
 [CloudBox evolution sources](docs/AUTOMATIC_EVOLUTION_SOURCES.md).
+CloudBox 6.4 import first verifies bundle/exporter/candidate schema, declared
+CloudBox version, host/runtime, filename/manifest identity, and payload hashes;
+contract drift is retained as unsupported evidence before candidate routing.
 
 ## Skills
 

@@ -147,6 +147,12 @@ def validate_candidate(candidate: dict[str, Any], expected_kind: str) -> list[st
         errors.append(f'case_kind must equal --kind {expected_kind!r}')
     if candidate.get('status') != 'candidate':
         errors.append('status must be candidate')
+    if candidate.get('schema_version') != '1.0':
+        errors.append('schema_version must be 1.0')
+    if not re.fullmatch(r'[0-9]+\.[0-9]+\.[0-9]+', str(candidate.get('cloudskill_version', ''))):
+        errors.append('cloudskill_version must be semantic version x.y.z')
+    if candidate.get('runtime') not in {'codex', 'claude'}:
+        errors.append('runtime must be codex or claude')
     for key, child in walk_items(candidate):
         if key in PROHIBITED_KEYS:
             errors.append(f'prohibited raw/identifying field: {key}')

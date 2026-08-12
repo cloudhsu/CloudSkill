@@ -24,6 +24,11 @@ This is the operational entry point for a new conversation or coding agent that 
   remains 2.0 and filename identity is unchanged; focused evidence proves a
   correctly named 6.3 archive is accepted by the 6.4 importer as well as the
   current exporter/importer round trip.
+- A later user-authorized increment binds manifest and payload CloudBox
+  version, candidate schema, and host/runtime. Export and Git Exchange reject
+  mixed contracts and duplicate payload names; import checks the whole contract
+  before candidate routing and retains mismatches as unsupported without partial output. The prior
+  exact-tip release PASS at `7b0d4b4` is stale for this increment.
 - Pre-release evidence is in
   `docs/releases/6.4.0-pre-release-evidence.md`. Fresh full-suite validation and
   an independent exact-tip release review remain required before push/PR.
