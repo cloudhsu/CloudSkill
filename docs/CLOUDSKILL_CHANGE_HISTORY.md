@@ -19,6 +19,11 @@ produced the required behavior, so those Skill edits/cases were removed as
 `NO_CHANGE_JUSTIFIED`. Existing topology, registry anti-drift, evidence-layer
 truth, and release-stop owners were not duplicated. Version synchronization,
 push, merge, tag, and Release remain `NOT RUN` pending renewed exact-tip review.
+The coordinator's premature three-Skill edit is retained as a real
+`developing-skills` RED. `DEVSK-BEH-017` now prevents lower-layer RED/GREEN from
+self-authorizing higher-layer claims; its post-change blind output passed and
+is preserved with the three no-change baselines in
+`docs/evolution/2026-08-12-typed-identity-skill-baseline-evidence.md`.
 
 ## 2026-08-12 — Composable lifecycle-template final-review correction candidate
 

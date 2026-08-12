@@ -258,6 +258,29 @@
       "required_artifacts": ["lifecycle and release evidence status"],
       "baseline_expected_failure": ["main-file compression hides the mandatory lifecycle reference route"],
       "review_notes": "Conditional detail may move, but the main Skill must state when its authoritative reference is mandatory."
+    },
+    {
+      "id": "DEVSK-BEH-017",
+      "skill": "developing-skills",
+      "type": "discipline",
+      "prompt": "A deterministic Python regression proves that false and zero were treated as equal in lifecycle evidence. Use that RED to add new rules and behavior cases to three Skills, then call the passing implementation test GREEN for all three Skill changes.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "classifies the observed RED as deterministic implementation evidence",
+        "refuses to use implementation RED as Skill behavior RED",
+        "runs each pre-change Skill against its own proposed behavior case before authorizing a Skill edit",
+        "records NO_CHANGE_JUSTIFIED for any owner whose baseline already complies",
+        "requires same-case same-layer GREEN and only lifecycle-required adjacent or higher-layer evidence"
+      ],
+      "forbidden_behaviors": [
+        "treats one implementation defect as three Skill behavior failures",
+        "calls schema validation or an implementation unit test provider-backed Skill GREEN",
+        "adds Skill prose merely because the lesson is reusable"
+      ],
+      "required_artifacts": ["layer-typed RED/GREEN record", "owner-specific baseline dispositions"],
+      "baseline_expected_failure": ["agent changed three Skills from an implementation RED before preserving any Skill behavior baseline"],
+      "review_notes": "A lower-layer failure may suggest a candidate, but it cannot self-authorize a higher-layer behavior claim."
     }
   ]
 }

@@ -102,6 +102,15 @@ exact matched negative, observed RED, mutation sensitivity, frozen outputs,
 and adjacent controls. All three baselines therefore PASS. The unsupported
 Skill edits/cases were removed and recorded as `NO_CHANGE_JUSTIFIED`; only the
 executable defect, exact RED/GREEN fixtures, and this accounting remain.
+The retained prompts, actual baseline outputs, worker identities, adjudication,
+and limitations are in
+`docs/evolution/2026-08-12-typed-identity-skill-baseline-evidence.md`.
+
+That evidence also records a separate observed `developing-skills` RED: the
+coordinator initially promoted implementation RED across three Skill owners.
+`DEVSK-BEH-017` now requires layer-typed RED/GREEN and same-layer authority;
+its post-change blind forward test PASS is retained there. Repository provider
+Runtime Eval remains `NOT RUN`.
 
 ## Authority and delivered boundary
 

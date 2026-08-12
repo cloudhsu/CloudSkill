@@ -57,7 +57,11 @@ This is the operational entry point for a new conversation or coding agent that 
   and risk mutations. A first draft also changed three owner Skills, but fresh
   pre-change blind cases showed all three already produced the required
   behavior; those unsupported edits/cases were removed as
-  `NO_CHANGE_JUSTIFIED`.
+  `NO_CHANGE_JUSTIFIED`. Their retained prompts/outputs are in
+  `docs/evolution/2026-08-12-typed-identity-skill-baseline-evidence.md`.
+  The cross-layer mistake itself is an observed `developing-skills` RED;
+  `DEVSK-BEH-017` adds layer-typed RED/GREEN, and one post-change blind forward
+  test passed. Provider-backed Runtime Eval remains `NOT RUN`.
 - Candidate evidence is in
   `docs/evolution/2026-08-11-lifecycle-template-pilot-evidence.md`; operating
   guidance is in `docs/LIFECYCLE_TEMPLATE_CATALOG.md`. Two independent
