@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | Final-review correction candidate; independent exact-tip re-review pending |
+| Status | Typed-identity correction candidate; two independent validations pending |
 | Observation scope | Three implemented templates and seven deferred registry entries |
 | Registry authority | `config/lifecycle-templates.json` |
 | Plan Owner | `development-process-tailoring` |
@@ -61,6 +61,40 @@ plan evidence and independently matches it at admission, and derives
 invalidation from trigger/context semantics. The legacy four-argument
 `create_plan` result is asserted unchanged at the Python-value contract level.
 No provider or external runtime was invoked for these fixes.
+
+## Typed-identity RED and extraction accounting
+
+The independent re-review of `5d6cdb5` found one remaining Important defect:
+ordinary Python dictionary equality treats JSON `false` as numeric `0` and
+`true` as numeric `1`. The exact pre-change admission fixture accepted a
+resolution bound to `external_side_effect: false` when the caller supplied
+`external_side_effect: 0`; replan also retained `selected` and invalidated no
+evidence. This is the deterministic RED for the user-authorized correction.
+
+The correction compares normalized JSON through type-preserving canonical
+identity at admission, persisted-plan lineage, and replan. Focused GREEN covers
+both fact and risk contexts with boolean-to-integer mutations. Provider-backed
+behavior execution remains `NOT RUN`; behavior-case contract validation is not
+represented as model behavior.
+
+Reusable extraction was assigned without creating another Skill:
+
+| Pressure | Owner outcome |
+|---|---|
+| stage partial-order composition and cycle refusal | already implemented in `development-process-tailoring` and executable contract |
+| work/source/task/fact/risk/registry evidence binding | already implemented in `development-process-tailoring` and plan contract |
+| type-preserving serialized identity | added to `development-process-tailoring`; implementation and replan mutations added |
+| automatic evidence invalidation | existing process rule retained; type-change loophole closed |
+| literal-boolean fail-closed selection | existing process rule retained |
+| positive registry propagation plus negative drift injection | already owned by `framework-design`; no duplicate edit |
+| exact-mechanism fault injection | added to `runtime-evaluation-engineering` |
+| serialized-state type confusion review | added to the `code-review` checklist |
+| deterministic, static/manual, provider, token, and cost evidence separation | already owned by `developing-skills` and `runtime-evaluation-engineering` |
+| Important finding stops version/tag/release | already covered by `coding-agent-project-governance`; no duplicate edit |
+
+New behavior contracts are `PROC-BEH-017`, `CR-BEH-005`, and `RTE-BEH-010`.
+Their RED basis is the observed exact-tip defect and missing owner instructions;
+provider/model RED and GREEN execution are `NOT RUN`.
 
 ## Authority and delivered boundary
 

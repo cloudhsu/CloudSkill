@@ -4,11 +4,11 @@
 
 **Goal:** Add three pre-qualified, composable lifecycle templates with deterministic applicability/delta checks so matching work avoids repeated full risk calculation without weakening lifecycle or evidence.
 
-**Execution status (2026-08-12):** Tasks 1 through 5 are committed through
-`5a06cdd`. Final whole-branch review found three blocking and four minor
-findings. One bounded correction wave has addressed them locally; independent
-exact-tip re-review remains pending. No publication operation is authorized by
-this status.
+**Execution status (2026-08-12):** Tasks 1 through 5 and the first correction
+are committed through `5d6cdb5`. Its independent re-review closed the original
+three blocking/four minor findings and found one typed JSON identity blocker.
+The user authorized a new RED/GREEN correction plus reusable Skill extraction;
+two exact-tip validations and every publication gate remain pending.
 
 **Architecture:** Add one authoritative versioned template registry and a pure selector/composer beside the existing lifecycle-profile contract. The existing Plan Owner and durable lifecycle runtime remain authoritative; template output is only normalized planning input and never executes work.
 

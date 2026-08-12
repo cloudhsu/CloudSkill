@@ -1,7 +1,7 @@
 from __future__ import annotations
 import copy,hashlib,json
 from typing import Any
-from lifecycle_template_contract import DELTA_FIELDS, RESOLUTION_PROVENANCE, validate_selected_resolution
+from lifecycle_template_contract import DELTA_FIELDS, RESOLUTION_PROVENANCE, json_identity_equal, validate_selected_resolution
 from review_assurance_contract import LEVELS
 
 UNRESOLVED_PROVENANCE="lifecycle_plan_contract.replan_unresolved"
@@ -202,8 +202,8 @@ def _validated_lineage(plan:dict[str,Any])->tuple[dict[str,Any],list[dict[str,An
         if (
             context["work_id"]!=plan.get("work_id")
             or context["source_hash"]!=plan.get("source_hash")
-            or context["tasks"]!=plan.get("tasks")
-            or context["risk_context"]!=plan.get("risk_baseline")
+            or not json_identity_equal(context["tasks"],plan.get("tasks"))
+            or not json_identity_equal(context["risk_context"],plan.get("risk_baseline"))
         ):
             raise ValueError("invalid template resolution lineage context binding")
     lineage=plan.get("template_resolution_lineage")
@@ -253,9 +253,9 @@ def _trigger_contradicts_selected_context(
         for field in DELTA_FIELDS
     ):
         return True
-    if risk!=context["risk_context"]:
+    if not json_identity_equal(risk,context["risk_context"]):
         return True
-    if template_facts is not None and template_facts!=context["task_facts"]:
+    if template_facts is not None and not json_identity_equal(template_facts,context["task_facts"]):
         return True
     return False
 

@@ -56,7 +56,7 @@ template_facts={
     "irreversible_or_unreconciled":False,
     "outside_verified_envelope":False,
 }
-template_risk={"risk_class":"medium","scope":"bounded"}
+template_risk={"risk_class":"medium","scope":"bounded","assessment_complete":False,"review_required":True}
 resolution=compose_templates(
     "bounded-feature",
     ["skill-evolution"],
@@ -119,7 +119,11 @@ context_reuse_cases=(
     ("cross-source", "W2", "d"*64, tasks, template_facts, template_risk, compatible_registry),
     ("cross-task", "W2", "c"*64, [{**tasks[0],"outputs":["different"]}], template_facts, template_risk, compatible_registry),
     ("cross-facts", "W2", "c"*64, tasks, {**template_facts,"requirement_revision":2}, template_risk, compatible_registry),
+    ("cross-facts-bool-int", "W2", "c"*64, tasks, {**template_facts,"external_side_effect":0}, template_risk, compatible_registry),
+    ("cross-facts-bool-int-true", "W2", "c"*64, tasks, {**template_facts,"design_approved":1}, template_risk, compatible_registry),
     ("cross-risk", "W2", "c"*64, tasks, template_facts, {**template_risk,"risk_class":"high"}, compatible_registry),
+    ("cross-risk-bool-int", "W2", "c"*64, tasks, template_facts, {**template_risk,"assessment_complete":0}, compatible_registry),
+    ("cross-risk-bool-int-true", "W2", "c"*64, tasks, template_facts, {**template_risk,"review_required":1}, compatible_registry),
 )
 for label,work_id,source_hash,candidate_tasks,candidate_facts,candidate_risk,candidate_registry in context_reuse_cases:
     try:
@@ -268,6 +272,21 @@ for trigger in (
     assert automatically_unresolved["evidence_invalidated"]==[resolution["delta_evidence_hash"]]
 safe_delta_trigger=replan(templated_plan,{"kind":"requirement_checked","evidence_hash":"9"*64,"delta_changes":{"sensitive_or_privileged":False}},template_risk,{"invalidate":[],"reuse":[]})
 assert safe_delta_trigger["template_resolution"]["status"]=="selected"
+for label, changed_facts, changed_risk in (
+    ("fact false-to-zero", {**template_facts,"external_side_effect":0}, template_risk),
+    ("fact true-to-one", {**template_facts,"design_approved":1}, template_risk),
+    ("risk false-to-zero", template_facts, {**template_risk,"assessment_complete":0}),
+    ("risk true-to-one", template_facts, {**template_risk,"review_required":1}),
+):
+    typed_change=replan(
+        templated_plan,
+        {"kind":"context_rechecked","evidence_hash":"d"*64},
+        changed_risk,
+        {"invalidate":[],"reuse":[]},
+        template_facts=changed_facts,
+    )
+    assert typed_change["template_resolution"]["status"]=="escalation_required", label
+    assert typed_change["evidence_invalidated"]==[resolution["delta_evidence_hash"]], label
 risk_changed=replan(templated_plan,{"kind":"risk_changed","evidence_hash":"a"*64},{**template_risk,"risk_class":"high"},{"invalidate":[],"reuse":[]})
 assert risk_changed["template_resolution"]["status"]=="escalation_required"
 try:

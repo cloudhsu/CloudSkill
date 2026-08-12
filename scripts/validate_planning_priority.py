@@ -40,6 +40,11 @@ def contract_errors(process_text: str, developing_text: str):
             and "do not depend on a caller invalidation list" in process
             and "result bound to the new context" in process
         ),
+        "template context identity preserves JSON types": (
+            "canonical, type-preserving identity" in process
+            and "`false` is not `0`" in process
+            and "`true` is not `1`" in process
+        ),
         "process priority is lifecycle then evidence then token": (
             "lifecycle and dynamic feedback loop first" in process
             and "evidence and verification second" in process
@@ -101,6 +106,14 @@ def main() -> int:
     )
     if not contract_errors(template_context_mutation, developing_text):
         errors.append("negative mutation did not detect automatic-invalidation drift")
+
+    typed_identity_mutation = process_text.replace(
+        "canonical,\ntype-preserving identity",
+        "ordinary host-language identity",
+        1,
+    )
+    if not contract_errors(typed_identity_mutation, developing_text):
+        errors.append("negative mutation did not detect typed-identity drift")
 
     if errors:
         for error in errors:

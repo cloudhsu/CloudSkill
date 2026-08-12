@@ -68,7 +68,10 @@ becomes a second Plan Owner.
 
 Persist selected template IDs, contract versions, composition order, status,
 delta-evidence identity, and the bound work/source/tasks/facts/risk/registry
-context in the lifecycle plan. A source, authority-boundary, side-effect-scope,
+context in the lifecycle plan. Compare that JSON context with a canonical,
+type-preserving identity: object-key order may normalize, but booleans, numbers,
+strings, nulls, arrays, and objects never alias (`false` is not `0`; `true` is
+not `1`). A source, authority-boundary, side-effect-scope,
 bound fact/risk, or explicit delta change that contradicts the all-false
 selection automatically invalidates that identity; do not depend on a caller
 invalidation list. Create a new plan revision, retain the prior resolution in

@@ -371,7 +371,7 @@ def validate_selected_resolution(
         registry=registry,
     )
     if (
-        replay_context != selection_context
+        not json_identity_equal(replay_context, selection_context)
         or resolution.get("selection_context_hash") != _canonical_hash(selection_context)
     ):
         raise ValueError("selected resolution context does not match authoritative registry identity")
@@ -387,7 +387,7 @@ def validate_selected_resolution(
             risk_context=risk_context,
             registry=registry,
         )
-        if expected_context is None or expected_context != selection_context:
+        if expected_context is None or not json_identity_equal(expected_context, selection_context):
             raise ValueError("selected resolution context does not match plan work/source/task/risk identity")
 
     facts = selection_context["task_facts"]
@@ -432,7 +432,7 @@ def validate_selected_resolution(
         tasks=selection_context["tasks"],
         risk_context=selection_context["risk_context"],
     )
-    if replayed != resolution:
+    if not json_identity_equal(replayed, resolution):
         raise ValueError("selected resolution does not replay against authoritative registry")
 
 
@@ -589,8 +589,34 @@ def _resolve_reuse(
 
 
 def _canonical_hash(value: Any) -> str:
-    encoded = json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
+    encoded = json.dumps(
+        value,
+        sort_keys=True,
+        separators=(",", ":"),
+        ensure_ascii=False,
+        allow_nan=False,
+    )
     return hashlib.sha256(encoded.encode("utf-8")).hexdigest()
+
+
+def json_identity_equal(left: Any, right: Any) -> bool:
+    """Compare normalized JSON values without Python's bool/int aliasing."""
+    try:
+        return json.dumps(
+            left,
+            sort_keys=True,
+            separators=(",", ":"),
+            ensure_ascii=False,
+            allow_nan=False,
+        ) == json.dumps(
+            right,
+            sort_keys=True,
+            separators=(",", ":"),
+            ensure_ascii=False,
+            allow_nan=False,
+        )
+    except (TypeError, ValueError):
+        return False
 
 
 def _selection_context(

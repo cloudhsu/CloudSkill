@@ -15,7 +15,7 @@ This is the operational entry point for a new conversation or coding agent that 
 
 ## Current repository state
 
-### Composable lifecycle-template final-review correction candidate (2026-08-12)
+### Composable lifecycle-template typed-identity correction candidate (2026-08-12)
 
 - Branch `feat/cloudbox-skill-optimization` contains a three-template pilot at
   pre-correction review tip `5a06cdd`: `lightweight-change`, `bounded-feature`,
@@ -48,12 +48,17 @@ This is the operational entry point for a new conversation or coding agent that 
   suite passed locally. The pure selector makes zero model calls; provider-
   backed Runtime Eval remains `NOT RUN`, with provider token/cost evidence
   unavailable.
+- Independent re-review of `5d6cdb5` closed the prior topology, context-binding,
+  invalidation, and documentation findings but reproduced one remaining
+  Important: Python equality aliased JSON booleans and integers. The user
+  authorized a new correction/evolution increment. Exact RED showed
+  `false -> 0` crossing both admission and replan without invalidation; the
+  current candidate uses canonical type-preserving JSON identity and adds fact
+  and risk mutations plus three owner-specific behavior cases.
 - Candidate evidence is in
   `docs/evolution/2026-08-11-lifecycle-template-pilot-evidence.md`; operating
-  guidance is in `docs/LIFECYCLE_TEMPLATE_CATALOG.md`. Final review of
-  `5a06cdd` found three blocking and four minor findings; the one correction
-  wave addresses all seven. Independent exact-tip re-review of the containing
-  commit is still assigned to the controller's reviewer. Do not self-certify it
+  guidance is in `docs/LIFECYCLE_TEMPLATE_CATALOG.md`. Two independent
+  validations of the new exact tip are still required. Do not self-certify it
   from this handoff.
 - Version synchronization, push, PR, merge, tag, Release, and host reload are
   `NOT RUN`. Continue with exact-tip re-review and correct any remaining

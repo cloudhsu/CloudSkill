@@ -2,6 +2,23 @@
 
 This document records the evolution rationale and evidence chain for work that may span multiple conversations. Git commits and tags remain the authoritative source history.
 
+## 2026-08-12 — Lifecycle typed-identity correction and reusable extraction
+
+Independent re-review of the first lifecycle-template correction reproduced a
+typed-context evidence defect: host-language equality admitted JSON `false`
+and numeric `0` as the same fact/risk identity, preserving a selected plan and
+reusing evidence across distinct serialized contexts. The user authorized a
+new correction increment and requested every reusable lesson be incorporated.
+
+Deterministic RED now mutates the exact admission and replan mechanisms. The
+shared contract uses canonical type-preserving JSON identity, while
+`development-process-tailoring`, `code-review`, and
+`runtime-evaluation-engineering` gain narrowly owned rules/cases for typed
+evidence identity and exact-mechanism fault injection. Existing topology,
+registry anti-drift, evidence-layer truth, and release-stop owners were not
+duplicated. Provider-backed behavior execution, version synchronization, push,
+merge, tag, and Release remain `NOT RUN` pending two independent validations.
+
 ## 2026-08-12 — Composable lifecycle-template final-review correction candidate
 
 The pilot adds one authoritative registry, a pure deterministic selector/

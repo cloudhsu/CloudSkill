@@ -36,7 +36,8 @@
     "PROC-BEH-013",
     "PROC-BEH-014",
     "PROC-BEH-015",
-    "PROC-BEH-016"
+    "PROC-BEH-016",
+    "PROC-BEH-017"
   ],
   "behavior_case_types": [
     "application",

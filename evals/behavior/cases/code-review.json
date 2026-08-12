@@ -93,6 +93,27 @@
                 "agent reviews happy-path decoding but misses byte-order, lifetime and readiness-state ambiguity"
             ],
             "review_notes": "Keep protocol constants generic; review ordering, ownership and state semantics rather than inventing a wire format."
+        },
+        {
+            "id": "CR-BEH-005",
+            "skill": "code-review",
+            "type": "application",
+            "prompt": "Review lifecycle-cache code that accepts a stored JSON context when Python dictionary equality says it matches the caller. The stored fact is false while a later caller supplies 0; the cache controls evidence reuse.",
+            "expected_routing": true,
+            "expected_alternative_skill": null,
+            "required_behaviors": [
+                "identifies host-language boolean-number equality as a type-confusion defect at the serialized contract boundary",
+                "requires canonical type-preserving identity for persisted cached signed or evidence-bearing JSON",
+                "requires automatic invalidation when authority source risk or contract identity changes"
+            ],
+            "forbidden_behaviors": [
+                "accepts dictionary equality because false and zero are both falsy",
+                "fixes only one field name without protecting the general serialized identity boundary",
+                "depends only on callers to request evidence invalidation"
+            ],
+            "required_artifacts": ["failure scenario", "false-zero and true-one regression tests"],
+            "baseline_expected_failure": ["review checks hashes and field presence but misses host-language equality aliasing distinct JSON types"],
+            "review_notes": "Review the serialized identity contract, not merely the current field names."
         }
   ]
 }

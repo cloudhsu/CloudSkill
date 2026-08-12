@@ -10,6 +10,9 @@
 - Are collections thread-safe in both access and compound operations?
 - Is cancellation distinguished from failure?
 - Are memory visibility and ordering assumptions valid?
+- When persisted, cached, signed, or evidence-bearing state is compared, does
+  identity preserve serialized types instead of relying on host-language
+  equality that aliases values such as JSON booleans and numbers?
 
 ## Communication
 
@@ -40,6 +43,8 @@
 - Can retry repeat a non-idempotent action?
 - Is recovery based on actual external state or only local assumptions?
 - Can the process restart without leaving the system ambiguous?
+- Do authority, source, risk, or contract changes automatically invalidate the
+  affected evidence, or can a caller forget to request invalidation?
 
 ## Framework and Cross-Platform
 
