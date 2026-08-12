@@ -224,7 +224,12 @@ def package_outbox(outbox: Path, payload: Path, project_name: str, host: str, ag
     stamp = datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ')
     bundle_id = uuid.uuid4().hex
     payloads = [payload]
-    payload_hashes = {str(path.relative_to(outbox)): hashlib.sha256(path.read_bytes()).hexdigest() for path in payloads}
+    # zipfile normalizes an arcname's separators to '/' when writing (see the
+    # archive.write() call below), regardless of host OS. str(Path) does not --
+    # on Windows it keeps '\\', so a manifest built with str() would declare a
+    # payload_hashes key that never matches the archive member zipfile actually
+    # produced. as_posix() matches zipfile's own normalization on every OS.
+    payload_hashes = {path.relative_to(outbox).as_posix(): hashlib.sha256(path.read_bytes()).hexdigest() for path in payloads}
     manifest = {
         'bundle_format_version': BUNDLE_FORMAT_VERSION,
         'cloudbox_version': cloudbox_version,
