@@ -41,9 +41,12 @@ This is the operational entry point for a new conversation or coding agent that 
   real 6.3-shaped path provenance only after removing it and forcing manual
   review; rollback failure creates a relative-path reconciliation sidecar and
   blocks retry. Focused GREEN passes; commit/full/dual review remain pending.
+- Exact tip `cd23028` passed both independent reviews with no High/Medium
+  findings. The full deterministic suite, focused exchange/import checks,
+  lifecycle audit, and diff checks pass. Provider Runtime Eval remains
+  `NOT RUN`; publication operations are the remaining gates.
 - Pre-release evidence is in
-  `docs/releases/6.4.0-pre-release-evidence.md`. Fresh full-suite validation and
-  an independent exact-tip release review remain required before push/PR.
+  `docs/releases/6.4.0-pre-release-evidence.md`.
 - Push, PR/CI, merge, main validation, annotated tag, tag validation, GitHub
   Release, and post-release evidence remain `NOT RUN`.
 

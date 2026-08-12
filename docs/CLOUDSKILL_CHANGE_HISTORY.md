@@ -35,8 +35,10 @@ rollback deletion failure was silently described as complete. A representative
 fixture now proves 6.3 input is stripped of that value and conservatively routed
 to manual review. Failed rollback writes path-relative durable reconciliation
 evidence and prevents blind retry. Fresh full and dual review remain pending.
-Fresh full validation, exact-tip release review, push, PR/CI, merge, tag,
-Release, and post-release verification remain pending.
+Exact tip `cd23028` then passed both independent reviews with no High/Medium
+findings; one reviewer reran the full deterministic suite and the other reran
+the focused exchange/import checks. Push, PR/CI, merge, tag, Release, and
+post-release verification remain pending.
 
 ## 2026-08-12 — Lifecycle typed-identity correction and reusable extraction
 
