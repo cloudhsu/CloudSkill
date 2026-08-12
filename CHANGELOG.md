@@ -26,6 +26,10 @@
   archives and duplicate payload names fail closed before any candidate
   publication, while correctly declared 6.3 archives remain consumable by the
   6.4 importer.
+- Revalidated every candidate and the owning private-term policy before Eval
+  Exchange network/Git activity, removed local config-path provenance from
+  exported payloads, converted malformed sanitization metadata into controlled
+  rejection evidence, and rolled back archive outputs after publication errors.
 
 ## 6.3.0
 

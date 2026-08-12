@@ -21,6 +21,14 @@ against the manifest before routing any candidate and retains mismatched
 archives without partial output. Exchange push also rejects duplicate payload
 names before remote access. The earlier PASS is stale and cannot authorize this
 descendant.
+Dual review of `68aae7e` then found that metadata-only Exchange preflight could
+commit unsafe candidates, malformed sanitization could terminate the importer,
+and a later candidate write could leave earlier archive output. Focused RED
+reproduced each failure. The correction reuses authoritative candidate and
+private-term validation before network/Git access, rejects credential and local
+config-path metadata, retains malformed sanitization as a controlled rejection,
+and rolls back outputs created by a failed archive publication. Fresh full and
+dual exact-tip validation remain pending.
 Fresh full validation, exact-tip release review, push, PR/CI, merge, tag,
 Release, and post-release verification remain pending.
 

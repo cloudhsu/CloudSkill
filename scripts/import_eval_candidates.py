@@ -206,6 +206,15 @@ def write_candidate(inbox: Path, queue: str, candidate: dict[str, Any], dry_run:
     return target
 
 
+def retain_rejection(candidate: dict[str, Any], errors: list[str]) -> None:
+    """Replace untrusted sanitization metadata with a controlled rejection record."""
+    sanitization = candidate.get("sanitization")
+    if not isinstance(sanitization, dict):
+        sanitization = {"status": "MANUAL_REQUIRED", "raw_transcript_saved": False}
+        candidate["sanitization"] = sanitization
+    sanitization["import_errors"] = errors
+
+
 def import_zip(zip_path: Path, inbox: Path, terms: list[str], seen_keys: set[str], dry_run: bool) -> dict[str, int]:
     counts = {"candidates": 0, "manual_review": 0, "rejected": 0, "duplicate": 0, "skipped": 0, "unsupported": 0}
     planned: list[tuple[str, dict[str, Any], str | None]] = []
@@ -247,13 +256,13 @@ def import_zip(zip_path: Path, inbox: Path, terms: list[str], seen_keys: set[str
                     return counts
                 kind = candidate.get("case_kind")
                 if kind not in ALLOWED_KINDS:
-                    candidate.setdefault("sanitization", {})["import_errors"] = [f"unknown case_kind: {kind!r}"]
+                    retain_rejection(candidate, [f"unknown case_kind: {kind!r}"])
                     planned.append(("rejected", candidate, None))
                     counts["rejected"] += 1
                     continue
                 errors = validate_candidate(candidate, kind)
                 if errors:
-                    candidate.setdefault("sanitization", {})["import_errors"] = errors
+                    retain_rejection(candidate, errors)
                     planned.append(("rejected", candidate, None))
                     counts["rejected"] += 1
                     continue
@@ -280,8 +289,21 @@ def import_zip(zip_path: Path, inbox: Path, terms: list[str], seen_keys: set[str
         print(f"ERROR: {zip_path.name}: not a valid zip archive; leaving in imports/ for manual review")
         return {**{key: 0 for key in counts}, "skipped": 1}
 
-    for queue, candidate, key in planned:
-        write_candidate(inbox, queue, candidate, dry_run)
+    published: list[Path] = []
+    try:
+        for queue, candidate, _key in planned:
+            published.append(write_candidate(inbox, queue, candidate, dry_run))
+    except (OSError, ValueError):
+        if not dry_run:
+            for target in reversed(published):
+                try:
+                    if target.exists():
+                        target.unlink()
+                except OSError:
+                    pass
+        print(f"ERROR: {zip_path.name}: candidate publication failed; rolled back archive output")
+        return {**{key: 0 for key in counts}, "skipped": 1}
+    for _queue, _candidate, key in planned:
         if key is not None:
             seen_keys.add(key)
 

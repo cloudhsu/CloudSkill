@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 from pathlib import Path
+import contextlib
 import hashlib
 import importlib.util
+import io
 import json
 import os
 import shutil
@@ -166,6 +168,10 @@ with tempfile.TemporaryDirectory(prefix='cloudskill-interaction-') as tmp_name:
         ], cwd=ROOT, env=env)
         if len(list((inbox / 'candidates').glob('*.json'))) != 1:
             fail('positive candidate was not saved to candidates queue')
+        else:
+            captured_candidate = json.loads(next((inbox / 'candidates').glob('*.json')).read_text(encoding='utf-8'))
+            if 'capture_config' in captured_candidate or str(config_path) in json.dumps(captured_candidate):
+                fail('captured candidate exposed its local config path')
 
         terms_path = Path(config['sensitive_terms_path'])
         terms_path.write_text('ExampleInternalName\n', encoding='utf-8')
@@ -507,6 +513,76 @@ if export_script_path.is_file():
             if 'skipped=1' not in partial.stdout or list((partial_inbox / 'manual-review').glob('*.json')):
                 fail('manifest-valid archive published a partial candidate before later payload failure')
 
+            malformed_sanitization_inbox = tmp / 'malformed-sanitization-inbox'
+            malformed_sanitization_imports = malformed_sanitization_inbox / 'imports'
+            malformed_sanitization_imports.mkdir(parents=True)
+            malformed_sanitization_candidate = json.loads(valid_payload)
+            malformed_sanitization_candidate['sanitization'] = 'not-an-object'
+            malformed_sanitization_payload = json.dumps(malformed_sanitization_candidate).encode('utf-8')
+            malformed_sanitization_manifest = dict(duplicate_manifest)
+            malformed_sanitization_manifest['bundle_id'] = 'a' * 32
+            malformed_sanitization_manifest['payload_hashes'] = {
+                valid_payload_name: hashlib.sha256(malformed_sanitization_payload).hexdigest()
+            }
+            malformed_sanitization_name = import_module.bundle_filename(malformed_sanitization_manifest)
+            malformed_sanitization_archive = malformed_sanitization_imports / malformed_sanitization_name
+            with zipfile.ZipFile(malformed_sanitization_archive, 'w', zipfile.ZIP_DEFLATED) as archive:
+                archive.writestr('manifest.json', json.dumps(malformed_sanitization_manifest))
+                archive.writestr(valid_payload_name, malformed_sanitization_payload)
+            try:
+                malformed_counts = import_module.import_zip(
+                    malformed_sanitization_archive, malformed_sanitization_inbox, [], set(), False
+                )
+            except TypeError:
+                fail('malformed sanitization type escaped archive validation')
+            else:
+                if malformed_counts['rejected'] != 1 or len(list((malformed_sanitization_inbox / 'rejected').glob('*.json'))) != 1:
+                    fail('malformed sanitization type was not retained as one controlled rejection')
+
+            write_failure_inbox = tmp / 'write-failure-inbox'
+            write_failure_imports = write_failure_inbox / 'imports'
+            write_failure_imports.mkdir(parents=True)
+            first_write_candidate = json.loads(valid_payload)
+            second_write_candidate = dict(first_write_candidate)
+            second_write_candidate['task_summary'] = 'distinct second candidate'
+            write_failure_payloads = {
+                'manual-review/first.json': json.dumps(first_write_candidate).encode('utf-8'),
+                'manual-review/second.json': json.dumps(second_write_candidate).encode('utf-8'),
+            }
+            write_failure_manifest = dict(duplicate_manifest)
+            write_failure_manifest['bundle_id'] = 'b' * 32
+            write_failure_manifest['payload_hashes'] = {
+                name: hashlib.sha256(payload).hexdigest() for name, payload in write_failure_payloads.items()
+            }
+            write_failure_archive = write_failure_imports / import_module.bundle_filename(write_failure_manifest)
+            with zipfile.ZipFile(write_failure_archive, 'w', zipfile.ZIP_DEFLATED) as archive:
+                archive.writestr('manifest.json', json.dumps(write_failure_manifest))
+                for name, payload in write_failure_payloads.items():
+                    archive.writestr(name, payload)
+            original_write_candidate = import_module.write_candidate
+            write_calls = [0]
+            def fail_second_write(inbox_path, queue, candidate, dry_run):
+                write_calls[0] += 1
+                if write_calls[0] == 2:
+                    raise OSError('injected second publication failure')
+                return original_write_candidate(inbox_path, queue, candidate, dry_run)
+            import_module.write_candidate = fail_second_write
+            try:
+                with contextlib.redirect_stdout(io.StringIO()):
+                    write_failure_counts = import_module.import_zip(
+                        write_failure_archive, write_failure_inbox, [], set(), False
+                    )
+            except OSError:
+                write_failure_counts = None
+            finally:
+                import_module.write_candidate = original_write_candidate
+            if write_failure_counts is None or write_failure_counts['skipped'] != 1:
+                fail('candidate publication failure escaped archive-level containment')
+            if list((write_failure_inbox / 'manual-review').glob('*.json')):
+                fail('candidate publication failure left partial archive output')
+            if not write_failure_archive.is_file():
+                fail('candidate publication failure did not retain source archive')
+
             unsafe_id_inbox = tmp / 'unsafe-id-inbox'
             unsafe_id_imports = unsafe_id_inbox / 'imports'
             unsafe_id_imports.mkdir(parents=True)
@@ -563,7 +639,11 @@ if export_script_path.is_file():
                     [sys.executable, str(import_script_path), '--eval-inbox', str(symlink_inbox)],
                     cwd=ROOT, text=True, capture_output=True,
                 )
-                if symlink_result.returncode == 0 or list(external_queue.glob('*.json')):
+                if (
+                    'skipped=1' not in symlink_result.stdout
+                    or list(external_queue.glob('*.json'))
+                    or not list(symlink_imports.glob('*.zip'))
+                ):
                     fail('symlinked candidate queue was followed outside the Inbox')
 
             continuation_inbox = tmp / 'continuation-inbox'
@@ -606,6 +686,7 @@ else:
         (source_inbox / 'candidates' / 'INT-exchange-smoke-positive.json').write_text(
             json.dumps(draft, ensure_ascii=False, indent=2), encoding='utf-8'
         )
+        (source_inbox / 'sensitive-terms.local.txt').write_text('', encoding='utf-8')
 
         source_config_path = tmp / 'source-config.json'
         source_config_path.write_text(json.dumps({

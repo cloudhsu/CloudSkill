@@ -22,6 +22,7 @@ ALLOWED_SANITIZATION = {'PASS', 'MANUAL_REQUIRED'}
 PROHIBITED_KEYS = {
     'raw_transcript', 'full_transcript', 'conversation_transcript', 'messages',
     'customer_name', 'company_name', 'person_name', 'source_path', 'repository_url',
+    'password', 'access_token', 'api_key', 'client_secret', 'credentials', 'capture_config',
 }
 SENSITIVE_PATTERNS = {
     'email': re.compile(r'\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b', re.I),
@@ -226,7 +227,6 @@ def main() -> int:
         candidate_id = f"INT-{now.strftime('%Y%m%d-%H%M%S')}-{suffix}"
         candidate['candidate_id'] = candidate_id
         candidate['captured_at'] = now.isoformat()
-        candidate['capture_config'] = str(config_path)
 
         queue = 'candidates' if sanitization['status'] == 'PASS' else 'manual-review'
         output = config['_inbox_path'] / queue / f'{candidate_id}-{args.kind}.json'

@@ -27,8 +27,15 @@ This is the operational entry point for a new conversation or coding agent that 
 - A later user-authorized increment binds manifest and payload CloudBox
   version, candidate schema, and host/runtime. Export and Git Exchange reject
   mixed contracts and duplicate payload names; import checks the whole contract
-  before candidate routing and retains mismatches as unsupported without partial output. The prior
-  exact-tip release PASS at `7b0d4b4` is stale for this increment.
+  before candidate routing and retains mismatches as unsupported without
+  partial output. The prior exact-tip release PASS at `7b0d4b4` is stale for
+  this increment.
+- Dual review at `68aae7e` exposed incomplete Exchange preflight and importer
+  error containment. The working descendant revalidates full candidate/privacy
+  policy before remote access, removes local config-path provenance, controls
+  malformed sanitization rejection, and rolls back archive outputs after write
+  failure. Focused checks pass; a clean commit, full suite, and two fresh
+  exact-tip reviews remain required.
 - Pre-release evidence is in
   `docs/releases/6.4.0-pre-release-evidence.md`. Fresh full-suite validation and
   an independent exact-tip release review remain required before push/PR.

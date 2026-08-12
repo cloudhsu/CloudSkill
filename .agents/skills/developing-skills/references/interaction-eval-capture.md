@@ -179,4 +179,14 @@ count/path/size/expansion, preserve collisions, and leave malformed input for
 manual review. These are executable obligations; this reference does not
 replace their tests.
 
+Before an Eval Exchange push, re-run the authoritative candidate validator and
+the owning Inbox's private-term scan over every payload before clone, ZIP,
+commit, or push. Reject the whole batch when the policy file is unavailable,
+candidate structure is invalid, credential/path metadata is present, a private
+term remains, contracts differ, or archive member names collide. On repository-
+side import, normalize malformed sanitization metadata into a controlled
+rejection. If candidate publication fails, roll back outputs already created by
+that archive, retain the source ZIP, and report the archive as skipped for
+manual recovery; do not continue as if the archive completed.
+
 One interaction may justify a candidate. A skill rule normally requires a repeatable failure or a high-severity prohibited behavior.
