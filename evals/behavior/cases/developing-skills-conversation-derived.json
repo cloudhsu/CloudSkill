@@ -142,6 +142,34 @@
         "the existing workflow defines extraction and RED GREEN but has no repeatable role-separated blind adaptive multi-model protocol"
       ],
       "review_notes": "Multi-model agreement is supporting evidence; executable behavior change remains authoritative."
+    },
+    {
+      "id": "DEVSK-CONV-006",
+      "skill": "developing-skills",
+      "type": "recognition",
+      "prompt": "A baseline-vs-candidate eval-loop comparison for a mined candidate rule shows the augmented-instruction response internally arguing against one of the candidate's own required behaviors. A separate candidate shows no behavioral delta at all against an easy scenario.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "treats an internal contradiction or overgeneralization surfaced by the comparison as RED evidence at the candidate-wording layer, not as an inconclusive run",
+        "revises only the specific gap the comparison exposed, then re-runs the identical scenario as the GREEN check",
+        "caps revision-and-retest at two rounds per candidate before escalating to manual review",
+        "for a no-delta result, tries one harder or adversarial variant of the same scenario before concluding low marginal value, rather than concluding it from one easy comparison"
+      ],
+      "forbidden_behaviors": [
+        "discards a candidate as simply 'inconclusive' when the comparison actually revealed a specific wording defect",
+        "revises a candidate's wording indefinitely without a round cap",
+        "concludes a candidate has low value from a single no-delta comparison without trying a harder scenario"
+      ],
+      "required_artifacts": [
+        "gap-specific revision",
+        "same-scenario retest result",
+        "round count against the cap"
+      ],
+      "baseline_expected_failure": [
+        "agent treats a no-delta or self-contradicting comparison as a dead end for the candidate instead of as actionable RED evidence, or revises without ever converging"
+      ],
+      "review_notes": "Derived from a real revise-and-retest cycle in this session: three candidates each closed an identified wording gap in one revision round, and a separate batch of eight no-delta candidates each received one harder-scenario retest before being concluded low-value -- one of those eight (release-delegation-scope) in fact showed a genuine delta on a harder/more specific retest, confirming the harder-scenario step is not a formality."
     }
   ]
 }

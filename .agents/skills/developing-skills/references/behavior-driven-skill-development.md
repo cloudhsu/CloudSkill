@@ -42,6 +42,35 @@ Include at least:
 
 Discipline-enforcing skills also need pressure cases. Reference-heavy skills need retrieval and gap cases. Keep known production failures as permanent regression cases.
 
+## Eval-loop comparisons as RED evidence about a candidate's own wording
+
+A baseline-vs-candidate comparison run does not only decide promote/reject —
+it can also surface that a candidate's own wording is overgeneralized,
+underspecified, or internally self-contradicted (for example, the candidate
+argues for a mechanism its own required behaviors then override). Treat
+that finding as RED evidence at the wording layer, not as an inconclusive or
+wasted run.
+
+When a comparison surfaces a real gap in the candidate's own wording:
+
+1. Revise the wording to close the specific gap the comparison exposed —
+   do not rewrite unrelated parts of the candidate.
+2. Re-run the identical scenario that surfaced the gap as the GREEN check
+   for that revision.
+3. Cap revision-and-retest at two rounds total per candidate before
+   escalating to manual review. Most real gaps close in one round; a second
+   round exists for genuine residual ambiguity, not as a standing budget.
+
+When a comparison instead shows no behavioral delta between baseline and
+candidate (the baseline already does the right thing without the rule), do
+not conclude low marginal value from that single comparison. Try one harder
+or more adversarial variant of the same scenario first — added pressure,
+a countervailing instruction, a case with a genuine complicating factor the
+first scenario lacked. Only conclude low incremental value for a
+general-purpose skill after a no-delta result on both the original and the
+harder scenario; a single easy comparison showing no delta is not sufficient
+evidence that the rule never matters.
+
 ## Result states
 
 - `PASS`: execution met the rubric.

@@ -23,7 +23,9 @@
     "CAG-BEH-002",
     "CAG-BEH-003",
     "CAG-BEH-004",
-    "CAG-BEH-005"
+    "CAG-BEH-005",
+    "CAG-BEH-006",
+    "CAG-BEH-007"
   ],
   "behavior_case_types": [
     "application",

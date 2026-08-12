@@ -2,7 +2,7 @@
 
 <p align="center"><img src="assets/cloudbox-logo.png" width="160" alt="CloudBox logo"></p>
 
-**Current version: 6.4.1**
+**Current version: 6.5.0**
 
 CloudBox 6.4 adds pre-qualified, deterministic lifecycle templates while
 retaining risk-based Review Assurance and resumable adaptive planning. See
