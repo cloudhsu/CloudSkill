@@ -29,7 +29,8 @@
 - Revalidated every candidate and the owning private-term policy before Eval
   Exchange network/Git activity, removed local config-path provenance from
   exported payloads, converted malformed sanitization metadata into controlled
-  rejection evidence, and rolled back archive outputs after publication errors.
+  rejection evidence, migrated path-bearing 6.3 provenance into manual review,
+  and made incomplete publication rollback a durable reconciliation state.
 
 ## 6.3.0
 

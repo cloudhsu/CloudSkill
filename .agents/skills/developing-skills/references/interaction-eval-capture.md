@@ -185,8 +185,12 @@ commit, or push. Reject the whole batch when the policy file is unavailable,
 candidate structure is invalid, credential/path metadata is present, a private
 term remains, contracts differ, or archive member names collide. On repository-
 side import, normalize malformed sanitization metadata into a controlled
-rejection. If candidate publication fails, roll back outputs already created by
-that archive, retain the source ZIP, and report the archive as skipped for
-manual recovery; do not continue as if the archive completed.
+rejection. Strip the path-bearing `capture_config` field from legacy 6.3
+payloads, record the migration without the value, and force manual review; keep
+the field prohibited for new capture, export, and Exchange push. If candidate
+publication fails, roll back outputs already created by that archive. When
+rollback itself fails, write a path-relative `RECONCILIATION_REQUIRED` sidecar,
+retain the source ZIP, and block retry until manual recovery; never report an
+incomplete rollback as successful.
 
 One interaction may justify a candidate. A skill rule normally requires a repeatable failure or a high-severity prohibited behavior.

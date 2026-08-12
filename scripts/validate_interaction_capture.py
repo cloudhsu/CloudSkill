@@ -344,6 +344,7 @@ if export_script_path.is_file():
             for payload_name in compatibility_manifest['payload_hashes']:
                 compatibility_candidate = json.loads(compatibility_members[payload_name])
                 compatibility_candidate['cloudskill_version'] = '6.3.0'
+                compatibility_candidate['capture_config'] = '/Users/example/private/config.local.json'
                 compatibility_payload = (
                     json.dumps(compatibility_candidate, ensure_ascii=False, indent=2) + '\n'
                 ).encode('utf-8')
@@ -367,8 +368,20 @@ if export_script_path.is_file():
             if (
                 'manual_review=1' not in compatibility_result.stdout
                 or len(list((compatibility_inbox / 'imports/processed').glob('*.zip'))) != 1
+                or list((compatibility_inbox / 'rejected').glob('*.json'))
             ):
                 fail('6.4 importer did not preserve 6.3 bundle-format 2.0 compatibility')
+            compatibility_outputs = list((compatibility_inbox / 'manual-review').glob('*.json'))
+            compatibility_output = (
+                json.loads(compatibility_outputs[0].read_text(encoding='utf-8'))
+                if len(compatibility_outputs) == 1 else {}
+            )
+            if (
+                len(compatibility_outputs) != 1
+                or 'capture_config' in compatibility_output
+                or '/Users/example/private' in json.dumps(compatibility_output)
+            ):
+                fail('6.3 capture_config provenance survived compatibility import')
 
             mismatch_cases = {
                 'cloudbox-version': ({'cloudbox_version': '6.3.0'}, {}),
@@ -582,6 +595,49 @@ if export_script_path.is_file():
                 fail('candidate publication failure left partial archive output')
             if not write_failure_archive.is_file():
                 fail('candidate publication failure did not retain source archive')
+
+            rollback_failure_inbox = tmp / 'rollback-failure-inbox'
+            rollback_failure_imports = rollback_failure_inbox / 'imports'
+            rollback_failure_imports.mkdir(parents=True)
+            rollback_failure_archive = rollback_failure_imports / write_failure_archive.name
+            shutil.copy2(write_failure_archive, rollback_failure_archive)
+            original_remove_published = getattr(import_module, 'remove_published_candidate', None)
+            write_calls[0] = 0
+            import_module.write_candidate = fail_second_write
+            import_module.remove_published_candidate = lambda _target: (_ for _ in ()).throw(
+                OSError('injected rollback failure')
+            )
+            try:
+                with contextlib.redirect_stdout(io.StringIO()):
+                    rollback_failure_counts = import_module.import_zip(
+                        rollback_failure_archive, rollback_failure_inbox, [], set(), False
+                    )
+            finally:
+                import_module.write_candidate = original_write_candidate
+                if original_remove_published is None:
+                    del import_module.remove_published_candidate
+                else:
+                    import_module.remove_published_candidate = original_remove_published
+            reconciliation_sidecar = rollback_failure_archive.with_suffix(
+                rollback_failure_archive.suffix + '.reconciliation.json'
+            )
+            if rollback_failure_counts['skipped'] != 1 or not reconciliation_sidecar.is_file():
+                fail('rollback failure did not create durable reconciliation evidence')
+            else:
+                reconciliation_text = reconciliation_sidecar.read_text(encoding='utf-8')
+                if str(rollback_failure_inbox) in reconciliation_text or 'RECONCILIATION_REQUIRED' not in reconciliation_text:
+                    fail('rollback reconciliation evidence leaked an absolute path or lacked state')
+                surviving_before_retry = list((rollback_failure_inbox / 'manual-review').glob('*.json'))
+                with contextlib.redirect_stdout(io.StringIO()):
+                    retry_counts = import_module.import_zip(
+                        rollback_failure_archive, rollback_failure_inbox, [], set(), False
+                    )
+                if (
+                    retry_counts['skipped'] != 1
+                    or not reconciliation_sidecar.is_file()
+                    or list((rollback_failure_inbox / 'manual-review').glob('*.json')) != surviving_before_retry
+                ):
+                    fail('reconciliation state did not block blind archive retry')
 
             unsafe_id_inbox = tmp / 'unsafe-id-inbox'
             unsafe_id_imports = unsafe_id_inbox / 'imports'

@@ -36,6 +36,11 @@ This is the operational entry point for a new conversation or coding agent that 
   malformed sanitization rejection, and rolls back archive outputs after write
   failure. Focused checks pass; a clean commit, full suite, and two fresh
   exact-tip reviews remain required.
+- Re-review at `79be88d` found the 6.3 compatibility fixture was not authentic
+  and rollback evidence could overclaim success. The working descendant imports
+  real 6.3-shaped path provenance only after removing it and forcing manual
+  review; rollback failure creates a relative-path reconciliation sidecar and
+  blocks retry. Focused GREEN passes; commit/full/dual review remain pending.
 - Pre-release evidence is in
   `docs/releases/6.4.0-pre-release-evidence.md`. Fresh full-suite validation and
   an independent exact-tip release review remain required before push/PR.

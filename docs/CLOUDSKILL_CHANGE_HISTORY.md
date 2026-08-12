@@ -29,6 +29,12 @@ private-term validation before network/Git access, rejects credential and local
 config-path metadata, retains malformed sanitization as a controlled rejection,
 and rolls back outputs created by a failed archive publication. Fresh full and
 dual exact-tip validation remain pending.
+Re-review then showed that the compatibility fixture did not include the
+path-bearing `capture_config` emitted by real 6.3 capture/export tools, and that
+rollback deletion failure was silently described as complete. A representative
+fixture now proves 6.3 input is stripped of that value and conservatively routed
+to manual review. Failed rollback writes path-relative durable reconciliation
+evidence and prevents blind retry. Fresh full and dual review remain pending.
 Fresh full validation, exact-tip release review, push, PR/CI, merge, tag,
 Release, and post-release verification remain pending.
 
