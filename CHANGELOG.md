@@ -1,5 +1,27 @@
 # Changelog
 
+## 6.4.0
+
+### Evidence-driven lifecycle templates
+
+- Added one authoritative registry and deterministic selector/composer for
+  `lightweight-change`, `bounded-feature`, and `skill-evolution`; seven future
+  template IDs remain explicitly deferred and fail closed as unsupported.
+- Preserved every template's stage partial order through deterministic
+  topological composition, with owner/gate conflicts and cycles stopping plan
+  creation instead of silently weakening lifecycle control.
+- Bound selected evidence to work, source, task definitions, facts, risk, and
+  registry identity, with automatic invalidation and ordered lineage when that
+  context changes.
+- Made JSON evidence identity type-preserving so booleans and numbers cannot
+  alias across admission or replan; regression mutations cover facts and risk
+  in both boolean directions.
+- Added layer-typed RED/GREEN governance to prevent implementation evidence
+  from being promoted into unexecuted Skill, provider, or release claims.
+- Retained manual Eval ZIP import, unsupported/legacy recovery, privacy policy,
+  lifecycle-first planning, evidence-second verification, and token reduction
+  only after those higher priorities are preserved.
+
 ## 6.3.0
 
 ### Manual Eval ZIP exchange

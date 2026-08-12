@@ -2,6 +2,21 @@
 
 This document records the evolution rationale and evidence chain for work that may span multiple conversations. Git commits and tags remain the authoritative source history.
 
+## 2026-08-12 — CloudBox 6.4.0 version candidate
+
+After the typed implementation and Skill/evidence review gates passed, package
+version surfaces were synchronized to 6.4.0 and the generated manifest was
+refreshed. The release candidate includes three implemented deterministic
+lifecycle templates, seven explicit deferred IDs, context-bound/type-preserving
+evidence, automatic invalidation, and layer-typed Skill RED/GREEN governance.
+
+Eval ZIP bundle and exporter formats remain 2.0. A new end-to-end compatibility
+fixture proves the 6.4 importer accepts a correctly named 6.3 archive; current
+6.4 export/import remains covered. Exchange stability is now recorded as a
+maturity signal rather than a reason to remove manual review prematurely.
+Fresh full validation, exact-tip release review, push, PR/CI, merge, tag,
+Release, and post-release verification remain pending.
+
 ## 2026-08-12 — Lifecycle typed-identity correction and reusable extraction
 
 Independent re-review of the first lifecycle-template correction reproduced a

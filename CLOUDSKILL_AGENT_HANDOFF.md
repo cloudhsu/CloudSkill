@@ -15,6 +15,21 @@ This is the operational entry point for a new conversation or coding agent that 
 
 ## Current repository state
 
+### CloudBox 6.4.0 version candidate (2026-08-12)
+
+- The composable lifecycle-template pilot, typed JSON evidence correction, and
+  layer-typed RED/GREEN governance passed two independent exact-tip reviews
+  without High/Medium findings before version synchronization.
+- Authoritative version surfaces now target `6.4.0`. Bundle/exporter format
+  remains 2.0 and filename identity is unchanged; focused evidence proves a
+  correctly named 6.3 archive is accepted by the 6.4 importer as well as the
+  current exporter/importer round trip.
+- Pre-release evidence is in
+  `docs/releases/6.4.0-pre-release-evidence.md`. Fresh full-suite validation and
+  an independent exact-tip release review remain required before push/PR.
+- Push, PR/CI, merge, main validation, annotated tag, tag validation, GitHub
+  Release, and post-release evidence remain `NOT RUN`.
+
 ### Composable lifecycle-template typed-identity correction candidate (2026-08-12)
 
 - Branch `feat/cloudbox-skill-optimization` contains a three-template pilot at

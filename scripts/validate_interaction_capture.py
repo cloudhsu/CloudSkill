@@ -212,7 +212,8 @@ if import_script_path.is_file():
         terms_path.write_text('private-marker\n', encoding='utf-8')
         config_path = tmp / 'config.json'
         config_path.write_text(json.dumps({
-            'schema_version': '1.0', 'cloudskill_version': '6.3.0',
+            'schema_version': '1.0',
+            'cloudskill_version': (ROOT / 'VERSION').read_text(encoding='utf-8').strip(),
             'cloudskill_repository': str(ROOT), 'eval_inbox': str(owned_inbox),
             'sensitive_terms_path': str(terms_path), 'default_sanitization': True,
             'save_raw_transcript': False, 'auto_modify_skills': False,
@@ -293,6 +294,37 @@ if export_script_path.is_file():
                 fail('import_eval_candidates.py left the processed zip in imports/ instead of imports/processed/')
             if len(list((repo_inbox / 'imports/processed').glob('*.zip'))) != 1:
                 fail('import_eval_candidates.py did not move the processed zip into imports/processed/')
+
+            # Product version is provenance, not the bundle schema. A 6.3
+            # bundle-format 2.0 archive must remain consumable by the 6.4
+            # importer without renaming or migration.
+            compatibility_inbox = tmp / 'version-compatibility-inbox'
+            compatibility_imports = compatibility_inbox / 'imports'
+            compatibility_imports.mkdir(parents=True)
+            with zipfile.ZipFile(exported_zips[0]) as source:
+                compatibility_members = {
+                    name: source.read(name) for name in source.namelist()
+                }
+            compatibility_manifest = json.loads(compatibility_members['manifest.json'])
+            compatibility_manifest['cloudbox_version'] = '6.3.0'
+            compatibility_archive = compatibility_imports / exported_zips[0].name
+            with zipfile.ZipFile(compatibility_archive, 'w', zipfile.ZIP_DEFLATED) as archive:
+                archive.writestr(
+                    'manifest.json',
+                    json.dumps(compatibility_manifest, ensure_ascii=False, indent=2) + '\n',
+                )
+                for name, payload in compatibility_members.items():
+                    if name != 'manifest.json':
+                        archive.writestr(name, payload)
+            compatibility_result = run([
+                sys.executable, str(import_script_path), '--eval-inbox',
+                str(compatibility_inbox),
+            ], cwd=ROOT)
+            if (
+                'manual_review=1' not in compatibility_result.stdout
+                or len(list((compatibility_inbox / 'imports/processed').glob('*.zip'))) != 1
+            ):
+                fail('6.4 importer did not preserve 6.3 bundle-format 2.0 compatibility')
 
             renamed = repo_inbox / 'imports' / 'renamed.zip'
             shutil.copy2(exported_zips[0], renamed)
