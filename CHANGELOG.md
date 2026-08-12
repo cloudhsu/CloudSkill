@@ -1,5 +1,21 @@
 # Changelog
 
+## 6.4.1
+
+### Windows export bundle corruption fix
+
+- Fixed `export_eval_candidate.py`'s `package_outbox()` building `payload_hashes`
+  manifest keys with `str(path.relative_to(outbox))`, which yields backslash
+  separators on Windows while `zipfile.write()` independently normalizes the
+  archive member name to forward slashes on every OS -- the manifest's declared
+  key never matched the actual archive member, and `import_eval_candidates.py`
+  rejected the whole archive as an invalid zip, silently discarding every
+  candidate inside it. Only affected Windows invocations without `--no-zip`.
+- Found via the 6.4.0 version-compatibility self-test in
+  `validate_interaction_capture.py`, which crashed with a `KeyError` before
+  the fix on a Windows machine. Fixed by using `Path.as_posix()` instead of
+  `str()`, matching zipfile's own normalization. See #19, #20.
+
 ## 6.4.0
 
 ### Evidence-driven lifecycle templates
