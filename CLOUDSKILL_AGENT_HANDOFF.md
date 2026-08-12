@@ -48,7 +48,12 @@ This is the operational entry point for a new conversation or coding agent that 
 - Pre-release evidence is in
   `docs/releases/6.4.0-pre-release-evidence.md`.
 - Push, PR/CI, merge, main validation, annotated tag, tag validation, GitHub
-  Release, and post-release evidence remain `NOT RUN`.
+  Release, and post-release evidence are complete for 6.4.0. Publication lineage
+  is recorded in `docs/releases/6.4.0-post-release-record.md`.
+- Proactive Skill evolution is now paused for real-project validation. Continue
+  collecting sanitized candidates and operational evidence, but do not make
+  formal Skill changes without explicit later batch-review instruction or a
+  blocking safety/correctness defect.
 
 ### Composable lifecycle-template typed-identity correction candidate (2026-08-12)
 

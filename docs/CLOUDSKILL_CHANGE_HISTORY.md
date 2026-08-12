@@ -2,6 +2,19 @@
 
 This document records the evolution rationale and evidence chain for work that may span multiple conversations. Git commits and tags remain the authoritative source history.
 
+## 2026-08-12 — CloudBox 6.4.0 published; Skill evolution validation pause
+
+PR [#17](https://github.com/cloudhsu/CloudSkill/pull/17) merged reviewed head
+`b5aa2dd` as main commit `e7c439f`. Main and annotated-tag validations passed;
+tag `v6.4.0` peels to that merge and the non-draft, non-prerelease
+[GitHub Release](https://github.com/cloudhsu/CloudSkill/releases/tag/v6.4.0) is
+published. Durable lineage is in
+`docs/releases/6.4.0-post-release-record.md`.
+
+Proactive Skill evolution now pauses for real-project use. Sanitized evidence
+capture and manual import remain available, while formal Skill changes wait for
+explicit later batch review or a blocking safety/correctness defect.
+
 ## 2026-08-12 — CloudBox 6.4.0 version candidate
 
 After the typed implementation and Skill/evidence review gates passed, package
