@@ -1,5 +1,39 @@
 # Changelog
 
+## 6.5.0
+
+### Promoted five eval-inbox candidates to Skill content
+
+- `coding-agent-project-governance`: added `CAG-BEH-006` (delegation scope for
+  irreversible release steps -- weigh established in-session delegation trust
+  against reversibility and audience before proceeding autonomously through
+  merge/tag/publish) and `CAG-BEH-007` (three-tier ALLOW/ASK/DENY tool-permission
+  classification replacing a binary allow/deny split, with pattern-matching
+  bypass-vector disclosure) to `references/risk-routing.md`.
+- `safe-incremental-refactoring`: added `REF-BEH-006` (classify a failure as
+  environment-agnostic or mechanism-specific before treating a
+  differently-configured CI run as environment-vs-defect evidence) to
+  `references/evidence-checklist.md`.
+- `runtime-evaluation-engineering`: added `RTE-BEH-010` (sub-agent evaluation
+  containment -- isolate the target system and scope tool access regardless of
+  prompt framing, then verify change-tracking state afterward) to
+  `references/case-and-grader-design.md`.
+- `developing-skills`: added `DEVSK-CONV-006` (treat an eval-loop comparison
+  that reveals a candidate's own overgeneralized or self-contradicted wording
+  as RED evidence at the wording layer, with a two-round revise-and-retest cap
+  and a harder-scenario requirement before concluding a no-delta candidate has
+  low value) to `references/behavior-driven-skill-development.md`.
+- All five candidates were empirically tested via baseline-vs-candidate
+  sub-agent comparisons before promotion; one (`CAG-BEH-006`) showed a
+  genuine, reproducible behavioral delta, the other four converged with
+  independently-reasoned baseline behavior and are promoted primarily for
+  their more complete and explicit disclosure/classification content. Nine
+  sibling candidates from the same mining passes were tested and rejected
+  (no behavioral delta after a required harder-scenario retest, or superseded
+  by these same five); see `.local/eval-inbox/rejected/` for the retained,
+  non-deleted evidence trail.
+- No lifecycle stage, schema, or bundle-format change.
+
 ## 6.4.1
 
 ### Windows export bundle corruption fix

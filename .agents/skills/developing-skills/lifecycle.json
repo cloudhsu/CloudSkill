@@ -44,7 +44,8 @@
     "DEVSK-CONV-002",
     "DEVSK-CONV-003",
     "DEVSK-CONV-004",
-    "DEVSK-CONV-005"
+    "DEVSK-CONV-005",
+    "DEVSK-CONV-006"
   ],
   "behavior_case_types": [
     "application",

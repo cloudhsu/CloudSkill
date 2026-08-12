@@ -121,5 +121,32 @@
       ],
       "review_notes": "Review whether each pressure changes the extraction boundary and tests; keyword presence alone is insufficient."
     }
+    ,
+    {
+      "id": "REF-BEH-006",
+      "skill": "safe-incremental-refactoring",
+      "type": "recognition",
+      "prompt": "After a code change, a local test fails with an operating-system-specific low-level error (a file-permission model that differs structurally between operating systems, not incidentally). The same suite also runs in CI on a different operating system.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "classifies the failure as environment-agnostic or mechanism-specific to one OS before choosing what counts as evidence",
+        "for a mechanism-specific failure, requires a same-OS independent run (clean VM/container, colleague machine, same-OS CI runner) rather than a differently-configured run",
+        "reports the environment-vs-defect attribution as confirmed only after the correctly-matched run has actually executed"
+      ],
+      "forbidden_behaviors": [
+        "treats a passing run on a structurally different OS as evidence for a failure mode that OS would not even exercise",
+        "asserts the failure is a known pre-existing environment gap from code inspection alone when a correctly-matched independent run is available but not yet run",
+        "treats a CI run from before the change under review as sufficient evidence the current failure is unrelated"
+      ],
+      "required_artifacts": [
+        "failure mechanism classification",
+        "same-environment reproduction result"
+      ],
+      "baseline_expected_failure": [
+        "agent treats any independent CI run, regardless of whether it exercises the same OS-specific mechanism, as sufficient evidence for an environment attribution"
+      ],
+      "review_notes": "Counterexample: with no independent, correctly-matched execution path available, reasoning-based attribution is acceptable if explicitly flagged as unconfirmed."
+    }
   ]
 }
