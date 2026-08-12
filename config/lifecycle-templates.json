@@ -1,0 +1,376 @@
+{
+  "schema_version": 1,
+  "required_consumer_paths": [
+    "scripts/lifecycle_template_contract.py"
+  ],
+  "templates": {
+    "lightweight-change": {
+      "template_id": "lightweight-change",
+      "status": "implemented",
+      "contract_version": 1,
+      "applicability": {
+        "scope": "local",
+        "risk": "low",
+        "reversible": true
+      },
+      "exclusions": [
+        "material semantic change",
+        "authority or durable-state change",
+        "security, privacy, platform, deployment, or external-side-effect change"
+      ],
+      "exclusion_facts": {
+        "material_semantic_change": {
+          "type": "boolean",
+          "condition": "material semantic change"
+        },
+        "authority_or_durable_state_change": {
+          "type": "boolean",
+          "condition": "authority or durable-state change"
+        },
+        "security_privacy_platform_deployment_or_external_side_effect_change": {
+          "type": "boolean",
+          "condition": "security, privacy, platform, deployment, or external-side-effect change"
+        }
+      },
+      "stages": [
+        "analyze",
+        "implement",
+        "verify"
+      ],
+      "gates": [
+        {
+          "gate_id": "scope-and-delta",
+          "owner": "development-process-tailoring",
+          "required_evidence": [
+            "all-false bounded delta record"
+          ],
+          "transition": {
+            "on_pass": "implement",
+            "on_fail": "escalation_required"
+          }
+        },
+        {
+          "gate_id": "verification",
+          "owner": "verification-owner",
+          "required_evidence": [
+            "focused verification result"
+          ],
+          "transition": {
+            "on_pass": "complete",
+            "on_fail": "escalation_required"
+          }
+        }
+      ],
+      "owners": {
+        "lifecycle_plan": "development-process-tailoring",
+        "state": "existing-lifecycle-orchestration",
+        "policy": "development-process-tailoring",
+        "action": "task-execution-owner",
+        "evidence": "verification-owner"
+      },
+      "required_evidence": [
+        "normalized task facts",
+        "all-false bounded delta record",
+        "focused verification result",
+        "durable state reconciliation"
+      ],
+      "review_level": "L0_SINGLE_REVIEW",
+      "resume_reconciliation": {
+        "checkpoint_owner": "existing-lifecycle-orchestration",
+        "reconcile_before_resume": true,
+        "on_unreconciled": "reconciliation_required",
+        "required_evidence": [
+          "durable state reconciliation"
+        ]
+      },
+      "reuse_invalidation": {
+        "reuse_when": [
+          "task facts, source, contract, and risk remain equivalent"
+        ],
+        "invalidate_when": [
+          "any matched condition or bounded delta changes"
+        ],
+        "unaffected_evidence": "preserve",
+        "on_invalidation": "new_plan_revision"
+      },
+      "compatible_overlays": [],
+      "escalation_conditions": [
+        "a bounded delta is true or unknown",
+        "a positive applicability condition no longer matches",
+        "authority, evidence identity, or reconciliation is ambiguous"
+      ]
+    },
+    "bounded-feature": {
+      "template_id": "bounded-feature",
+      "status": "implemented",
+      "contract_version": 1,
+      "applicability": {
+        "scope": "bounded",
+        "design_approved": true,
+        "owners_known": true,
+        "reversible": true,
+        "automated_verification_available": true
+      },
+      "exclusions": [
+        "unapproved design",
+        "unknown owner or authority boundary",
+        "irreversible or unreconciled outcome"
+      ],
+      "exclusion_facts": {
+        "design_unapproved": {
+          "type": "boolean",
+          "condition": "unapproved design"
+        },
+        "owner_or_authority_boundary_unknown": {
+          "type": "boolean",
+          "condition": "unknown owner or authority boundary"
+        },
+        "irreversible_or_unreconciled_outcome": {
+          "type": "boolean",
+          "condition": "irreversible or unreconciled outcome"
+        }
+      },
+      "stages": [
+        "analyze",
+        "design",
+        "implement",
+        "verify",
+        "release"
+      ],
+      "gates": [
+        {
+          "gate_id": "approved-design",
+          "owner": "development-process-tailoring",
+          "required_evidence": [
+            "approved design",
+            "known-owner record"
+          ],
+          "transition": {
+            "on_pass": "implement",
+            "on_fail": "escalation_required"
+          }
+        },
+        {
+          "gate_id": "verification",
+          "owner": "verification-owner",
+          "required_evidence": [
+            "automated verification result"
+          ],
+          "transition": {
+            "on_pass": "release",
+            "on_fail": "escalation_required"
+          }
+        }
+      ],
+      "owners": {
+        "lifecycle_plan": "development-process-tailoring",
+        "state": "existing-lifecycle-orchestration",
+        "policy": "development-process-tailoring",
+        "action": "task-execution-owner",
+        "evidence": "verification-owner"
+      },
+      "required_evidence": [
+        "approved design",
+        "known-owner record",
+        "normalized task facts",
+        "bounded delta record",
+        "automated verification result",
+        "durable state reconciliation"
+      ],
+      "review_level": "L2_SINGLE_FAMILY_QUAD",
+      "resume_reconciliation": {
+        "checkpoint_owner": "existing-lifecycle-orchestration",
+        "reconcile_before_resume": true,
+        "on_unreconciled": "reconciliation_required",
+        "required_evidence": [
+          "durable state reconciliation"
+        ]
+      },
+      "reuse_invalidation": {
+        "reuse_when": [
+          "approved design, source, contract, and risk remain equivalent"
+        ],
+        "invalidate_when": [
+          "design, owner, delta, or plan revision changes"
+        ],
+        "unaffected_evidence": "preserve",
+        "on_invalidation": "new_plan_revision"
+      },
+      "compatible_overlays": [
+        "skill-evolution"
+      ],
+      "escalation_conditions": [
+        "a bounded delta is true or unknown",
+        "approved design or owner evidence is stale",
+        "a required overlay conflicts with an owner or gate"
+      ]
+    },
+    "skill-evolution": {
+      "template_id": "skill-evolution",
+      "status": "implemented",
+      "contract_version": 1,
+      "applicability": {
+        "work_type": "skill_evolution",
+        "sanitization_required": true,
+        "adjacent_regression_required": true
+      },
+      "exclusions": [
+        "unsanitized private evidence",
+        "missing RED baseline evidence",
+        "release claim without execution evidence"
+      ],
+      "exclusion_facts": {
+        "unsanitized_private_evidence": {
+          "type": "boolean",
+          "condition": "unsanitized private evidence"
+        },
+        "red_baseline_evidence_missing": {
+          "type": "boolean",
+          "condition": "missing RED baseline evidence"
+        },
+        "release_claim_without_execution_evidence": {
+          "type": "boolean",
+          "condition": "release claim without execution evidence"
+        }
+      },
+      "stages": [
+        "analyze",
+        "verify_red",
+        "implement",
+        "verify_green",
+        "release",
+        "learn"
+      ],
+      "gates": [
+        {
+          "gate_id": "evidence-inventory",
+          "owner": "developing-skills",
+          "required_evidence": [
+            "sanitized and deduplicated evidence inventory"
+          ],
+          "transition": {
+            "on_pass": "verify_red",
+            "on_fail": "escalation_required"
+          }
+        },
+        {
+          "gate_id": "red-baseline",
+          "owner": "developing-skills",
+          "required_evidence": [
+            "RED baseline result"
+          ],
+          "transition": {
+            "on_pass": "implement",
+            "on_fail": "escalation_required"
+          }
+        },
+        {
+          "gate_id": "green-adjacent-regression",
+          "owner": "developing-skills",
+          "required_evidence": [
+            "minimum change",
+            "GREEN and adjacent regression result"
+          ],
+          "transition": {
+            "on_pass": "verify_green",
+            "on_fail": "escalation_required"
+          }
+        },
+        {
+          "gate_id": "release-boundary",
+          "owner": "developing-skills",
+          "required_evidence": [
+            "review and release-boundary decision"
+          ],
+          "transition": {
+            "on_pass": "release",
+            "on_fail": "escalation_required"
+          }
+        }
+      ],
+      "owners": {
+        "lifecycle_plan": "development-process-tailoring",
+        "state": "existing-lifecycle-orchestration",
+        "policy": "developing-skills",
+        "action": "skill-change-owner",
+        "evidence": "developing-skills"
+      },
+      "required_evidence": [
+        "sanitized and deduplicated evidence inventory",
+        "owner selection",
+        "RED baseline result",
+        "minimum change",
+        "GREEN and adjacent regression result",
+        "review and release-boundary decision",
+        "durable state reconciliation"
+      ],
+      "review_level": "L3_SINGLE_FAMILY_PAIR",
+      "resume_reconciliation": {
+        "checkpoint_owner": "existing-lifecycle-orchestration",
+        "reconcile_before_resume": true,
+        "on_unreconciled": "reconciliation_required",
+        "required_evidence": [
+          "durable state reconciliation"
+        ]
+      },
+      "reuse_invalidation": {
+        "reuse_when": [
+          "evidence scope, source, contract, rubric, environment, and risk remain equivalent"
+        ],
+        "invalidate_when": [
+          "Skill text, Eval, contract, source, rubric, environment, or risk changes"
+        ],
+        "unaffected_evidence": "preserve",
+        "on_invalidation": "new_plan_revision"
+      },
+      "compatible_overlays": [],
+      "escalation_conditions": [
+        "a bounded delta is true or unknown",
+        "sanitization, owner, or evidence validity is ambiguous",
+        "the change requires a deferred lifecycle template"
+      ]
+    },
+    "iterative-discovery": {
+      "template_id": "iterative-discovery",
+      "status": "deferred",
+      "contract_version": 1,
+      "deferred_reason": "Requires its own RED contract, validator, and behavior evidence."
+    },
+    "architecture-change": {
+      "template_id": "architecture-change",
+      "status": "deferred",
+      "contract_version": 1,
+      "deferred_reason": "Requires its own RED contract, validator, and behavior evidence."
+    },
+    "brownfield-refactor": {
+      "template_id": "brownfield-refactor",
+      "status": "deferred",
+      "contract_version": 1,
+      "deferred_reason": "Requires its own RED contract, validator, and behavior evidence."
+    },
+    "hotfix": {
+      "template_id": "hotfix",
+      "status": "deferred",
+      "contract_version": 1,
+      "deferred_reason": "Requires its own RED contract, validator, and behavior evidence."
+    },
+    "release": {
+      "template_id": "release",
+      "status": "deferred",
+      "contract_version": 1,
+      "deferred_reason": "Requires its own RED contract, validator, and behavior evidence."
+    },
+    "hardware-integration": {
+      "template_id": "hardware-integration",
+      "status": "deferred",
+      "contract_version": 1,
+      "deferred_reason": "Requires its own RED contract, validator, and behavior evidence."
+    },
+    "incident-recovery": {
+      "template_id": "incident-recovery",
+      "status": "deferred",
+      "contract_version": 1,
+      "deferred_reason": "Requires its own RED contract, validator, and behavior evidence."
+    }
+  }
+}

@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 from pathlib import Path
+import contextlib
 import hashlib
 import importlib.util
+import io
 import json
 import os
 import shutil
@@ -166,6 +168,10 @@ with tempfile.TemporaryDirectory(prefix='cloudskill-interaction-') as tmp_name:
         ], cwd=ROOT, env=env)
         if len(list((inbox / 'candidates').glob('*.json'))) != 1:
             fail('positive candidate was not saved to candidates queue')
+        else:
+            captured_candidate = json.loads(next((inbox / 'candidates').glob('*.json')).read_text(encoding='utf-8'))
+            if 'capture_config' in captured_candidate or str(config_path) in json.dumps(captured_candidate):
+                fail('captured candidate exposed its local config path')
 
         terms_path = Path(config['sensitive_terms_path'])
         terms_path.write_text('ExampleInternalName\n', encoding='utf-8')
@@ -212,7 +218,8 @@ if import_script_path.is_file():
         terms_path.write_text('private-marker\n', encoding='utf-8')
         config_path = tmp / 'config.json'
         config_path.write_text(json.dumps({
-            'schema_version': '1.0', 'cloudskill_version': '6.3.0',
+            'schema_version': '1.0',
+            'cloudskill_version': (ROOT / 'VERSION').read_text(encoding='utf-8').strip(),
             'cloudskill_repository': str(ROOT), 'eval_inbox': str(owned_inbox),
             'sensitive_terms_path': str(terms_path), 'default_sanitization': True,
             'save_raw_transcript': False, 'auto_modify_skills': False,
@@ -235,6 +242,17 @@ if export_script_path.is_file():
     export_patterns = {key: pattern.pattern for key, pattern in export_module.SENSITIVE_PATTERNS.items()}
     if capture_patterns != export_patterns:
         fail('export_eval_candidate.py SENSITIVE_PATTERNS has drifted from capture_eval_candidate.py')
+    for label, mutation in (
+        ('candidate schema', {'schema_version': '9.9'}),
+        ('CloudBox version', {'cloudskill_version': 'not-a-version'}),
+        ('runtime', {'runtime': 'unknown-host'}),
+    ):
+        invalid_contract_candidate = {**candidate_template, **mutation}
+        if (
+            not capture_module.validate_candidate(invalid_contract_candidate, 'positive')
+            or not export_module.validate_candidate(invalid_contract_candidate, 'positive')
+        ):
+            fail(f'capture/export validators accepted invalid {label} contract metadata')
 
     # Export-then-import round trip, simulating a fully disconnected session: no
     # .cloudskill config anywhere, an external "eval-outbox" project, a manual zip
@@ -251,6 +269,23 @@ if export_script_path.is_file():
         draft['prompt_sanitized'] = 'A device accepts a command but the hardware readback has not reached the requested value.'
         draft_path = tmp / 'export-positive.json'
         draft_path.write_text(json.dumps(draft, ensure_ascii=False, indent=2), encoding='utf-8')
+        wrong_host_draft = {**draft, 'runtime': 'claude'}
+        wrong_host_path = tmp / 'export-wrong-host.json'
+        wrong_host_path.write_text(
+            json.dumps(wrong_host_draft, ensure_ascii=False, indent=2), encoding='utf-8'
+        )
+        wrong_host_outbox = external_project / '.cloudskill/wrong-host-outbox'
+        wrong_host_result = subprocess.run([
+            sys.executable, str(export_script_path), '--kind', 'positive',
+            '--input', str(wrong_host_path), '--outbox', str(wrong_host_outbox),
+            '--project-name', 'validator-smoke', '--host', 'codex', '--non-interactive',
+        ], cwd=external_project, text=True, capture_output=True)
+        if (
+            wrong_host_result.returncode == 0
+            or list(wrong_host_outbox.rglob('*.json'))
+            or list(external_project.glob('validator-smoke-codex-*.zip'))
+        ):
+            fail('portable exporter did not reject runtime/host drift before publication')
         stale = external_project / '.cloudskill/eval-outbox/manual-review/INT-stale-negative.json'
         stale.parent.mkdir(parents=True, exist_ok=True)
         stale.write_text('{}\n', encoding='utf-8')
@@ -293,6 +328,106 @@ if export_script_path.is_file():
                 fail('import_eval_candidates.py left the processed zip in imports/ instead of imports/processed/')
             if len(list((repo_inbox / 'imports/processed').glob('*.zip'))) != 1:
                 fail('import_eval_candidates.py did not move the processed zip into imports/processed/')
+
+            # Product version is provenance, not the bundle schema. A 6.3
+            # bundle-format 2.0 archive must remain consumable by the 6.4
+            # importer without renaming or migration.
+            compatibility_inbox = tmp / 'version-compatibility-inbox'
+            compatibility_imports = compatibility_inbox / 'imports'
+            compatibility_imports.mkdir(parents=True)
+            with zipfile.ZipFile(exported_zips[0]) as source:
+                compatibility_members = {
+                    name: source.read(name) for name in source.namelist()
+                }
+            compatibility_manifest = json.loads(compatibility_members['manifest.json'])
+            compatibility_manifest['cloudbox_version'] = '6.3.0'
+            for payload_name in compatibility_manifest['payload_hashes']:
+                compatibility_candidate = json.loads(compatibility_members[payload_name])
+                compatibility_candidate['cloudskill_version'] = '6.3.0'
+                compatibility_candidate['capture_config'] = '/Users/example/private/config.local.json'
+                compatibility_payload = (
+                    json.dumps(compatibility_candidate, ensure_ascii=False, indent=2) + '\n'
+                ).encode('utf-8')
+                compatibility_members[payload_name] = compatibility_payload
+                compatibility_manifest['payload_hashes'][payload_name] = hashlib.sha256(
+                    compatibility_payload
+                ).hexdigest()
+            compatibility_archive = compatibility_imports / exported_zips[0].name
+            with zipfile.ZipFile(compatibility_archive, 'w', zipfile.ZIP_DEFLATED) as archive:
+                archive.writestr(
+                    'manifest.json',
+                    json.dumps(compatibility_manifest, ensure_ascii=False, indent=2) + '\n',
+                )
+                for name, payload in compatibility_members.items():
+                    if name != 'manifest.json':
+                        archive.writestr(name, payload)
+            compatibility_result = run([
+                sys.executable, str(import_script_path), '--eval-inbox',
+                str(compatibility_inbox),
+            ], cwd=ROOT)
+            if (
+                'manual_review=1' not in compatibility_result.stdout
+                or len(list((compatibility_inbox / 'imports/processed').glob('*.zip'))) != 1
+                or list((compatibility_inbox / 'rejected').glob('*.json'))
+            ):
+                fail('6.4 importer did not preserve 6.3 bundle-format 2.0 compatibility')
+            compatibility_outputs = list((compatibility_inbox / 'manual-review').glob('*.json'))
+            compatibility_output = (
+                json.loads(compatibility_outputs[0].read_text(encoding='utf-8'))
+                if len(compatibility_outputs) == 1 else {}
+            )
+            if (
+                len(compatibility_outputs) != 1
+                or 'capture_config' in compatibility_output
+                or '/Users/example/private' in json.dumps(compatibility_output)
+            ):
+                fail('6.3 capture_config provenance survived compatibility import')
+
+            mismatch_cases = {
+                'cloudbox-version': ({'cloudbox_version': '6.3.0'}, {}),
+                'candidate-schema': ({}, {'schema_version': '9.9'}),
+                'runtime-host': ({}, {'runtime': 'claude'}),
+            }
+            for mismatch_label, (manifest_changes, candidate_changes) in mismatch_cases.items():
+                mismatch_inbox = tmp / f'{mismatch_label}-mismatch-inbox'
+                mismatch_imports = mismatch_inbox / 'imports'
+                mismatch_imports.mkdir(parents=True)
+                with zipfile.ZipFile(exported_zips[0]) as source:
+                    mismatch_members = {
+                        name: source.read(name) for name in source.namelist()
+                    }
+                mismatch_manifest = json.loads(mismatch_members['manifest.json'])
+                mismatch_manifest.update(manifest_changes)
+                for payload_name in mismatch_manifest['payload_hashes']:
+                    mismatch_candidate = json.loads(mismatch_members[payload_name])
+                    mismatch_candidate.update(candidate_changes)
+                    mismatch_payload = (
+                        json.dumps(mismatch_candidate, ensure_ascii=False, indent=2) + '\n'
+                    ).encode('utf-8')
+                    mismatch_members[payload_name] = mismatch_payload
+                    mismatch_manifest['payload_hashes'][payload_name] = hashlib.sha256(
+                        mismatch_payload
+                    ).hexdigest()
+                with zipfile.ZipFile(
+                    mismatch_imports / exported_zips[0].name, 'w', zipfile.ZIP_DEFLATED
+                ) as archive:
+                    archive.writestr(
+                        'manifest.json',
+                        json.dumps(mismatch_manifest, ensure_ascii=False, indent=2) + '\n',
+                    )
+                    for name, payload in mismatch_members.items():
+                        if name != 'manifest.json':
+                            archive.writestr(name, payload)
+                mismatch_result = run([
+                    sys.executable, str(import_script_path), '--eval-inbox',
+                    str(mismatch_inbox),
+                ], cwd=ROOT)
+                if (
+                    'unsupported=1' not in mismatch_result.stdout
+                    or list((mismatch_inbox / 'manual-review').glob('*.json'))
+                    or list((mismatch_inbox / 'candidates').glob('*.json'))
+                ):
+                    fail(f'manifest/payload {mismatch_label} mismatch did not fail closed')
 
             renamed = repo_inbox / 'imports' / 'renamed.zip'
             shutil.copy2(exported_zips[0], renamed)
@@ -391,6 +526,119 @@ if export_script_path.is_file():
             if 'skipped=1' not in partial.stdout or list((partial_inbox / 'manual-review').glob('*.json')):
                 fail('manifest-valid archive published a partial candidate before later payload failure')
 
+            malformed_sanitization_inbox = tmp / 'malformed-sanitization-inbox'
+            malformed_sanitization_imports = malformed_sanitization_inbox / 'imports'
+            malformed_sanitization_imports.mkdir(parents=True)
+            malformed_sanitization_candidate = json.loads(valid_payload)
+            malformed_sanitization_candidate['sanitization'] = 'not-an-object'
+            malformed_sanitization_payload = json.dumps(malformed_sanitization_candidate).encode('utf-8')
+            malformed_sanitization_manifest = dict(duplicate_manifest)
+            malformed_sanitization_manifest['bundle_id'] = 'a' * 32
+            malformed_sanitization_manifest['payload_hashes'] = {
+                valid_payload_name: hashlib.sha256(malformed_sanitization_payload).hexdigest()
+            }
+            malformed_sanitization_name = import_module.bundle_filename(malformed_sanitization_manifest)
+            malformed_sanitization_archive = malformed_sanitization_imports / malformed_sanitization_name
+            with zipfile.ZipFile(malformed_sanitization_archive, 'w', zipfile.ZIP_DEFLATED) as archive:
+                archive.writestr('manifest.json', json.dumps(malformed_sanitization_manifest))
+                archive.writestr(valid_payload_name, malformed_sanitization_payload)
+            try:
+                malformed_counts = import_module.import_zip(
+                    malformed_sanitization_archive, malformed_sanitization_inbox, [], set(), False
+                )
+            except TypeError:
+                fail('malformed sanitization type escaped archive validation')
+            else:
+                if malformed_counts['rejected'] != 1 or len(list((malformed_sanitization_inbox / 'rejected').glob('*.json'))) != 1:
+                    fail('malformed sanitization type was not retained as one controlled rejection')
+
+            write_failure_inbox = tmp / 'write-failure-inbox'
+            write_failure_imports = write_failure_inbox / 'imports'
+            write_failure_imports.mkdir(parents=True)
+            first_write_candidate = json.loads(valid_payload)
+            second_write_candidate = dict(first_write_candidate)
+            second_write_candidate['task_summary'] = 'distinct second candidate'
+            write_failure_payloads = {
+                'manual-review/first.json': json.dumps(first_write_candidate).encode('utf-8'),
+                'manual-review/second.json': json.dumps(second_write_candidate).encode('utf-8'),
+            }
+            write_failure_manifest = dict(duplicate_manifest)
+            write_failure_manifest['bundle_id'] = 'b' * 32
+            write_failure_manifest['payload_hashes'] = {
+                name: hashlib.sha256(payload).hexdigest() for name, payload in write_failure_payloads.items()
+            }
+            write_failure_archive = write_failure_imports / import_module.bundle_filename(write_failure_manifest)
+            with zipfile.ZipFile(write_failure_archive, 'w', zipfile.ZIP_DEFLATED) as archive:
+                archive.writestr('manifest.json', json.dumps(write_failure_manifest))
+                for name, payload in write_failure_payloads.items():
+                    archive.writestr(name, payload)
+            original_write_candidate = import_module.write_candidate
+            write_calls = [0]
+            def fail_second_write(inbox_path, queue, candidate, dry_run):
+                write_calls[0] += 1
+                if write_calls[0] == 2:
+                    raise OSError('injected second publication failure')
+                return original_write_candidate(inbox_path, queue, candidate, dry_run)
+            import_module.write_candidate = fail_second_write
+            try:
+                with contextlib.redirect_stdout(io.StringIO()):
+                    write_failure_counts = import_module.import_zip(
+                        write_failure_archive, write_failure_inbox, [], set(), False
+                    )
+            except OSError:
+                write_failure_counts = None
+            finally:
+                import_module.write_candidate = original_write_candidate
+            if write_failure_counts is None or write_failure_counts['skipped'] != 1:
+                fail('candidate publication failure escaped archive-level containment')
+            if list((write_failure_inbox / 'manual-review').glob('*.json')):
+                fail('candidate publication failure left partial archive output')
+            if not write_failure_archive.is_file():
+                fail('candidate publication failure did not retain source archive')
+
+            rollback_failure_inbox = tmp / 'rollback-failure-inbox'
+            rollback_failure_imports = rollback_failure_inbox / 'imports'
+            rollback_failure_imports.mkdir(parents=True)
+            rollback_failure_archive = rollback_failure_imports / write_failure_archive.name
+            shutil.copy2(write_failure_archive, rollback_failure_archive)
+            original_remove_published = getattr(import_module, 'remove_published_candidate', None)
+            write_calls[0] = 0
+            import_module.write_candidate = fail_second_write
+            import_module.remove_published_candidate = lambda _target: (_ for _ in ()).throw(
+                OSError('injected rollback failure')
+            )
+            try:
+                with contextlib.redirect_stdout(io.StringIO()):
+                    rollback_failure_counts = import_module.import_zip(
+                        rollback_failure_archive, rollback_failure_inbox, [], set(), False
+                    )
+            finally:
+                import_module.write_candidate = original_write_candidate
+                if original_remove_published is None:
+                    del import_module.remove_published_candidate
+                else:
+                    import_module.remove_published_candidate = original_remove_published
+            reconciliation_sidecar = rollback_failure_archive.with_suffix(
+                rollback_failure_archive.suffix + '.reconciliation.json'
+            )
+            if rollback_failure_counts['skipped'] != 1 or not reconciliation_sidecar.is_file():
+                fail('rollback failure did not create durable reconciliation evidence')
+            else:
+                reconciliation_text = reconciliation_sidecar.read_text(encoding='utf-8')
+                if str(rollback_failure_inbox) in reconciliation_text or 'RECONCILIATION_REQUIRED' not in reconciliation_text:
+                    fail('rollback reconciliation evidence leaked an absolute path or lacked state')
+                surviving_before_retry = list((rollback_failure_inbox / 'manual-review').glob('*.json'))
+                with contextlib.redirect_stdout(io.StringIO()):
+                    retry_counts = import_module.import_zip(
+                        rollback_failure_archive, rollback_failure_inbox, [], set(), False
+                    )
+                if (
+                    retry_counts['skipped'] != 1
+                    or not reconciliation_sidecar.is_file()
+                    or list((rollback_failure_inbox / 'manual-review').glob('*.json')) != surviving_before_retry
+                ):
+                    fail('reconciliation state did not block blind archive retry')
+
             unsafe_id_inbox = tmp / 'unsafe-id-inbox'
             unsafe_id_imports = unsafe_id_inbox / 'imports'
             unsafe_id_imports.mkdir(parents=True)
@@ -447,7 +695,11 @@ if export_script_path.is_file():
                     [sys.executable, str(import_script_path), '--eval-inbox', str(symlink_inbox)],
                     cwd=ROOT, text=True, capture_output=True,
                 )
-                if symlink_result.returncode == 0 or list(external_queue.glob('*.json')):
+                if (
+                    'skipped=1' not in symlink_result.stdout
+                    or list(external_queue.glob('*.json'))
+                    or not list(symlink_imports.glob('*.zip'))
+                ):
                     fail('symlinked candidate queue was followed outside the Inbox')
 
             continuation_inbox = tmp / 'continuation-inbox'
@@ -490,6 +742,7 @@ else:
         (source_inbox / 'candidates' / 'INT-exchange-smoke-positive.json').write_text(
             json.dumps(draft, ensure_ascii=False, indent=2), encoding='utf-8'
         )
+        (source_inbox / 'sensitive-terms.local.txt').write_text('', encoding='utf-8')
 
         source_config_path = tmp / 'source-config.json'
         source_config_path.write_text(json.dumps({

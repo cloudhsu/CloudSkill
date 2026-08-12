@@ -2,10 +2,11 @@
 
 <p align="center"><img src="assets/cloudbox-logo.png" width="160" alt="CloudBox logo"></p>
 
-**Current version: 6.3.0**
+**Current version: 6.4.0**
 
-CloudBox 6.2 defines risk-based Review Assurance and resumable, adaptive
-lifecycle planning. See `docs/REVIEW_ASSURANCE_LEVELS.md` and
+CloudBox 6.4 adds pre-qualified, deterministic lifecycle templates while
+retaining risk-based Review Assurance and resumable adaptive planning. See
+`docs/LIFECYCLE_TEMPLATE_CATALOG.md`, `docs/REVIEW_ASSURANCE_LEVELS.md`, and
 `docs/RESUMABLE_LIFECYCLE_ORCHESTRATION.md`. A later-version discussion for
 controlled CLI/MCP integration is recorded in
 `docs/future/CONTROLLED_EXTERNAL_TOOL_ADAPTERS.md`.
@@ -31,6 +32,9 @@ discovery. Use `從專案提煉優化案例` for an initial bounded pass and
 `同步優化來源` for incremental discovery. Actual URLs, credentials,
 candidates, and provenance remain in ignored/private storage; see
 [CloudBox evolution sources](docs/AUTOMATIC_EVOLUTION_SOURCES.md).
+CloudBox 6.4 import first verifies bundle/exporter/candidate schema, declared
+CloudBox version, host/runtime, filename/manifest identity, and payload hashes;
+contract drift is retained as unsupported evidence before candidate routing.
 
 ## Skills
 

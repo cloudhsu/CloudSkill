@@ -45,6 +45,7 @@ ALLOWED_SANITIZATION = {'PASS', 'MANUAL_REQUIRED'}
 PROHIBITED_KEYS = {
     'raw_transcript', 'full_transcript', 'conversation_transcript', 'messages',
     'customer_name', 'company_name', 'person_name', 'source_path', 'repository_url',
+    'password', 'access_token', 'api_key', 'client_secret', 'credentials', 'capture_config',
 }
 SENSITIVE_PATTERNS = {
     'email': re.compile(r'\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b', re.I),
@@ -139,6 +140,12 @@ def validate_candidate(candidate: dict[str, Any], expected_kind: str) -> list[st
         errors.append(f'case_kind must equal --kind {expected_kind!r}')
     if candidate.get('status') != 'candidate':
         errors.append('status must be candidate')
+    if candidate.get('schema_version') != '1.0':
+        errors.append('schema_version must be 1.0')
+    if not re.fullmatch(r'[0-9]+\.[0-9]+\.[0-9]+', str(candidate.get('cloudskill_version', ''))):
+        errors.append('cloudskill_version must be semantic version x.y.z')
+    if candidate.get('runtime') not in {'codex', 'claude'}:
+        errors.append('runtime must be codex or claude')
     for key, child in walk_items(candidate):
         if key in PROHIBITED_KEYS:
             errors.append(f'prohibited raw/identifying field: {key}')
@@ -245,6 +252,8 @@ def main() -> int:
         errors = validate_candidate(candidate, args.kind)
         if errors:
             raise ValueError('; '.join(errors))
+        if candidate['runtime'] != args.host:
+            raise ValueError('candidate runtime must match export host')
 
         terms: list[str] = []
         if args.sensitive_terms:
@@ -272,7 +281,6 @@ def main() -> int:
         candidate_id = f"INT-{now.strftime('%Y%m%d-%H%M%S')}-{suffix}"
         candidate['candidate_id'] = candidate_id
         candidate['captured_at'] = now.isoformat()
-        candidate['capture_config'] = 'export_eval_candidate.py (disconnected session; no CloudSkill repository config)'
 
         queue = 'candidates' if sanitization['status'] == 'PASS' else 'manual-review'
         outbox = Path(args.outbox).expanduser()

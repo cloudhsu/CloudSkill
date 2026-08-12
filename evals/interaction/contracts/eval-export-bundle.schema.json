@@ -8,7 +8,7 @@
     "bundle_format_version": {"const": "2.0"},
     "cloudbox_version": {"type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"},
     "exporter_version": {"const": "2.0"},
-    "candidate_schema_version": {"type": "string", "minLength": 1},
+    "candidate_schema_version": {"const": "1.0"},
     "host": {"type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$"},
     "agent_name": {"type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$"},
     "export_project_name": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]*$"},

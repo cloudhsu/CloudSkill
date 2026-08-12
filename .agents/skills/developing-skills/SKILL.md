@@ -106,6 +106,14 @@ counterexample, discipline, or reference case. Run current behavior without the
 proposed instruction and record the exact omission. If no observable failure
 exists, use `NO_CHANGE_JUSTIFIED`; do not invent a fix.
 
+Type every RED and GREEN by evidence layer: case/contract, deterministic
+implementation, Skill/agent behavior, adjacent composition, runtime/provider,
+or release/field effectiveness. A RED authorizes correction only at its failed
+layer and authoritative owner; implementation RED cannot substitute for Skill
+behavior RED. Re-run the same case at the same layer for GREEN, then add only
+the adjacent and higher-layer evidence required by lifecycle stage and risk.
+Never promote a lower-layer GREEN into a higher-layer claim.
+
 ### 4. Define and implement the minimum contract
 
 Specify trigger/non-trigger conditions, required and forbidden behavior,

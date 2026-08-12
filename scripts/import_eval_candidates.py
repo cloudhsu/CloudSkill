@@ -206,8 +206,46 @@ def write_candidate(inbox: Path, queue: str, candidate: dict[str, Any], dry_run:
     return target
 
 
+def retain_rejection(candidate: dict[str, Any], errors: list[str]) -> None:
+    """Replace untrusted sanitization metadata with a controlled rejection record."""
+    sanitization = candidate.get("sanitization")
+    if not isinstance(sanitization, dict):
+        sanitization = {"status": "MANUAL_REQUIRED", "raw_transcript_saved": False}
+        candidate["sanitization"] = sanitization
+    sanitization["import_errors"] = errors
+
+
+def remove_published_candidate(target: Path) -> None:
+    if target.exists():
+        target.unlink()
+
+
+def write_reconciliation(zip_path: Path, inbox: Path, surviving: list[Path]) -> Path:
+    sidecar = zip_path.with_suffix(zip_path.suffix + ".reconciliation.json")
+    relative_outputs = []
+    inbox_root = inbox.resolve()
+    for target in surviving:
+        try:
+            relative_outputs.append(str(target.resolve().relative_to(inbox_root)))
+        except ValueError:
+            relative_outputs.append("UNRESOLVED_OUTSIDE_INBOX")
+    payload = {
+        "status": "RECONCILIATION_REQUIRED",
+        "archive": zip_path.name,
+        "surviving_outputs": relative_outputs,
+    }
+    temporary = sidecar.with_suffix(sidecar.suffix + ".tmp")
+    temporary.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+    temporary.replace(sidecar)
+    return sidecar
+
+
 def import_zip(zip_path: Path, inbox: Path, terms: list[str], seen_keys: set[str], dry_run: bool) -> dict[str, int]:
     counts = {"candidates": 0, "manual_review": 0, "rejected": 0, "duplicate": 0, "skipped": 0, "unsupported": 0}
+    reconciliation = zip_path.with_suffix(zip_path.suffix + ".reconciliation.json")
+    if reconciliation.is_file():
+        print(f"ERROR: {zip_path.name}: reconciliation required before retry")
+        return {**counts, "skipped": 1}
     planned: list[tuple[str, dict[str, Any], str | None]] = []
     planned_keys: set[str] = set()
     try:
@@ -238,15 +276,32 @@ def import_zip(zip_path: Path, inbox: Path, terms: list[str], seen_keys: set[str
                 candidate = json.loads(archive.read(candidate_name))
                 if not isinstance(candidate, dict) or "case_kind" not in candidate:
                     raise ValueError("candidate payload is not a candidate object")
+                if (
+                    candidate.get("schema_version") != manifest["candidate_schema_version"]
+                    or candidate.get("cloudskill_version") != manifest["cloudbox_version"]
+                    or candidate.get("runtime") != manifest["host"]
+                ):
+                    counts["unsupported"] = 1
+                    return counts
+                if manifest["cloudbox_version"] == "6.3.0" and "capture_config" in candidate:
+                    candidate.pop("capture_config", None)
+                    sanitization = candidate.get("sanitization")
+                    if isinstance(sanitization, dict):
+                        sanitization["status"] = "MANUAL_REQUIRED"
+                        migrations = sanitization.get("import_migrations")
+                        if not isinstance(migrations, list):
+                            migrations = []
+                            sanitization["import_migrations"] = migrations
+                        migrations.append("removed legacy 6.3 capture_config provenance")
                 kind = candidate.get("case_kind")
                 if kind not in ALLOWED_KINDS:
-                    candidate.setdefault("sanitization", {})["import_errors"] = [f"unknown case_kind: {kind!r}"]
+                    retain_rejection(candidate, [f"unknown case_kind: {kind!r}"])
                     planned.append(("rejected", candidate, None))
                     counts["rejected"] += 1
                     continue
                 errors = validate_candidate(candidate, kind)
                 if errors:
-                    candidate.setdefault("sanitization", {})["import_errors"] = errors
+                    retain_rejection(candidate, errors)
                     planned.append(("rejected", candidate, None))
                     counts["rejected"] += 1
                     continue
@@ -273,8 +328,25 @@ def import_zip(zip_path: Path, inbox: Path, terms: list[str], seen_keys: set[str
         print(f"ERROR: {zip_path.name}: not a valid zip archive; leaving in imports/ for manual review")
         return {**{key: 0 for key in counts}, "skipped": 1}
 
-    for queue, candidate, key in planned:
-        write_candidate(inbox, queue, candidate, dry_run)
+    published: list[Path] = []
+    try:
+        for queue, candidate, _key in planned:
+            published.append(write_candidate(inbox, queue, candidate, dry_run))
+    except (OSError, ValueError):
+        rollback_failures: list[Path] = []
+        if not dry_run:
+            for target in reversed(published):
+                try:
+                    remove_published_candidate(target)
+                except OSError:
+                    rollback_failures.append(target)
+        if rollback_failures:
+            write_reconciliation(zip_path, inbox, rollback_failures)
+            print(f"ERROR: {zip_path.name}: publication rollback incomplete; reconciliation required")
+        else:
+            print(f"ERROR: {zip_path.name}: candidate publication failed; rolled back archive output")
+        return {**{key: 0 for key in counts}, "skipped": 1}
+    for _queue, _candidate, key in planned:
         if key is not None:
             seen_keys.add(key)
 

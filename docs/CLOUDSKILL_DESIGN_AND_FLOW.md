@@ -178,6 +178,27 @@ The release package also performs two mutation tests:
 This closes the gap between centralizing the contract and proving that every
 consumer actually uses it.
 
+## Lifecycle-template evidence boundary
+
+`config/lifecycle-templates.json` is the sole template-registry authority.
+`scripts/lifecycle_template_contract.py` is a pure adapter: it evaluates typed
+facts, composes stage constraints with a deterministic topological merge, and
+fails closed on cyclic or otherwise incompatible constraints. It does not own
+the plan or execute work.
+
+A selected composition is portable only with its bound context: work identity,
+source hash, full task definitions, normalized task facts and risk context, and
+the complete registry identity. Delta evidence, selected-resolution integrity,
+and the persisted plan snapshot cover that context; lifecycle-plan admission
+independently matches it and replays against the authoritative registry.
+
+Existing lifecycle orchestration remains the durable owner. Source, authority,
+side-effect, bound-fact/risk, and explicit delta changes that contradict a
+selected all-false assessment automatically create an unresolved/full-risk
+revision and ordered lineage. Selection can resume only from a fresh
+authoritative resolution bound to the new context. Legacy plans without a
+template resolution retain their prior contract.
+
 ## Evolution rule
 
 Always modify the earliest proven failing layer.

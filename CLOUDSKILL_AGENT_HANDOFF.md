@@ -15,6 +15,97 @@ This is the operational entry point for a new conversation or coding agent that 
 
 ## Current repository state
 
+### CloudBox 6.4.0 version candidate (2026-08-12)
+
+- The composable lifecycle-template pilot, typed JSON evidence correction, and
+  layer-typed RED/GREEN governance passed two independent exact-tip reviews
+  without High/Medium findings before version synchronization.
+- Authoritative version surfaces now target `6.4.0`. Bundle/exporter format
+  remains 2.0 and filename identity is unchanged; focused evidence proves a
+  correctly named 6.3 archive is accepted by the 6.4 importer as well as the
+  current exporter/importer round trip.
+- A later user-authorized increment binds manifest and payload CloudBox
+  version, candidate schema, and host/runtime. Export and Git Exchange reject
+  mixed contracts and duplicate payload names; import checks the whole contract
+  before candidate routing and retains mismatches as unsupported without
+  partial output. The prior exact-tip release PASS at `7b0d4b4` is stale for
+  this increment.
+- Dual review at `68aae7e` exposed incomplete Exchange preflight and importer
+  error containment. The working descendant revalidates full candidate/privacy
+  policy before remote access, removes local config-path provenance, controls
+  malformed sanitization rejection, and rolls back archive outputs after write
+  failure. Focused checks pass; a clean commit, full suite, and two fresh
+  exact-tip reviews remain required.
+- Re-review at `79be88d` found the 6.3 compatibility fixture was not authentic
+  and rollback evidence could overclaim success. The working descendant imports
+  real 6.3-shaped path provenance only after removing it and forcing manual
+  review; rollback failure creates a relative-path reconciliation sidecar and
+  blocks retry. Focused GREEN passes; commit/full/dual review remain pending.
+- Exact tip `cd23028` passed both independent reviews with no High/Medium
+  findings. The full deterministic suite, focused exchange/import checks,
+  lifecycle audit, and diff checks pass. Provider Runtime Eval remains
+  `NOT RUN`; publication operations are the remaining gates.
+- Pre-release evidence is in
+  `docs/releases/6.4.0-pre-release-evidence.md`.
+- Push, PR/CI, merge, main validation, annotated tag, tag validation, GitHub
+  Release, and post-release evidence remain `NOT RUN`.
+
+### Composable lifecycle-template typed-identity correction candidate (2026-08-12)
+
+- Branch `feat/cloudbox-skill-optimization` contains a three-template pilot at
+  pre-correction review tip `5a06cdd`: `lightweight-change`, `bounded-feature`,
+  and `skill-evolution`. Seven registered template IDs remain deferred and
+  return `unsupported`. The final-review correction source is the commit
+  containing this handoff entry.
+- `config/lifecycle-templates.json` is the sole registry authority. The pure
+  selector/composer has no model, task-execution, persistence, Git, or release
+  authority; existing lifecycle orchestration remains the durable owner.
+- Exact canonical matches for the three implemented templates return
+  `selected` with `full_risk_calculation_required: false`. True or unknown
+  deltas escalate. The current authoritative `bounded-feature +
+  skill-evolution` composition returns `conflict` because its owners differ.
+  Compatible stage lists use deterministic topological merge and cycles fail
+  closed. Selected delta/resolution/plan evidence binds work, source, tasks,
+  normalized facts/risk, and full registry identity; cross-context or caller-
+  resealed replay is rejected.
+- Authority-boundary, side-effect-scope, source, bound-fact/risk, and explicit
+  delta-changing triggers automatically invalidate an all-false selection,
+  retain ordered lineage, and require full-risk re-resolution. A caller
+  invalidation list is not required, and replaying the old selection does not
+  count as fresh resolution.
+- Task 4 static/manual semantic adjudication passed the post-change cases. Its
+  retained provenance identifies only a separate read-only agent; reviewer ID,
+  human-versus-model execution modality, provider/model, and raw-output lineage
+  are unknown, so independence is not claimed. Pre-change cases 009–016 are
+  normalized to `FAIL`, with partial prior behavior satisfaction noted for all
+  except the full omission in case 013. The complete deterministic suite and
+  `git diff --check` passed after Task 5 documentation and the final correction
+  suite passed locally. The pure selector makes zero model calls; provider-
+  backed Runtime Eval remains `NOT RUN`, with provider token/cost evidence
+  unavailable.
+- Independent re-review of `5d6cdb5` closed the prior topology, context-binding,
+  invalidation, and documentation findings but reproduced one remaining
+  Important: Python equality aliased JSON booleans and integers. The user
+  authorized a new correction/evolution increment. Exact RED showed
+  `false -> 0` crossing both admission and replan without invalidation; the
+  current candidate uses canonical type-preserving JSON identity and adds fact
+  and risk mutations. A first draft also changed three owner Skills, but fresh
+  pre-change blind cases showed all three already produced the required
+  behavior; those unsupported edits/cases were removed as
+  `NO_CHANGE_JUSTIFIED`. Their retained prompts/outputs are in
+  `docs/evolution/2026-08-12-typed-identity-skill-baseline-evidence.md`.
+  The cross-layer mistake itself is an observed `developing-skills` RED;
+  `DEVSK-BEH-017` adds layer-typed RED/GREEN, and one post-change blind forward
+  test passed. Provider-backed Runtime Eval remains `NOT RUN`.
+- Candidate evidence is in
+  `docs/evolution/2026-08-11-lifecycle-template-pilot-evidence.md`; operating
+  guidance is in `docs/LIFECYCLE_TEMPLATE_CATALOG.md`. Two independent
+  validations of the new exact tip are still required. Do not self-certify it
+  from this handoff.
+- Version synchronization, push, PR, merge, tag, Release, and host reload are
+  `NOT RUN`. Continue with exact-tip re-review and correct any remaining
+  High/Medium finding before any publication decision.
+
 ### Developing Skills token refactor merged (2026-08-11)
 
 - `developing-skills` now uses explicit progressive disclosure: its default

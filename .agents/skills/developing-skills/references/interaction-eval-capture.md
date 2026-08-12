@@ -167,10 +167,30 @@ Only from the CloudSkill repository and only after explicit instruction:
 Container intake is a separate precondition to this list. The exporter must
 produce a versioned manifest with declared payload hashes and a manifest-bound
 filename, and the real importer must validate the completed ZIP. Importers plan
-the whole archive before publishing any candidate, use only locally generated
+the whole archive before publishing any candidate. Before candidate routing,
+require a supported bundle/exporter/candidate schema and exact agreement between
+manifest and payload CloudBox version, candidate schema, and host/runtime.
+Contract mismatch fails the whole archive closed and preserves it as unsupported
+evidence; do not partially import matching members. These checks prove declared
+structural-contract consistency, not that the external model reasoned correctly.
+Use only locally generated
 output names, reject queue escape/symlink and unsafe member forms, bound member
 count/path/size/expansion, preserve collisions, and leave malformed input for
 manual review. These are executable obligations; this reference does not
 replace their tests.
+
+Before an Eval Exchange push, re-run the authoritative candidate validator and
+the owning Inbox's private-term scan over every payload before clone, ZIP,
+commit, or push. Reject the whole batch when the policy file is unavailable,
+candidate structure is invalid, credential/path metadata is present, a private
+term remains, contracts differ, or archive member names collide. On repository-
+side import, normalize malformed sanitization metadata into a controlled
+rejection. Strip the path-bearing `capture_config` field from legacy 6.3
+payloads, record the migration without the value, and force manual review; keep
+the field prohibited for new capture, export, and Exchange push. If candidate
+publication fails, roll back outputs already created by that archive. When
+rollback itself fails, write a path-relative `RECONCILIATION_REQUIRED` sidecar,
+retain the source ZIP, and block retry until manual recovery; never report an
+incomplete rollback as successful.
 
 One interaction may justify a candidate. A skill rule normally requires a repeatable failure or a high-severity prohibited behavior.

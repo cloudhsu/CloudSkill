@@ -24,6 +24,22 @@ def contract_errors(process_text: str, developing_text: str):
             "new risk or authority evidence creates a new plan revision"
             in process
         ),
+        "template fast path requires six literal false values": (
+            "answer all six bounded-delta questions with literal `true` or `false` values"
+            in process
+            and "only when every one of the six answers is literal `false`"
+            in process
+            and "any literal `true`, missing, non-boolean, or unknown answer requires"
+            in process
+        ),
+        "template selection binds context and auto-invalidates contradictions": (
+            "every template's stage partial order" in process
+            and "deterministic topological merge" in process
+            and "bound work/source/tasks/facts/risk/registry context" in process
+            and "automatically invalidates that identity" in process
+            and "do not depend on a caller invalidation list" in process
+            and "result bound to the new context" in process
+        ),
         "process priority is lifecycle then evidence then token": (
             "lifecycle and dynamic feedback loop first" in process
             and "evidence and verification second" in process
@@ -68,6 +84,23 @@ def main() -> int:
     )
     if not contract_errors(owner_mutation, developing_text):
         errors.append("negative mutation did not detect Plan Owner drift")
+
+    literal_boolean_mutation = re.sub(
+        r"only when every one of the six answers is literal\s+`false`",
+        "when the answers appear false",
+        process_text,
+        1,
+    )
+    if not contract_errors(literal_boolean_mutation, developing_text):
+        errors.append("negative mutation did not detect literal-boolean drift")
+
+    template_context_mutation = process_text.replace(
+        "automatically invalidates that identity",
+        "may invalidate that identity when requested",
+        1,
+    )
+    if not contract_errors(template_context_mutation, developing_text):
+        errors.append("negative mutation did not detect automatic-invalidation drift")
 
     if errors:
         for error in errors:

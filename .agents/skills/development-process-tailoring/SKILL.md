@@ -29,6 +29,54 @@ lifecycle and dynamic feedback loop first, preserve required evidence and
 verification second, and reduce token/context cost third. A token saving that
 weakens lifecycle control or proof is a failed optimization.
 
+## Pre-qualified lifecycle templates
+
+Use a lifecycle template only when explicit task facts can be assessed against
+the authoritative `config/lifecycle-templates.json` registry through the shared
+`assess_template()`/`compose_templates()` contract. The currently implemented
+IDs are `lightweight-change`, `bounded-feature`, and `skill-evolution`; the
+registry, not this summary, owns their applicability, exclusions, mechanics,
+versions, compatibility, gates, owners, and evidence. Never select from name or
+prose resemblance, reconstruct a template body from memory, or silently fall
+back from an unknown or deferred ID.
+
+For every candidate, answer all six bounded-delta questions with literal
+`true` or `false` values:
+
+- external side effect;
+- authority or state change;
+- sensitive or privileged access;
+- platform or compatibility impact;
+- irreversible or unreconciled outcome;
+- work outside the verified envelope.
+
+An implemented template whose applicability and exclusions match may use the
+no-full-risk fast path only when every one of the six answers is literal
+`false`. Preserve the contract version and delta-evidence identity and continue
+every required gate and verification step. Any literal `true`, missing,
+non-boolean, or unknown answer requires `escalation_required`, a full risk
+calculation, and a stop before creating a selected template-backed plan. Unknown
+and deferred IDs are `unsupported`, not aliases or defaults.
+
+Compose only through the shared contract: one base, unique overlays, declared
+compatibility, and no owner conflict. Preserve every template's stage partial
+order through the contract's deterministic topological merge; a cycle is
+`conflict`. Preserve every required gate and evidence item and the strongest
+review/gate result. `unsupported`,
+`escalation_required`, or `conflict` stops plan creation; a template never
+becomes a second Plan Owner.
+
+Persist selected template IDs, contract versions, composition order, status,
+delta-evidence identity, and the bound work/source/tasks/facts/risk/registry
+context in the lifecycle plan. A source, authority-boundary, side-effect-scope,
+bound fact/risk, or explicit delta change that contradicts the all-false
+selection automatically invalidates that identity; do not depend on a caller
+invalidation list. Create a new plan revision, retain the prior resolution in
+ordered lineage, mark the current resolution unresolved/full-risk, and preserve
+unrelated hash-valid evidence. Restore `selected` only from a fresh contract
+result bound to the new context and replayed against the authoritative registry,
+never from memory or a caller-recomputed seal.
+
 Long-running work must persist plan/work revisions, checkpoints, authority,
 action identity, budgets, evidence lineage, and Review Assurance state. Resume
 read-only: reconcile late external completion, reject stale plan/lease writers,

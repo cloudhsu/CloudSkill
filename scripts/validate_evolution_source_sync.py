@@ -8,6 +8,8 @@ import tempfile
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 from evolution_source_contract import load_source_registry, sync_source
+import sync_eval_exchange as exchange_module
+from sync_eval_exchange import candidate_contract, validate_exchange_candidates
 
 errors = []
 with tempfile.TemporaryDirectory(prefix="cloudskill-source-validator-") as tmp_name:
@@ -40,6 +42,64 @@ with tempfile.TemporaryDirectory(prefix="cloudskill-source-validator-") as tmp_n
     except ValueError as exc:
         if str(source) in str(exc): errors.append("secret value leaked in error")
     else: errors.append("missing secret did not fail")
+    contract_dir = tmp / "candidate-contracts"; contract_dir.mkdir()
+    first_candidate = contract_dir / "first.json"
+    second_candidate = contract_dir / "second.json"
+    base_contract = {"cloudskill_version":"6.4.0","schema_version":"1.0","runtime":"codex"}
+    first_candidate.write_text(json.dumps(base_contract), encoding="utf-8")
+    second_candidate.write_text(json.dumps(base_contract), encoding="utf-8")
+    if candidate_contract([first_candidate, second_candidate]) != {
+        "cloudbox_version":"6.4.0","candidate_schema_version":"1.0","host":"codex"
+    }: errors.append("Eval Exchange did not derive one payload-owned contract")
+    for label, changed in (
+        ("CloudBox version", {**base_contract,"cloudskill_version":"6.3.0"}),
+        ("candidate schema", {**base_contract,"schema_version":"9.9"}),
+        ("runtime", {**base_contract,"runtime":"claude"}),
+    ):
+        second_candidate.write_text(json.dumps(changed), encoding="utf-8")
+        try: candidate_contract([first_candidate, second_candidate])
+        except ValueError: pass
+        else: errors.append(f"Eval Exchange accepted mixed {label} contracts")
+    duplicate_left = contract_dir / "left" / "same.json"
+    duplicate_right = contract_dir / "right" / "same.json"
+    duplicate_left.parent.mkdir(); duplicate_right.parent.mkdir()
+    duplicate_left.write_text(json.dumps(base_contract), encoding="utf-8")
+    duplicate_right.write_text(json.dumps(base_contract), encoding="utf-8")
+    try: candidate_contract([duplicate_left, duplicate_right])
+    except ValueError: pass
+    else: errors.append("Eval Exchange accepted duplicate archive member names")
+    valid_candidate = json.loads((ROOT / ".agents/skills/developing-skills/assets/INTERACTION_EVAL_CANDIDATE.template.json").read_text(encoding="utf-8"))
+    valid_candidate.update(base_contract)
+    unsafe_candidate = {**valid_candidate, "password":"secret"}
+    first_candidate.write_text(json.dumps(unsafe_candidate), encoding="utf-8")
+    try: validate_exchange_candidates([first_candidate], [])
+    except ValueError: pass
+    else: errors.append("Eval Exchange accepted a structurally unsafe candidate")
+    private_candidate = {**valid_candidate, "task_summary":"contains private-marker"}
+    first_candidate.write_text(json.dumps(private_candidate), encoding="utf-8")
+    try: validate_exchange_candidates([first_candidate], ["private-marker"])
+    except ValueError: pass
+    else: errors.append("Eval Exchange accepted an unresolved private term")
+    unsafe_inbox = tmp / "unsafe-exchange-inbox"
+    (unsafe_inbox / "candidates").mkdir(parents=True)
+    unsafe_path = unsafe_inbox / "candidates" / "unsafe.json"
+    unsafe_path.write_text(json.dumps(unsafe_candidate), encoding="utf-8")
+    terms_path = unsafe_inbox / "sensitive-terms.local.txt"
+    terms_path.write_text("", encoding="utf-8")
+    remote_accessed = [False]
+    original_ensure_clone = exchange_module.ensure_clone
+    def unexpected_clone(_repo, _clone_dir):
+        remote_accessed[0] = True
+        raise AssertionError("remote access must follow candidate validation")
+    exchange_module.ensure_clone = unexpected_clone
+    try:
+        exchange_module.do_push({
+            "eval_exchange_repo":"redacted", "_inbox_path":unsafe_inbox,
+            "_sensitive_terms_file":terms_path,
+        }, type("Args", (), {"clone_dir":tmp / "never", "label":"validator"})())
+    except ValueError: pass
+    finally: exchange_module.ensure_clone = original_ensure_clone
+    if remote_accessed[0]: errors.append("Eval Exchange accessed remote state before validation")
 print("Validated token-free Git evolution source synchronization")
 controller = (ROOT / "scripts/cloudskill_evolution.py").read_text(encoding="utf-8")
 workflow = (ROOT / ".github/workflows/evolution-source-sync.yml").read_text(encoding="utf-8")

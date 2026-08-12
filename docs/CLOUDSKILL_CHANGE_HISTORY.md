@@ -2,6 +2,112 @@
 
 This document records the evolution rationale and evidence chain for work that may span multiple conversations. Git commits and tags remain the authoritative source history.
 
+## 2026-08-12 — CloudBox 6.4.0 version candidate
+
+After the typed implementation and Skill/evidence review gates passed, package
+version surfaces were synchronized to 6.4.0 and the generated manifest was
+refreshed. The release candidate includes three implemented deterministic
+lifecycle templates, seven explicit deferred IDs, context-bound/type-preserving
+evidence, automatic invalidation, and layer-typed Skill RED/GREEN governance.
+
+Eval ZIP bundle and exporter formats remain 2.0. A new end-to-end compatibility
+fixture proves the 6.4 importer accepts a correctly named 6.3 archive; current
+6.4 export/import remains covered. Exchange stability is now recorded as a
+maturity signal rather than a reason to remove manual review prematurely.
+After the first exact-tip release PASS, the user added an explicit external-
+session compliance requirement. Export and Git Exchange now derive and bind
+CloudBox version, candidate schema, and runtime; import validates those values
+against the manifest before routing any candidate and retains mismatched
+archives without partial output. Exchange push also rejects duplicate payload
+names before remote access. The earlier PASS is stale and cannot authorize this
+descendant.
+Dual review of `68aae7e` then found that metadata-only Exchange preflight could
+commit unsafe candidates, malformed sanitization could terminate the importer,
+and a later candidate write could leave earlier archive output. Focused RED
+reproduced each failure. The correction reuses authoritative candidate and
+private-term validation before network/Git access, rejects credential and local
+config-path metadata, retains malformed sanitization as a controlled rejection,
+and rolls back outputs created by a failed archive publication. Fresh full and
+dual exact-tip validation remain pending.
+Re-review then showed that the compatibility fixture did not include the
+path-bearing `capture_config` emitted by real 6.3 capture/export tools, and that
+rollback deletion failure was silently described as complete. A representative
+fixture now proves 6.3 input is stripped of that value and conservatively routed
+to manual review. Failed rollback writes path-relative durable reconciliation
+evidence and prevents blind retry. Fresh full and dual review remain pending.
+Exact tip `cd23028` then passed both independent reviews with no High/Medium
+findings; one reviewer reran the full deterministic suite and the other reran
+the focused exchange/import checks. Push, PR/CI, merge, tag, Release, and
+post-release verification remain pending.
+
+## 2026-08-12 — Lifecycle typed-identity correction and reusable extraction
+
+Independent re-review of the first lifecycle-template correction reproduced a
+typed-context evidence defect: host-language equality admitted JSON `false`
+and numeric `0` as the same fact/risk identity, preserving a selected plan and
+reusing evidence across distinct serialized contexts. The user authorized a
+new correction increment and requested every reusable lesson be incorporated.
+
+Deterministic RED now mutates the exact admission and replan mechanisms, and
+the shared contract uses canonical type-preserving JSON identity. A first draft
+also changed `development-process-tailoring`, `code-review`, and
+`runtime-evaluation-engineering`, but independent Skill review found no retained
+pre-change agent RED. Fresh blind cases against each owner at `5d6cdb5` all
+produced the required behavior, so those Skill edits/cases were removed as
+`NO_CHANGE_JUSTIFIED`. Existing topology, registry anti-drift, evidence-layer
+truth, and release-stop owners were not duplicated. Version synchronization,
+push, merge, tag, and Release remain `NOT RUN` pending renewed exact-tip review.
+The coordinator's premature three-Skill edit is retained as a real
+`developing-skills` RED. `DEVSK-BEH-017` now prevents lower-layer RED/GREEN from
+self-authorizing higher-layer claims; its post-change blind output passed and
+is preserved with the three no-change baselines in
+`docs/evolution/2026-08-12-typed-identity-skill-baseline-evidence.md`.
+
+## 2026-08-12 — Composable lifecycle-template final-review correction candidate
+
+The pilot adds one authoritative registry, a pure deterministic selector/
+composer, sealed lifecycle-plan integration, and minimum Skill routing for
+`lightweight-change`, `bounded-feature`, and `skill-evolution`. Seven planned
+IDs remain explicitly deferred. Exact matches answer all exclusions and six
+deltas with literal booleans; all false avoids only the repeated full-risk
+calculation. Lifecycle authority, evidence, verification, Review Assurance,
+resume, reconciliation, and replan remain intact.
+
+Deterministic RED/GREEN corrected typed exclusions, owner/gate conflict,
+resolution provenance and integrity, invalidation-safe replan, deferred-ID
+forgery, selective evidence invalidation, and complete lineage. Static/manual
+semantic adjudication passed the final ten Skill cases while preserving two
+pre-existing controls as regression-only. Its retained provenance names only a
+separate read-only agent; human/model modality, reviewer/model identity, and raw
+judge lineage are unknown, so independence is not claimed. The eight
+pre-change template cases are normalized to `FAIL`; seven note partial prior
+generic-process satisfaction and case 013 records a full omission. The current
+authoritative `bounded-feature + skill-evolution` pair truthfully returns
+`conflict` because
+its policy/action/evidence owners differ; only an owner-aligned synthetic
+fixture proves successful strongest-gate composition.
+
+Final review of `b31ac35..5a06cdd` then exposed three additional blocking
+mechanisms: concatenated stage lists violated an overlay partial order and did
+not detect cycles; selected evidence and persisted snapshots did not bind the
+complete work/source/task/fact/risk/registry context; and invalidating
+authority/side-effect/delta triggers depended on caller-supplied hash lists.
+One bounded TDD correction wave now topologically merges stages, rejects
+cycles, seals and independently admits exact normalized selection context, and
+automatically moves contradictory all-false selections to unresolved/full-risk
+lineage unless a fresh authoritative result is bound to the new context. The
+legacy four-argument plan-creation contract remains unchanged. Four associated
+wording/status/ledger minors were corrected in the same wave.
+
+Task 5 adds a human catalog and evidence record without duplicating the
+registry. The pure selector/composer makes zero model calls. Provider-backed
+Runtime Eval is `NOT RUN`, and provider token/cost evidence for it is
+unavailable. Independent exact-tip re-review of the correction commit,
+version synchronization, push, PR, merge, tag, Release, and host reload remain
+`NOT RUN` at this checkpoint. Exact measurements, evidence limitations, and
+continuation are in
+`docs/evolution/2026-08-11-lifecycle-template-pilot-evidence.md`.
+
 ## 2026-08-11 — Skill optimization and token pilot merged
 
 PR `#15` merged the reviewed Inbox/session Skill optimization, the
