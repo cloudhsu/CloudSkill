@@ -15,8 +15,7 @@
     "CR-BEH-001",
     "CR-BEH-002",
     "CR-BEH-003",
-    "CR-BEH-004",
-    "CR-BEH-005"
+    "CR-BEH-004"
   ],
   "behavior_case_types": [
     "application",

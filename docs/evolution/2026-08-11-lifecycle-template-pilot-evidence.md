@@ -83,18 +83,25 @@ Reusable extraction was assigned without creating another Skill:
 |---|---|
 | stage partial-order composition and cycle refusal | already implemented in `development-process-tailoring` and executable contract |
 | work/source/task/fact/risk/registry evidence binding | already implemented in `development-process-tailoring` and plan contract |
-| type-preserving serialized identity | added to `development-process-tailoring`; implementation and replan mutations added |
+| type-preserving serialized identity | deterministic implementation/replan mutations added; existing process behavior passed the pre-change blind case, so Skill text is `NO_CHANGE_JUSTIFIED` |
 | automatic evidence invalidation | existing process rule retained; type-change loophole closed |
 | literal-boolean fail-closed selection | existing process rule retained |
 | positive registry propagation plus negative drift injection | already owned by `framework-design`; no duplicate edit |
-| exact-mechanism fault injection | added to `runtime-evaluation-engineering` |
-| serialized-state type confusion review | added to the `code-review` checklist |
+| exact-mechanism fault injection | pre-change `runtime-evaluation-engineering` blind output already required a matched pair, observed RED, frozen raw evidence, mutation sensitivity, and adjacent controls; `NO_CHANGE_JUSTIFIED` |
+| serialized-state type confusion review | pre-change `code-review` blind output identified nested boolean/integer aliasing, evidence impact, type-strict correction, and positive/negative tests; `NO_CHANGE_JUSTIFIED` |
 | deterministic, static/manual, provider, token, and cost evidence separation | already owned by `developing-skills` and `runtime-evaluation-engineering` |
 | Important finding stops version/tag/release | already covered by `coding-agent-project-governance`; no duplicate edit |
 
-New behavior contracts are `PROC-BEH-017`, `CR-BEH-005`, and `RTE-BEH-010`.
-Their RED basis is the observed exact-tip defect and missing owner instructions;
-provider/model RED and GREEN execution are `NOT RUN`.
+The first correction draft added `PROC-BEH-017`, `CR-BEH-005`, and
+`RTE-BEH-010`, but independent Skill review correctly rejected implementation
+RED as proof of agent-behavior RED. Three fresh pre-change blind forward tests
+then used only each owner at `5d6cdb5`: process refused `false -> 0` reuse and
+required unresolved/full-risk lineage; code review found the typed equality
+defect and required nested regression cases; Eval engineering required an
+exact matched negative, observed RED, mutation sensitivity, frozen outputs,
+and adjacent controls. All three baselines therefore PASS. The unsupported
+Skill edits/cases were removed and recorded as `NO_CHANGE_JUSTIFIED`; only the
+executable defect, exact RED/GREEN fixtures, and this accounting remain.
 
 ## Authority and delivered boundary
 

@@ -10,14 +10,15 @@ and numeric `0` as the same fact/risk identity, preserving a selected plan and
 reusing evidence across distinct serialized contexts. The user authorized a
 new correction increment and requested every reusable lesson be incorporated.
 
-Deterministic RED now mutates the exact admission and replan mechanisms. The
-shared contract uses canonical type-preserving JSON identity, while
-`development-process-tailoring`, `code-review`, and
-`runtime-evaluation-engineering` gain narrowly owned rules/cases for typed
-evidence identity and exact-mechanism fault injection. Existing topology,
-registry anti-drift, evidence-layer truth, and release-stop owners were not
-duplicated. Provider-backed behavior execution, version synchronization, push,
-merge, tag, and Release remain `NOT RUN` pending two independent validations.
+Deterministic RED now mutates the exact admission and replan mechanisms, and
+the shared contract uses canonical type-preserving JSON identity. A first draft
+also changed `development-process-tailoring`, `code-review`, and
+`runtime-evaluation-engineering`, but independent Skill review found no retained
+pre-change agent RED. Fresh blind cases against each owner at `5d6cdb5` all
+produced the required behavior, so those Skill edits/cases were removed as
+`NO_CHANGE_JUSTIFIED`. Existing topology, registry anti-drift, evidence-layer
+truth, and release-stop owners were not duplicated. Version synchronization,
+push, merge, tag, and Release remain `NOT RUN` pending renewed exact-tip review.
 
 ## 2026-08-12 — Composable lifecycle-template final-review correction candidate
 

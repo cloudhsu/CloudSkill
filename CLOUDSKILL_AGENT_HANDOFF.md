@@ -54,7 +54,10 @@ This is the operational entry point for a new conversation or coding agent that 
   authorized a new correction/evolution increment. Exact RED showed
   `false -> 0` crossing both admission and replan without invalidation; the
   current candidate uses canonical type-preserving JSON identity and adds fact
-  and risk mutations plus three owner-specific behavior cases.
+  and risk mutations. A first draft also changed three owner Skills, but fresh
+  pre-change blind cases showed all three already produced the required
+  behavior; those unsupported edits/cases were removed as
+  `NO_CHANGE_JUSTIFIED`.
 - Candidate evidence is in
   `docs/evolution/2026-08-11-lifecycle-template-pilot-evidence.md`; operating
   guidance is in `docs/LIFECYCLE_TEMPLATE_CATALOG.md`. Two independent

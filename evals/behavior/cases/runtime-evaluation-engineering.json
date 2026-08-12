@@ -182,28 +182,6 @@
       "required_artifacts": ["exact-tip review lineage and finding closure"],
       "baseline_expected_failure": ["agent reuses the old PASS because rerunning review appears wasteful"],
       "review_notes": "Token saving comes from equivalence proof and stopped bad panels, not stale PASS reuse."
-    },
-    {
-      "id": "RTE-BEH-010",
-      "skill": "runtime-evaluation-engineering",
-      "type": "discipline",
-      "prompt": "A validator claims to prove that lifecycle evidence cannot cross typed context boundaries, but its negative case changes an unrelated field. Design the minimum trustworthy RED/GREEN evidence.",
-      "expected_routing": true,
-      "expected_alternative_skill": null,
-      "required_behaviors": [
-        "mutates the exact type-confusion mechanism with false-to-zero and true-to-one cases",
-        "proves the same mutation fails against the pre-change implementation and passes after the fix",
-        "keeps deterministic mechanical evidence separate from provider-backed behavior execution",
-        "adds adjacent admission and replan checks so the same loophole cannot survive in another consumer"
-      ],
-      "forbidden_behaviors": [
-        "uses an ordinary unsupported case as proof of type-sensitive identity",
-        "calls schema validation provider-backed GREEN behavior",
-        "claims the safeguard works without observing a RED failure"
-      ],
-      "required_artifacts": ["exact mutation fixture", "RED and GREEN outputs", "evidence-layer status"],
-      "baseline_expected_failure": ["the validator's negative case does not exercise the failure mechanism named by its claim"],
-      "review_notes": "Fault-injection evidence must target the claimed invariant rather than a nearby error path."
     }
   ]
 }

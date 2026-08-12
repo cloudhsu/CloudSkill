@@ -121,13 +121,6 @@ Use deterministic grading for:
 - file and artifact existence,
 - reproducible mechanical constraints.
 
-For a mechanical safeguard, mutate the exact claimed failure mechanism. Prove
-the mutation fails against the pre-change implementation and passes after the
-fix; an ordinary unsupported or happy-path case is not evidence for stale-copy,
-type-confusion, confinement, ordering, or invalidation claims. Include adjacent
-lookalikes when the host language can coerce distinct wire values into equal
-runtime values.
-
 Use semantic or human review for:
 
 - architectural completeness,
