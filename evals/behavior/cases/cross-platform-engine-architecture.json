@@ -79,9 +79,36 @@
         "routes every engine design through architecture-review",
         "assumes scene persistence semantics without asking"
       ],
-      "required_artifacts": ["one decision question"],
-      "baseline_expected_failure": ["agent invents surface-recreation semantics"],
+      "required_artifacts": [
+        "one decision question"
+      ],
+      "baseline_expected_failure": [
+        "agent invents surface-recreation semantics"
+      ],
       "review_notes": "Domain architecture remains primary while using the shared elicitation protocol."
+    },
+    {
+      "id": "ENG-BEH-005",
+      "skill": "cross-platform-engine-architecture",
+      "type": "discipline",
+      "prompt": "A platform adapter file's own header comment says it is an old, unused view implementation, no longer wired into the app. Before excluding it from a rebuild or a written architecture plan as dead code, what must be done?",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "traces the actual call graph from the real application entry point before trusting the comment",
+        "treats a stale or copy-pasted comment as unverified rather than as evidence",
+        "prefers building and running the code to confirm reachability when feasible",
+        "names the entry point and reference chain that proves the file unreachable if it is excluded"
+      ],
+      "forbidden_behaviors": [
+        "excludes or marks the file dead based on the comment alone",
+        "propagates an unverified dead-code claim into a written architecture or refactor plan"
+      ],
+      "required_artifacts": [],
+      "baseline_expected_failure": [
+        "agent classifies the file as dead code solely because its own comment says so, without tracing references, then later discovers by actually running the code that the comment was a copy-pasted artifact and the file was live"
+      ],
+      "review_notes": "Derived from a real session: the same boilerplate comment was duplicated across a live file and a genuinely dead one; only tracing the call graph and then actually building/running the code caught the error. Preserve the discipline of naming the verification method, not just asserting it was done."
     }
   ]
 }
