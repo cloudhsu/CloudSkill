@@ -2,6 +2,12 @@
 
 <p align="center"><img src="assets/cloudbox-logo.png" width="160" alt="CloudBox logo"></p>
 
+> **This public repository is a partial mirror.** Active development has
+> moved to a private repository under the `cloudbox-skills` plugin identity.
+> This public copy only continues to receive updates for the
+> `teach-while-building` skill, since it is meant for general use; other
+> skills and engineering-workflow content are no longer synced here.
+
 **Current version: 7.2.0**
 
 CloudBox 6.4 adds pre-qualified, deterministic lifecycle templates while
