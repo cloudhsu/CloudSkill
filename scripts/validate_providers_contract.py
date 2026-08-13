@@ -85,16 +85,16 @@ for consumer in required_consumers:
         if "providers_contract" not in text:
             errors.append(f"{consumer}: does not import the shared providers_contract adapter")
     else:
-        # Shell consumers (cloudskill-resume) cannot import Python; require every
+        # Shell consumers (cloudbox-skills-resume) cannot import Python; require every
         # provider ID literal to appear so a newly registered provider cannot be
         # silently unreachable from the interruption-safe continuation command.
         for provider_id in provider_ids:
             if provider_id not in text:
                 errors.append(f"{consumer}: missing provider literal '{provider_id}'")
-        # cloudskill-resume only stages/commits paths listed in its FORMAL_PATHS
+        # cloudbox-skills-resume only stages/commits paths listed in its FORMAL_PATHS
         # array; a hosted-agent provider's smoke launcher that is not listed
         # there is silently left uncommitted (a real regression this validator
-        # caught: cloudskill-eval-claude was created but never staged).
+        # caught: cloudbox-skills-eval-claude was created but never staged).
         formal_paths_match = re.search(r"FORMAL_PATHS=\((.*?)\)", text, re.S)
         formal_paths_block = formal_paths_match.group(1) if formal_paths_match else ""
         for provider_id, info in providers.items():
@@ -156,7 +156,7 @@ claude_adapter_text = (SCRIPTS / "claude_eval_adapter.py").read_text(encoding="u
 if '"acceptEdits"' in claude_adapter_text or '"dontAsk"' not in claude_adapter_text:
     errors.append("Claude evaluation adapter must deny unapproved tool actions instead of auto-accepting edits")
 
-# cloudskill-eval-<provider> smoke wrappers for every hosted-agent provider.
+# cloudbox-skills-eval-<provider> smoke wrappers for every hosted-agent provider.
 for provider_id, info in providers.items():
     if not isinstance(info, dict) or info.get("family") != "hosted-agent":
         continue
@@ -257,10 +257,10 @@ for path in sorted(SCRIPTS.glob("*.py")):
                 f"that bypasses the registry: {literal!r}"
             )
 
-resume_text = (ROOT / "cloudskill-resume").read_text(encoding="utf-8")
+resume_text = (ROOT / "cloudbox-skills-resume").read_text(encoding="utf-8")
 if "ollama|codex)" in resume_text:
     errors.append(
-        "cloudskill-resume: case statement still matches the pre-Claude "
+        "cloudbox-skills-resume: case statement still matches the pre-Claude "
         "'ollama|codex' pattern instead of the full registered provider set"
     )
 

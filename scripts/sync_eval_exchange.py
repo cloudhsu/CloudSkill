@@ -7,7 +7,7 @@ are unreviewed evidence, not formal Evals), so having CloudSkill repository
 access on a second machine does not by itself get candidates from there to
 here. This script pushes/pulls through a separate, private "exchange"
 repository the user owns and configures via `eval_exchange_repo` in
-`.cloudskill/config.local.json` / `~/.cloudskill/config.json`.
+`.cloudbox-skills/config.local.json` / `~/.cloudbox-skills/config.json`.
 
 --push (run where candidates were captured): zips new files from
   eval_inbox/{candidates,manual-review}/ in the same format
@@ -68,7 +68,7 @@ def parse_args() -> argparse.Namespace:
 def resolve_config(explicit: str | None) -> dict[str, Any]:
     config_path = Path(explicit).expanduser().resolve() if explicit else find_project_config(ROOT)
     if config_path is None:
-        config_path = Path.home() / ".cloudskill" / "config.json"
+        config_path = Path.home() / ".cloudbox-skills" / "config.json"
     if not config_path.is_file():
         raise SystemExit(f"no CloudSkill local config found (looked for {config_path})")
     return load_config(config_path)
@@ -146,7 +146,7 @@ def validate_exchange_candidates(paths: list[Path], terms: list[str]) -> None:
 def do_push(config: dict[str, Any], args: argparse.Namespace) -> int:
     exchange_repo = config.get("eval_exchange_repo")
     if not exchange_repo:
-        raise SystemExit("config has no 'eval_exchange_repo'; add it to .cloudskill/config.local.json or ~/.cloudskill/config.json")
+        raise SystemExit("config has no 'eval_exchange_repo'; add it to .cloudbox-skills/config.local.json or ~/.cloudbox-skills/config.json")
 
     inbox: Path = config["_inbox_path"]
     pending = [
@@ -202,7 +202,7 @@ def do_push(config: dict[str, Any], args: argparse.Namespace) -> int:
 def do_pull(config: dict[str, Any], args: argparse.Namespace) -> int:
     exchange_repo = config.get("eval_exchange_repo")
     if not exchange_repo:
-        raise SystemExit("config has no 'eval_exchange_repo'; add it to .cloudskill/config.local.json or ~/.cloudskill/config.json")
+        raise SystemExit("config has no 'eval_exchange_repo'; add it to .cloudbox-skills/config.local.json or ~/.cloudbox-skills/config.json")
 
     inbox: Path = config["_inbox_path"]
     clone_dir = ensure_clone(exchange_repo, args.clone_dir)

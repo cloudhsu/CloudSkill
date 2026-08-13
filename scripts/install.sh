@@ -116,7 +116,7 @@ version = (repo / 'VERSION').read_text(encoding='utf-8').strip()
 config = {
     'schema_version': '1.0',
     'cloudskill_version': version,
-    'cloudskill_repository': str(repo),
+    'cloudbox_skills_repository': str(repo),
     'eval_inbox': str(inbox),
     'sensitive_terms_path': str(terms),
     'default_sanitization': True,
@@ -173,9 +173,9 @@ if [[ $SKIP_LOCAL_CONFIG -eq 0 ]]; then
   EVAL_INBOX_PATH="$(python3 -c 'from pathlib import Path; import sys; print(Path(sys.argv[1]).expanduser().resolve())' "$EVAL_INBOX_PATH")"
   terms="$(initialize_eval_inbox "$EVAL_INBOX_PATH")"
   if [[ "$SCOPE" == "user" ]]; then
-    config_path="$HOME/.cloudskill/config.json"
+    config_path="$HOME/.cloudbox-skills/config.json"
   else
-    config_dir="$PROJECT_PATH/.cloudskill"
+    config_dir="$PROJECT_PATH/.cloudbox-skills"
     mkdir -p "$config_dir"
     config_path="$config_dir/config.local.json"
     tmp_ignore="$(mktemp)"

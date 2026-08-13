@@ -143,7 +143,7 @@
         "primary_skill": null,
         "required_supporting_skills": [],
         "forbidden_selected_skills": [
-          "using-cloudskill",
+          "using-cloudbox-skills",
           "document-governance"
         ],
         "execution_order": [],
@@ -174,7 +174,7 @@
         "required_supporting_skills": [],
         "forbidden_selected_skills": [
           "agent-development-process",
-          "using-cloudskill"
+          "using-cloudbox-skills"
         ],
         "execution_order": [
           "developing-skills"

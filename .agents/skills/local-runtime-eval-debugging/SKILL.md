@@ -116,9 +116,9 @@ Create a stable pointer such as `LATEST_REVIEW_ZIP.txt`, print the exact ZIP pat
 
 When the task produces an increment intended for another conversation or coding agent, update:
 
-- `/CLOUDSKILL_AGENT_HANDOFF.md` with current branch/PR, latest verified evidence, open items, commands, and safety constraints;
-- `/docs/CLOUDSKILL_DESIGN_AND_FLOW.md` when the architecture or operating flow changes;
-- `/docs/CLOUDSKILL_CHANGE_HISTORY.md` with the evidence, diagnosed layer, change, result, and unresolved risk.
+- `/CLOUDBOX_SKILLS_AGENT_HANDOFF.md` with current branch/PR, latest verified evidence, open items, commands, and safety constraints;
+- `/docs/CLOUDBOX_SKILLS_DESIGN_AND_FLOW.md` when the architecture or operating flow changes;
+- `/docs/CLOUDBOX_SKILLS_CHANGE_HISTORY.md` with the evidence, diagnosed layer, change, result, and unresolved risk.
 
 The handoff must be sufficient to continue from repository files and the newest review ZIP without requiring the previous chat transcript.
 
@@ -166,8 +166,8 @@ Do not infer a later-stage defect when an earlier stage never ran.
 Use the Codex path when a higher-capability authenticated Codex baseline is needed in addition to the local Ollama baseline.
 
 - Run `codex login status` before a long test; use `codex login` when no valid session exists.
-- Use `./cloudskill-eval-codex` for the quota-conscious one-repeat smoke path.
-- Use `./cloudskill-eval-codex --repeat 3` only after the smoke path completes and the expected usage budget is available.
+- Use `./cloudbox-skills-eval-codex` for the quota-conscious one-repeat smoke path.
+- Use `./cloudbox-skills-eval-codex --repeat 3` only after the smoke path completes and the expected usage budget is available.
 - Execute Codex non-interactively through `codex exec` with an ephemeral session, read-only sandbox, no approvals, JSONL event capture, and a final-message file.
 - Run the model in an isolated empty Git repository so it cannot silently load extra CloudSkill source beyond the assembled Eval prompt.
 - Keep Codex and Ollama results as separate review bundles. Do not average them into one provider-independent score.
@@ -179,8 +179,8 @@ Use the Codex path when a higher-capability authenticated Codex baseline is need
 Use the Claude path when a higher-capability authenticated Claude baseline is needed alongside the local Ollama baseline and/or the Codex comparison.
 
 - Run `claude auth status` before a long test; use `claude auth login` when no valid session exists.
-- Use `./cloudskill-eval-claude` for the quota-conscious one-repeat smoke path.
-- Use `./cloudskill-eval-claude --repeat 3` only after the smoke path completes and the expected usage budget is available.
+- Use `./cloudbox-skills-eval-claude` for the quota-conscious one-repeat smoke path.
+- Use `./cloudbox-skills-eval-claude --repeat 3` only after the smoke path completes and the expected usage budget is available.
 - Execute Claude Code non-interactively through `claude -p --output-format json` with `--safe-mode` (no CLAUDE.md/Skills/plugins/hooks/MCP auto-loading), `--tools ""` (no tool access), `--permission-mode acceptEdits` (so a non-interactive session cannot stall on an unanswerable permission prompt; the ephemeral directory has nothing real to protect), and `--no-session-persistence`. Also frame the piped prompt itself with an explicit "do not inspect the workspace, do not use any tool" instruction — confirmed against a real run that omitting this let the model occasionally attempt a tool call anyway and exhaust its structured-output retry budget against a call `--tools ""` had already disabled.
 - Run the model from an isolated empty temporary directory so it cannot silently load extra CloudSkill source beyond the assembled Eval prompt.
 - Keep Claude, Codex, and Ollama results as separate review bundles. Do not average them into one provider-independent score.

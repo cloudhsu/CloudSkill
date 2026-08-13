@@ -1,5 +1,5 @@
 ---
-name: using-cloudskill
+name: using-cloudbox-skills
 description: Use when a non-trivial engineering task may require one or more CloudBox skills, especially when it refers to prior corrections or interactions, spans architecture, equipment, code, process, quality, documents, or AI agents, or has ambiguous routing and skill composition.
 ---
 
@@ -45,7 +45,7 @@ Interpret the fields as follows:
 - `reason`: the concrete decision or failure boundary, not a keyword explanation.
 - `confidence`: confidence in routing based on available evidence.
 
-`using-cloudskill` is the router. Do not list it as a primary or supporting downstream skill unless the task is specifically about router design, routing policy, or CloudBox skill composition itself.
+`using-cloudbox-skills` is the router. Do not list it as a primary or supporting downstream skill unless the task is specifically about router design, routing policy, or CloudBox skill composition itself.
 
 ## Composition order
 

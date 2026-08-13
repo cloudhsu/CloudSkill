@@ -258,7 +258,7 @@ for cid in sorted(acceptance_ids):
             if skill_id not in bundles[mode]["system_prompt"]:
                 errors.append(f"{cid}: {mode} prompt omitted skill ID {skill_id}")
                 break
-        if "using-cloudskill is the router" not in bundles[mode]["system_prompt"]:
+        if "using-cloudbox-skills is the router" not in bundles[mode]["system_prompt"]:
             errors.append(f"{cid}: {mode} prompt omitted router exclusion rule")
     if "router" in bundles:
         try:
@@ -279,7 +279,7 @@ for cid in sorted(acceptance_ids):
     if "manifest" in bundles and "# Using CloudBox" in bundles["manifest"]["system_prompt"]:
         errors.append(f"{cid}: manifest baseline unexpectedly contains router SKILL.md")
     if "router" in bundles and "# Using CloudBox" not in bundles["router"]["system_prompt"]:
-        errors.append(f"{cid}: router mode omitted full using-cloudskill/SKILL.md")
+        errors.append(f"{cid}: router mode omitted full using-cloudbox-skills/SKILL.md")
     if cid == "R02-code-and-command-state" and "router" in bundles:
         prompt = bundles["router"]["system_prompt"]
         for marker in (
@@ -339,7 +339,7 @@ if r07:
             if expected_path not in loaded_paths:
                 errors.append(f"selected-skills prompt did not load {expected_path}")
             if ROUTER_SKILL_PATH.relative_to(ROOT).as_posix() in loaded_paths:
-                errors.append("selected-skills prompt loaded using-cloudskill downstream")
+                errors.append("selected-skills prompt loaded using-cloudbox-skills downstream")
             if behavior["context"]["overflow_tokens"]:
                 errors.append("selected-skills prompt exceeds the behavior validation context with declared references")
             if "Return exactly one JSON object" not in behavior["system_prompt"]:

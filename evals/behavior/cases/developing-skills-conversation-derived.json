@@ -75,7 +75,7 @@
         "creates adjacent-skill counterexamples"
       ],
       "forbidden_behaviors": [
-        "adds both rules only to using-cloudskill",
+        "adds both rules only to using-cloudbox-skills",
         "embeds the original project identity",
         "assumes one conversation proves a release-ready change"
       ],

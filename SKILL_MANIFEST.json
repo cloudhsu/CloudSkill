@@ -110,9 +110,9 @@
       "file_count": 7
     },
     {
-      "name": "using-cloudskill",
+      "name": "using-cloudbox-skills",
       "description": "Use when a non-trivial engineering task may require one or more CloudBox skills, especially when it refers to prior corrections or interactions, spans architecture, equipment, code, process, quality, documents, or AI agents, or has ambiguous routing and skill composition.",
-      "path": ".agents/skills/using-cloudskill/SKILL.md",
+      "path": ".agents/skills/using-cloudbox-skills/SKILL.md",
       "file_count": 5
     }
   ]

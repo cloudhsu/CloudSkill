@@ -8,7 +8,7 @@ Plugin installation and enablement are host configuration. Skill routing is task
 
 Use when the user wants CloudBox to be the sole optional workflow system for the task.
 
-- Select CloudBox skills through `using-cloudskill`.
+- Select CloudBox skills through `using-cloudbox-skills`.
 - Do not invoke another plugin's router, planning lifecycle, or review lifecycle.
 - Preserve higher-level system, security, repository, and user instructions.
 - Report host-level plugin state as unknown unless it was actually inspected or changed.
@@ -24,7 +24,7 @@ Use one router first, then explicitly invoke the other system only for its non-o
 
 ## Distribution collision
 
-CloudBox may be installed as a plugin or as standalone skills. Do not load both copies in the same host. A duplicate `using-cloudskill` or other skill ID can cause ambiguous routing, duplicate context, and unclear Eval attribution.
+CloudBox may be installed as a plugin or as standalone skills. Do not load both copies in the same host. A duplicate `using-cloudbox-skills` or other skill ID can cause ambiguous routing, duplicate context, and unclear Eval attribution.
 
 ## Evidence
 

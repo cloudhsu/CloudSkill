@@ -16,9 +16,9 @@ if str(SCRIPTS) not in sys.path:
 errors: list[str] = []
 
 required = [
-    ROOT / "cloudskill-eval",
-    ROOT / "cloudskill-eval-codex",
-    ROOT / "cloudskill-eval-claude",
+    ROOT / "cloudbox-skills-eval",
+    ROOT / "cloudbox-skills-eval-codex",
+    ROOT / "cloudbox-skills-eval-claude",
     SCRIPTS / "codex_eval_adapter.py",
     SCRIPTS / "claude_eval_adapter.py",
     SCRIPTS / "providers_contract.py",
@@ -67,9 +67,9 @@ required = [
     / "behavior"
     / "cases"
     / "local-runtime-eval-debugging.json",
-    ROOT / "CLOUDSKILL_AGENT_HANDOFF.md",
-    ROOT / "docs" / "CLOUDSKILL_DESIGN_AND_FLOW.md",
-    ROOT / "docs" / "CLOUDSKILL_CHANGE_HISTORY.md",
+    ROOT / "CLOUDBOX_SKILLS_AGENT_HANDOFF.md",
+    ROOT / "docs" / "CLOUDBOX_SKILLS_DESIGN_AND_FLOW.md",
+    ROOT / "docs" / "CLOUDBOX_SKILLS_CHANGE_HISTORY.md",
     SCRIPTS / "validate_evolution_handoff.py",
 ]
 for path in required:
@@ -78,11 +78,11 @@ for path in required:
             f"missing local Eval debugging file: {path.relative_to(ROOT)}"
         )
 
-launcher = ROOT / "cloudskill-eval"
+launcher = ROOT / "cloudbox-skills-eval"
 if launcher.is_file():
     mode = launcher.stat().st_mode
     if not (mode & stat.S_IXUSR):
-        errors.append("cloudskill-eval is not executable")
+        errors.append("cloudbox-skills-eval is not executable")
     text = launcher.read_text(encoding="utf-8")
     for marker in (
         "Python 3.10",
@@ -91,14 +91,14 @@ if launcher.is_file():
     ):
         if marker not in text:
             errors.append(
-                f"cloudskill-eval missing operational marker: {marker}"
+                f"cloudbox-skills-eval missing operational marker: {marker}"
             )
 
-codex_launcher = ROOT / "cloudskill-eval-codex"
+codex_launcher = ROOT / "cloudbox-skills-eval-codex"
 if codex_launcher.is_file():
     mode = codex_launcher.stat().st_mode
     if not (mode & stat.S_IXUSR):
-        errors.append("cloudskill-eval-codex is not executable")
+        errors.append("cloudbox-skills-eval-codex is not executable")
     text = codex_launcher.read_text(encoding="utf-8")
     for marker in (
         "--provider codex",
@@ -108,15 +108,15 @@ if codex_launcher.is_file():
     ):
         if marker not in text:
             errors.append(
-                "cloudskill-eval-codex missing operational marker: "
+                "cloudbox-skills-eval-codex missing operational marker: "
                 f"{marker}"
             )
 
-claude_launcher = ROOT / "cloudskill-eval-claude"
+claude_launcher = ROOT / "cloudbox-skills-eval-claude"
 if claude_launcher.is_file():
     mode = claude_launcher.stat().st_mode
     if not (mode & stat.S_IXUSR):
-        errors.append("cloudskill-eval-claude is not executable")
+        errors.append("cloudbox-skills-eval-claude is not executable")
     text = claude_launcher.read_text(encoding="utf-8")
     for marker in (
         "--provider claude",
@@ -126,7 +126,7 @@ if claude_launcher.is_file():
     ):
         if marker not in text:
             errors.append(
-                "cloudskill-eval-claude missing operational marker: "
+                "cloudbox-skills-eval-claude missing operational marker: "
                 f"{marker}"
             )
 

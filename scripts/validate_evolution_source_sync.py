@@ -101,7 +101,7 @@ with tempfile.TemporaryDirectory(prefix="cloudskill-source-validator-") as tmp_n
     finally: exchange_module.ensure_clone = original_ensure_clone
     if remote_accessed[0]: errors.append("Eval Exchange accessed remote state before validation")
 print("Validated token-free Git evolution source synchronization")
-controller = (ROOT / "scripts/cloudskill_evolution.py").read_text(encoding="utf-8")
+controller = (ROOT / "scripts/cloudbox_skills_evolution.py").read_text(encoding="utf-8")
 workflow = (ROOT / ".github/workflows/evolution-source-sync.yml").read_text(encoding="utf-8")
 for marker in ('explicit --approve is required', '"execution": "MANUAL_REQUIRED"'):
     if marker not in controller: errors.append(f"controller missing authority marker: {marker}")

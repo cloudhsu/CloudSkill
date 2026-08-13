@@ -1,8 +1,8 @@
 """Portable, config-free CloudSkill interaction Eval candidate exporter.
 
 Use this when a coding agent has the `developing-skills` Skill installed but
-has NO reachable `.cloudskill/config.local.json` (project) or
-`~/.cloudskill/config.json` (user) pointing at a CloudSkill repository clone
+has NO reachable `.cloudbox-skills/config.local.json` (project) or
+`~/.cloudbox-skills/config.json` (user) pointing at a CloudSkill repository clone
 on this machine -- a disconnected/external session, such as a different
 machine, a cloud sandbox, or a project where local config was never set up.
 
@@ -10,7 +10,7 @@ Normal same-machine capture uses `scripts/capture_eval_candidate.py` in the
 CloudSkill repository, which writes directly into a configured Eval Inbox.
 This script instead performs the same structural validation and
 sanitization scan, but writes into a self-contained local "eval-outbox"
-folder (default: `.cloudskill/eval-outbox/`) inside the CURRENT project, and
+folder (default: `.cloudbox-skills/eval-outbox/`) inside the CURRENT project, and
 packages the result into one timestamped zip. The user copies that zip onto
 the machine that hosts the CloudSkill repository and drops it into
 `<CloudSkillRepo>/.local/eval-inbox/imports/`; `scripts/
@@ -56,7 +56,7 @@ SENSITIVE_PATTERNS = {
     'home_path': re.compile(r'(?<![\w.-])/(?:home|Users)/[^\s"\']+'),
 }
 
-DEFAULT_OUTBOX = str(Path('.cloudskill') / 'eval-outbox')
+DEFAULT_OUTBOX = str(Path('.cloudbox-skills') / 'eval-outbox')
 BUNDLE_FORMAT_VERSION = '2.0'
 EXPORTER_VERSION = '2.0'
 
@@ -79,7 +79,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument('--project-name', help='Private export project name; stored in project-local ignored config.')
     parser.add_argument('--host', choices=('codex', 'claude'), default='codex')
     parser.add_argument('--agent-name', help='Agent filename label. Defaults to host or claude-code.')
-    parser.add_argument('--project-path', default='.', help='Project containing .cloudskill/config.local.json.')
+    parser.add_argument('--project-path', default='.', help='Project containing .cloudbox-skills/config.local.json.')
     parser.add_argument('--non-interactive', action='store_true')
     parser.add_argument('--no-zip', action='store_true', help='Write the candidate JSON only; skip packaging a zip.')
     parser.add_argument('--dry-run', action='store_true')
@@ -197,7 +197,7 @@ def safe_component(value: str) -> str:
 
 
 def resolve_export_identity(args: argparse.Namespace) -> tuple[str, str]:
-    config_path = Path(args.project_path).expanduser().resolve() / '.cloudskill' / 'config.local.json'
+    config_path = Path(args.project_path).expanduser().resolve() / '.cloudbox-skills' / 'config.local.json'
     config: dict[str, Any] = {}
     if config_path.is_file():
         value = json.loads(config_path.read_text(encoding='utf-8'))

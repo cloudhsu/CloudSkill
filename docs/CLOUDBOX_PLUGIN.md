@@ -1,6 +1,6 @@
 # CloudBox Plugin Distribution
 
-CloudBox is the user-facing plugin brand. The GitHub repository remains `CloudSkill`, and existing skill IDs such as `using-cloudskill` remain stable for compatibility.
+CloudBox is the user-facing plugin brand. The GitHub repository remains `CloudSkill`, and existing skill IDs such as `using-cloudbox-skills` remain stable for compatibility.
 
 ## One canonical skill source
 
@@ -54,7 +54,7 @@ Use the same `-ConfigOnly` setup when the Claude Code plugin should write saniti
 Claude Code namespaces plugin skills. For example:
 
 ```text
-/cloudbox-skills:using-cloudskill
+/cloudbox-skills:using-cloudbox-skills
 /cloudbox-skills:architecture-review
 /cloudbox-skills:equipment-control-architecture
 ```

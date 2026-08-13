@@ -24,8 +24,8 @@ The private Inbox is evidence staging in every path. The public `evals/` tree co
 
 Use the first valid configuration in this order:
 
-1. `<current-project>/.cloudskill/config.local.json`
-2. `$HOME/.cloudskill/config.json`
+1. `<current-project>/.cloudbox-skills/config.local.json`
+2. `$HOME/.cloudbox-skills/config.json`
 
 A valid configuration must keep `default_sanitization=true`, `save_raw_transcript=false`, `auto_modify_skills=false`, `auto_commit=false`, and `auto_push=false`. Stop rather than weakening these controls.
 
@@ -53,7 +53,7 @@ This script:
 - performs the same structural validation and sanitization scan as
   `capture_eval_candidate.py`, with no dependency on the CloudSkill
   repository (stdlib only, so it works wherever the Skill is installed);
-- writes into a local, config-free `.cloudskill/eval-outbox/{candidates,
+- writes into a local, config-free `.cloudbox-skills/eval-outbox/{candidates,
   manual-review}/` folder inside the current project (no CloudSkill
   repository access required);
 - packages the result into one timestamped
@@ -84,7 +84,7 @@ already available in both places.
 
 `scripts/sync_eval_exchange.py` moves candidates through a separate,
 private Git repository the user owns and lists as `eval_exchange_repo` in
-their `.cloudskill/config.local.json` / `~/.cloudskill/config.json` (this
+their `.cloudbox-skills/config.local.json` / `~/.cloudbox-skills/config.json` (this
 repository is transport only — never CloudSkill's own repository, and never
 committed to it).
 

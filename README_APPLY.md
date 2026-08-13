@@ -10,7 +10,7 @@ It does not pretend that all historical conversations were available. The change
 
 ## What changes
 
-- Strengthens `using-cloudskill` as a bilingual, conversation-aware top-level router.
+- Strengthens `using-cloudbox-skills` as a bilingual, conversation-aware top-level router.
 - Adds explicit routing cues for recurring Chinese engineering questions.
 - Extends `developing-skills` with a truthful historical-interaction mining workflow.
 - Adds sanitized behavior cases for routing and read-only GitHub fallback.

@@ -54,8 +54,8 @@ Plugin 模式若要使用 `整理成正向案例`／`整理成負向案例`，�
 
 ## 3. Standalone 安裝模式
 
-- **User scope**：同一位使用者的多個專案共用 Skills 與 `~/.cloudskill/config.json`。
-- **Project scope**：只對指定專案生效，並寫入不應提交的 `<project>/.cloudskill/config.local.json`。
+- **User scope**：同一位使用者的多個專案共用 Skills 與 `~/.cloudbox-skills/config.json`。
+- **Project scope**：只對指定專案生效，並寫入不應提交的 `<project>/.cloudbox-skills/config.local.json`。
 - **Skills-only**：使用 `-SkipGuidance` / `--skip-guidance`，不匯入個人架構 Guidance。
 - **No local config**：使用 `-SkipLocalConfig` / `--skip-local-config`；此模式無法使用簡短的正向／負向案例收集流程。
 
@@ -142,18 +142,18 @@ Project: <repo>/.claude/skills/<skill-name>/SKILL.md
 Project scope 設定：
 
 ```text
-<project>/.cloudskill/config.local.json
+<project>/.cloudbox-skills/config.local.json
 ```
 
 User scope 設定：
 
 ```text
-~/.cloudskill/config.json
+~/.cloudbox-skills/config.json
 ```
 
 設定包含：
 
-- `cloudskill_repository`
+- `cloudbox_skills_repository`
 - `eval_inbox`
 - `sensitive_terms_path`
 - `eval_exchange_repo`（選填，見第 8d 節）
@@ -193,7 +193,7 @@ Agent 應使用 `developing-skills`：
 
 1. 只擷取理解案例所需的相關互動。
 2. 預設去除識別資訊，不保存完整對話。
-3. 產生候選 JSON。若 `.cloudskill/config.local.json` 或 `~/.cloudskill/config.json` 能解析到本機可存取的 CloudSkill Repository，呼叫其 `scripts/capture_eval_candidate.py`，直接寫入 Eval Inbox。
+3. 產生候選 JSON。若 `.cloudbox-skills/config.local.json` 或 `~/.cloudbox-skills/config.json` 能解析到本機可存取的 CloudSkill Repository，呼叫其 `scripts/capture_eval_candidate.py`，直接寫入 Eval Inbox。
 4. 安全案例寫入 `candidates/`；有疑慮的案例寫入 `manual-review/`。
 5. 不修改正式 `evals/`、技能、Commit、Tag、Branch 或 Remote。
 
@@ -211,7 +211,7 @@ python3 .claude/skills/developing-skills/assets/export_eval_candidate.py \
 行為：
 
 - 驗證規則與 `capture_eval_candidate.py` 相同，但不需要任何設定檔（純標準函式庫，跟著技能一起安裝）。
-- 寫入目前專案內、免設定的 `.cloudskill/eval-outbox/{candidates,manual-review}/`。
+- 寫入目前專案內、免設定的 `.cloudbox-skills/eval-outbox/{candidates,manual-review}/`。
 - 打包成 `CloudSkill-eval-export-<label>-<timestamp>.zip`，印出確切路徑。
 - 因為通常沒有可用的私人 `sensitive-terms.local.txt`，預設保守地將案例歸類為 `manual-review`（若這台機器剛好有私人詞彙檔，可用 `--sensitive-terms PATH` 傳入）。
 
@@ -251,11 +251,11 @@ Agent 應使用 `developing-skills`（見 `references/conversation-derived-optim
 
 情境：第二台機器（例如公司筆電）也裝了 Codex/Claude 且也能連到 CloudSkill Repository，但候選案例還是出不來——因為 `.local/eval-inbox/` 在**每一台機器上**都被 Git 忽略，不會因為兩邊都連得到同一個 Repository 就自動同步。這不是第 8b 節那種「連不到 Repository」的情境，是「兩邊都連得到，但私人候選資料本來就不該進 Git history」的情境。
 
-在 `.cloudskill/config.local.json` / `~/.cloudskill/config.json` 裡加一個你自己擁有的私有 Git repository（純粹當傳輸層，不是 CloudSkill 本身）：
+在 `.cloudbox-skills/config.local.json` / `~/.cloudbox-skills/config.json` 裡加一個你自己擁有的私有 Git repository（純粹當傳輸層，不是 CloudSkill 本身）：
 
 ```json
 {
-  "eval_exchange_repo": "git@github.com:<you>/cloudskill-eval-exchange.git"
+  "eval_exchange_repo": "git@github.com:<you>/cloudbox-skills-eval-exchange.git"
 }
 ```
 
@@ -325,7 +325,7 @@ Gemini CLI 官方文件宣稱原生支援 `.agents/skills/` 這個路徑別名�
 
 CloudBox 的手動匯出包含版本 manifest，檔名固定為
 `<project>-<host>-<agent>-<YYYYMMDDTHHMMSSZ>-<bundle-id8>.zip`。第一次匯出設定
-專案名稱與代理別名，兩者保存於不提交的 `.cloudskill/config.local.json`。將一個
+專案名稱與代理別名，兩者保存於不提交的 `.cloudbox-skills/config.local.json`。將一個
 或多個 ZIP 直接放入 `.local/eval-inbox/imports/`，再說「匯入優化案例」或執行
 `python3 scripts/import_eval_candidates.py`。檔名與 manifest 不一致或版本不支援的
 bundle 會移到 `imports/unsupported/`；損壞或不安全的檔案保留原處供人工檢查，

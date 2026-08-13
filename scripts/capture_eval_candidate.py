@@ -55,7 +55,7 @@ def read_json(path_arg: str) -> dict[str, Any]:
 def find_project_config(start: Path) -> Path | None:
     start = start.resolve()
     for folder in (start, *start.parents):
-        candidate = folder / '.cloudskill' / 'config.local.json'
+        candidate = folder / '.cloudbox-skills' / 'config.local.json'
         if candidate.is_file():
             return candidate
     return None
@@ -70,7 +70,7 @@ def resolve_config(explicit: str | None, project_path: str) -> Path:
     project = find_project_config(Path(project_path))
     if project:
         return project
-    user = Path.home() / '.cloudskill' / 'config.json'
+    user = Path.home() / '.cloudbox-skills' / 'config.json'
     if user.is_file():
         return user
     raise FileNotFoundError('no CloudSkill local config found; run the 5.5.1 installer with local config enabled')
@@ -83,11 +83,11 @@ def load_config(path: Path) -> dict[str, Any]:
     for key, expected in SAFE_CONFIG.items():
         if config.get(key) is not expected:
             raise ValueError(f'unsafe config: {key} must be {expected!r}')
-    for key in ('cloudskill_repository', 'eval_inbox', 'sensitive_terms_path'):
+    for key in ('cloudbox_skills_repository', 'eval_inbox', 'sensitive_terms_path'):
         value = config.get(key)
         if not isinstance(value, str) or not value.strip():
             raise ValueError(f'config requires {key}')
-    repository = Path(config['cloudskill_repository']).expanduser().resolve()
+    repository = Path(config['cloudbox_skills_repository']).expanduser().resolve()
     inbox = Path(config['eval_inbox']).expanduser().resolve()
     formal_evals = repository / 'evals'
     try:

@@ -15,11 +15,11 @@ This file defines the authoritative location for each concern.
 | Version history | `/CHANGELOG.md`, Git commits and tags | `history/RELEASES.md` provides an index only |
 | External references | `REFERENCES.md` | Link to it |
 | Documentation duplication controls | `DOCUMENTATION_AUDIT.md` | Record future audit decisions here |
-| CloudSkill design purpose and evolution flow | `CLOUDSKILL_DESIGN_AND_FLOW.md` | Link or summarize only |
-| Multi-session evolution history | `CLOUDSKILL_CHANGE_HISTORY.md` | Git remains authoritative; record rationale and evidence links |
-| Current conversation/agent continuation state | `/CLOUDSKILL_AGENT_HANDOFF.md` | Update with each evolution increment |
+| CloudSkill design purpose and evolution flow | `CLOUDBOX_SKILLS_DESIGN_AND_FLOW.md` | Link or summarize only |
+| Multi-session evolution history | `CLOUDBOX_SKILLS_CHANGE_HISTORY.md` | Git remains authoritative; record rationale and evidence links |
+| Current conversation/agent continuation state | `/CLOUDBOX_SKILLS_AGENT_HANDOFF.md` | Update with each evolution increment |
 | Skill workflow | Each `.agents/skills/<name>/SKILL.md` | Supporting detail stays in that skill's references/assets |
-| Skill selection and composition | `.agents/skills/using-cloudskill/SKILL.md` | Domain skills state only local composition rules |
+| Skill selection and composition | `.agents/skills/using-cloudbox-skills/SKILL.md` | Domain skills state only local composition rules |
 | Skill development method | `.agents/skills/developing-skills/SKILL.md` | References may explain evaluation details |
 | Skill routing evaluation | `/evals/skill-routing-cases.csv` | Add cases; do not copy the matrix elsewhere |
 | Skill behavior evaluation contracts | `/evals/behavior/` | Execution reports must state actual run status |

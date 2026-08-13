@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "skill": "using-cloudskill",
+  "skill": "using-cloudbox-skills",
   "stage": "active",
   "introduced_version": "unknown",
   "last_reviewed_version": "5.8.0",

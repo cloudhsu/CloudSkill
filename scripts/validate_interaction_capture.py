@@ -47,7 +47,7 @@ def run(command: list[str], *, cwd: Path, env: dict[str, str] | None = None) -> 
 
 
 candidate_template_path = ROOT / '.agents/skills/developing-skills/assets/INTERACTION_EVAL_CANDIDATE.template.json'
-config_template_path = ROOT / 'config/cloudskill-config.template.json'
+config_template_path = ROOT / 'config/cloudbox-skills-config.template.json'
 try:
     candidate_template = json.loads(candidate_template_path.read_text(encoding='utf-8'))
     config_template = json.loads(config_template_path.read_text(encoding='utf-8'))
@@ -95,7 +95,7 @@ if '從專案提煉優化案例' not in install_text:
     fail('INSTALL.md is missing the project-history mining trigger phrase')
 
 ignore_text = (ROOT / '.gitignore').read_text(encoding='utf-8')
-for pattern in ('.local/', '.cloudskill/config.local.json', '*.session.jsonl', '*.transcript.md'):
+for pattern in ('.local/', '.cloudbox-skills/config.local.json', '*.session.jsonl', '*.transcript.md'):
     if pattern not in ignore_text:
         fail(f'.gitignore missing private pattern: {pattern}')
 
@@ -120,7 +120,7 @@ with tempfile.TemporaryDirectory(prefix='cloudskill-interaction-') as tmp_name:
         '--eval-inbox-path', str(inbox),
     ], cwd=ROOT, env=env)
 
-    config_path = project / '.cloudskill/config.local.json'
+    config_path = project / '.cloudbox-skills/config.local.json'
     if not config_path.is_file():
         fail('project installer did not create config.local.json')
     if not (project / '.agents/skills/developing-skills/SKILL.md').is_file():
@@ -137,7 +137,7 @@ with tempfile.TemporaryDirectory(prefix='cloudskill-interaction-') as tmp_name:
         'bash', 'scripts/install.sh', '--scope', 'project', '--project-path', str(config_only_project),
         '--cloudskill-repo-path', str(ROOT), '--eval-inbox-path', str(config_only_inbox), '--config-only',
     ], cwd=ROOT, env=env)
-    if not (config_only_project / '.cloudskill/config.local.json').is_file():
+    if not (config_only_project / '.cloudbox-skills/config.local.json').is_file():
         fail('config-only setup did not create project config')
     if (config_only_project / '.agents/skills').exists() or (config_only_project / '.claude/skills').exists():
         fail('config-only setup copied standalone skills')
@@ -220,7 +220,7 @@ if import_script_path.is_file():
         config_path.write_text(json.dumps({
             'schema_version': '1.0',
             'cloudskill_version': (ROOT / 'VERSION').read_text(encoding='utf-8').strip(),
-            'cloudskill_repository': str(ROOT), 'eval_inbox': str(owned_inbox),
+            'cloudbox_skills_repository': str(ROOT), 'eval_inbox': str(owned_inbox),
             'sensitive_terms_path': str(terms_path), 'default_sanitization': True,
             'save_raw_transcript': False, 'auto_modify_skills': False,
             'auto_commit': False, 'auto_push': False,
@@ -255,7 +255,7 @@ if export_script_path.is_file():
             fail(f'capture/export validators accepted invalid {label} contract metadata')
 
     # Export-then-import round trip, simulating a fully disconnected session: no
-    # .cloudskill config anywhere, an external "eval-outbox" project, a manual zip
+    # .cloudbox-skills config anywhere, an external "eval-outbox" project, a manual zip
     # transfer, and an import into a private repository-side Eval Inbox.
     with tempfile.TemporaryDirectory(prefix='cloudskill-export-import-') as tmp_name:
         tmp = Path(tmp_name)
@@ -274,7 +274,7 @@ if export_script_path.is_file():
         wrong_host_path.write_text(
             json.dumps(wrong_host_draft, ensure_ascii=False, indent=2), encoding='utf-8'
         )
-        wrong_host_outbox = external_project / '.cloudskill/wrong-host-outbox'
+        wrong_host_outbox = external_project / '.cloudbox-skills/wrong-host-outbox'
         wrong_host_result = subprocess.run([
             sys.executable, str(export_script_path), '--kind', 'positive',
             '--input', str(wrong_host_path), '--outbox', str(wrong_host_outbox),
@@ -286,16 +286,16 @@ if export_script_path.is_file():
             or list(external_project.glob('validator-smoke-codex-*.zip'))
         ):
             fail('portable exporter did not reject runtime/host drift before publication')
-        stale = external_project / '.cloudskill/eval-outbox/manual-review/INT-stale-negative.json'
+        stale = external_project / '.cloudbox-skills/eval-outbox/manual-review/INT-stale-negative.json'
         stale.parent.mkdir(parents=True, exist_ok=True)
         stale.write_text('{}\n', encoding='utf-8')
 
         export_result = run([
             sys.executable, str(export_script_path), '--kind', 'positive',
-            '--input', str(draft_path), '--outbox', str(external_project / '.cloudskill/eval-outbox'),
+            '--input', str(draft_path), '--outbox', str(external_project / '.cloudbox-skills/eval-outbox'),
             '--project-name', 'validator-smoke', '--non-interactive',
         ], cwd=external_project)
-        export_config = json.loads((external_project / '.cloudskill/config.local.json').read_text(encoding='utf-8'))
+        export_config = json.loads((external_project / '.cloudbox-skills/config.local.json').read_text(encoding='utf-8'))
         if export_config.get('export_project_name') != 'validator-smoke' or export_config.get('export_agent_name') != 'codex':
             fail('portable exporter did not persist project and agent aliases')
         exported_zips = list(external_project.glob('validator-smoke-codex-codex-*.zip'))
@@ -726,7 +726,7 @@ else:
     # .local/eval-inbox/ being gitignored on every machine does not strand
     # candidates captured on a second machine that never reaches this one's
     # filesystem directly.
-    with tempfile.TemporaryDirectory(prefix='cloudskill-eval-exchange-') as tmp_name:
+    with tempfile.TemporaryDirectory(prefix='cloudbox-skills-eval-exchange-') as tmp_name:
         tmp = Path(tmp_name)
         bare_exchange = tmp / 'bare-exchange.git'
         source_inbox = tmp / 'source-inbox'
@@ -747,7 +747,7 @@ else:
         source_config_path = tmp / 'source-config.json'
         source_config_path.write_text(json.dumps({
             'schema_version': '1.0', 'cloudskill_version': draft['cloudskill_version'],
-            'cloudskill_repository': str(ROOT), 'eval_inbox': str(source_inbox),
+            'cloudbox_skills_repository': str(ROOT), 'eval_inbox': str(source_inbox),
             'sensitive_terms_path': str(source_inbox / 'sensitive-terms.local.txt'),
             'default_sanitization': True, 'save_raw_transcript': False,
             'auto_modify_skills': False, 'auto_commit': False, 'auto_push': False,
@@ -773,7 +773,7 @@ else:
         dest_config_path = tmp / 'dest-config.json'
         dest_config_path.write_text(json.dumps({
             'schema_version': '1.0', 'cloudskill_version': draft['cloudskill_version'],
-            'cloudskill_repository': str(ROOT), 'eval_inbox': str(dest_inbox),
+            'cloudbox_skills_repository': str(ROOT), 'eval_inbox': str(dest_inbox),
             'sensitive_terms_path': str(dest_inbox / 'sensitive-terms.local.txt'),
             'default_sanitization': True, 'save_raw_transcript': False,
             'auto_modify_skills': False, 'auto_commit': False, 'auto_push': False,
