@@ -2,6 +2,14 @@
 
 <p align="center"><img src="assets/cloudbox-logo.png" width="160" alt="CloudBox logo"></p>
 
+> **This public repository is now archived as of v7.1.0 (2026-08-13).**
+> Active development has moved to a private repository under the renamed
+> plugin identity `cloudbox-skills`. This snapshot — including the plugin
+> identity rename to `cloudbox-skills` and the `teach-while-building` skill —
+> is the final synced state and will not receive further updates. The code
+> and skill content here remain available under this repository's license
+> for anyone who found it useful.
+
 **Current version: 7.1.0**
 
 CloudBox 6.4 adds pre-qualified, deterministic lifecycle templates while
