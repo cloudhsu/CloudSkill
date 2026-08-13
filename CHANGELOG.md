@@ -1,5 +1,59 @@
 # Changelog
 
+## 7.0.0
+
+### Plugin identity renamed: cloudbox -> cloudbox-skills
+
+Breaking change to the published interface -- major version bump.
+
+- `.claude-plugin/marketplace.json`, `.claude-plugin/plugin.json`,
+  `.codex-plugin/plugin.json`, `.agents/plugins/marketplace.json`: plugin `name`
+  `cloudbox` -> `cloudbox-skills`, `displayName`/`interface.displayName`
+  `CloudBox` -> `CloudBox Skills`. `author.name`/`developerName` stay `CloudBox`
+  (the brand, not the product).
+- Router skill: `.agents/skills/using-cloudskill/` ->
+  `using-cloudbox-skills/` (directory, `SKILL.md` name field, lifecycle.json,
+  references, both behavior-eval case files re-keyed to match).
+- Config template `config/cloudskill-config.template.json` ->
+  `cloudbox-skills-config.template.json`; `cloudskill_repository` config key ->
+  `cloudbox_skills_repository`. Local config directory convention `.cloudskill/`
+  -> `.cloudbox-skills/` (existing local configs are not auto-migrated).
+- Docs `CLOUDSKILL_AGENT_HANDOFF.md`, `docs/CLOUDSKILL_CHANGE_HISTORY.md`,
+  `docs/CLOUDSKILL_DESIGN_AND_FLOW.md` -> `CLOUDBOX_SKILLS_*`.
+- CLI executables `cloudskill-eval(-claude/-codex)`, `cloudskill-resume` ->
+  `cloudbox-skills-eval(-claude/-codex)`, `cloudbox-skills-resume`.
+  `scripts/cloudskill_evolution.py` -> `cloudbox_skills_evolution.py`.
+- Install docs (`INSTALL.md`, `docs/CLOUDBOX_PLUGIN.md`): install command and
+  `/cloudbox:<skill>` -> `/cloudbox-skills:<skill>` invocation examples updated.
+- `homepage`/`repository`/`websiteURL` fields updated to
+  `github.com/cloudhsu/cloudbox-skills` (this repository's new home; the prior
+  public `github.com/cloudhsu/CloudSkill` gets one final synced release and is
+  not updated further after that).
+- Rationale and full migration checklist: `NAMING.md` (new) -- a domain-word
+  decision procedure (`agent`/`engine`/`skills`/`tools`) for the CloudBox
+  product family, written to prevent the plugin-vs.-an-unrelated-CloudBox-game-
+  engine naming collision that prompted this release from recurring as the
+  family grows (planned future `cloudbox-agent-*` roles).
+
+### Distilled two reusable safeguards from a real engine-revival session
+
+- `cross-platform-engine-architecture`: a comment claiming code is dead/unused
+  is not evidence by itself -- require tracing the reachable call graph (or
+  running the code) before excluding a file as dead.
+  `references/historical-evidence-rule.md`, case `ENG-BEH-005`.
+- `coding-agent-project-governance`: verify the actual host toolchain/
+  environment (compilers, SDKs, target architecture) before configuring a
+  cross-compile build, rather than assuming from the task description.
+  `SKILL.md` "Inspect before prescribing", case `CAG-BEH-008`. Also adds a
+  "long-running/multi-session progress" checkpoint-convention row to
+  `references/artifact-matrix.md`.
+
+Both source cases are sanitized (no project/product names, paths, or dates).
+`validate_pack.py` (94 routing cases, unchanged), `validate_behavior_evals.py`
+(142 -> 144 behavior contracts), `validate_skill_lifecycle.py`, and
+`validate_plugins.py` all pass. Live model grading (`grade_behavior_evals.py`)
+not run as part of this release.
+
 ## 6.5.0
 
 ### Promoted five eval-inbox candidates to Skill content

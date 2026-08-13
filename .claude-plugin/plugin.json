@@ -1,13 +1,13 @@
 {
   "name": "cloudbox-skills",
   "displayName": "CloudBox Skills",
-  "version": "6.5.0",
+  "version": "7.0.0",
   "description": "Architecture, equipment-domain, quality, governance, refactoring, and Eval workflows for Claude Code.",
   "author": {
     "name": "CloudBox"
   },
-  "homepage": "https://github.com/cloudhsu/CloudSkill",
-  "repository": "https://github.com/cloudhsu/CloudSkill",
+  "homepage": "https://github.com/cloudhsu/cloudbox-skills",
+  "repository": "https://github.com/cloudhsu/cloudbox-skills",
   "keywords": [
     "architecture",
     "equipment",
