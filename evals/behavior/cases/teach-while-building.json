@@ -132,6 +132,70 @@
         "agent notices the user was surprised but doesn't adjust future calibration, so the same class of gap keeps getting missed"
       ],
       "review_notes": "The live feedback loop is what keeps calibration honest over a session -- a static initial guess that never updates isn't real adaptation."
+    },
+    {
+      "id": "TWB-BEH-007",
+      "skill": "teach-while-building",
+      "type": "discipline",
+      "prompt": "Across a stretch of implementation work before any natural pause, three separate non-obvious concepts surface, each qualifying for a check.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "holds all three flagged concepts without interrupting the task after each one",
+        "runs a single batched round at the next natural pause, with one ❓/➡️ pair per concept"
+      ],
+      "forbidden_behaviors": [
+        "interrupting the task immediately after each of the three concepts with a separate check",
+        "dropping any of the held concepts instead of covering all of them in the batched round"
+      ],
+      "required_artifacts": [],
+      "baseline_expected_failure": [
+        "agent fires three separate checks scattered through the implementation work, breaking flow repeatedly instead of once"
+      ],
+      "review_notes": "Batching keeps the check lightweight in aggregate; per-concept interruption is what makes users turn a good idea off."
+    },
+    {
+      "id": "TWB-BEH-008",
+      "skill": "teach-while-building",
+      "type": "discipline",
+      "prompt": "A non-obvious concept just surfaced and it is a hard prerequisite for correctly understanding the very next step the user is about to take -- there is no natural pause before that step.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "checks it immediately rather than holding it for a later batched round",
+        "recognizes this as the narrow exception to batching, not the default"
+      ],
+      "forbidden_behaviors": [
+        "deferring a blocking prerequisite check to a later pause, letting the user proceed on a shaky foundation",
+        "treating every concept as blocking in order to avoid ever batching"
+      ],
+      "required_artifacts": [],
+      "baseline_expected_failure": [
+        "agent mechanically batches even a concept the user needs to have landed before the next step makes sense"
+      ],
+      "review_notes": "Batching is the default for pacing, not a rule that overrides whether the next step is actually understandable without the check."
+    },
+    {
+      "id": "TWB-BEH-009",
+      "skill": "teach-while-building",
+      "type": "application",
+      "prompt": "A `LEARNING_LEVEL.md` file exists next to `LEARNING_LOG.md` and states the user is experienced in the domain the agent is about to explain something in. No organic `LEARNING_LOG.md` history exists yet for that domain.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "reads LEARNING_LEVEL.md before applying the no-history-defaults-generous rule",
+        "treats the explicit line as overriding the no-history default for that domain",
+        "does not fire a check merely because LEARNING_LOG.md itself has no entries yet in that domain"
+      ],
+      "forbidden_behaviors": [
+        "inferring a new entry into LEARNING_LEVEL.md from conversational tone instead of a direct user statement",
+        "ignoring the file's explicit level and falling back to the generous no-history default"
+      ],
+      "required_artifacts": [],
+      "baseline_expected_failure": [
+        "agent never reads LEARNING_LEVEL.md and defaults to generous checking, quizzing a user who already stated they don't need it"
+      ],
+      "review_notes": "An explicit, once-written statement is stronger evidence than the absence of organic history, and should be checked first."
     }
   ]
 }

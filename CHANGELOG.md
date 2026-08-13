@@ -1,5 +1,19 @@
 # Changelog
 
+## 7.3.0
+
+Public mirror sync. This public copy only syncs `teach-while-building` going forward; the rest of
+the pack is unchanged from v7.1.0 here. See the private `cloudbox-skills`
+CHANGELOG for the full v7.3.0 history.
+
+- `teach-while-building`: optional `LEARNING_LEVEL.md` explicit calibration
+  override file; checks now batch at natural pauses instead of firing after
+  every flagged concept, with an exception for concepts that block the very
+  next step. 3 new behavior cases (`TWB-BEH-007/008/009`).
+- README rewritten to lead with `teach-while-building` and its install
+  instructions; the rest of the frozen skill snapshot moved into collapsible
+  sections.
+
 ## 7.2.0
 
 ### `teach-while-building`: zone-of-proximal-development calibration

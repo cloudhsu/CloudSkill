@@ -57,10 +57,35 @@ This mirrors how real adaptive tutoring stays effective: target the zone between
 using the learner's actual responses as the live signal, not a static assumption
 about who they are.
 
+### Optional explicit calibration file
+
+A user can skip organic calibration entirely for a domain by stating it once in
+writing instead of waiting for it to be inferred. If `LEARNING_LEVEL.md` exists next
+to `LEARNING_LOG.md`, read it before applying any other calibration signal: an
+explicit line for a domain (e.g. "iOS build toolchain: experienced", "Android
+Gradle: junior") overrides both the no-history default and any signal drawn from
+`LEARNING_LOG.md` for that domain. Only write a new line into this file when the
+user states their level directly — the same trigger as the override rule above —
+never infer an entry into it from how a conversation went.
+
+### Timing: batch at natural pauses, don't interrupt mid-flow
+
+Noticing a teaching moment does not mean checking it immediately. Hold flagged
+concepts and run the check at the next natural pause — a slice/checkpoint
+finishing, a build or test succeeding, a logical stopping point in the
+conversation — covering everything flagged since the last check in one short
+round, not one interruption per concept. Firing mid-implementation turns a
+lightweight check into friction, and friction is what gets a feature turned off.
+
+Exception: check immediately, without batching, when the concept is a hard
+prerequisite for correctly following the very next step — the user cannot
+usefully continue without it landing first.
+
 ## The check
 
-After explaining the concept, ask 1-2 short questions back — do not just restate the
-explanation and ask "does that make sense?". Format each question as:
+At the next natural pause (see Timing above), ask short questions back for every
+concept flagged since the last check — do not just restate the explanation and ask
+"does that make sense?". One ❓/➡️ pair per concept; format each as:
 
 ```
 ❓ <question that requires recalling or applying the concept, not just recognizing it>
