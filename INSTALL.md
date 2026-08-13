@@ -35,11 +35,11 @@ codex plugin marketplace add D:\Git\CloudSkill
 
 ```powershell
 claude plugin marketplace add D:\Git\CloudSkill
-claude plugin install cloudbox@cloudbox-marketplace --scope user
+claude plugin install cloudbox-skills@cloudbox-marketplace --scope user
 claude plugin list
 ```
 
-安裝後執行 `/reload-plugins`。Claude Code 的明確技能名稱為 `/cloudbox:<skill-name>`。
+安裝後執行 `/reload-plugins`。Claude Code 的明確技能名稱為 `/cloudbox-skills:<skill-name>`。
 
 Plugin 模式可與 Superpowers 等其他 Plugin 同時安裝，但應在 Host 中停用不需要的 Plugin，或明確劃分 generic development workflow 與 CloudBox domain/architecture responsibility。CloudBox 不會自行修改其他 Plugin 的啟用狀態。
 
