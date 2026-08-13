@@ -1,5 +1,28 @@
 # Changelog
 
+## 7.1.0
+
+### New skill: `teach-while-building`
+
+Distilled from reviewing `mattpocock/skills`' `grilling`/`teach` interaction
+patterns and adapted into a lightweight, self-judged, in-task check, rather than
+a separate teaching workspace or course:
+
+- Fires only when a genuinely new, non-obvious, likely-to-matter-again concept
+  comes up mid-task -- not on every explanation.
+- Checks understanding with 1-2 short questions (own recommended answer stated
+  alongside each), not a restated explanation.
+- Logs only confirmed-durable concepts to a project-local `LEARNING_LOG.md`, in
+  the user's own framing, not a transcript of the explanation.
+- Explicitly out of scope: building a curriculum, lesson sequence, or resource
+  list -- that's a materially heavier, different request.
+
+Stage: `experimental` (2 routing cases, 4 behavior cases covering recognition,
+discipline, counterexample, and the full positive application path).
+`validate_pack.py` (20 skills, 96 routing cases), `validate_behavior_evals.py`
+(148 behavior contracts), `validate_skill_lifecycle.py`, and
+`validate_plugins.py` all pass.
+
 ## 7.0.0
 
 ### Plugin identity renamed: cloudbox -> cloudbox-skills

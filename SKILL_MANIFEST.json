@@ -1,5 +1,5 @@
 {
-  "version": "7.0.0",
+  "version": "7.1.0",
   "skills": [
     {
       "name": "agent-development-process",
@@ -108,6 +108,12 @@
       "description": "Use when software quality must be translated into measurable scenarios, acceptance criteria, metrics, evidence, dashboards, release gates, or defect analysis using ISO/IEC 25010.",
       "path": ".agents/skills/software-quality-iso25010/SKILL.md",
       "file_count": 7
+    },
+    {
+      "name": "teach-while-building",
+      "description": "Use when the user wants to build mastery of relevant knowledge as a side effect of real engineering work, not as a separate course — proactively check understanding of new concepts as they come up, then keep only the durable ones.",
+      "path": ".agents/skills/teach-while-building/SKILL.md",
+      "file_count": 2
     },
     {
       "name": "using-cloudbox-skills",

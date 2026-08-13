@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "skill": "teach-while-building",
+  "stage": "experimental",
+  "introduced_version": "7.1.0",
+  "last_reviewed_version": "7.1.0",
+  "routing_case_ids": [
+    "TWB-01",
+    "TWB-NEG-01"
+  ],
+  "positive_routing_case_ids": [
+    "TWB-01"
+  ],
+  "negative_routing_case_ids": [
+    "TWB-NEG-01"
+  ],
+  "behavior_case_ids": [
+    "TWB-BEH-001",
+    "TWB-BEH-002",
+    "TWB-BEH-003",
+    "TWB-BEH-004"
+  ],
+  "behavior_case_types": [
+    "application",
+    "counterexample",
+    "discipline",
+    "recognition"
+  ],
+  "next_review_triggers": [
+    "three repeated contract-valid routing misses with verified context",
+    "a behavior regression on an existing case",
+    "a new adjacent skill creates scope overlap",
+    "the routing reference or selected-skill context no longer fits its supported budget",
+    "a deterministic grader produces a demonstrated false positive or false negative",
+    "a user correction reveals a reusable missing safeguard",
+    "the skill has not been reviewed for two feature releases"
+  ],
+  "replacement_skill": null,
+  "notes": "New skill, distilled from reviewing mattpocock/skills' grilling/teach interaction patterns and adapted into a lightweight, self-judged, in-task check rather than a separate teaching workspace. Promote to active after real usage confirms the trigger-selectivity discipline holds."
+}

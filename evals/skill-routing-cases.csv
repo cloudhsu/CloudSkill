@@ -93,3 +93,5 @@ DEVSK-05,建立一套標準化Skill建立與成熟度流程，包含RED/GREEN、
 RTE-01,設計一套可執行的AI Skill評估系統，需區分Case有效性、Context、Runner、deterministic grader、semantic review與release gate。,runtime-evaluation-engineering,true,executable evaluation system design
 RTE-02,同一個contract-valid路由案例連續三次選到另一個合理Skill，請判斷是Case歧義、Grader、模型還是Skill規則問題。,runtime-evaluation-engineering,true,evaluation failure classification and case validity
 RTE-NEG-01,Ollama沒有啟動而且JSONL不存在，請幫我跑本機評分並封裝log。,runtime-evaluation-engineering,false,local execution belongs to local-runtime-eval-debugging
+TWB-01,我想一邊開發一邊透過跟你的互動把相關知識學起來，不要另外開一個學習課程。,teach-while-building,true,learn as a side effect of real work not a separate course
+TWB-NEG-01,幫我規劃一套完整的瑜珈課程，分成好幾堂課、附教材跟練習。,teach-while-building,false,full multi-session course workspace is a different heavier request

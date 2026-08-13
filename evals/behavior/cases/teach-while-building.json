@@ -1,0 +1,94 @@
+{
+  "skill": "teach-while-building",
+  "cases": [
+    {
+      "id": "TWB-BEH-001",
+      "skill": "teach-while-building",
+      "type": "recognition",
+      "prompt": "Mid-task, the agent just explained a genuinely new, non-obvious platform/toolchain behavior the user hadn't hit before, and it's likely to matter again later in this project.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "asks 1-2 short questions back that require recalling or applying the concept, not just recognizing it",
+        "states its own expected/recommended answer alongside each question",
+        "waits for the user's answer before moving on"
+      ],
+      "forbidden_behaviors": [
+        "just restates the explanation and asks 'does that make sense?'",
+        "runs a long multi-round interview instead of one short confirmation round"
+      ],
+      "required_artifacts": [],
+      "baseline_expected_failure": [
+        "agent explains the concept once and moves straight on, with no check"
+      ],
+      "review_notes": "Fluency strength (feels understood) vs. storage strength (actually retained) is the point -- passive explanation alone does not build the latter."
+    },
+    {
+      "id": "TWB-BEH-002",
+      "skill": "teach-while-building",
+      "type": "discipline",
+      "prompt": "The agent just explained something routine (ordinary syntax, or something the user clearly already knew) during a task.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "does not trigger a teaching-moment check",
+        "does not log anything to LEARNING_LOG.md"
+      ],
+      "forbidden_behaviors": [
+        "checks understanding after every explanation regardless of novelty",
+        "logs routine explanations as if they were durable knowledge"
+      ],
+      "required_artifacts": [],
+      "baseline_expected_failure": [
+        "agent fires a comprehension check on trivial or already-known material, turning the workflow into constant quizzing"
+      ],
+      "review_notes": "Self-judged triggering only pays off if it stays selective; over-triggering is the main failure mode to guard against."
+    },
+    {
+      "id": "TWB-BEH-003",
+      "skill": "teach-while-building",
+      "type": "counterexample",
+      "prompt": "The user asks for a full multi-session course on an unrelated topic (e.g. a structured curriculum with lessons, reference materials, and a resource list), not learning-alongside-real-work.",
+      "expected_routing": false,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "recognizes this is a heavier, different request than the lightweight in-task check this skill provides",
+        "does not attempt to build a curriculum, lesson sequence, or resource list under this skill"
+      ],
+      "forbidden_behaviors": [
+        "silently expands this skill's scope into a full teaching-workspace/course builder"
+      ],
+      "required_artifacts": [],
+      "baseline_expected_failure": [
+        "agent tries to stretch the lightweight check-and-log mechanism into a full course structure"
+      ],
+      "review_notes": "Keeps this skill's scope narrow and distinct from a full teaching-workspace pattern, which is a materially different, heavier request."
+    },
+    {
+      "id": "TWB-BEH-004",
+      "skill": "teach-while-building",
+      "type": "application",
+      "prompt": "During a real engineering task, the agent discovers a genuinely new root cause (e.g. a platform restriction that explains a bug), explains it, runs the short check, and the user's answer confirms real understanding.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "explains the concept concisely before checking it, not after",
+        "runs exactly one short round of 1-2 questions with its own stated expected answer",
+        "on confirmation, appends a short entry to the project's LEARNING_LOG.md in the user's own framing, not a copy of the explanation",
+        "continues the original task afterward without turning the moment into a detour"
+      ],
+      "forbidden_behaviors": [
+        "skipping the log even though the concept was confirmed durable and relevant",
+        "writing a long transcript-style entry instead of a short reference note",
+        "blocking further task progress on the logging step"
+      ],
+      "required_artifacts": [
+        "LEARNING_LOG.md entry"
+      ],
+      "baseline_expected_failure": [
+        "agent explains the finding well but never checks or logs it, so nothing durable survives the session"
+      ],
+      "review_notes": "This is the end-to-end positive path: discover, explain, check, log, continue -- the whole point of the skill in one realistic pass."
+    }
+  ]
+}
