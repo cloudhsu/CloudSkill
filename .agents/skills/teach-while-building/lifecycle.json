@@ -3,7 +3,7 @@
   "skill": "teach-while-building",
   "stage": "experimental",
   "introduced_version": "7.1.0",
-  "last_reviewed_version": "7.1.0",
+  "last_reviewed_version": "7.2.0",
   "routing_case_ids": [
     "TWB-01",
     "TWB-NEG-01"
@@ -18,7 +18,9 @@
     "TWB-BEH-001",
     "TWB-BEH-002",
     "TWB-BEH-003",
-    "TWB-BEH-004"
+    "TWB-BEH-004",
+    "TWB-BEH-005",
+    "TWB-BEH-006"
   ],
   "behavior_case_types": [
     "application",

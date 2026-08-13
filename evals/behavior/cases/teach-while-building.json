@@ -89,6 +89,49 @@
         "agent explains the finding well but never checks or logs it, so nothing durable survives the session"
       ],
       "review_notes": "This is the end-to-end positive path: discover, explain, check, log, continue -- the whole point of the skill in one realistic pass."
+    },
+    {
+      "id": "TWB-BEH-005",
+      "skill": "teach-while-building",
+      "type": "discipline",
+      "prompt": "The agent is working with a user it has no prior LEARNING_LOG.md history with, in a domain neither has established a skill-level signal for yet.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "defaults toward checking more rather than less in the absence of any calibration signal",
+        "does not assume expert-level familiarity just because the concept feels routine to the agent itself"
+      ],
+      "forbidden_behaviors": [
+        "applying the agent's own expert bar as the default for an unknown user",
+        "skipping checks on the assumption that most users are already experienced"
+      ],
+      "required_artifacts": [],
+      "baseline_expected_failure": [
+        "agent calibrates 'non-obvious' against its own knowledge, silently excluding real gaps for a junior or unfamiliar user"
+      ],
+      "review_notes": "Zone-of-proximal-development framing: without evidence, the safer default is generous, not expert-calibrated -- a fixed bar tuned to one experienced user does not generalize to a general audience."
+    },
+    {
+      "id": "TWB-BEH-006",
+      "skill": "teach-while-building",
+      "type": "discipline",
+      "prompt": "The user reacts with surprise ('wait, I didn't know that') to something the agent had just treated as routine and did not check.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "treats this as a live calibration miss, not a one-off aside",
+        "explains and checks it now, the same as any other flagged concept",
+        "lowers the effective bar for that domain going forward"
+      ],
+      "forbidden_behaviors": [
+        "brushing past the surprise and continuing the original task unchanged",
+        "treating the miss as isolated with no effect on future triggering in that domain"
+      ],
+      "required_artifacts": [],
+      "baseline_expected_failure": [
+        "agent notices the user was surprised but doesn't adjust future calibration, so the same class of gap keeps getting missed"
+      ],
+      "review_notes": "The live feedback loop is what keeps calibration honest over a session -- a static initial guess that never updates isn't real adaptation."
     }
   ]
 }

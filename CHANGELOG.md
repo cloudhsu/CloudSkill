@@ -1,5 +1,26 @@
 # Changelog
 
+## 7.2.0
+
+### `teach-while-building`: zone-of-proximal-development calibration
+
+The trigger bar was previously implicitly calibrated against an expert user's
+sense of "non-obvious" -- real but silent gap for a junior or unfamiliar-with-
+the-stack audience. Adds an explicit calibration section grounded in Vygotsky's
+zone-of-proximal-development framing (target the gap between "already knows
+alone" and "needs a full lecture," using live evidence, not a fixed assumption):
+
+- No calibration history for a domain yet -> default toward checking *more*.
+- Confirmed `LEARNING_LOG.md` history in a domain -> the bar can rise there.
+- User expresses surprise about something that wasn't flagged -> treat as a
+  live miss, lower the bar for that domain going forward.
+- User states their own level directly -> overrides inferred calibration.
+
+2 new behavior cases (`TWB-BEH-005` no-history-defaults-generous,
+`TWB-BEH-006` surprise-is-a-live-miss-signal). `validate_pack.py` (20 skills,
+96 routing cases), `validate_behavior_evals.py` (150 behavior contracts),
+`validate_skill_lifecycle.py`, and `validate_plugins.py` all pass.
+
 ## 7.1.0
 
 ### New skill: `teach-while-building`
