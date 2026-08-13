@@ -8,8 +8,8 @@ A local Ollama model is not a Codex, ChatGPT, or Claude Code plugin host. It doe
 
 The original 5.6.0 routing runner assembled a synthetic routing instruction, the `SKILL_MANIFEST.json` ID/description catalog, the current case, and the structured-output schema. It did **not** load:
 
-- `.agents/skills/using-cloudskill/SKILL.md`
-- `.agents/skills/using-cloudskill/references/conversation-routing-map.md`
+- `.agents/skills/using-cloudbox-skills/SKILL.md`
+- `.agents/skills/using-cloudbox-skills/references/conversation-routing-map.md`
 - downstream `SKILL.md` files or their declared references
 
 Therefore a failed 4B-model result could represent a Runner/context defect rather than a CloudBox Skill defect.
@@ -20,7 +20,7 @@ Therefore a failed 4B-model result could represent a Runner/context defect rathe
 
 A Routing Eval chooses the smallest sufficient downstream skill set. In `router` mode the actual request includes:
 
-1. the complete `using-cloudskill/SKILL.md`,
+1. the complete `using-cloudbox-skills/SKILL.md`,
 2. `conversation-routing-map.md`,
 3. all 17 Skill IDs and descriptions from `SKILL_MANIFEST.json`,
 4. the routing-decision JSON Schema,
@@ -28,7 +28,7 @@ A Routing Eval chooses the smallest sufficient downstream skill set. In `router`
 6. explicit router/downstream separation,
 7. language-neutral, decision-boundary routing rules.
 
-The router is context used to make the decision. `using-cloudskill` must never appear in `supporting_skills`; it may be `primary_skill` only for a task specifically about router design or routing policy.
+The router is context used to make the decision. `using-cloudbox-skills` must never appear in `supporting_skills`; it may be `primary_skill` only for a task specifically about router design or routing policy.
 
 ### Behavior Eval
 
@@ -250,7 +250,7 @@ This repair is intentionally narrow. It may:
 
 - remove duplicate selected IDs,
 - remove selected/rejected overlap,
-- remove `using-cloudskill` from downstream supporting skills,
+- remove `using-cloudbox-skills` from downstream supporting skills,
 - reconcile `execution_order` with the model-selected primary/supporting set.
 
 It does **not** change `primary_skill` and does not add a missing supporting skill. Every record preserves:
@@ -324,7 +324,7 @@ The Behavior score checks configured evidence groups and unsafe claims. It is de
 From the repository root, run:
 
 ```bash
-./cloudskill-eval
+./cloudbox-skills-eval
 ```
 
 The command discovers Python 3.10+, verifies Ollama and the requested model, selects an adaptive routing context, runs the focused routing regression and R07 Behavior Eval, grades raw and refined behavior separately, and creates one ignored review ZIP. Upload the ZIP path printed as `UPLOAD THIS ZIP`; do not manually collect individual result files.

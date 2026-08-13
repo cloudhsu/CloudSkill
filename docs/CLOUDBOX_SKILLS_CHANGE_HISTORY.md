@@ -606,7 +606,7 @@ python3 scripts/run_all_checks.py
   registered. Local lightweight `v5.8.0` resolves to
   `348063dfe0c8ee7b47d5547aeb550d289d8ba860` and is an ancestor of `HEAD`.
 - **CONCERN — preserved dirty paths:** the worktree already had modifications
-  to `CLOUDSKILL_AGENT_HANDOFF.md` and `docs/CLOUDSKILL_CHANGE_HISTORY.md`,
+  to `CLOUDBOX_SKILLS_AGENT_HANDOFF.md` and `docs/CLOUDBOX_SKILLS_CHANGE_HISTORY.md`,
   plus untracked approved plan/design files. No unrelated path was normalized
   or discarded.
 - **PASS — deterministic baseline:** two complete runner captures (runs 3 and
@@ -977,7 +977,7 @@ deduplication, owner confirmation, and RED evidence in a future conversation.
 
 Continued an interrupted evidence-import session from repository handoff rather
 than chat memory. A sub-agent executed
-`./cloudskill-eval --provider claude --behavior-repeat 3` and wrote the normal
+`./cloudbox-skills-eval --provider claude --behavior-repeat 3` and wrote the normal
 fixed artifact `.local/runtime-evals/CloudSkill-local-eval-review-latest.zip`
 plus timestamp bundle
 `CloudSkill-local-eval-review-local-review-20260809-180816.zip` (both SHA-256
@@ -1155,7 +1155,7 @@ Change:
   `candidates/`/`manual-review/` files (same format
   `export_eval_candidate.py` already produces) and commits+pushes them to a
   separate, user-owned private Git repository (`eval_exchange_repo` in
-  `.cloudskill/config.local.json`/`~/.cloudskill/config.json` — transport
+  `.cloudbox-skills/config.local.json`/`~/.cloudbox-skills/config.json` — transport
   only, never CloudSkill's own repository), then moves the source files
   into a new `eval_inbox/synced/` folder (never deleted, mirrors the
   existing `processed/`/`rejected/` bookkeeping pattern). `--pull` copies
@@ -1168,7 +1168,7 @@ Change:
   decision-making, so the git-transport layer is additive, not a second
   code path to keep in sync.
 - Added `eval_exchange_repo` (optional) to
-  `config/cloudskill-config.template.json`.
+  `config/cloudbox-skills-config.template.json`.
 - Added "Git-based transport between machines" to
   `.agents/skills/developing-skills/references/interaction-eval-capture.md`
   and INSTALL.md section 8d, both pointing out explicitly that "both
@@ -1376,10 +1376,10 @@ Provider registry mutation tests (`scripts/validate_providers_contract.py`):
   propagates without editing either consumer.
 - **Negative drift injection**: scan every `scripts/*.py` (except the two
   validators that legitimately quote it as a documented anti-pattern
-  string) and `cloudskill-resume`'s case statement for the exact stale
+  string) and `cloudbox-skills-resume`'s case statement for the exact stale
   literals this session already hand-fixed once —
   `choices=("ollama", "codex")` and the equivalent 3-provider copy, plus
-  `cloudskill-resume`'s old `ollama|codex)` case pattern.
+  `cloudbox-skills-resume`'s old `ollama|codex)` case pattern.
 - Verified both are real tests, not decorative: extracted the pre-Claude
   version of `run_local_eval_review.py` (`git show 7d37a53~1:...`) and
   confirmed the negative-drift check flags it (RED) while the current file
@@ -1393,9 +1393,9 @@ Decoupled Behavior repeat count:
   `--repeat` (which only ever threaded to routing). Default stays `1` —
   identical behavior to every prior run — so this is additive, not a
   default-cost change.
-- Threaded `--behavior-repeat` through `cloudskill-resume` too, so it is
+- Threaded `--behavior-repeat` through `cloudbox-skills-resume` too, so it is
   reachable through the safe commit/push path, not only by calling
-  `./cloudskill-eval` directly. Two safety details: (a) rejected in
+  `./cloudbox-skills-eval` directly. Two safety details: (a) rejected in
   combination with `--provider codex`/`--provider claude`, since those
   routes go through the intentionally-fixed quota-conscious smoke wrappers;
   (b) implies `--force-eval`, because the existing source-hash ZIP-reuse
@@ -1409,10 +1409,10 @@ Decoupled Behavior repeat count:
 Validation performed:
 
 - `python3 scripts/run_all_checks.py` passes.
-- `./cloudskill-resume --behavior-repeat 3 --provider codex --status` and
+- `./cloudbox-skills-resume --behavior-repeat 3 --provider codex --status` and
   `--behavior-repeat abc --status` both fail fast with a clear message,
   before touching any model or the Runtime Eval lock.
-- `./cloudskill-resume --behavior-repeat 3 --status` (default ollama)
+- `./cloudbox-skills-resume --behavior-repeat 3 --status` (default ollama)
   passes through cleanly and correctly reports the implied `--force-eval`.
 
 Explicitly NOT done this increment: no model was called. The Behavior
@@ -1427,7 +1427,7 @@ just static validation) and fix whatever the live evidence surfaces.
 Observed and fixed, in order, all against real live processes:
 
 1. **`/no_think` leaked into the Claude behavior prompt.** First live
-   `./cloudskill-eval-claude` run: routing 5/5 passed, but Behavior execution
+   `./cloudbox-skills-eval-claude` run: routing 5/5 passed, but Behavior execution
    failed with `RuntimeError: model output is not JSON: Unknown command:
    /no_think`. Root cause: `runtime_eval_common.py::_behavior_user_prompt()`
    unconditionally prepended `/no_think` (a Qwen3/Ollama thinking-mode
@@ -1461,7 +1461,7 @@ Observed and fixed, in order, all against real live processes:
 Validation performed:
 
 - `python3 scripts/run_all_checks.py` passes after each fix.
-- Re-ran `./cloudskill-eval-claude` after the fixes: routing 5/5, Behavior
+- Re-ran `./cloudbox-skills-eval-claude` after the fixes: routing 5/5, Behavior
   raw score 78.0/100, **gate PASS outright, no refinement needed** —
   `final-answer-discipline` and `assumptions-unknowns` both scored full
   marks (the R07 grader precision hotfix from earlier today confirmed
@@ -1514,7 +1514,7 @@ Change:
 
 - Initialized `.local/eval-inbox/` in this repository via the existing,
   already-validated `scripts/install.sh --config-only` (self-referential:
-  `.cloudskill/config.local.json` points at this repository itself). Added
+  `.cloudbox-skills/config.local.json` points at this repository itself). Added
   `imports/` and `imports/processed/` to the documented Inbox structure —
   these two folders complete the `eval-outbox/` concept that
   `scripts/install.sh`/`scripts/install.ps1` had already reserved in their
@@ -1523,7 +1523,7 @@ Change:
   a self-contained (stdlib-only, no CloudSkill-repository import) exporter
   that ships with the installed Skill. It performs the same structural
   validation and sanitization scan as `scripts/capture_eval_candidate.py`,
-  writes into a config-free `.cloudskill/eval-outbox/` in the current
+  writes into a config-free `.cloudbox-skills/eval-outbox/` in the current
   project, and packages the result into one timestamped zip. Chose to
   extend the existing `developing-skills` capture flow (`整理成正向/負向案例`)
   with a config-free fallback rather than create a new Skill, per the "do
@@ -1551,7 +1551,7 @@ Change:
   (new section 8b) to document the disconnected-session path and where to
   physically drop the transferred zip.
 - Added an explicit, enumerated "Release / merge-to-main criteria" section
-  to `CLOUDSKILL_AGENT_HANDOFF.md` — this had previously only been referenced
+  to `CLOUDBOX_SKILLS_AGENT_HANDOFF.md` — this had previously only been referenced
   as "the current release criteria" without a concrete checklist.
 
 Validation performed:
@@ -1583,7 +1583,7 @@ First diagnosis (incomplete): a stray `__pycache__/` under
 test inflated the count picked up by `scripts/validate_pack.py` (the actual
 `SKILL_MANIFEST.json` writer; `manage_skill.py refresh --all` does not touch
 `file_count`). Deleting the cache and recommitting `file_count: 16` looked
-like the fix, but the very next `./cloudskill-resume` run silently
+like the fix, but the very next `./cloudbox-skills-resume` run silently
 regenerated `17` again and committed it — because the real, recurring source
 was the new drift check in `scripts/validate_interaction_capture.py`, which
 imports `capture_eval_candidate.py`/`export_eval_candidate.py` via
@@ -1631,7 +1631,7 @@ authoritative JSON contract + one executable adapter + one drift Validator):
   that every hosted-agent adapter exports `<name>_preflight`/
   `call_<name>_cli`, that every local adapter's declared `call_site` function
   exists, that every Python consumer imports `providers_contract`, and that
-  the shell-based `cloudskill-resume` (which cannot `import` Python) contains
+  the shell-based `cloudbox-skills-resume` (which cannot `import` Python) contains
   every registered provider ID literal.
 
 Claude Code CLI adapter (mirrors `scripts/codex_eval_adapter.py`):
@@ -1643,16 +1643,16 @@ Claude Code CLI adapter (mirrors `scripts/codex_eval_adapter.py`):
   [--json-schema <schema>]` from an isolated empty temporary directory, piping
   the user prompt over stdin. `--safe-mode` and `--tools ""` were confirmed to
   exist via `claude --help` before writing this adapter (not guessed).
-- Add `cloudskill-eval-claude`, a quota-conscious `--repeat 1 --no-refine`
-  smoke wrapper mirroring `cloudskill-eval-codex`.
+- Add `cloudbox-skills-eval-claude`, a quota-conscious `--repeat 1 --no-refine`
+  smoke wrapper mirroring `cloudbox-skills-eval-codex`.
 - Wire `--provider claude` / `--claude-model` through
   `scripts/run_runtime_evals.py` (`call_model`, `resolve_model_label`,
   `prompt_request_payload`, `dry_run_plan`, preflight dispatch),
   `scripts/run_local_eval_review.py` (`requested_model`,
   `runtime_provider_args`, environment preflight, refinement eligibility now
   driven by `refinement_default(args.provider)` instead of a hardcoded
-  `== "ollama"` check), and `cloudskill-resume` (`--provider`/`--claude`
-  flag, dispatch to `./cloudskill-eval-claude`).
+  `== "ollama"` check), and `cloudbox-skills-resume` (`--provider`/`--claude`
+  flag, dispatch to `./cloudbox-skills-eval-claude`).
 - Extend `scripts/validate_local_eval_debugging.py` and
   `scripts/validate_pack.py` to also require the new Claude files; fix two
   markers in `scripts/validate_codex_eval_path.py` and
@@ -1660,8 +1660,8 @@ Claude Code CLI adapter (mirrors `scripts/codex_eval_adapter.py`):
   literal `choices=("ollama", "codex")` / `args.provider == "ollama" and not
   args.no_refine` and would otherwise have gone stale silently.
 - Extend `scripts/validate_evolution_handoff.py` and
-  `CLOUDSKILL_AGENT_HANDOFF.md` to require/document a
-  `./cloudskill-resume --provider claude --force-eval` continuation command.
+  `CLOUDBOX_SKILLS_AGENT_HANDOFF.md` to require/document a
+  `./cloudbox-skills-resume --provider claude --force-eval` continuation command.
 
 Validation performed:
 
@@ -1678,30 +1678,30 @@ Explicitly NOT done:
 - No live `claude`, `codex`, or `ollama` model call was made. The
   `--output-format json` result-field parsing in `claude_eval_adapter.py` is
   grounded in `claude --help` and documented CLI behavior, not in an actual
-  executed response — `./cloudskill-eval-claude` is the first point that gets
+  executed response — `./cloudbox-skills-eval-claude` is the first point that gets
   confirmed against a real process, and it spends Claude usage/quota, so it is
   deferred until explicitly requested.
 
 Unresolved:
 
-- Run `./cloudskill-eval-claude` (one repeat, no refine) to confirm the JSON
+- Run `./cloudbox-skills-eval-claude` (one repeat, no refine) to confirm the JSON
   result-shape parsing against a live Claude Code CLI process.
 - `ollama` stayed a local, inline `call_ollama()` in `run_runtime_evals.py`
   rather than moving to `scripts/local_providers/ollama_adapter.py` — the
   registry documents the extension shape but does not force a working path to
   move file location without a second local backend actually needing it yet.
 
-CI caught a real gap in this increment: `cloudskill-eval-claude` was created
-but `cloudskill-resume` only stages/commits paths listed in its hardcoded
-`FORMAL_PATHS` array, and `cloudskill-eval-claude` was not added to it, so the
+CI caught a real gap in this increment: `cloudbox-skills-eval-claude` was created
+but `cloudbox-skills-resume` only stages/commits paths listed in its hardcoded
+`FORMAL_PATHS` array, and `cloudbox-skills-eval-claude` was not added to it, so the
 first push landed without the launcher file and `validate_pack.py` failed in
-GitHub Actions (`missing required file: cloudskill-eval-claude`) even though
+GitHub Actions (`missing required file: cloudbox-skills-eval-claude`) even though
 every local `run_all_checks.py` pass had been GREEN — local checks run against
 the working tree, not the committed diff. Fixed by adding
-`"cloudskill-eval-claude"` to `FORMAL_PATHS`, and by extending
+`"cloudbox-skills-eval-claude"` to `FORMAL_PATHS`, and by extending
 `scripts/validate_providers_contract.py` to parse that array and fail when a
 registered hosted-agent provider's `smoke_command` launcher is absent from
-it — confirmed this check fails against the pre-fix `cloudskill-resume` (RED)
+it — confirmed this check fails against the pre-fix `cloudbox-skills-resume` (RED)
 and passes after (GREEN), so the same class of provider-launcher omission is
 now caught before push, not by CI after.
 
@@ -1766,7 +1766,7 @@ Unresolved:
 - This is n=1 behavior evidence (one Ollama attempt); the repetition policy
   in `runtime-evaluation-engineering` calls for at least three repeats before
   treating a local-model behavior score as stable. A fresh
-  `./cloudskill-resume --provider ollama --force-eval` run is the next
+  `./cloudbox-skills-resume --provider ollama --force-eval` run is the next
   Ollama-dependent step, deferred at the user's request for this increment.
 - Content-fidelity risk in the Refiner: the accepted refined answer replaced
   raw's concrete authority class names (`ChamberStateAuthority`,
@@ -1894,7 +1894,7 @@ Change:
 - Align synthetic refiner checks with `extract_refined_final`.
 - Validate structured `{ "final": "..." }`, strict terminal legacy fallback,
   unstructured tag mentions, and non-terminal legacy blocks.
-- Continue through `cloudskill-resume --provider ollama` without reapplying
+- Continue through `cloudbox-skills-resume --provider ollama` without reapplying
   the already completed evolution overlay.
 
 Expected evidence:
@@ -1940,7 +1940,7 @@ Expected evidence:
 
 Commit: `61f33c39ce9ba4628dd1225ead5df9542bb64d4c`
 
-- Added `cloudskill-eval-codex`.
+- Added `cloudbox-skills-eval-codex`.
 - Added Codex CLI adapter and provider-aware resume logic.
 - Isolated Codex execution in a temporary read-only Git repository.
 - Kept Codex authentication and quota failures separate from Skill-quality results.
@@ -1962,7 +1962,7 @@ Commit: `7a67da8a62a4449b09bcd477a2aba23bf2f5a42e`
 
 Commit: `fa054afcce6e141f90eb0000dc33a76e2115330b`
 
-- Added `cloudskill-resume`.
+- Added `cloudbox-skills-resume`.
 - Added provider/process detection, source-hash ZIP reuse, stage logging, commit/push/PR continuation, and stale-lock handling.
 - Kept stashes and `.local` evidence outside commits.
 

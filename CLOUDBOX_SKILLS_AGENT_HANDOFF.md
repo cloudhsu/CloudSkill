@@ -6,8 +6,8 @@ This is the operational entry point for a new conversation or coding agent that 
 
 1. `AGENTS.md`
 2. This file
-3. `docs/CLOUDSKILL_DESIGN_AND_FLOW.md`
-4. `docs/CLOUDSKILL_CHANGE_HISTORY.md`
+3. `docs/CLOUDBOX_SKILLS_DESIGN_AND_FLOW.md`
+4. `docs/CLOUDBOX_SKILLS_CHANGE_HISTORY.md`
 5. `.agents/skills/developing-skills/SKILL.md`
 6. `.agents/skills/runtime-evaluation-engineering/SKILL.md`
 7. `.agents/skills/local-runtime-eval-debugging/SKILL.md`
@@ -509,7 +509,7 @@ was registered. Local lightweight tag `v5.8.0` resolves to
 `348063dfe0c8ee7b47d5547aeb550d289d8ba860` and is an ancestor of this base.
 
 - **Worktree state: CONCERN.** Pre-existing modifications were retained in
-  `CLOUDSKILL_AGENT_HANDOFF.md` and `docs/CLOUDSKILL_CHANGE_HISTORY.md`; the
+  `CLOUDBOX_SKILLS_AGENT_HANDOFF.md` and `docs/CLOUDBOX_SKILLS_CHANGE_HISTORY.md`; the
   approved 6.0 plan/design documents were also untracked. Do not treat this as
   a clean isolation boundary or overwrite those paths.
 - **Deterministic baseline: PASS.** Two complete
@@ -697,7 +697,7 @@ treating this static validator as execution evidence.
 - **Active branch: `main`.** PR #1 (`fix/skill-lifecycle-and-ci-20260809-013048`)
   merged 2026-08-09T08:33:29Z as merge commit `0b73ec2` (regular merge, not
   squashed, so the full 21-commit history and its messages remain
-  individually inspectable and map 1:1 to `docs/CLOUDSKILL_CHANGE_HISTORY.md`
+  individually inspectable and map 1:1 to `docs/CLOUDBOX_SKILLS_CHANGE_HISTORY.md`
   entries). GitHub Actions on `main` at that commit: SUCCESS.
 - The old branch `fix/skill-lifecycle-and-ci-20260809-013048` still exists on
   the remote (not auto-deleted on merge). Ask the user before deleting it —
@@ -755,7 +755,7 @@ treating this static validator as execution evidence.
   no refinement attempted
 - First real exercise of `codex_eval_adapter.py` since it was written
   (commit `61f33c3`) — found and fixed a real bug (`--ask-for-approval`
-  retired from the CLI), see `docs/CLOUDSKILL_CHANGE_HISTORY.md` "First live
+  retired from the CLI), see `docs/CLOUDBOX_SKILLS_CHANGE_HISTORY.md` "First live
   Codex evidence, retired CLI flag fixed, second-round grader precision
   hotfix"
 
@@ -782,13 +782,13 @@ answers to chase a score the grader was wrongly withholding.**
   79.8/100, gate PASS**, no refinement attempted (every raw attempt already
   cleared the 75-point threshold on its own). Produced with the new
   `--behavior-repeat 3` flag (see below) via
-  `./cloudskill-resume --behavior-repeat 3`. **Merge criterion 4 is now
+  `./cloudbox-skills-resume --behavior-repeat 3`. **Merge criterion 4 is now
   satisfied with real evidence, not just a capable flag.**
 - The earlier `local-review-20260809-134358.zip` bundle (routing repeat=3,
   Behavior still n=1 at that point) is superseded by this one; the
   `behavior_command` hard-coded-`--repeat 1` limitation it exposed is fixed
   (`scripts/run_local_eval_review.py --behavior-repeat N`, threaded through
-  `cloudskill-resume --behavior-repeat N`, forces `--force-eval` since the
+  `cloudbox-skills-resume --behavior-repeat N`, forces `--force-eval` since the
   ZIP-reuse hash check cannot detect a differing repeat count).
 
 First live Claude evidence: `CloudSkill-local-eval-review-local-review-20260809-134008.zip`
@@ -799,7 +799,7 @@ First live Claude evidence: `CloudSkill-local-eval-review-local-review-20260809-
 - Raw R07 Behavior: **78.0/100, gate PASS outright** (n=1, no refinement needed/attempted)
 - `final-answer-discipline` and `assumptions-unknowns` both full marks — confirms the R07 grader precision hotfix generalizes beyond the Ollama sample it was fixed against.
 - Reached only after fixing two real bugs found by this live run — see
-  `docs/CLOUDSKILL_CHANGE_HISTORY.md` 2026-08-09 "First live Claude/Ollama
+  `docs/CLOUDBOX_SKILLS_CHANGE_HISTORY.md` 2026-08-09 "First live Claude/Ollama
   Runtime Eval confirmation + real adapter bugs found and fixed".
 - Same behavior-repeat caveat as Ollama above: this is n=1, not n=3.
 
@@ -985,7 +985,7 @@ Evidence status and next action:
 1. ~~Restore the R02 `code-review` plus `equipment-domain-modeling` boundary~~ — resolved, confirmed 3/3 in the 20260809-113507 bundle.
 2. ~~Use a structured `{ "final": "..." }` Behavior output contract~~ — resolved; contract ID/fingerprint confirmed consistent across environment.json and both raw/refined JSONL records.
 3. ~~Reject unstructured refinement candidates~~ — resolved; the accepted refined R07 answer passes `final-answer-discipline` (no planning leak) in the latest bundle.
-4. ~~R07 Behavior repeat is hard-coded to 1~~ — fully resolved, including real evidence. `--behavior-repeat 3` run completed: 3/3 attempts passed (78.0/80.7/80.7, avg 79.8), gate PASS. Claude provider is still n=1 for Behavior (`./cloudskill-eval --provider claude --behavior-repeat 3`, bypassing the fixed-repeat smoke wrapper, would get equivalent evidence there if wanted later).
+4. ~~R07 Behavior repeat is hard-coded to 1~~ — fully resolved, including real evidence. `--behavior-repeat 3` run completed: 3/3 attempts passed (78.0/80.7/80.7, avg 79.8), gate PASS. Claude provider is still n=1 for Behavior (`./cloudbox-skills-eval --provider claude --behavior-repeat 3`, bypassing the fixed-repeat smoke wrapper, would get equivalent evidence there if wanted later).
 5. Investigate whether the Refiner Prompt should be strengthened to preserve raw's concrete authority identifiers (`ChamberStateAuthority`, `WaferCustodyAuthority`, `FencingToken`, exact `wafer location`/`occupancy` phrasing) instead of paraphrasing them away. Currently n=1 evidence only — do not change the Refiner Prompt until repeat evidence confirms this is systematic, not one sample's variance.
 6. ~~Run the quota-conscious Codex comparison~~ — resolved. Quota recovered
    earlier than expected the same day; user asked for it to be run. First
@@ -1045,45 +1045,45 @@ Evidence status and next action:
 Static/status only:
 
 ```bash
-./cloudskill-resume --status
+./cloudbox-skills-resume --status
 python3 scripts/run_all_checks.py
 ```
 
 Fresh Ollama evidence:
 
 ```bash
-./cloudskill-resume --provider ollama --force-eval
+./cloudbox-skills-resume --provider ollama --force-eval
 ```
 
 Release-grade Ollama R07 Behavior evidence (repeat>=3, ~25+ minutes, costs
 3x the usual Behavior model calls; routing already defaults to repeat=3):
 
 ```bash
-./cloudskill-resume --behavior-repeat 3
+./cloudbox-skills-resume --behavior-repeat 3
 ```
 
 Fresh Codex evidence:
 
 ```bash
 codex login status
-./cloudskill-resume --provider codex --force-eval
+./cloudbox-skills-resume --provider codex --force-eval
 ```
 
 Fresh Claude evidence:
 
 ```bash
 claude auth status
-./cloudskill-resume --provider claude --force-eval
+./cloudbox-skills-resume --provider claude --force-eval
 ```
 
 Resume after interruption without forcing a second completed run:
 
 ```bash
-./cloudskill-resume --provider ollama
+./cloudbox-skills-resume --provider ollama
 # or
-./cloudskill-resume --provider codex
+./cloudbox-skills-resume --provider codex
 # or
-./cloudskill-resume --provider claude
+./cloudbox-skills-resume --provider claude
 ```
 
 ## Evidence handoff contract
@@ -1158,8 +1158,8 @@ When adding a new consumer:
 Copy this into a new conversation or agent task:
 
 ```text
-Continue CloudSkill evolution from the repository state described in CLOUDSKILL_AGENT_HANDOFF.md.
-Read AGENTS.md, docs/CLOUDSKILL_DESIGN_AND_FLOW.md, docs/CLOUDSKILL_CHANGE_HISTORY.md,
+Continue CloudSkill evolution from the repository state described in CLOUDBOX_SKILLS_AGENT_HANDOFF.md.
+Read AGENTS.md, docs/CLOUDBOX_SKILLS_DESIGN_AND_FLOW.md, docs/CLOUDBOX_SKILLS_CHANGE_HISTORY.md,
 and the developing-skills/runtime-evaluation-engineering/local-runtime-eval-debugging Skills.
 PR #1 already merged to main (commit 0b73ec2) -- start this increment from a fresh
 single-purpose branch off main, not from the old merged branch.
@@ -1172,8 +1172,8 @@ Do not merge this increment's PR or mark it ready until the release criteria are
 ## Eval Inbox import path
 
 `.local/eval-inbox/` in this repository is initialized (via
-`scripts/install.sh --config-only`, self-referential: `.cloudskill/config.local.json`
-points `cloudskill_repository` and `eval_inbox` at this repository itself).
+`scripts/install.sh --config-only`, self-referential: `.cloudbox-skills/config.local.json`
+points `cloudbox_skills_repository` and `eval_inbox` at this repository itself).
 Structure: `candidates/`, `manual-review/`, `processed/`, `rejected/`,
 `imports/` (drop zips exported from a disconnected/external session here),
 `imports/processed/` (already-merged zips, kept for audit).
@@ -1217,17 +1217,17 @@ document.
    `runtime-evaluation-engineering/references/case-and-grader-design.md`
    ("Local small-model routing: at least three repetitions"). A single
    sample passing is diagnostic evidence, not release evidence.
-5. At least one Codex comparison run (`./cloudskill-eval-codex`) has been
+5. At least one Codex comparison run (`./cloudbox-skills-eval-codex`) has been
    executed and interpreted, OR an explicit, dated reason is recorded here
    for why it was deferred (for example, quota unavailable).
 6. If a `claude` provider run was added in this increment, its first live
-   smoke run (`./cloudskill-eval-claude`) has been executed at least once and
+   smoke run (`./cloudbox-skills-eval-claude`) has been executed at least once and
    the `--output-format json` parsing assumption in
    `scripts/claude_eval_adapter.py` is confirmed against real output, OR an
    explicit, dated reason is recorded here for why it was deferred.
 7. Ollama, Codex, and Claude results are reported separately in the
    accepted evidence — never averaged into one provider-independent score.
-8. `docs/CLOUDSKILL_DESIGN_AND_FLOW.md`, `docs/CLOUDSKILL_CHANGE_HISTORY.md`,
+8. `docs/CLOUDBOX_SKILLS_DESIGN_AND_FLOW.md`, `docs/CLOUDBOX_SKILLS_CHANGE_HISTORY.md`,
    and this handoff reflect the final accepted state — no "Unresolved" bullet
    that was actually resolved should remain unresolved in the text.
 9. The user has reviewed the PR diff and raised no open objection.
@@ -1254,4 +1254,4 @@ An evolution round is complete only when it provides:
 - one current Runtime Eval bundle or an explicit reason it was not run;
 - an interpretation separating harness defects from model/Skill defects;
 - updated design/history/handoff documentation;
-- a safe commit/push path through `cloudskill-resume`.
+- a safe commit/push path through `cloudbox-skills-resume`.

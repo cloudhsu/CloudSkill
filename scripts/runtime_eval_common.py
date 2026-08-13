@@ -20,7 +20,7 @@ DEFAULT_CASES = ROOT / "evals" / "runtime" / "cases" / "canary.json"
 DEFAULT_SCHEMA = ROOT / "evals" / "runtime" / "schemas" / "routing-decision.schema.json"
 MANIFEST = ROOT / "SKILL_MANIFEST.json"
 VERSION_FILE = ROOT / "VERSION"
-ROUTER_SKILL = "using-cloudskill"
+ROUTER_SKILL = "using-cloudbox-skills"
 ROUTER_SKILL_PATH = ROOT / ".agents" / "skills" / ROUTER_SKILL / "SKILL.md"
 ROUTING_MAP_PATH = (
     ROOT
@@ -352,12 +352,12 @@ def _routing_rules(compact: bool = False) -> str:
 - When the component contract is already defined and the requested deliverable is Sequence/Equipment Service responsibility, shared-resource ownership, reconnect, restart, or failover, choose equipment-control-architecture as primary without equipment-domain-modeling.
 - Do not add semiconductor-equipment-domain-knowledge merely because chamber, valve, transfer, or completion vocabulary appears; add it only when physical purpose, process meaning, readiness criteria, or completion evidence is actually unresolved.
 - execution_order must contain the selected primary/supporting set exactly once and cannot be empty when primary_skill is not null.
-- using-cloudskill is the router and must be absent downstream. Translation/simple rewriting/trivial work selects no skill.
+- using-cloudbox-skills is the router and must be absent downstream. Translation/simple rewriting/trivial work selects no skill.
 """
     return """Mandatory routing rules:
 - Return exactly one JSON object matching the supplied schema. Do not add Markdown fences.
 - Route by decision/failure boundary and requested deliverable, never by prompt language or isolated keywords.
-- using-cloudskill is the router and MUST NOT appear in primary_skill or supporting_skills for ordinary downstream tasks.
+- using-cloudbox-skills is the router and MUST NOT appear in primary_skill or supporting_skills for ordinary downstream tasks.
 - Translation, simple rewriting, trivial calculation, and inspection-only work require no downstream skill.
 - Do not solve the engineering task during a Routing Eval.
 
@@ -372,7 +372,7 @@ Before returning JSON, perform this checklist:
    - Add equipment-control-architecture to a component-contract task when that separate cross-layer responsibility deliverable is explicitly requested.
    - Do not add semiconductor-equipment-domain-knowledge when physical purpose and completion evidence are explicitly supplied.
 3. Build execution_order from the selected set: primary_skill plus supporting_skills, each exactly once. If primary_skill is not null, execution_order must not be empty.
-4. Confirm rejected_skills does not overlap the selected set and using-cloudskill is absent downstream.
+4. Confirm rejected_skills does not overlap the selected set and using-cloudbox-skills is absent downstream.
 
 - The primary owner does not have to execute first when a supporting analysis establishes inputs first.
 - confidence must be high, medium, or low.
@@ -561,7 +561,7 @@ def build_routing_prompt(
     if evidence["overflow_tokens"]:
         raise ContextBudgetError(
             "required routing context exceeds the configured input budget; "
-            "CloudBox refuses to truncate using-cloudskill/SKILL.md, the routing reference, "
+            "CloudBox refuses to truncate using-cloudbox-skills/SKILL.md, the routing reference, "
             "the routing contract, schema, catalog, or current case. Increase --num-ctx or reduce "
             "--context-reserve-tokens.",
             evidence,
@@ -589,7 +589,7 @@ def assert_router_context(bundle: dict[str, Any]) -> None:
     system_prompt = bundle.get("system_prompt", "")
     for marker in (
         "Routing decision contract",
-        "using-cloudskill is the router",
+        "using-cloudbox-skills is the router",
         "Prompt language alone is never a routing condition",
     ):
         if marker not in system_prompt:
@@ -676,7 +676,7 @@ def build_selected_skills_prompt(
     if not selected:
         return None
     if ROUTER_SKILL in selected:
-        raise RuntimeError("using-cloudskill is the router and cannot be loaded as a downstream selected skill")
+        raise RuntimeError("using-cloudbox-skills is the router and cannot be loaded as a downstream selected skill")
     if reserve_output_tokens < 1 or reserve_output_tokens >= num_ctx:
         raise ValueError("reserve_output_tokens must be positive and smaller than num_ctx")
 
@@ -850,7 +850,7 @@ def validate_decision_shape(decision: Any, valid_skills: set[str]) -> list[str]:
     if primary is None and (supporting or order):
         errors.append("no-skill decisions must have empty supporting_skills and execution_order")
     if ROUTER_SKILL in supporting:
-        errors.append("using-cloudskill is the router and must not appear in supporting_skills")
+        errors.append("using-cloudbox-skills is the router and must not appear in supporting_skills")
     return errors
 
 

@@ -2,9 +2,9 @@
 .local/
 __pycache__/
 .cloudskill-backup/
-.cloudskill/config.local.json
-.cloudskill/eval-outbox/
-.cloudskill/.gitignore
+.cloudbox-skills/config.local.json
+.cloudbox-skills/eval-outbox/
+.cloudbox-skills/.gitignore
 .codex/config.toml
 *.session.jsonl
 *.transcript.md
@@ -17,3 +17,4 @@ evals/runtime/reports/generated/
 artifacts/runtime-eval*.jsonl
 artifacts/runtime-eval*.json
 .worktrees/
+/.cloudskill/

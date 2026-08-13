@@ -40,7 +40,7 @@ contract drift is retained as unsupported evidence before candidate routing.
 
 | Skill | Primary use |
 |---|---|
-| `using-cloudskill` | Select and order the smallest sufficient skill set |
+| `using-cloudbox-skills` | Select and order the smallest sufficient skill set |
 | `developing-skills` | Develop and release skills with routing and behavior evidence |
 | `architecture-review` | Reconstruct and compare architecture decisions |
 | `semiconductor-equipment-domain-knowledge` | EFEM/material flow, component purpose, vacuum, PVD, process readiness, and physical-to-software interpretation |
@@ -90,9 +90,9 @@ See [docs/README.md](docs/README.md) for the document ownership map.
 
 ## Evolution and handoff
 
-- [Design purpose and flow](docs/CLOUDSKILL_DESIGN_AND_FLOW.md)
-- [Evolution change history](docs/CLOUDSKILL_CHANGE_HISTORY.md)
-- [Current agent/conversation handoff](CLOUDSKILL_AGENT_HANDOFF.md)
+- [Design purpose and flow](docs/CLOUDBOX_SKILLS_DESIGN_AND_FLOW.md)
+- [Evolution change history](docs/CLOUDBOX_SKILLS_CHANGE_HISTORY.md)
+- [Current agent/conversation handoff](CLOUDBOX_SKILLS_AGENT_HANDOFF.md)
 
 Start with the handoff document when continuing an existing multi-session Skill evolution task.
 

@@ -105,7 +105,7 @@ function Write-LocalConfig {
     $config = [ordered]@{
         schema_version = '1.0'
         cloudskill_version = $version
-        cloudskill_repository = $RepoRoot
+        cloudbox_skills_repository = $RepoRoot
         eval_inbox = $Inbox
         sensitive_terms_path = $SensitiveTerms
         default_sanitization = $true
@@ -169,9 +169,9 @@ if (-not $SkipLocalConfig) {
     }
     $terms = Initialize-EvalInbox $inbox
     if ($Scope -eq 'user') {
-        $configPath = Join-Path $HOME '.cloudskill\config.json'
+        $configPath = Join-Path $HOME '.cloudbox-skills\config.json'
     } else {
-        $configDir = Join-Path $project '.cloudskill'
+        $configDir = Join-Path $project '.cloudbox-skills'
         New-Item -ItemType Directory -Force $configDir | Out-Null
         $configPath = Join-Path $configDir 'config.local.json'
         Set-ManagedBlock (Join-Path $configDir '.gitignore') "config.local.json`neval-outbox/"

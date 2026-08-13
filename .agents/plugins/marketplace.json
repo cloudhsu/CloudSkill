@@ -5,7 +5,7 @@
   },
   "plugins": [
     {
-      "name": "cloudbox",
+      "name": "cloudbox-skills",
       "source": {
         "source": "local",
         "path": "./"

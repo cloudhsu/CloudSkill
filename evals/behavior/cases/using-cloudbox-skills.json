@@ -1,9 +1,9 @@
 {
-  "skill": "using-cloudskill",
+  "skill": "using-cloudbox-skills",
   "cases": [
     {
       "id": "USE-BEH-001",
-      "skill": "using-cloudskill",
+      "skill": "using-cloudbox-skills",
       "type": "recognition",
       "prompt": "A legacy Qt utility needs architecture review, compatibility-preserving migration, release gates, and a controlled handoff. Select the relevant skills and order them.",
       "expected_routing": true,
@@ -25,7 +25,7 @@
     },
     {
       "id": "USE-BEH-002",
-      "skill": "using-cloudskill",
+      "skill": "using-cloudbox-skills",
       "type": "application",
       "prompt": "Plan how CloudSkill should handle a Qt 5 to Qt 6 migration that also changes duplicated components and release documentation.",
       "expected_routing": true,
@@ -48,7 +48,7 @@
     },
     {
       "id": "USE-BEH-003",
-      "skill": "using-cloudskill",
+      "skill": "using-cloudbox-skills",
       "type": "counterexample",
       "prompt": "Translate this sentence into Traditional Chinese: The build passed.",
       "expected_routing": false,
@@ -69,7 +69,7 @@
     },
     {
       "id": "USE-BEH-004",
-      "skill": "using-cloudskill",
+      "skill": "using-cloudbox-skills",
       "type": "application",
       "prompt": "Plan a legacy equipment migration involving distributed IPCs, Sequence, shared robot resources, config-generated chamber UI, state/command modeling, compatibility and release gates.",
       "expected_routing": true,
@@ -94,7 +94,7 @@
     },
     {
       "id": "USE-BEH-005",
-      "skill": "using-cloudskill",
+      "skill": "using-cloudbox-skills",
       "type": "application",
       "prompt": "First explain EFEM, vacuum gauges and PVD principles; then design loadlock pump/vent Sequence and an MFC state model. Select and order the smallest sufficient skills.",
       "expected_routing": true,
@@ -119,7 +119,7 @@
     },
     {
       "id": "USE-BEH-006",
-      "skill": "using-cloudskill",
+      "skill": "using-cloudbox-skills",
       "type": "application",
       "prompt": "CloudBox and Superpowers are both installed. For this equipment architecture task, use CloudBox only and do not run Superpowers workflows.",
       "expected_routing": true,
@@ -145,7 +145,7 @@
     },
     {
       "id": "USE-BEH-007",
-      "skill": "using-cloudskill",
+      "skill": "using-cloudbox-skills",
       "type": "application",
       "prompt": "Use an external workflow plugin for planning and TDD, and CloudBox for semiconductor domain interpretation, equipment architecture, and state modeling. Define the execution order.",
       "expected_routing": true,

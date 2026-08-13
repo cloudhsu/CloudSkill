@@ -93,7 +93,7 @@ def resolve_private_terms(inbox: Path, config_path: Path | None = None) -> list[
     if selected is None:
         selected = find_project_config(ROOT)
         if selected is None:
-            user_config = Path.home() / ".cloudskill" / "config.json"
+            user_config = Path.home() / ".cloudbox-skills" / "config.json"
             selected = user_config if user_config.is_file() else None
     if selected is None or not selected.is_file():
         return []
@@ -127,7 +127,7 @@ def resolve_inbox(args: argparse.Namespace) -> tuple[Path, list[str]]:
             project_config = find_project_config(ROOT)
             if project_config is not None:
                 config_paths.append(project_config)
-            config_paths.append(Path.home() / ".cloudskill" / "config.json")
+            config_paths.append(Path.home() / ".cloudbox-skills" / "config.json")
         for config_path in config_paths:
             if not config_path.is_file():
                 continue
@@ -140,7 +140,7 @@ def resolve_inbox(args: argparse.Namespace) -> tuple[Path, list[str]]:
     try:
         config_path = Path(args.config).expanduser().resolve() if args.config else find_project_config(ROOT)
         if config_path is None:
-            config_path = Path.home() / ".cloudskill" / "config.json"
+            config_path = Path.home() / ".cloudbox-skills" / "config.json"
         if config_path.is_file():
             config = load_config(config_path)
             terms = resolve_private_terms(config["_inbox_path"], config_path)

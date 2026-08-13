@@ -20,7 +20,7 @@ installation.
 ## Versioned manual export
 
 On the first interactive export, provide a project-safe export name. It is
-stored in ignored `.cloudskill/config.local.json` as `export_project_name` and
+stored in ignored `.cloudbox-skills/config.local.json` as `export_project_name` and
 reused later. A non-interactive runner must configure it first.
 
 ```bash
@@ -56,7 +56,7 @@ public registry:
 ```
 
 ```bash
-python3 scripts/cloudskill_evolution.py source sync --registry .cloudskill/evolution-sources.private.json --exchange /private/eval-exchange --source-id engine-history
+python3 scripts/cloudbox_skills_evolution.py source sync --registry .cloudbox-skills/evolution-sources.private.json --exchange /private/eval-exchange --source-id engine-history
 ```
 
 No changed commit means `NO_CHANGE` and `model_calls: 0`. Background authority

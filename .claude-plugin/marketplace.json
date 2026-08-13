@@ -6,7 +6,7 @@
   "description": "CloudBox architecture and equipment engineering workflows.",
   "plugins": [
     {
-      "name": "cloudbox",
+      "name": "cloudbox-skills",
       "source": "./",
       "description": "Architecture, equipment-domain, quality, governance, refactoring, and Eval workflows.",
       "category": "Development"

@@ -91,7 +91,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--allow-context-baseline",
         action="store_true",
-        help="Allow executable none/manifest diagnostic baselines. Without this flag Ollama refuses a run that omits using-cloudskill/SKILL.md.",
+        help="Allow executable none/manifest diagnostic baselines. Without this flag Ollama refuses a run that omits using-cloudbox-skills/SKILL.md.",
     )
     parser.add_argument(
         "--context-reserve-tokens",
@@ -505,7 +505,7 @@ def deterministic_contract_repair(
     new_supporting = _dedupe_strings(supporting)
     if isinstance(primary, str):
         new_supporting = [item for item in new_supporting if item != primary]
-    new_supporting = [item for item in new_supporting if item != "using-cloudskill"]
+    new_supporting = [item for item in new_supporting if item != "using-cloudbox-skills"]
     if new_supporting != supporting:
         changes.append("normalized supporting_skills duplicates/overlap/router inclusion")
         repaired["supporting_skills"] = new_supporting
@@ -551,7 +551,7 @@ def validate_mode(args: argparse.Namespace, context_mode: str) -> None:
         omits_router = args.eval_kind == "routing" and context_mode in {"none", "manifest"}
         if omits_router and not args.allow_context_baseline:
             raise SystemExit(
-                "Refusing invalid Ollama score: using-cloudskill/SKILL.md is not loaded in "
+                "Refusing invalid Ollama score: using-cloudbox-skills/SKILL.md is not loaded in "
                 f"--context-mode {context_mode}. Use --context-mode router, or add "
                 "--allow-context-baseline only for an explicitly labeled diagnostic comparison."
             )

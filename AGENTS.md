@@ -27,7 +27,7 @@ Act as an architecture peer and implementation assistant.
 
 ## Skill use and composition
 
-CloudBox is the user-facing plugin brand; `CloudSkill` remains the repository and compatibility name. Use `using-cloudskill` when routing or composition is non-obvious. Select the smallest sufficient skill set before substantial analysis or modification.
+CloudBox is the user-facing plugin brand; `CloudSkill` remains the repository and compatibility name. Use `using-cloudbox-skills` when routing or composition is non-obvious. Select the smallest sufficient skill set before substantial analysis or modification.
 
 When multiple skills apply, use this order:
 
@@ -43,7 +43,7 @@ When CloudBox coexists with Superpowers or another workflow plugin, use one top-
 
 ## Multi-session Skill evolution handoff
 
-When continuing an existing CloudSkill evolution, read `CLOUDSKILL_AGENT_HANDOFF.md` before modifying Skills, Evals, graders, or runtime tooling. Then read the design/flow and change-history documents it references.
+When continuing an existing CloudSkill evolution, read `CLOUDBOX_SKILLS_AGENT_HANDOFF.md` before modifying Skills, Evals, graders, or runtime tooling. Then read the design/flow and change-history documents it references.
 
 Update the handoff and change history in the same increment whenever the current evidence, open failure layer, continuation command, provider path, or release decision changes. Repository evidence and the newest review ZIP take precedence over remembered chat context.
 
@@ -118,12 +118,12 @@ When equipment software is in scope:
 
 When the user says `整理成正向案例` or `整理成負向案例`, use `developing-skills` to capture only the relevant current interaction as an Eval candidate.
 
-- Read project `.cloudskill/config.local.json` first, then user `~/.cloudskill/config.json`.
+- Read project `.cloudbox-skills/config.local.json` first, then user `~/.cloudbox-skills/config.json`.
 - Sanitization is mandatory. Remove or generalize company, customer, person, project, product, machine, site, network, path, schedule, recipe, safety-limit, and other identifying details before writing.
 - Preserve the technical mechanism, user correction, expected skills, required behavior, forbidden behavior, and evidence status.
 - Never save the raw or complete transcript. If safe sanitization is uncertain, route the candidate to manual review rather than the normal candidate queue.
 - Daily capture may write only to the configured private Eval Inbox. It must not modify formal `evals/`, skill files, Git commits, tags, branches, or remotes.
-- When neither config path resolves to a reachable CloudSkill repository (a disconnected/external session), use `developing-skills`' `assets/export_eval_candidate.py` instead of guessing a write location: it writes the same sanitized candidate into a local, config-free `.cloudskill/eval-outbox/` and packages it as a zip for the user to transfer into `<CloudSkillRepo>/.local/eval-inbox/imports/`, where `scripts/import_eval_candidates.py` merges it after re-scanning against the repository's own private terms.
+- When neither config path resolves to a reachable CloudSkill repository (a disconnected/external session), use `developing-skills`' `assets/export_eval_candidate.py` instead of guessing a write location: it writes the same sanitized candidate into a local, config-free `.cloudbox-skills/eval-outbox/` and packages it as a zip for the user to transfer into `<CloudSkillRepo>/.local/eval-inbox/imports/`, where `scripts/import_eval_candidates.py` merges it after re-scanning against the repository's own private terms.
 - Convert candidates into formal routing or behavior Evals only from the CloudSkill repository after explicit batch-review instruction, deduplication, ownership analysis, sensitive-content scanning, and human review of the diff.
 
 ## Project-history-derived Eval capture

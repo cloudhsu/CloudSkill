@@ -46,7 +46,7 @@ fi
 
 if [ -z "$PYTHON" ]; then
   echo "ERROR: Python 3.10 or newer was not found."
-  echo "Install Python 3.11, then run ./cloudskill-eval again."
+  echo "Install Python 3.11, then run ./cloudbox-skills-eval again."
   exit 2
 fi
 

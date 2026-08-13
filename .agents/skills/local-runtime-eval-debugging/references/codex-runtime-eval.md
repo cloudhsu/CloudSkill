@@ -18,19 +18,19 @@ The local path reuses saved Codex CLI authentication. It does not read, copy, pr
 Quota-conscious smoke test:
 
 ```bash
-./cloudskill-eval-codex
+./cloudbox-skills-eval-codex
 ```
 
 Three-repeat comparison:
 
 ```bash
-./cloudskill-eval-codex --repeat 3
+./cloudbox-skills-eval-codex --repeat 3
 ```
 
 Optional explicit model override:
 
 ```bash
-./cloudskill-eval-codex --codex-model <model-name>
+./cloudbox-skills-eval-codex --codex-model <model-name>
 ```
 
 ## Execution contract

@@ -66,7 +66,7 @@ It does not change the official VERSION or CHANGELOG yet.
 
 Recommended review:
   cd "$TARGET"
-  git diff -- .agents/skills/using-cloudskill
+  git diff -- .agents/skills/using-cloudbox-skills
   git diff -- .agents/skills/developing-skills
   git diff -- evals SKILL_MANIFEST.json
 

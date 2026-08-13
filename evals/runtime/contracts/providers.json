@@ -9,7 +9,7 @@
       "default_model": "qwen3:4b",
       "requires": "a local Ollama daemon reachable at --ollama-url with the requested model pulled",
       "refinement_default": "auto",
-      "smoke_command": "./cloudskill-eval"
+      "smoke_command": "./cloudbox-skills-eval"
     },
     "codex": {
       "family": "hosted-agent",
@@ -18,7 +18,7 @@
       "default_model": "codex-default",
       "requires": "the codex CLI installed and authenticated via `codex login`",
       "refinement_default": "skip",
-      "smoke_command": "./cloudskill-eval-codex"
+      "smoke_command": "./cloudbox-skills-eval-codex"
     },
     "claude": {
       "family": "hosted-agent",
@@ -27,13 +27,13 @@
       "default_model": "claude-default",
       "requires": "the claude CLI installed and authenticated via `claude auth login`",
       "refinement_default": "skip",
-      "smoke_command": "./cloudskill-eval-claude"
+      "smoke_command": "./cloudbox-skills-eval-claude"
     }
   },
   "required_consumer_paths": [
     "scripts/run_runtime_evals.py",
     "scripts/run_local_eval_review.py",
-    "cloudskill-resume"
+    "cloudbox-skills-resume"
   ],
   "extension_guide": [
     "Local backend: add scripts/local_providers/<name>_adapter.py exposing a call(...) function with the same signature as call_ollama in scripts/run_runtime_evals.py, then add a 'family': 'local' entry here.",

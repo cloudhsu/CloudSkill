@@ -40,7 +40,7 @@ Long evolution work can span conversations or agents. Root handoff and history d
 
 ```text
 User request
-  -> using-cloudskill routes by decision/failure boundary
+  -> using-cloudbox-skills routes by decision/failure boundary
   -> selected Skill instructions and references are loaded
   -> model produces a structured final deliverable
   -> deterministic routing and behavior graders evaluate explicit evidence
@@ -49,7 +49,7 @@ User request
   -> developing-skills governs the smallest Skill or Eval change
   -> static checks run
   -> Ollama and/or Codex Runtime Eval runs
-  -> cloudskill-resume commits, pushes, updates the Draft PR, and watches CI
+  -> cloudbox-skills-resume commits, pushes, updates the Draft PR, and watches CI
   -> handoff and change history are updated
 ```
 
@@ -91,20 +91,20 @@ evals/runtime/contracts/providers.json
 `scripts/providers_contract.py` is the only executable adapter for that data
 (`PROVIDER_IDS`, `LOCAL_PROVIDER_IDS`, `HOSTED_AGENT_PROVIDER_IDS`,
 `get_provider`, `refinement_default`). `scripts/run_runtime_evals.py`,
-`scripts/run_local_eval_review.py`, and `cloudskill-resume` must read the
+`scripts/run_local_eval_review.py`, and `cloudbox-skills-resume` must read the
 provider ID set from this contract rather than hand-copying a literal tuple or
 case statement. `scripts/validate_providers_contract.py` checks the contract
 shape, that every registered hosted-agent adapter exports the expected
 `<name>_preflight`/`call_<name>_cli` functions, that every registered local
 adapter's `call_site` function exists, and that every required consumer
-(including the shell-based `cloudskill-resume`, checked by literal scan since
+(including the shell-based `cloudbox-skills-resume`, checked by literal scan since
 shell cannot import Python) actually reaches every registered provider ID.
 It also runs the same two mutation-test categories used for the Behavior
 output contract: a positive propagation check (AST-parses each Python
 consumer's `--provider` `choices=` expression and requires it to reference
 `PROVIDER_IDS` symbolically, not a copied tuple, so a contract edit
 propagates without editing the consumer) and a negative drift-injection scan
-(every other script and `cloudskill-resume`'s case statement must not
+(every other script and `cloudbox-skills-resume`'s case statement must not
 contain a hand-typed provider tuple/pattern that bypasses the registry).
 
 Two provider families exist:

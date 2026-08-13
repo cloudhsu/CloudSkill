@@ -1,9 +1,9 @@
 {
-  "skill": "using-cloudskill",
+  "skill": "using-cloudbox-skills",
   "cases": [
     {
       "id": "USE-CONV-001",
-      "skill": "using-cloudskill",
+      "skill": "using-cloudbox-skills",
       "type": "application",
       "prompt": "這段 C# NetworkStream 程式送出命令後立刻收到成功，但懷疑 dictionary 留有上一輪資料、buffer 殘留或 thread-safe 問題，也可能發生重送。該使用哪些技能？",
       "expected_routing": true,
@@ -12,7 +12,7 @@
         "routes primarily to code-review",
         "focuses on executable state, concurrency, duplicate execution, stale response and timeout ordering",
         "adds equipment-domain-modeling only if the requested fix changes command/readback state semantics",
-        "does not list using-cloudskill as a downstream supporting skill"
+        "does not list using-cloudbox-skills as a downstream supporting skill"
       ],
       "forbidden_behaviors": [
         "routes primarily to development-process-tailoring",
@@ -29,7 +29,7 @@
     },
     {
       "id": "USE-CONV-002",
-      "skill": "using-cloudskill",
+      "skill": "using-cloudbox-skills",
       "type": "application",
       "prompt": "同一批更新資料要拆成原始資料、管理層報告與工程師學習文件；成功率只能統計能對應實際版本的紀錄，無版本資料要隔離但仍揭露。該如何選技能？",
       "expected_routing": true,
@@ -56,7 +56,7 @@
     },
     {
       "id": "USE-CONV-003",
-      "skill": "using-cloudskill",
+      "skill": "using-cloudbox-skills",
       "type": "application",
       "prompt": "設計一個小型員工訂餐 Web 系統，包含登入、RBAC、SQLite、同時下單、儲值歷史、NAS 容器部署、備份與手機 UI。需要哪些技能？",
       "expected_routing": true,
@@ -81,14 +81,14 @@
     },
     {
       "id": "USE-CONV-004",
-      "skill": "using-cloudskill",
+      "skill": "using-cloudbox-skills",
       "type": "recognition",
       "prompt": "請根據我們過去的對話，自動優化已安裝的技能與插件，並提供可覆蓋本機 clone 的版本。",
       "expected_routing": true,
       "expected_alternative_skill": null,
       "required_behaviors": [
         "routes downstream work to developing-skills",
-        "does not list using-cloudskill as a supporting downstream skill",
+        "does not list using-cloudbox-skills as a supporting downstream skill",
         "uses only available interaction evidence and repository content",
         "requires sanitization, owner mapping, RED cases and a reviewable delivery",
         "reports connector write limitations truthfully"
@@ -109,7 +109,7 @@
     },
     {
       "id": "USE-CONV-005",
-      "skill": "using-cloudskill",
+      "skill": "using-cloudbox-skills",
       "type": "counterexample",
       "prompt": "列出目前畫面上已安裝的技能名稱，不要修改任何技能。",
       "expected_routing": false,
@@ -131,7 +131,7 @@
     },
     {
       "id": "USE-CONV-006",
-      "skill": "using-cloudskill",
+      "skill": "using-cloudbox-skills",
       "type": "counterexample",
       "prompt": "請把『系統已完成更新』翻譯成英文。",
       "expected_routing": false,
@@ -141,7 +141,7 @@
         "treats prompt language as irrelevant to routing"
       ],
       "forbidden_behaviors": [
-        "routes to using-cloudskill because the prompt is Chinese",
+        "routes to using-cloudbox-skills because the prompt is Chinese",
         "routes to document-governance because the sentence contains system and update"
       ],
       "required_artifacts": [],
@@ -152,7 +152,7 @@
     },
     {
       "id": "USE-CONV-007",
-      "skill": "using-cloudskill",
+      "skill": "using-cloudbox-skills",
       "type": "recognition",
       "prompt": "Design ownership, shared-resource arbitration, restart recovery, reconnect, and failover for a distributed equipment system where each chamber has an independent IPC.",
       "expected_routing": true,
@@ -176,7 +176,7 @@
     },
     {
       "id": "USE-CONV-008",
-      "skill": "using-cloudskill",
+      "skill": "using-cloudbox-skills",
       "type": "recognition",
       "prompt": "Review 這段 C# callback ordering、timeout、late response 與 stale dictionary state，確認是否可能 duplicate send。",
       "expected_routing": true,
@@ -201,7 +201,7 @@
     },
     {
       "id": "USE-CONV-009",
-      "skill": "using-cloudskill",
+      "skill": "using-cloudbox-skills",
       "type": "discipline",
       "prompt": "請輸出這項任務的 primary_skill、supporting_skills、rejected_skills 與 execution_order。主要交付是多受眾更新報告，但要先定義版本成功率的分母與排除條件。",
       "expected_routing": true,
@@ -210,7 +210,7 @@
         "sets primary_skill to document-governance",
         "includes software-quality-iso25010 as supporting",
         "places software-quality-iso25010 before document-governance in execution_order",
-        "does not include using-cloudskill in the downstream list"
+        "does not include using-cloudbox-skills in the downstream list"
       ],
       "forbidden_behaviors": [
         "forces primary_skill to be first in execution_order",

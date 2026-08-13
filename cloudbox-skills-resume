@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # CloudSkill interruption-safe continuation command.
 # Run from the repository root or any subdirectory:
-#   ./cloudskill-resume
-#   ./cloudskill-resume --status
+#   ./cloudbox-skills-resume
+#   ./cloudbox-skills-resume --status
 
 set -Eeuo pipefail
 
@@ -17,7 +17,7 @@ COMMIT_MESSAGE="feat: continue CloudSkill lifecycle and runtime evaluation"
 
 usage() {
   cat <<'EOF'
-Usage: ./cloudskill-resume [options]
+Usage: ./cloudbox-skills-resume [options]
 
 Options:
   --status       Show the current branch, Eval, ZIP, PR, and stash state only.
@@ -126,7 +126,7 @@ fi
 }
 cd "$ROOT"
 
-STATE_DIR="$ROOT/.local/cloudskill-resume"
+STATE_DIR="$ROOT/.local/cloudbox-skills-resume"
 LOCK_DIR="$STATE_DIR/lock"
 STATUS_FILE="$STATE_DIR/STATUS.txt"
 mkdir -p "$STATE_DIR"
@@ -167,7 +167,7 @@ finish() {
     echo
     echo "Interrupted or failed at stage: $STAGE"
     echo "Resume from the current folder with:"
-    echo "  ./cloudskill-resume"
+    echo "  ./cloudbox-skills-resume"
     echo "Log: $LOG_FILE"
   fi
   exit "$FINAL_CODE"
@@ -318,7 +318,7 @@ if [ -n "$ACTIVE" ]; then
   fi
   echo
   echo "No second model run was started."
-  echo "Run ./cloudskill-resume again after the process ends."
+  echo "Run ./cloudbox-skills-resume again after the process ends."
   exit 0
 fi
 
@@ -401,31 +401,31 @@ elif [ "$FORCE_EVAL" -eq 0 ] && zip_matches_current_sources "$REVIEW_ZIP" "$EVAL
   echo "Reusing the completed review ZIP because its source hashes still match:"
   echo "$REVIEW_ZIP"
 else
-  [ -x "./cloudskill-eval" ] || {
-    echo "ERROR: ./cloudskill-eval is missing or not executable." >&2
+  [ -x "./cloudbox-skills-eval" ] || {
+    echo "ERROR: ./cloudbox-skills-eval is missing or not executable." >&2
     exit 2
   }
   echo "Starting exactly one foreground Runtime Eval with provider: $EVAL_PROVIDER"
   case "$EVAL_PROVIDER" in
     codex)
-      [ -x "./cloudskill-eval-codex" ] || {
-        echo "ERROR: ./cloudskill-eval-codex is missing or not executable." >&2
+      [ -x "./cloudbox-skills-eval-codex" ] || {
+        echo "ERROR: ./cloudbox-skills-eval-codex is missing or not executable." >&2
         exit 2
       }
-      ./cloudskill-eval-codex
+      ./cloudbox-skills-eval-codex
       ;;
     claude)
-      [ -x "./cloudskill-eval-claude" ] || {
-        echo "ERROR: ./cloudskill-eval-claude is missing or not executable." >&2
+      [ -x "./cloudbox-skills-eval-claude" ] || {
+        echo "ERROR: ./cloudbox-skills-eval-claude is missing or not executable." >&2
         exit 2
       }
-      ./cloudskill-eval-claude
+      ./cloudbox-skills-eval-claude
       ;;
     *)
       if [ -n "$BEHAVIOR_REPEAT" ]; then
-        ./cloudskill-eval --behavior-repeat "$BEHAVIOR_REPEAT"
+        ./cloudbox-skills-eval --behavior-repeat "$BEHAVIOR_REPEAT"
       else
-        ./cloudskill-eval
+        ./cloudbox-skills-eval
       fi
       ;;
   esac
@@ -449,13 +449,13 @@ FORMAL_PATHS=(
   "evals"
   "scripts"
   "docs"
-  "CLOUDSKILL_AGENT_HANDOFF.md"
+  "CLOUDBOX_SKILLS_AGENT_HANDOFF.md"
   "SKILL_MANIFEST.json"
   ".gitignore"
-  "cloudskill-eval"
-  "cloudskill-eval-codex"
-  "cloudskill-eval-claude"
-  "cloudskill-resume"
+  "cloudbox-skills-eval"
+  "cloudbox-skills-eval-codex"
+  "cloudbox-skills-eval-claude"
+  "cloudbox-skills-resume"
   "README.md"
   "CHANGELOG.md"
   "VERSION"
@@ -480,7 +480,7 @@ git diff --cached --check
 
 BRANCH="$(git branch --show-current)"
 if ! git diff --cached --quiet && { [ "$BRANCH" = "main" ] || [ "$BRANCH" = "master" ]; }; then
-  BRANCH="fix/cloudskill-resume-$STAMP"
+  BRANCH="fix/cloudbox-skills-resume-$STAMP"
   git switch -c "$BRANCH"
   echo "Created review branch: $BRANCH"
 fi

@@ -32,22 +32,22 @@ jobs:
           test -n "$EVOLUTION_SOURCE_URL"
           test -n "$EVOLUTION_EXCHANGE_URL"
           test -n "$EVOLUTION_SOURCE_ID"
-          mkdir -p .cloudskill .local
+          mkdir -p .cloudbox-skills .local
           python - <<'PY'
           import json, os, re
           source_id = os.environ["EVOLUTION_SOURCE_ID"]
           if not re.fullmatch(r"[a-z0-9][a-z0-9_-]*", source_id):
               raise SystemExit("invalid source identifier")
           registry = {"schema_version": "1.0", "sources": [{"source_id": source_id, "url_secret": "EVOLUTION_SOURCE_URL", "ref": "HEAD"}]}
-          with open(".cloudskill/evolution-sources.private.json", "w", encoding="utf-8") as stream:
+          with open(".cloudbox-skills/evolution-sources.private.json", "w", encoding="utf-8") as stream:
               json.dump(registry, stream)
           PY
           if ! git clone --quiet "$EVOLUTION_EXCHANGE_URL" .local/private-evolution-exchange 2>/dev/null; then
             echo "Private Eval Exchange clone failed; remote details redacted" >&2
             exit 1
           fi
-          python scripts/cloudskill_evolution.py source sync \
-            --registry .cloudskill/evolution-sources.private.json \
+          python scripts/cloudbox_skills_evolution.py source sync \
+            --registry .cloudbox-skills/evolution-sources.private.json \
             --exchange .local/private-evolution-exchange \
             --source-id "$EVOLUTION_SOURCE_ID"
           git -C .local/private-evolution-exchange config user.name "CloudBox Evolution Sync"

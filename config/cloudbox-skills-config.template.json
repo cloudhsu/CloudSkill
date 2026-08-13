@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
   "cloudskill_version": "5.5.1",
-  "cloudskill_repository": "ABSOLUTE_PATH_TO_LOCAL_CLOUDSKILL_REPOSITORY",
+  "cloudbox_skills_repository": "ABSOLUTE_PATH_TO_LOCAL_CLOUDSKILL_REPOSITORY",
   "eval_inbox": "ABSOLUTE_PATH_TO_PRIVATE_EVAL_INBOX",
   "sensitive_terms_path": "ABSOLUTE_PATH_TO_PRIVATE_SENSITIVE_TERMS_FILE",
   "default_sanitization": true,

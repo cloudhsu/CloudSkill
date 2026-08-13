@@ -7,7 +7,7 @@ Use this reference for recurring engineering scenarios and routing counterexampl
 - `primary_skill` owns the requested deliverable or final decision.
 - `supporting_skills` materially change the work.
 - `execution_order` records analysis or governance order and may begin with a supporting skill.
-- `using-cloudskill` performs routing and is not normally included in the downstream skill list.
+- `using-cloudbox-skills` performs routing and is not normally included in the downstream skill list.
 - Prompt language is not a routing condition.
 
 ## Reusable routing cues

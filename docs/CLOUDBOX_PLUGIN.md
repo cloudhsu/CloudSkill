@@ -1,6 +1,6 @@
 # CloudBox Plugin Distribution
 
-CloudBox is the user-facing plugin brand. The GitHub repository remains `CloudSkill`, and existing skill IDs such as `using-cloudskill` remain stable for compatibility.
+CloudBox is the user-facing plugin brand. The GitHub repository remains `CloudSkill`, and existing skill IDs such as `using-cloudbox-skills` remain stable for compatibility.
 
 ## One canonical skill source
 
@@ -39,7 +39,7 @@ From a local clone:
 
 ```powershell
 claude plugin marketplace add D:\Git\CloudSkill
-claude plugin install cloudbox@cloudbox-marketplace --scope user
+claude plugin install cloudbox-skills@cloudbox-marketplace --scope user
 claude plugin list
 ```
 
@@ -54,9 +54,9 @@ Use the same `-ConfigOnly` setup when the Claude Code plugin should write saniti
 Claude Code namespaces plugin skills. For example:
 
 ```text
-/cloudbox:using-cloudskill
-/cloudbox:architecture-review
-/cloudbox:equipment-control-architecture
+/cloudbox-skills:using-cloudbox-skills
+/cloudbox-skills:architecture-review
+/cloudbox-skills:equipment-control-architecture
 ```
 
 Claude Code uses the standard `displayName`, description, version, author, and component-path fields. The CloudBox logo asset is included for cross-host branding, but the current Claude Code plugin manifest schema does not define a standard custom-logo field, so Claude UI logo rendering is not claimed.

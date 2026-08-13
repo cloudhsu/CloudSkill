@@ -12,8 +12,8 @@ SCRIPTS = ROOT / "scripts"
 errors: list[str] = []
 
 required = [
-    ROOT / "cloudskill-eval-codex",
-    ROOT / "cloudskill-resume",
+    ROOT / "cloudbox-skills-eval-codex",
+    ROOT / "cloudbox-skills-resume",
     SCRIPTS / "codex_eval_adapter.py",
     SCRIPTS / "run_runtime_evals.py",
     SCRIPTS / "run_local_eval_review.py",
@@ -29,10 +29,10 @@ for path in required:
     if not path.is_file():
         errors.append(f"missing Codex Eval path file: {path.relative_to(ROOT)}")
 
-launcher = ROOT / "cloudskill-eval-codex"
+launcher = ROOT / "cloudbox-skills-eval-codex"
 if launcher.is_file():
     if not (launcher.stat().st_mode & stat.S_IXUSR):
-        errors.append("cloudskill-eval-codex is not executable")
+        errors.append("cloudbox-skills-eval-codex is not executable")
     text = launcher.read_text(encoding="utf-8")
     for marker in (
         "--provider codex",
@@ -41,10 +41,10 @@ if launcher.is_file():
         "codex login",
     ):
         if marker not in text:
-            errors.append(f"cloudskill-eval-codex missing marker: {marker}")
+            errors.append(f"cloudbox-skills-eval-codex missing marker: {marker}")
 
 
-resume = ROOT / "cloudskill-resume"
+resume = ROOT / "cloudbox-skills-resume"
 if resume.is_file():
     text = resume.read_text(encoding="utf-8")
     for marker in (
@@ -52,10 +52,10 @@ if resume.is_file():
         'EVAL_PROVIDER="ollama"',
         'EVAL_PROVIDER="codex"',
         'zip_matches_current_sources "$REVIEW_ZIP" "$EVAL_PROVIDER"',
-        './cloudskill-eval-codex',
+        './cloudbox-skills-eval-codex',
     ):
         if marker not in text:
-            errors.append(f"cloudskill-resume missing provider marker: {marker}")
+            errors.append(f"cloudbox-skills-resume missing provider marker: {marker}")
 
 adapter = SCRIPTS / "codex_eval_adapter.py"
 if adapter.is_file():

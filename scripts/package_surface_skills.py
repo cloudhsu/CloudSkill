@@ -4,7 +4,7 @@ claude.ai and Claude Desktop upload one Skill at a time as a zip through
 Customize/Settings -> Skills -> Upload, and require the skill folder itself
 to sit at the root of the archive (`<skill-name>/SKILL.md`, not a nested or
 flattened layout) -- this is different from the whole-repository plugin
-marketplace bundle `cloudskill-eval`/`install.sh` produce for Codex/Claude
+marketplace bundle `cloudbox-skills-eval`/`install.sh` produce for Codex/Claude
 Code CLI.
 
 Only packages Skills classified `portable` or `hybrid` in
