@@ -81,8 +81,12 @@
         "equates version synchronization or local tests with publication",
         "claims remote or hosted state before checking it"
       ],
-      "required_artifacts": ["release gate status and post-release record"],
-      "baseline_expected_failure": ["agent calls the versioned source tree released"],
+      "required_artifacts": [
+        "release gate status and post-release record"
+      ],
+      "baseline_expected_failure": [
+        "agent calls the versioned source tree released"
+      ],
       "review_notes": "Repository governance owns operational publication truth; Eval validity is a separate owner."
     },
     {
@@ -146,11 +150,38 @@
       "prompt": "Fix a spelling-only README typo on a local branch; no release or publication was requested.",
       "expected_routing": false,
       "expected_alternative_skill": "document-governance",
-      "required_behaviors": ["uses proportionate document and repository checks"],
-      "forbidden_behaviors": ["requires tag Release and post-release evidence for a non-release typo"],
+      "required_behaviors": [
+        "uses proportionate document and repository checks"
+      ],
+      "forbidden_behaviors": [
+        "requires tag Release and post-release evidence for a non-release typo"
+      ],
       "required_artifacts": [],
-      "baseline_expected_failure": ["agent applies the full release closure checklist to every commit"],
+      "baseline_expected_failure": [
+        "agent applies the full release closure checklist to every commit"
+      ],
       "review_notes": "Release closure is conditional on an actual publication objective."
+    },
+    {
+      "id": "CAG-BEH-008",
+      "skill": "coding-agent-project-governance",
+      "type": "discipline",
+      "prompt": "A task requires configuring a cross-compile build for a specific target architecture. The agent has not yet checked what the host machine actually is.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "inspects the actual host toolchain, installed SDKs, and host architecture before choosing build configuration flags",
+        "treats a wrong environment assumption caught by a failed install/run step as a real finding to record, not something to quietly retry past"
+      ],
+      "forbidden_behaviors": [
+        "assumes the host architecture or available toolchain from the task description alone",
+        "silently retries with corrected assumptions without noting the earlier assumption was wrong"
+      ],
+      "required_artifacts": [],
+      "baseline_expected_failure": [
+        "agent picks a target architecture/toolchain flag matching what is common or expected, without inspecting the actual host, then fails later at install/run time"
+      ],
+      "review_notes": "Derived from a real session: a build was configured for the wrong CPU architecture because the host was assumed rather than checked (`uname -m` was not run until an install failure forced it). The fix generalizes to any host-dependent configuration decision, not just this one flag."
     }
   ]
 }

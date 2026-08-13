@@ -40,6 +40,10 @@ Identify:
 - Domain invariants.
 - Git state.
 - Existing release/version policy.
+- Host toolchain and environment actually available (installed compilers,
+  SDKs, target architecture) when the task involves building, cross-compiling,
+  or configuring for a specific platform — verify by inspection, do not
+  assume from the task description or from what the task "should" need.
 
 Do not generate generic rules that contradict the actual repository.
 
