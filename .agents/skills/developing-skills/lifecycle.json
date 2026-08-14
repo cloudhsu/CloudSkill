@@ -3,7 +3,7 @@
   "skill": "developing-skills",
   "stage": "active",
   "introduced_version": "unknown",
-  "last_reviewed_version": "5.8.0",
+  "last_reviewed_version": "7.5.0",
   "routing_case_ids": [
     "DEVSK-01",
     "DEVSK-02",
@@ -40,6 +40,9 @@
     "DEVSK-BEH-015",
     "DEVSK-BEH-016",
     "DEVSK-BEH-017",
+    "DEVSK-BEH-018",
+    "DEVSK-BEH-019",
+    "DEVSK-BEH-020",
     "DEVSK-CONV-001",
     "DEVSK-CONV-002",
     "DEVSK-CONV-003",

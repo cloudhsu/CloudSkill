@@ -3,7 +3,7 @@
   "skill": "teach-while-building",
   "stage": "experimental",
   "introduced_version": "7.1.0",
-  "last_reviewed_version": "7.3.0",
+  "last_reviewed_version": "7.5.0",
   "routing_case_ids": [
     "TWB-01",
     "TWB-NEG-01"
@@ -41,5 +41,5 @@
     "the skill has not been reviewed for two feature releases"
   ],
   "replacement_skill": null,
-  "notes": "New skill, distilled from reviewing mattpocock/skills' grilling/teach interaction patterns and adapted into a lightweight, self-judged, in-task check rather than a separate teaching workspace. Promote to active after real usage confirms the trigger-selectivity discipline holds."
+  "notes": "New skill, distilled from reviewing mattpocock/skills' grilling/teach interaction patterns and adapted into a lightweight, self-judged, in-task check rather than a separate teaching workspace. Promote to active after real usage confirms the trigger-selectivity discipline holds. Re-reviewed at 7.5.0 (two-feature-release cadence trigger): content confirmed current, NO_CHANGE_JUSTIFIED -- still experimental stage, no real-usage evidence yet to justify promotion to active."
 }

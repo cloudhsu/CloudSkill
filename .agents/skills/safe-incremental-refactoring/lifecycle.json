@@ -3,7 +3,7 @@
   "skill": "safe-incremental-refactoring",
   "stage": "active",
   "introduced_version": "unknown",
-  "last_reviewed_version": "5.8.0",
+  "last_reviewed_version": "7.6.1",
   "routing_case_ids": [
     "REF-01",
     "REF-02",
@@ -26,11 +26,14 @@
     "REF-BEH-003",
     "REF-BEH-004",
     "REF-BEH-005",
-    "REF-BEH-006"
+    "REF-BEH-006",
+    "REF-BEH-007",
+    "REF-BEH-008"
   ],
   "behavior_case_types": [
     "application",
     "counterexample",
+    "discipline",
     "recognition"
   ],
   "next_review_triggers": [
@@ -43,5 +46,5 @@
     "the skill has not been reviewed for two feature releases"
   ],
   "replacement_skill": null,
-  "notes": "Post-6.3 evolution candidate adds a compact extraction decision contract spanning compatibility seams, test shape, lazy dependency bootstrap, and authentication authority."
+  "notes": "Post-6.3 evolution candidate adds a compact extraction decision contract spanning compatibility seams, test shape, lazy dependency bootstrap, and authentication authority. Re-reviewed at 7.5.0 (two-feature-release cadence trigger): content confirmed current, NO_CHANGE_JUSTIFIED -- no repository change since REF-BEH-007 (7.3.0) affects this skill's contract. 7.6.1: conversation-derived correction (a live session's own real-time verification record) adds REF-BEH-008 plus an evidence-checklist.md/SKILL.md/REFACTOR_SLICE.template.md addition requiring a shared-consumer before/after state table whenever a slice replaces a component used by more than one consumer -- generalized from a real regression that a shared-backend swap traded correctness on one consumer for a gain on another, and prose-only verification let the asymmetric outcome go unnoticed until reported later from memory rather than caught at write time. RED evidence type: case/contract layer (the existing Step 7/8 text and evidence-checklist.md, read as written, do not require any per-consumer enumeration, so prose-only reporting of the shape that actually occurred would satisfy the prior checklist). Not run through the runtime/model behavior-eval harness in this pass -- disclosed as case/contract-layer evidence only, not promoted to a Skill/agent-behavior-layer GREEN claim."
 }

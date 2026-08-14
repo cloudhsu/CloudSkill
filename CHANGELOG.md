@@ -1,18 +1,161 @@
 # Changelog
 
+## 7.6.1
+
+### `safe-incremental-refactoring`: shared-consumer before/after state table
+
+Conversation-derived correction from a live engine-revival session's own
+real-time verification record: a slice that replaced a component shared by
+three platform consumers reported success in prose for two of them while a
+third had silently regressed -- the asymmetric outcome was invisible in the
+verification writeup and was only caught later when the user recalled the
+pre-change state from memory, costing several extra rounds of live
+re-testing to reconstruct. Generalized beyond the originating platform
+case: the same gap applies to any slice that replaces or consolidates a
+component used by more than one consumer (multiple call sites, multiple
+subclasses of a shared base, multiple client integrations), not only
+multi-platform work.
+
+- New behavior case `REF-BEH-008` (discipline): requires a per-consumer
+  before/after state table, built at write time, whenever a slice touches
+  a component with more than one consumer; a single-consumer slice is
+  explicitly exempted (prose remains sufficient there).
+- `evidence-checklist.md`: new "Shared-Consumer Before/After State" section
+  with the minimum table shape and rationale.
+- `SKILL.md`: one-line pointers in Step 7 (Verify) and Step 8 (Handoff).
+- `REFACTOR_SLICE.template.md`: an empty table skeleton under
+  `## Verification`, to fill in only when more than one consumer is
+  affected.
+
+RED evidence type: case/contract layer -- the prior Step 7/8 text and
+`evidence-checklist.md`, read as written, did not require enumerating
+every affected consumer, so prose-only reporting of exactly the shape that
+occurred in the originating session would have satisfied the prior
+checklist. Not run through the runtime/model behavior-eval harness in this
+pass; disclosed as case/contract-layer evidence, not promoted to a
+Skill/agent-behavior-layer GREEN claim.
+
+`validate_behavior_evals.py` (163 behavior case contracts, up from 161),
+`validate_skill_lifecycle.py`, and `validate_pack.py` (20 skills, 96
+routing cases) all pass.
+
+Synced to the public mirror alongside this release as a temporary,
+explicit exception to the private-only development model, pending a
+planned migration; see the public repository's README for the current
+sync status.
+
+## 7.6.0
+
+### `coding-agent-project-governance`: independent security verification before adopting agent infrastructure
+
+Set up the local Eval Inbox import folder (`.local/eval-inbox/`) and processed
+2 candidates imported from a disconnected session via `import_eval_candidates.py`.
+Both routed to `manual-review/` (no sensitive-terms file configured on this
+machine, so the importer conservatively withheld auto-promotion) and were
+reviewed by hand before any formal change:
+
+- One candidate (apply the user's own existing methodology documents instead
+  of generic advice) was checked against current skill content and found
+  already covered by `framework-design`'s demonstrated-consumer principle and
+  `document-governance`'s locate-authoritative-source discipline --
+  `NO_CHANGE_JUSTIFIED`, retained as regression evidence in `rejected/`, not
+  promoted.
+- The other candidate (independently verify a tool's security track record
+  across multiple authoritative sources before recommending adoption as
+  infrastructure, rather than trusting a single third-party comparison
+  article) was confirmed as a genuine, previously-uncovered gap in
+  `coding-agent-project-governance` and promoted: 1 new behavior case
+  (`CAG-BEH-009`) plus a short `SKILL.md` addition under "Route by risk".
+
+`validate_pack.py` (20 skills, 96 routing cases), `validate_behavior_evals.py`
+(161 behavior case contracts), `validate_skill_lifecycle.py`,
+`validate_plugins.py`, and the full `scripts/run_all_checks.py` suite all
+pass.
+
+## 7.5.0
+
+### `developing-skills`: CI status is release evidence, not an inference
+
+Discovered while auditing this repo's own GitHub Actions history: CI
+(`validate-cloudskill.yml`) had been failing on every push from v7.2.0
+through v7.3.0 -- the same `teach-while-building` portability gap fixed in
+v7.4.0 -- and it went unnoticed because release work only ever checked local
+validator output, never the actual CI run.
+
+`developing-skills`' release workflow (step 6) now requires checking the
+real CI run for a pushed commit before calling the release done; a
+CI-configured check that was never observed to run is `NOT RUN`, not
+`PASS`, no matter how clean the local run was. 1 new behavior case
+(`DEVSK-BEH-020`).
+
+`validate_pack.py` (20 skills, 96 routing cases), `validate_behavior_evals.py`
+(160 behavior case contracts), `validate_skill_lifecycle.py`,
+`validate_plugins.py`, and the full `scripts/run_all_checks.py` suite all
+pass.
+
+## 7.4.0
+
+### `developing-skills`: mandatory SKILL.md size gate
+
+`scripts/validate_skill_context_budget.py` previously checked only
+`developing-skills`' own SKILL.md. It now enforces a per-skill byte budget
+(default 10,500 bytes) across all 20 skills, wired into
+`scripts/run_all_checks.py` as before. 4 skills that were already over
+budget (`equipment-control-architecture`, `development-process-tailoring`,
+`equipment-domain-modeling`, `local-runtime-eval-debugging`) get a frozen
+ceiling at their exact current byte count -- zero further growth room, not a
+standing exemption.
+
+`developing-skills`' release workflow (step 6) now names this check
+explicitly as blocking: a budget failure must be fixed by consolidating
+rules or moving detail into `references/`, not deferred, and the budget or
+a grandfathered ceiling must never be raised just to make a failing skill
+pass. 1 new behavior case (`DEVSK-BEH-019`).
+
+`validate_pack.py` (20 skills, 96 routing cases), `validate_behavior_evals.py`
+(159 behavior case contracts), `validate_skill_lifecycle.py`, and
+`validate_plugins.py` all pass.
+
 ## 7.3.0
 
-Public mirror sync. This public copy only syncs `teach-while-building` going forward; the rest of
-the pack is unchanged from v7.1.0 here. See the private `cloudbox-skills`
-CHANGELOG for the full v7.3.0 history.
+Distilled from this session's own naming-migration, release-sync, and
+architecture-reversal friction into reusable behavior evidence, plus two
+`teach-while-building` optimizations proposed after that skill's v7.2.0 landed.
 
-- `teach-while-building`: optional `LEARNING_LEVEL.md` explicit calibration
-  override file; checks now batch at natural pauses instead of firing after
-  every flagged concept, with an exception for concepts that block the very
-  next step. 3 new behavior cases (`TWB-BEH-007/008/009`).
-- README rewritten to lead with `teach-while-building` and its install
-  instructions; the rest of the frozen skill snapshot moved into collapsible
-  sections.
+### `teach-while-building`: explicit calibration override + batched checks
+
+- New optional `LEARNING_LEVEL.md` file (sibling to `LEARNING_LOG.md`): a
+  user-written, per-domain level statement that overrides both the
+  no-history-default and any `LEARNING_LOG.md`-inferred signal. Only written
+  when the user states their level directly, never inferred.
+- Checks now batch at the next natural pause (slice/checkpoint finishing, a
+  build/test succeeding) instead of firing immediately after every flagged
+  concept, with an explicit exception for a concept that blocks the very next
+  step. 3 new behavior cases (`TWB-BEH-007` batching, `TWB-BEH-008` blocking
+  exception, `TWB-BEH-009` override-file applied).
+
+### New cross-skill behavior evidence, distilled from this session
+
+- `developing-skills` (`DEVSK-BEH-018`): surface a new skill/plugin
+  identifier's collision with an unrelated existing product immediately,
+  before it propagates across files, instead of discovering it after adoption.
+- `safe-incremental-refactoring` (`REF-BEH-007`): after a slice changes
+  `.gitignore` patterns, diff the newly-staged fileset against the previous
+  ignore state before committing, to catch a previously-local-only file that
+  got silently un-ignored.
+- `document-governance` (`DOC-BEH-006`, `DOC-BEH-007`): correct an absolute
+  document status claim ("archived", "no further updates") in the same change
+  that introduces a scope exception, instead of leaving it stale; and verify a
+  downstream/mirror remote is genuinely terminal before isolating a status-only
+  commit there, to avoid a forced non-fast-forward merge at the next real sync.
+- `agent-development-process` (`AID-BEH-004`): verify a load-bearing
+  platform/vendor capability against authoritative documentation or a direct
+  test *before* finalizing an architecture decision that depends on it, not
+  after work has already been built on the assumption.
+
+`validate_pack.py` (20 skills, 96 routing cases), `validate_behavior_evals.py`
+(158 behavior case contracts), `validate_skill_lifecycle.py`, and
+`validate_plugins.py` all pass.
 
 ## 7.2.0
 

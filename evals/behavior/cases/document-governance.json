@@ -116,6 +116,71 @@
         "existing metadata rules do not explicitly separate historical container version from observed-fact applicability"
       ],
       "review_notes": "Review temporal and version provenance; filename consistency alone is insufficient."
+    },
+    {
+      "id": "DOC-BEH-006",
+      "skill": "document-governance",
+      "type": "discipline",
+      "prompt": "A document carries an absolute status claim ('archived', 'no further updates planned'), and a scope exception now applies: one specific part of its content will keep receiving updates going forward.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "corrects the absolute claim in the same change that introduces or acts on the exception",
+        "rewrites the claim to scope it precisely (what still updates, what does not) instead of leaving an unqualified absolute standing"
+      ],
+      "forbidden_behaviors": [
+        "publishing a new update under the exception while the document still claims no further updates will ever happen",
+        "leaving the stale absolute claim for a later, separate cleanup pass"
+      ],
+      "required_artifacts": [],
+      "baseline_expected_failure": [
+        "agent acts on the exception without noticing the document's own status claim now contradicts what just happened"
+      ],
+      "review_notes": "An absolute claim is a promise; a silent partial exception without correcting the claim makes the document self-contradicting the moment anyone checks both against each other."
+    },
+    {
+      "id": "DOC-BEH-007",
+      "skill": "document-governance",
+      "type": "discipline",
+      "prompt": "About to publish a status-only commit (e.g. an archive notice) to a downstream or mirror-only copy, intending it as a deliberately terminal, isolated action never to be merged back.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "confirms the downstream copy will genuinely receive no further legitimate sync before isolating the commit there",
+        "when further sync is plausible, lands the change on the shared/authoritative line instead of isolating it on the downstream copy alone"
+      ],
+      "forbidden_behaviors": [
+        "isolating a status commit on a downstream remote without checking whether that remote will need a real content sync later",
+        "leaving the shared history and the downstream copy to silently diverge past the point where a normal fast-forward push still works"
+      ],
+      "required_artifacts": [],
+      "baseline_expected_failure": [
+        "a later legitimate sync to the same downstream remote fails as a non-fast-forward push, forcing an unplanned merge and conflict resolution that a shared-history commit would have avoided"
+      ],
+      "review_notes": "The isolation itself isn't wrong when the copy really is terminal; the failure is treating 'terminal' as assumed rather than verified."
+    },
+    {
+      "id": "DOC-BEH-008",
+      "skill": "document-governance",
+      "type": "application",
+      "prompt": "Drafting or optimizing a personal factual document (e.g. a resume/CV) from a mix of an existing source document and new informal input the person gives verbally across several messages. One new detail (a stated start date) is logically inconsistent with another fact already established (a status that implies the date should already be in the past).",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "surfaces the inconsistency directly and asks which fact is correct, instead of silently picking one interpretation",
+        "keeps checking if the person's own correction is itself still inconsistent, rather than accepting the first correction at face value",
+        "clearly separates content carried over unchanged from the source document, content added from new confirmed input, and the writer's own framing/restructuring"
+      ],
+      "forbidden_behaviors": [
+        "quietly resolving the date conflict by guessing which one is 'probably' right",
+        "inventing or strengthening an achievement claim beyond what the person actually stated, even when it would read better",
+        "treating this class of document as exempt from the same conflicting-source-data discipline used for engineering/equipment documents"
+      ],
+      "required_artifacts": [],
+      "baseline_expected_failure": [
+        "agent writes a plausible-sounding date into the final document without flagging that it contradicted an already-stated fact"
+      ],
+      "review_notes": "Same discipline as DOC-BEH-006/007 (don't silently normalize conflicting source data), confirmed here to generalize beyond engineering/equipment documents to personal/career documents -- the source data is scattered, informal, and repeatedly self-corrected in exactly the way that makes silent reconciliation tempting."
     }
   ]
 }

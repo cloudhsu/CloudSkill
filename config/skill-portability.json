@@ -25,6 +25,7 @@
     "safe-incremental-refactoring": "portable",
     "semiconductor-equipment-domain-knowledge": "portable",
     "software-quality-iso25010": "portable",
+    "teach-while-building": "portable",
     "using-cloudbox-skills": "portable"
   },
   "deployment_notes": [

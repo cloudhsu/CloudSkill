@@ -47,8 +47,18 @@ Classify:
 - Duplicate or irreversible action.
 - External communication.
 - Safety or compliance impact.
+- Unverified platform/vendor capability risk — an architecture decision that
+  quietly assumes an undocumented behavior of the host platform, framework, or
+  vendor product.
 
 Define approval points and safe failure behavior.
+
+For any decision that depends on a specific platform or vendor capability (for
+example, whether one installed component preloads or shares state with another
+at runtime), verify it against authoritative documentation or a direct test
+*before* finalizing the decision — not after other work has already been built
+on top of the assumption. If it cannot be confirmed, say so explicitly and
+default to the smaller, more reversible structure until it is.
 
 ### 3. Design evaluations before optimization
 

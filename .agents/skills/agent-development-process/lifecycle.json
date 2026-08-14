@@ -3,7 +3,7 @@
   "skill": "agent-development-process",
   "stage": "active",
   "introduced_version": "unknown",
-  "last_reviewed_version": "5.8.0",
+  "last_reviewed_version": "7.5.0",
   "routing_case_ids": [
     "AID-01",
     "AID-02",
@@ -19,11 +19,13 @@
   "behavior_case_ids": [
     "AID-BEH-001",
     "AID-BEH-002",
-    "AID-BEH-003"
+    "AID-BEH-003",
+    "AID-BEH-004"
   ],
   "behavior_case_types": [
     "application",
     "counterexample",
+    "discipline",
     "recognition"
   ],
   "next_review_triggers": [
@@ -36,5 +38,5 @@
     "the skill has not been reviewed for two feature releases"
   ],
   "replacement_skill": null,
-  "notes": "Baseline lifecycle evidence generated from committed routing and behavior cases."
+  "notes": "Baseline lifecycle evidence generated from committed routing and behavior cases. Re-reviewed at 7.5.0 (two-feature-release cadence trigger): content confirmed current, NO_CHANGE_JUSTIFIED -- no repository change since AID-BEH-004 (7.3.0) affects this skill's contract."
 }

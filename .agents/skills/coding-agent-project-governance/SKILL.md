@@ -94,6 +94,15 @@ Escalate for:
 - large architecture changes.
 - physical device/process control.
 
+Adopting a new tool-calling/execution-capable dependency (an agent
+framework, CLI, plugin marketplace, or similar) as project infrastructure is
+itself a security-relevant decision, not just a technology choice.
+Independently verify its security track record across multiple authoritative
+sources (security-media, vendor advisories, CVE trackers) before recommending
+adoption — a single third-party comparison article's summary is not
+sufficient evidence, especially when it states a vulnerability count without
+detail.
+
 ### 5. Assign agent roles only when useful
 
 Possible roles:

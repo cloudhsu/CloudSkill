@@ -147,6 +147,51 @@
         "agent treats any independent CI run, regardless of whether it exercises the same OS-specific mechanism, as sufficient evidence for an environment attribution"
       ],
       "review_notes": "Counterexample: with no independent, correctly-matched execution path available, reasoning-based attribution is acceptable if explicitly flagged as unconfirmed."
+    },
+    {
+      "id": "REF-BEH-007",
+      "skill": "safe-incremental-refactoring",
+      "type": "discipline",
+      "prompt": "A slice renames an identity or reorganizes directories and, as part of that, changes `.gitignore` patterns. The slice is about to be committed.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "diffs the newly-staged fileset against the previous ignore state before committing",
+        "checks specifically for a previously-ignored, local-only file that the pattern change unintentionally un-ignored"
+      ],
+      "forbidden_behaviors": [
+        "committing the slice without re-checking the staged fileset after an ignore-pattern change",
+        "assuming the ignore-pattern change only affects future files, not files already present locally"
+      ],
+      "required_artifacts": [],
+      "baseline_expected_failure": [
+        "a local-only file (e.g. a private config file) becomes tracked and gets committed because a pattern rename accidentally stopped matching it"
+      ],
+      "review_notes": "An ignore-pattern change is itself a behavior change to what gets tracked -- it needs the same before/after check as any other slice, not just a text diff of the pattern itself."
+    },
+    {
+      "id": "REF-BEH-008",
+      "skill": "safe-incremental-refactoring",
+      "type": "discipline",
+      "prompt": "A slice replaces or consolidates a component used by more than one consumer (multiple call sites, multiple platform adapters, multiple subclasses of a shared base, multiple client integrations). Verification is about to be written up.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "lists every known consumer of the replaced component, not only the ones directly exercised by the immediate test",
+        "records each consumer's state immediately before and immediately after the change in a table with one row per consumer, not only in prose",
+        "marks an untested consumer as untested rather than omitting its row"
+      ],
+      "forbidden_behaviors": [
+        "reports verification as prose confirming success for some consumers while omitting or failing to check consumers not directly exercised",
+        "reconstructs the before/after comparison later from memory or logs only after a regression is externally reported, instead of recording it at write time"
+      ],
+      "required_artifacts": [
+        "per-consumer before/after state table"
+      ],
+      "baseline_expected_failure": [
+        "a shared-component swap trades correctness on one consumer for a gain on another, and the asymmetric outcome goes unnoticed because verification prose reports the improved consumers without an explicit accounting of every consumer"
+      ],
+      "review_notes": "Counterexample: a slice with exactly one consumer (no fan-out) does not need the table -- a single before/after state pair in prose is sufficient. The table earns its cost specifically when a component serves more than one consumer, because that is where an asymmetric regression can hide behind prose about the consumers that improved."
     }
   ]
 }

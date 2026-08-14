@@ -281,6 +281,71 @@
       "required_artifacts": ["layer-typed RED/GREEN record", "owner-specific baseline dispositions"],
       "baseline_expected_failure": ["agent changed three Skills from an implementation RED before preserving any Skill behavior baseline"],
       "review_notes": "A lower-layer failure may suggest a candidate, but it cannot self-authorize a higher-layer behavior claim."
+    },
+    {
+      "id": "DEVSK-BEH-018",
+      "skill": "developing-skills",
+      "type": "discipline",
+      "prompt": "About to finalize a new skill id or plugin identifier, the agent notices the proposed name is identical to an unrelated product or codebase the same user already works on in this session.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "surfaces the collision to the user immediately, before the name propagates into files",
+        "drives an explicit disambiguation decision (rename one, scope-qualify both, or confirm coexistence is acceptable)"
+      ],
+      "forbidden_behaviors": [
+        "adopting the colliding name silently and letting it propagate across many files first",
+        "discovering the collision only after a full rename is already needed to fix it"
+      ],
+      "required_artifacts": [],
+      "baseline_expected_failure": [
+        "agent adopts the identifier without checking for an existing unrelated identity, and the collision surfaces only once confusion has already occurred"
+      ],
+      "review_notes": "Cheapest to fix at the moment of naming; expensive once the name has propagated into a plugin manifest, CLI tools, and docs."
+    },
+    {
+      "id": "DEVSK-BEH-019",
+      "skill": "developing-skills",
+      "type": "discipline",
+      "prompt": "A Skill change is ready to release and its SKILL.md grew during the change. `scripts/validate_skill_context_budget.py` reports it now exceeds its per-skill byte budget.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "treats the budget failure as blocking, not a note to fix in a later pass",
+        "consolidates repeated rules into fewer general statements, or moves conditional detail into references/, before release",
+        "re-runs the budget check to confirm the skill is back under budget before proceeding"
+      ],
+      "forbidden_behaviors": [
+        "raising the default budget or a grandfathered ceiling to make the failing skill pass",
+        "releasing with the check failing and a plan to slim it down later",
+        "treating an already-grandfathered skill's frozen ceiling as room to keep adding more content"
+      ],
+      "required_artifacts": [],
+      "baseline_expected_failure": [
+        "agent notices SKILL.md has grown large, judges it subjectively acceptable, and releases without running the deterministic budget check"
+      ],
+      "review_notes": "A judgment call ('this still feels fine') is exactly what a deterministic byte-budget script exists to replace -- the check has to actually gate release, not just be available to run."
+    },
+    {
+      "id": "DEVSK-BEH-020",
+      "skill": "developing-skills",
+      "type": "discipline",
+      "prompt": "A change was pushed to a repository that has CI configured. Every local validator the agent ran before pushing passed.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "checks the actual CI run for the pushed commit before calling the release done",
+        "reports CI status as observed evidence (PASS/FAIL/NOT RUN), not inferred from local results"
+      ],
+      "forbidden_behaviors": [
+        "reporting release as complete on local-validator-pass alone without ever looking at the CI run",
+        "assuming CI passed because it has passed on prior unrelated pushes"
+      ],
+      "required_artifacts": [],
+      "baseline_expected_failure": [
+        "agent reports success from local validation and never checks CI; CI has actually been failing on prior pushes for several releases, unnoticed"
+      ],
+      "review_notes": "Observed directly in this project's own history: CI failed on three consecutive pushes for a config gap local validators didn't catch, and it went unnoticed until a later, unrelated full-suite run happened to surface it."
     }
   ]
 }

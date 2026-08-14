@@ -25,6 +25,11 @@
 
 ## Verification
 
+### Shared-Consumer Before/After State (fill in only if more than one consumer is affected)
+
+| Consumer | State before | State after | Evidence |
+|---|---|---|---|
+
 ## Rollback
 
 ## Known Defects Preserved or Separated

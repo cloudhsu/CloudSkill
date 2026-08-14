@@ -3,7 +3,7 @@
   "skill": "document-governance",
   "stage": "active",
   "introduced_version": "unknown",
-  "last_reviewed_version": "5.8.0",
+  "last_reviewed_version": "7.5.0",
   "routing_case_ids": [
     "DOC-01",
     "DOC-02",
@@ -27,11 +27,15 @@
     "DOC-BEH-002",
     "DOC-BEH-003",
     "DOC-BEH-004",
-    "DOC-BEH-005"
+    "DOC-BEH-005",
+    "DOC-BEH-006",
+    "DOC-BEH-007",
+    "DOC-BEH-008"
   ],
   "behavior_case_types": [
     "application",
     "counterexample",
+    "discipline",
     "recognition"
   ],
   "next_review_triggers": [
@@ -44,5 +48,5 @@
     "the skill has not been reviewed for two feature releases"
   ],
   "replacement_skill": null,
-  "notes": "Post-6.3 evolution candidate distinguishes historical evidence container versions from the versions and capture times of observed facts."
+  "notes": "Post-6.3 evolution candidate distinguishes historical evidence container versions from the versions and capture times of observed facts. Re-reviewed at 7.5.0 (two-feature-release cadence trigger): content confirmed current, NO_CHANGE_JUSTIFIED -- no repository change since DOC-BEH-006/007 (7.3.0) affects this skill's contract."
 }

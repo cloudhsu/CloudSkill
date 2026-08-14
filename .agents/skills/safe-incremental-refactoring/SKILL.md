@@ -115,6 +115,15 @@ Run:
 - Migration idempotency.
 - Build/package checks when affected.
 - `git diff --check`.
+- If the slice changed `.gitignore` or other ignore patterns (common in an identity
+  or directory-structure rename), diff the newly-staged fileset against the
+  previous ignore state before committing — a pattern change can silently
+  un-ignore and stage a previously local-only file.
+- If the slice replaces or changes a component shared by more than one
+  consumer (call sites, platform adapters, subclasses, integrations), a
+  shared-consumer before/after state table (see `references/evidence-checklist.md`)
+  — an asymmetric regression hides behind prose that only reports the
+  consumers that improved.
 
 ### 8. Handoff
 
@@ -128,6 +137,8 @@ Report:
 - Known defects isolated.
 - Next safe slice.
 - Stop/escalation conditions.
+- Shared-consumer before/after state table when more than one consumer is
+  affected (see `references/evidence-checklist.md`), not prose alone.
 
 ## Output Format
 

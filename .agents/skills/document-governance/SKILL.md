@@ -120,6 +120,17 @@ Prefer one current specification with a controlled change log plus immutable rel
 - Do not silently normalize conflicting source data.
 - Use consistent domain vocabulary.
 - Keep planned, implemented, verified, and released status separate.
+- Do not let an absolute status claim (archived, final, no further updates,
+  frozen) go stale when a scope exception is introduced or a new update is about
+  to be published under it — correct the claim in the same change, or scope it
+  precisely (e.g. "no further updates except X") from the start instead of an
+  unqualified absolute.
+- When publishing an isolated change to a downstream or mirror-only copy as a
+  deliberately terminal action (e.g. an archive/status notice with no further
+  updates planned there), confirm that copy will genuinely receive no further
+  legitimate sync first. If any further sync is plausible, land the change on
+  the shared/authoritative line instead of isolating it, to avoid an unplanned
+  merge conflict at the next real sync.
 
 ### 7. Review
 

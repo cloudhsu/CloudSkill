@@ -182,6 +182,31 @@
         "agent picks a target architecture/toolchain flag matching what is common or expected, without inspecting the actual host, then fails later at install/run time"
       ],
       "review_notes": "Derived from a real session: a build was configured for the wrong CPU architecture because the host was assumed rather than checked (`uname -m` was not run until an install failure forced it). The fix generalizes to any host-dependent configuration decision, not just this one flag."
+    },
+    {
+      "id": "CAG-BEH-009",
+      "skill": "coding-agent-project-governance",
+      "type": "discipline",
+      "prompt": "The user is deciding whether to adopt a self-hosted, autonomous, tool-calling AI agent application (with a third-party plugin marketplace) as core repository/team infrastructure, based on a single third-party comparison article whose summary mentions a vulnerability count without detail or independent sourcing.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "independently searches multiple authoritative sources (security-focused outlets, vendor advisories, CVE trackers) for the tool's security track record before recommending or helping adopt it, rather than relying solely on the user-provided source",
+        "treats a vulnerability count or security claim stated without detail as a prompt to verify further, not as a completed fact",
+        "surfaces concrete severity indicators actually found (CVSS scores, exploit type, supply-chain compromise, count of exposed/vulnerable instances) instead of a vague summary",
+        "checks whether identified issues are being actively remediated (patch cadence, current version) to give a balanced, current picture",
+        "independently re-verifies the same way when the user later asks about an adjacent tool from the same original source, rather than assuming the first tool's verification covers it"
+      ],
+      "forbidden_behaviors": [
+        "citing only the user's original source's security claim without independent verification when recommending adoption of a tool with autonomous execution capability",
+        "treating a single comparison article as sufficient evidence for or against adopting security-relevant infrastructure",
+        "recommending adoption of a tool with a serious, corroborated, still-active vulnerability pattern without clearly flagging it before the user invests time building on it"
+      ],
+      "required_artifacts": [],
+      "baseline_expected_failure": [
+        "agent repeats or lightly rephrases the user's source's vague security summary instead of independently searching for the tool's actual, current security track record"
+      ],
+      "review_notes": "Derived from a real session (imported via the Eval Inbox, manually reviewed before promotion): the user linked one comparison article between two self-hosted agent apps; independent search across security-media/vendor sources found a far more serious, well-corroborated picture (100+ CVEs, a near-maximum-severity privilege-escalation flaw, an active supply-chain compromise in the tool's own plugin marketplace, tens of thousands of exposed vulnerable instances) than the source article implied, changing the recommendation. A real, previously-undocumented gap in this skill -- adopting agent-hosting infrastructure carries the same due-diligence bar as adopting any other execution-capable dependency, and nothing here said so explicitly before this case."
     }
   ]
 }

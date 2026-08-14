@@ -68,6 +68,27 @@
         "agent confuses coding-agent governance with agent-product engineering"
       ],
       "review_notes": "Review semantic relationships, evidence, and omissions; keyword presence alone is insufficient."
+    },
+    {
+      "id": "AID-BEH-004",
+      "skill": "agent-development-process",
+      "type": "discipline",
+      "prompt": "A multi-component architecture decision (e.g. splitting one plugin's responsibilities across several independently installed plugins) is about to be finalized, and its viability depends on an undocumented platform behavior (e.g. whether one installed component's context preloads for another at runtime).",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "checks authoritative platform/vendor documentation, or runs a direct test, for the load-bearing capability before finalizing the decision",
+        "if unconfirmed, states the uncertainty explicitly and defaults to the smaller, more easily reversible structure until it is confirmed"
+      ],
+      "forbidden_behaviors": [
+        "finalizing the decision on the assumption the capability works, with the documentation check deferred to whenever it happens to come up later",
+        "building further work on top of the unconfirmed assumption before verifying it"
+      ],
+      "required_artifacts": [],
+      "baseline_expected_failure": [
+        "the decision is settled and work proceeds on it; the documentation gap is discovered only incidentally, by a later and otherwise-unrelated question, forcing the architecture to be reversed after the fact"
+      ],
+      "review_notes": "The check belongs at decision time, not as a hedge applied after adopting the riskier structure -- verifying early is cheaper than reversing a decision already built on top of."
     }
   ]
 }

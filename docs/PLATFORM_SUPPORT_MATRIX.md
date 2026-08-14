@@ -53,7 +53,7 @@ python3 scripts/package_surface_skills.py
 
 | Tier | Meaning | Skills |
 |---|---|---|
-| `portable` | No CloudSkill-repository dependency; safe as-is | agent-development-process, application-client-server-architecture, architecture-review, code-review, coding-agent-project-governance, cross-platform-engine-architecture, cross-platform-native-architecture, development-process-tailoring, document-governance, equipment-control-architecture, equipment-domain-modeling, framework-design, runtime-evaluation-engineering, safe-incremental-refactoring, semiconductor-equipment-domain-knowledge, software-quality-iso25010, using-cloudbox-skills |
+| `portable` | No CloudSkill-repository dependency; safe as-is | agent-development-process, application-client-server-architecture, architecture-review, code-review, coding-agent-project-governance, cross-platform-engine-architecture, cross-platform-native-architecture, development-process-tailoring, document-governance, equipment-control-architecture, equipment-domain-modeling, framework-design, runtime-evaluation-engineering, safe-incremental-refactoring, semiconductor-equipment-domain-knowledge, software-quality-iso25010, teach-while-building, using-cloudbox-skills |
 | `hybrid` | Core judgment portable; some documented workflow steps invoke repository scripts and will not function in a sandbox | developing-skills |
 | `cli-only` | Excluded from sandboxed packaging | local-runtime-eval-debugging |
 

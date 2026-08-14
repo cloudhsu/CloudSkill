@@ -40,6 +40,14 @@ Use the matching assets and repository commands named by those references.
 Create new Skills with `scripts/manage_skill.py new`; before commit refresh and
 audit lifecycle evidence, then run the complete repository checks.
 
+Before finalizing a new skill id, plugin identifier, or other product-facing name,
+check whether it collides with an unrelated product or identity already in scope
+(a different codebase, plugin, or project the same user works on) — a same-session
+collision is easy to miss until many files already reference the name. Surface a
+collision immediately and drive an explicit disambiguation decision before
+propagating the name across files, rather than discovering it after adoption and
+paying for a full rename later.
+
 ## Explicit capture requests
 
 Treat these phrases as exact workflow triggers:
@@ -146,6 +154,22 @@ Report accessible evidence, unavailable sources, owner/overlap decision,
 sanitization/deduplication, contract, RED result, minimal change, GREEN and
 adjacent regression, structural/install checks, delivery form, release status,
 and remaining limitations.
+
+Before releasing any change that touches a `SKILL.md`, run
+`scripts/validate_skill_context_budget.py`. It enforces a hard per-skill byte
+budget (default 10,500 bytes; a short, dated list of frozen ceilings exists
+for skills that were already over budget when this check was introduced --
+those get zero further growth room, not a standing exemption). A failure is
+not something to note and defer: consolidate repeated rules into fewer,
+more general statements, or move conditional detail into `references/`,
+before release. Never raise the default budget or a grandfathered ceiling to
+make a failing skill pass -- shrink the skill instead.
+
+A local validator pass is not release evidence by itself when the repository
+has CI. After pushing, check the actual CI run for that commit (e.g. `gh run
+list` / `gh run view`) before calling the release done -- do not infer CI
+result from the local run alone. A CI-configured check that was never
+observed to run is `NOT RUN`, not `PASS`, regardless of local results.
 
 Before any stage or release decision, follow
 `references/skill-lifecycle-standard.md`. Distinguish structural validation,

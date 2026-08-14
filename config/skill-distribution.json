@@ -1,0 +1,50 @@
+{
+  "schema_version": 1,
+  "description": "Classifies each Skill's eventual distribution tier for the deferred public/private split described in docs/future/PUBLIC_PRIVATE_PACKAGE_SPLIT.md. This is a label-only ledger: it does not move files, change packaging, or affect the current single-repository install in any way. Its only purpose is to keep an always-current answer to 'which side does this Skill go on' so the eventual split reads from a maintained source of truth instead of requiring a fresh audit of all Skills at that time. Update this file whenever a Skill is added, renamed, or its distribution intent changes -- do not let it go stale the way a one-time audit would.",
+  "tiers": {
+    "core": "Public CloudBox Core: ordinary software-development Skills (architecture, design, implementation, review, quality, documents, lifecycle, agent-product engineering, and generalized/sanitized domain-engineering knowledge with no company/project/customer identifiers). Dual-published going forward once the split executes, same pattern already used for teach-while-building.",
+    "evolution-pack": "Private CloudBox Evolution Pack only: Skill self-development/mining/evolution machinery, the runtime-eval harness used to maintain CloudBox's own routing accuracy, and any future cloudbox-agent-* multi-role persona work. Never published to the public repository."
+  },
+  "skills": {
+    "agent-development-process": "core",
+    "application-client-server-architecture": "core",
+    "architecture-review": "core",
+    "code-review": "core",
+    "coding-agent-project-governance": "core",
+    "cross-platform-engine-architecture": "core",
+    "cross-platform-native-architecture": "core",
+    "developing-skills": "evolution-pack",
+    "development-process-tailoring": "core",
+    "document-governance": "core",
+    "equipment-control-architecture": "core",
+    "equipment-domain-modeling": "core",
+    "framework-design": "core",
+    "local-runtime-eval-debugging": "evolution-pack",
+    "runtime-evaluation-engineering": "evolution-pack",
+    "safe-incremental-refactoring": "core",
+    "semiconductor-equipment-domain-knowledge": "core",
+    "software-quality-iso25010": "core",
+    "teach-while-building": "core",
+    "using-cloudbox-skills": "core"
+  },
+  "decisions": [
+    {
+      "date": "2026-08-14",
+      "decision": "semiconductor-equipment-domain-knowledge, equipment-control-architecture, and equipment-domain-modeling classified core, not evolution-pack.",
+      "reasoning": "Content is already generalized/de-identified (no specific company, project, customer, recipe, or safety-limit identifiers per developing-skills' own sanitization discipline) -- publishing general equipment-automation-architecture knowledge does not expose the user's specific employer or project work.",
+      "decided_by": "user, explicit choice between two presented options"
+    },
+    {
+      "date": "2026-08-14",
+      "decision": "developing-skills, local-runtime-eval-debugging, and runtime-evaluation-engineering classified evolution-pack.",
+      "reasoning": "These are meta-tooling for maintaining CloudBox's own routing/behavior accuracy and skill-development lifecycle, not skills a user would apply to build their own product -- self-referential rather than general-purpose.",
+      "decided_by": "Claude, following the category boundary the user already stated (skill self-evolution/mining machinery stays private)"
+    },
+    {
+      "date": "2026-08-14",
+      "decision": "using-cloudbox-skills classified core, with a caveat.",
+      "reasoning": "The router itself is general-purpose and belongs in Core, but a Core-only build must not let it route to evolution-pack-tier skills (dead-end routes on the public side, same class of concern skill-portability.json already flags for local-runtime-eval-debugging on sandboxed surfaces). Needs a Core-scoped routing reference at actual split time, not resolved by this ledger alone.",
+      "decided_by": "Claude"
+    }
+  ]
+}
