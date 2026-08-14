@@ -1,5 +1,35 @@
 # Changelog
 
+## 7.6.2
+
+### `safe-incremental-refactoring`: dual implementation behind a single compile-time switch
+
+Same originating engine-revival session, a follow-on correction. After a
+shared implementation was replaced and the replacement's correctness in
+the actual target environment turned out not yet confirmed (it compiled,
+its own API reported success, but an outside observer -- the user -- could
+not confirm it actually worked there), the recovery decision was: restore
+the old implementation rather than leave it deleted, rename it to reflect
+what it actually is now that a second implementation exists beside it, and
+put both behind exactly one compile-time flag in a single dedicated
+location.
+
+- New behavior case `REF-BEH-009` (discipline).
+- `compatibility-facade.md`: new "Dual Implementation Behind a Single
+  Compile-Time Switch" section -- distinguished explicitly from the
+  existing Compatibility Façade pattern (that one is for responsibilities
+  migrating underneath a stable calling surface; this one is for two
+  complete, independent implementations of an already-existing interface,
+  appropriate specifically while the new implementation's correctness is
+  still an open question).
+
+RED evidence type: case/contract layer, same disclosure basis as 7.6.1 --
+not run through the runtime/model behavior-eval harness this pass.
+
+`validate_behavior_evals.py` (164 behavior case contracts, up from 163)
+passes. Synced to the public mirror per the same temporary exception noted
+in 7.6.1.
+
 ## 7.6.1
 
 ### `safe-incremental-refactoring`: shared-consumer before/after state table

@@ -192,6 +192,33 @@
         "a shared-component swap trades correctness on one consumer for a gain on another, and the asymmetric outcome goes unnoticed because verification prose reports the improved consumers without an explicit accounting of every consumer"
       ],
       "review_notes": "Counterexample: a slice with exactly one consumer (no fan-out) does not need the table -- a single before/after state pair in prose is sufficient. The table earns its cost specifically when a component serves more than one consumer, because that is where an asymmetric regression can hide behind prose about the consumers that improved."
+    },
+    {
+      "id": "REF-BEH-009",
+      "skill": "safe-incremental-refactoring",
+      "type": "discipline",
+      "prompt": "A shared implementation is about to be replaced with a new one, and the new implementation's correctness in the actual target environment is not yet independently confirmed (it compiles and its own API reports success, but no outside observation -- a user, a real-dependency integration test, a field report -- has confirmed it actually works there).",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "keeps the old implementation rather than deleting it, renaming it to reflect what it actually is now that a second implementation exists beside it",
+        "adds the new implementation alongside the renamed old one, both satisfying the same existing interface",
+        "selects between them with exactly one compile-time flag in a single, obviously-named location, not scattered conditionals at each call site",
+        "treats removing the old implementation and the flag as a later, separate change, gated on independent confirmation, not on the new implementation merely compiling or self-reporting success"
+      ],
+      "forbidden_behaviors": [
+        "deletes the old implementation in the same change that introduces the new one, before independent confirmation exists",
+        "edits both implementations' internal logic in the same change that also flips the flag's default",
+        "treats the new implementation's own successful API return codes as sufficient confirmation without an outside observation"
+      ],
+      "required_artifacts": [
+        "single compile-time selection flag with documented current direction",
+        "old implementation preserved and renamed, not deleted"
+      ],
+      "baseline_expected_failure": [
+        "the old, working implementation is deleted as part of the same change that introduces an unverified replacement, so if the replacement turns out not to work in the target environment there is no fast, low-risk way back -- recovering it means reconstructing it from source history under pressure instead of flipping one flag"
+      ],
+      "review_notes": "Distinguish from REF-BEH-008: that case is about verification evidence shape for a swap already believed correct; this case is about not committing to the swap at all -- keeping a real fallback -- while correctness is still an open question. Counterexample: once the new implementation is independently confirmed and the team commits to it, keeping both implementations and the flag indefinitely is itself a cost (see compatibility-facade.md's exit-condition point) -- the old implementation and the flag should be removed in that later, separate change, not preserved forever out of caution."
     }
   ]
 }
