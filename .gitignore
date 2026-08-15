@@ -18,3 +18,8 @@ artifacts/runtime-eval*.jsonl
 artifacts/runtime-eval*.json
 .worktrees/
 /.cloudskill/
+
+# skill-creator eval-loop scratch workspaces (subagent outputs, benchmark.json,
+# HTML viewers) -- machine-local execution evidence; the distilled result goes
+# into docs/releases/<version>-skill-release-evidence.md, not into git.
+*-workspace/

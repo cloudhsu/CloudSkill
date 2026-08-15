@@ -143,6 +143,49 @@ The table earns its cost specifically when a shared component serves more
 than one consumer, because that is where an asymmetric regression can hide
 behind prose about the consumers that improved.
 
+## Transitive-Consumer Discovery Before a Split
+
+A direct search for the moved item's own name only finds consumers that
+reference it *directly*. It misses a consumer that reaches the moved item
+through another file: a validator that imports another script, which
+imports another script, which hardcodes a path to the thing you moved,
+three hops away. That consumer never matches a grep for the moved name --
+it matches a grep for the name of whatever it directly imports, which has
+no obvious connection to your change.
+
+Before finalizing a split (a skill, a module, a shared file, a config
+entry), trace the dependency graph outward from the moved item, not just
+the literal string:
+
+- Grep for the moved item's own name (the obvious first pass), *then*
+  grep for the names of anything the moved item's own consumers import or
+  hardcode paths to, one more hop out. Repeat until a pass finds nothing
+  new.
+- Distinguish "no result" from "not searched" -- a clean grep for the
+  moved name proves nothing about hop-two or hop-three consumers unless
+  they were searched for too.
+- A test suite that runs entirely inside the source repository proves the
+  source repository is internally consistent. It does not prove a split
+  is complete when part of what makes a change "complete" is how the
+  result behaves once consumed downstream -- packaged, exported,
+  installed, or otherwise handed to something outside the repo. If such a
+  downstream consumption step exists, run it for real before calling the
+  split done, not only the in-repo checks.
+- A grep pass finds consumers that reach the moved item *by name* --
+  direct reference, indirect import, hardcoded path. It cannot find a
+  consumer that reaches it by something specific to what the moved item
+  *is*: a serializer whose output gets pickled and later reconstructed by
+  dotted path, an identifier persisted in a cache key or replay log, a
+  schema version baked into stored data. Grepping harder does not surface
+  this class of consumer -- asking "what's unusual about this specific
+  item, given what it does" does. Treat the discovery methods above as a
+  minimum, not a checklist that closes the question once satisfied.
+
+Counterexample: a moved item with no downstream packaging/export/install
+step, and no other script that imports or hardcodes a path into it, does
+not need multi-hop tracing -- a single-repo grep and its own test suite
+are sufficient evidence there.
+
 ## Escalating Evidence Shape as Complexity Grows
 
 When recording comparison/verification data (e.g. the shared-consumer

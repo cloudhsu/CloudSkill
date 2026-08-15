@@ -124,6 +124,13 @@ Run:
   shared-consumer before/after state table (see `references/evidence-checklist.md`)
   — an asymmetric regression hides behind prose that only reports the
   consumers that improved.
+- If the slice moves or splits something other files reach through an
+  import/path chain, trace consumers transitively, not only by grepping
+  the moved item's own name (see `references/evidence-checklist.md`'s
+  "Transitive-Consumer Discovery") — and if a downstream
+  packaging/export/install step exists, run it for real before calling
+  the slice done; the source repo's own tests passing does not prove that
+  step is complete.
 
 ### 8. Handoff
 

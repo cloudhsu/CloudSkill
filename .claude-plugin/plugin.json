@@ -1,7 +1,7 @@
 {
   "name": "cloudbox-skills",
   "displayName": "CloudBox Skills",
-  "version": "7.6.17",
+  "version": "7.6.18",
   "description": "Architecture, equipment-domain, quality, governance, refactoring, and Eval workflows for Claude Code.",
   "author": {
     "name": "CloudBox"

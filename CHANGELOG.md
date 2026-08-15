@@ -1,5 +1,38 @@
 # Changelog
 
+## 7.6.18
+
+### `safe-incremental-refactoring`: Transitive-Consumer Discovery Before a Split
+
+Distilled from the 2026-08-15 developing-eval split incident (9 patch
+releases, 7.6.9-7.6.17, to get a real end-to-end export working because
+validator scripts had hardcoded transitive dependencies a direct grep never
+surfaced). First skill change in this repo produced end-to-end with
+Anthropic's `skill-creator` eval-loop instead of manual editing: drafted,
+tested against 4 realistic prompts (including a deliberate counterexample and
+a hardened adversarial variant) via paired with-skill/baseline subagent
+comparisons, found and fixed a real anchoring gap in a second iteration. Full
+evidence in `docs/releases/7.6.18-skill-release-evidence.md`.
+
+- `references/evidence-checklist.md`: new "Transitive-Consumer Discovery
+  Before a Split" section -- grep the moved item's name, then one hop
+  further from anything referencing it, repeat until clean; an in-repo test
+  suite proves internal consistency, not that a downstream
+  packaging/export/install step is complete; and (iteration-2 addition) the
+  discovery methods are a minimum, not a checklist -- ask what's distinctive
+  about the specific item being moved, since a consumer reached by what an
+  item *is* (e.g. a pickled/persisted dotted path) cannot be found by
+  grepping harder.
+- `SKILL.md` Step 7: one-sentence cross-reference (not duplicated).
+
+RED evidence: skill-creator subagent-comparison loop (see release evidence
+doc), not a new `evals/behavior/cases/*.json` case. Full run_all_checks.py
+suite passes at 7.6.18.
+
+Temporary sync exception continues per 7.6.1: public CloudSkill mirror gets
+the same content, until the planned CrewAI migration resumes the
+private-only split.
+
 ## 7.6.17
 
 ### `validate_behavior_runtime_evals.py` no longer hard-requires `validate_behavior_contract.py`
