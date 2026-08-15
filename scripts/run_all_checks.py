@@ -33,6 +33,13 @@ commands = [
 ]
 
 for command in commands:
+    script_path = ROOT / command[1]
+    if not script_path.exists():
+        # A filtered public checkout (scripts/export_public_bundle.py) can
+        # legitimately omit a private-only validator. Skip rather than fail
+        # so this same command list works unmodified in both checkouts.
+        print(f"NOTE: skipping {command[1]} (not present in this checkout)", flush=True)
+        continue
     print('+', ' '.join(command), flush=True)
     result = subprocess.run(command, cwd=ROOT)
     if result.returncode:

@@ -56,8 +56,6 @@ def main() -> int:
             errors.append(f"developing-skills: missing universal main-file invariant: {label}")
 
     required_routes = {
-        "interaction capture": "references/interaction-eval-capture.md",
-        "conversation/project mining": "references/conversation-derived-optimization.md",
         "lifecycle and release": "references/skill-lifecycle-standard.md",
     }
     for label, path in required_routes.items():
@@ -65,6 +63,19 @@ def main() -> int:
             errors.append(
                 f"developing-skills: missing direct conditional reference route: {label} -> {path}"
             )
+
+    developing_eval = SKILLS_DIR / "developing-eval/SKILL.md"
+    if developing_eval.is_file():
+        eval_text = developing_eval.read_text(encoding="utf-8")
+        eval_routes = {
+            "interaction capture": "references/interaction-eval-capture.md",
+            "conversation/project mining": "references/conversation-derived-optimization.md",
+        }
+        for label, path in eval_routes.items():
+            if path not in eval_text:
+                errors.append(
+                    f"developing-eval: missing direct conditional reference route: {label} -> {path}"
+                )
 
     if errors:
         for error in errors:

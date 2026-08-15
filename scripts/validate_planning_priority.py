@@ -5,11 +5,13 @@ import re
 ROOT = Path(__file__).resolve().parents[1]
 PROCESS_SKILL = ROOT / ".agents/skills/development-process-tailoring/SKILL.md"
 DEVELOPING_SKILL = ROOT / ".agents/skills/developing-skills/SKILL.md"
+DEVELOPING_EVAL_SKILL = ROOT / ".agents/skills/developing-eval/SKILL.md"
 
 
-def contract_errors(process_text: str, developing_text: str):
+def contract_errors(process_text: str, developing_text: str, eval_text: str = ""):
     process = re.sub(r"\s+", " ", process_text).lower()
     developing = re.sub(r"\s+", " ", developing_text).lower()
+    ev = re.sub(r"\s+", " ", eval_text).lower()
     checks = {
         "development-process-tailoring owns the lifecycle plan": (
             "own the lifecycle plan, execution-plan contract" in process
@@ -50,13 +52,13 @@ def contract_errors(process_text: str, developing_text: str):
             and "then evidence and verification" in developing
             and "then token/context cost" in developing
         ),
-        "manual review remains default-visible": "manual-review" in developing,
+        "manual review remains default-visible": (not eval_text) or ("manual-review" in ev),
         "unsupported retention remains default-visible": (
-            "unsupported evidence" in developing
+            (not eval_text) or ("unsupported evidence" in ev)
         ),
-        "legacy recovery remains default-visible": "legacy recovery" in developing,
+        "legacy recovery remains default-visible": (not eval_text) or ("legacy recovery" in ev),
         "raw transcript prohibition remains default-visible": (
-            "raw or complete transcript" in developing
+            (not eval_text) or ("raw or complete transcript" in ev)
         ),
     }
     return [label for label, passed in checks.items() if not passed]
@@ -65,7 +67,8 @@ def contract_errors(process_text: str, developing_text: str):
 def main() -> int:
     process_text = PROCESS_SKILL.read_text(encoding="utf-8")
     developing_text = DEVELOPING_SKILL.read_text(encoding="utf-8")
-    errors = contract_errors(process_text, developing_text)
+    eval_text = DEVELOPING_EVAL_SKILL.read_text(encoding="utf-8") if DEVELOPING_EVAL_SKILL.is_file() else ""
+    errors = contract_errors(process_text, developing_text, eval_text)
 
     # Negative mutation proves the validator detects removal of the priority
     # authority rather than merely confirming that both files are readable.

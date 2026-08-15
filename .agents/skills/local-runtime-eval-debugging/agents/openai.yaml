@@ -1,4 +1,0 @@
-interface:
-  display_name: "本機 Runtime Eval 除錯"
-  short_description: "一鍵執行、分階段診斷並封裝可上傳的 Runtime Eval 證據"
-  default_prompt: "Use $local-runtime-eval-debugging to run or diagnose the local CloudSkill Runtime Eval and produce one review ZIP."

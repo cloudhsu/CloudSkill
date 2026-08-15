@@ -2,14 +2,16 @@
 
 <p align="center"><img src="assets/cloudbox-logo.png" width="160" alt="CloudBox logo"></p>
 
-> **This public repository is kept in sync with the private
-> `cloudbox-skills` repository for now.** All skills and
-> engineering-workflow content are mirrored here, not only
-> `teach-while-building`. This is a temporary arrangement; the split back to
-> a private-only, public-partial-mirror model resumes once the planned
-> CrewAI migration work begins.
+> **This public repository is exported from the private `cloudbox-skills`
+> repository via `scripts/export_public_bundle.py`, which reads
+> `config/skill-distribution.json` to include only `core`-tier content.**
+> `evolution-pack`-tier skills (skill self-development, conversation-mining,
+> and the runtime-eval harness CloudBox uses to maintain its own routing
+> accuracy) stay private and are never exported here. This is a temporary
+> arrangement; the split back to a private-only, public-partial-mirror model
+> resumes once the planned CrewAI migration work begins.
 
-**Current version: 7.6.8**
+**Current version: 7.6.17**
 
 CloudBox 6.4 adds pre-qualified, deterministic lifecycle templates while
 retaining risk-based Review Assurance and resumable adaptive planning. See
@@ -29,19 +31,6 @@ The same canonical `.agents/skills/` directories are used by both plugin manifes
 
 CloudBox supports Codex/ChatGPT and Claude Code plugins, plus the existing standalone user/project installation. See [INSTALL.md](INSTALL.md) and [docs/CLOUDBOX_PLUGIN.md](docs/CLOUDBOX_PLUGIN.md).
 
-
-## Interaction-derived Eval capture
-
-A local CloudSkill clone can be registered during installation. The installer stores only local paths and safe defaults; it does not store credentials. After configuration, the phrases `整理成正向案例` and `整理成負向案例` create sanitized candidates under the private Eval Inbox. Candidates do not modify formal Evals, skills, commits, or remote branches until a separate review/import task is explicitly requested.
-
-CloudBox 6.1 also provides versioned manual bundles and token-free Git source
-discovery. Use `從專案提煉優化案例` for an initial bounded pass and
-`同步優化來源` for incremental discovery. Actual URLs, credentials,
-candidates, and provenance remain in ignored/private storage; see
-[CloudBox evolution sources](docs/AUTOMATIC_EVOLUTION_SOURCES.md).
-CloudBox 6.4 import first verifies bundle/exporter/candidate schema, declared
-CloudBox version, host/runtime, filename/manifest identity, and payload hashes;
-contract drift is retained as unsupported evidence before candidate routing.
 
 ## Skills
 
@@ -102,47 +91,6 @@ See [docs/README.md](docs/README.md) for the document ownership map.
 - [Current agent/conversation handoff](CLOUDBOX_SKILLS_AGENT_HANDOFF.md)
 
 Start with the handoff document when continuing an existing multi-session Skill evolution task.
-
-## Runtime model evaluations
-
-CloudBox includes an executable routing Eval harness in `evals/runtime/`. Static CI validates the suite and grader without calling a model. Local execution defaults to Ollama and requires no API key; OpenAI execution remains optional. Private results are written under `.local/runtime-evals/`.
-
-Validate the Eval suite without a model call:
-
-```bash
-python3 scripts/validate_runtime_evals.py
-python3 scripts/run_runtime_evals.py --provider ollama --model qwen3:4b --dry-run
-```
-
-Run one local smoke case:
-
-```bash
-python3 scripts/run_runtime_evals.py \
-  --provider ollama \
-  --model qwen3:4b \
-  --case-id R06-chinese-translation-no-skill \
-  --repeat 1
-```
-
-Run the complete local Canary Suite:
-
-```bash
-python3 scripts/run_runtime_evals.py \
-  --provider ollama \
-  --model qwen3:4b \
-  --repeat 1 \
-  --num-ctx 4096
-```
-
-Grade the latest result file:
-
-```bash
-python3 scripts/grade_runtime_evals.py \
-  --input .local/runtime-evals/<result-file>.jsonl \
-  --output .local/runtime-evals/<summary-file>.json
-```
-
-The grader deterministically checks primary-skill accuracy, required supporting skills, forbidden selected skills, execution order, no-skill behavior, valid skill IDs, output shape, and router self-inclusion. It does not claim to grade the full semantic quality of the final engineering answer.
 
 ## Validate
 

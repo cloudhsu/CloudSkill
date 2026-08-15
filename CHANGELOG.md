@@ -1,5 +1,201 @@
 # Changelog
 
+## 7.6.17
+
+### `validate_behavior_runtime_evals.py` no longer hard-requires `validate_behavior_contract.py`
+
+Last file found running the real export end-to-end: this validator
+unconditionally required `validate_behavior_contract.py` to exist, which
+7.6.16 correctly excluded from the public checkout. Gated the requirement on
+the same private-checkout signal (`scripts/run_runtime_evals.py` presence)
+used elsewhere.
+
+RED evidence: case/contract layer only. Full run_all_checks.py suite passes
+at 7.6.17 in both checkouts; the real export into CloudSkill now passes
+run_all_checks.py cleanly end to end.
+
+## 7.6.16
+
+### Exclude `validate_behavior_contract.py` and its exclusive dependency chain
+
+Found running the real export end-to-end: `validate_behavior_contract.py`
+stayed public in 7.6.15 on the assumption it was general-purpose, but it
+hard-imports `run_local_eval_review`, `run_runtime_evals`, and
+`runtime_eval_common` to check contract-fingerprint consistency across the
+runtime-eval harness's consumer scripts -- all three already private. Audited
+every consumer of `behavior_output_contract.py`, `runtime_eval_common.py`,
+`canary.json`, and `routing-decision.schema.json` before excluding (not
+assumed from filenames this time): every one is already-excluded runtime-eval
+tooling, so all six are now excluded together. `review-assurance.schema.json`
+and `behavior-rubrics.json` were checked the same way and confirmed to have a
+genuinely public consumer (`validate_review_assurance.py`,
+`validate_behavior_runtime_evals.py`) -- correctly left in the public bundle.
+
+RED evidence: case/contract layer only. Full run_all_checks.py suite passes
+at 7.6.16 in both checkouts.
+
+## 7.6.15
+
+### Revert the blanket `evals/runtime/` exclusion -- scripts, not schemas, are private
+
+Found running the real export end-to-end: excluding the whole `evals/runtime/`
+directory (added in 7.6.12) broke `validate_behavior_contract.py` and other
+general-purpose validators that stay active in the public checkout --
+`behavior-output-contract.json`, `review-assurance.schema.json`, and
+`behavior-rubrics.json` are consumed by scripts that were never private
+(`validate_behavior_contract.py`, `validate_review_assurance.py`,
+`validate_behavior_runtime_evals.py`). The user's actual instruction was
+scripts, not data: "私有的python腳本也不用匯出到公開." Reverted the
+directory-level exclusion; the private-only *scripts* added in 7.6.12
+(`run_runtime_evals.py`, `validate_multimodel_panel.py`, etc.) stay excluded,
+and `run_all_checks.py`'s existing skip-if-missing-script logic handles their
+absence -- their now-unused data files sitting in the public repo are inert
+schemas/fixtures, not a privacy concern.
+
+RED evidence: case/contract layer only. Full run_all_checks.py suite passes
+at 7.6.15 in both checkouts.
+
+## 7.6.14
+
+### `validate_skill_portability.py`: treat an absent evolution-pack skill as expected
+
+Found running the real export end-to-end: the public checkout failed with
+"classifies Skill(s) that no longer exist" and "packaging
+runtime-evaluation-engineering failed: Skill directory not found" --
+`skill-portability.json` legitimately keeps classifying evolution-pack
+skills for when they might ever be distributed, but the validator treated
+their absence in a public checkout as an error rather than the expected
+result of `scripts/export_public_bundle.py` never copying them. Fixed both:
+the orphaned-classification check now excludes evolution-pack names, and the
+packaging eligibility check now requires the skill's directory to actually
+exist.
+
+RED evidence: case/contract layer only. Full run_all_checks.py suite passes
+at 7.6.14 in both checkouts.
+
+## 7.6.13
+
+### `validate_plugins.py`: don't hard-fail on a legitimately absent private plugin
+
+Found running the real export end-to-end for the first time: the public
+checkout's `run_all_checks.py` failed with "invalid JSON private-plugin/...:
+No such file" -- `load_json` was called unconditionally even though
+`private-plugin/` correctly does not exist in a public checkout, turning an
+expected absence into a hard error instead of the intended silent skip.
+Guarded the load behind an existence check.
+
+RED evidence: case/contract layer only. Full run_all_checks.py suite passes
+at 7.6.13 in both checkouts.
+
+## 7.6.12
+
+### Move evolution-pack documentation out of the public README
+
+The public README still documented "Interaction-derived Eval capture" and
+"Runtime model evaluations" -- both `evolution-pack`-tier per
+`config/skill-distribution.json`'s own definition (skill self-mining and the
+routing-accuracy runtime-eval harness). Moved both sections to the new
+`private-plugin/README.md` (excluded from export like the rest of
+`private-plugin/`), and updated the top-of-README banner to describe the
+actual export mechanism (`scripts/export_public_bundle.py` reading
+`skill-distribution.json`) instead of the stale "everything is mirrored"
+description.
+
+- `scripts/export_public_bundle.py` / `scripts/validate_pack.py`: extended
+  the private-infrastructure exclusion to the full runtime-eval/multimodel-
+  panel harness (`evals/runtime/`, `scripts/run_runtime_evals.py`,
+  `validate_multimodel_panel.py`, the `claude_eval_adapter.py`/
+  `codex_eval_adapter.py` pair, `cloudbox-skills-eval*` CLI entry points, and
+  related validators) -- these were previously being exported unfiltered.
+
+RED evidence: case/contract layer only. Full run_all_checks.py suite passes
+at 7.6.12.
+
+## 7.6.11
+
+### `export_public_bundle.py`: prune stale files, not just copy new ones
+
+Found running the first real export against CloudSkill: a copy-only export
+left every file from earlier, less careful full-sync mirrors sitting in the
+destination forever, including the two evolution-pack skill folders
+(`local-runtime-eval-debugging/`, `runtime-evaluation-engineering/`) and the
+old pre-split `developing-skills/references/interaction-eval-capture.md` /
+`conversation-derived-optimization.md` paths -- exactly how the original
+leak this whole rework exists to fix would have kept surviving every future
+export. The script now prunes any file tracked in `--dest` that this run did
+not write (except an explicit `DEST_ONLY_KEEP` allowlist for files the public
+repo legitimately owns, e.g. `LICENSE`), and removes directories left empty
+by pruning.
+
+RED evidence: case/contract layer only. Full run_all_checks.py suite passes
+at 7.6.11.
+
+## 7.6.10
+
+### `export_public_bundle.py`: rewrite plugin.json URLs to the public repo
+
+Found immediately after 7.6.9 shipped, before any real export ran: the
+export script copied `.claude-plugin/plugin.json` / `.codex-plugin/plugin.json`
+verbatim, which would have silently overwritten the public CloudSkill repo's
+already-fixed `homepage`/`repository`/`websiteURL` fields back to the private
+repo's own URL on the next sync -- the exact bug fixed by hand earlier this
+session, regressing itself. `PUBLIC_REPO_URL`/`PRIVATE_REPO_URL` constants
+added; the export now rewrites those fields instead of copying verbatim.
+
+RED evidence: case/contract layer only.
+
+## 7.6.9
+
+### Split `developing-eval` out of `developing-skills`; structural public/private plugin boundary
+
+Marketplace submission readiness surfaced that the temporary full-sync
+exception had already mirrored all three evolution-pack skills into the
+public CloudSkill repo, contradicting `config/skill-distribution.json`'s own
+"never publish" classification -- a memory/discipline-dependent gap, not a
+structural one (see [[cloudbox-skills-private-only]] and
+[[memory-vs-process-fix]] on the CloudBox side). `developing-skills` itself
+turned out to bundle generic skill-authoring craft with CloudBox's own
+private conversation-mining machinery. Fixed structurally, not by
+remembering to filter:
+
+- New skill `developing-eval` (evolution-pack): owns `整理成正向案例` /
+  `整理成負向案例` / `從專案提煉優化案例`, the private Eval Inbox/exchange,
+  and conversation/project-history mining. `developing-skills` (now core)
+  keeps the generic RED/GREEN/lifecycle/release craft and hands off to
+  `developing-eval` for capture.
+- `config/skill-distribution.json` reclassified `developing-skills` to core,
+  added `developing-eval` as evolution-pack, and is now enforced (not just a
+  deferred label) by `scripts/export_public_bundle.py`.
+- `.claude-plugin/plugin.json` / `.codex-plugin/plugin.json`: `skills` field
+  changed from a wildcard directory to an explicit array of the 18 core
+  skill paths, validated against `skill-distribution.json`.
+- New `private-plugin/.claude-plugin/plugin.json` (`cloudbox-skills-private`):
+  private-repo-only add-on plugin covering the 3 evolution-pack skills,
+  registered as a second entry in `.claude-plugin/marketplace.json`. Install
+  it locally with `/plugin install cloudbox-skills-private@cloudbox-marketplace`
+  alongside the normal `cloudbox-skills` install to keep all 21 skills
+  available day-to-day; it is never mirrored to the public repo.
+- New `scripts/export_public_bundle.py`: the actual, scripted answer to
+  "which files are safe to publish," reading `skill-distribution.json` and
+  excluding evolution-pack skill folders, `private-plugin/`, and a small set
+  of private mining/evolution infrastructure outside any skill folder
+  (`scripts/capture_eval_candidate.py`, `sync_eval_exchange.py`, etc.;
+  `.github/workflows/evolution-source-sync.yml`).
+- `scripts/validate_plugins.py`, `scripts/validate_pack.py`,
+  `scripts/run_all_checks.py`, and related validators made checkout-aware:
+  they detect whether evolution-pack skill directories are physically
+  present and enforce the private-repo contract when they are, or the
+  public-repo contract (no trace of the private plugin) when they are not --
+  the same command list and scripts now work unmodified in both checkouts.
+
+RED evidence: case/contract layer only. Not run through the runtime/model
+behavior-eval harness this pass. Full `run_all_checks.py` suite passes at
+7.6.9.
+
+Temporary sync exception continues per 7.6.1 for core content only from this
+version forward -- the export filter, not manual judgment, is what enforces
+that boundary now.
+
 ## 7.6.8
 
 ### Skill-quality pass: near-miss routing, description discipline, live-run model choice

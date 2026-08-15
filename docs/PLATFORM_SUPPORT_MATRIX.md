@@ -55,7 +55,7 @@ python3 scripts/package_surface_skills.py
 |---|---|---|
 | `portable` | No CloudSkill-repository dependency; safe as-is | agent-development-process, application-client-server-architecture, architecture-review, code-review, coding-agent-project-governance, cross-platform-engine-architecture, cross-platform-native-architecture, development-process-tailoring, document-governance, equipment-control-architecture, equipment-domain-modeling, framework-design, runtime-evaluation-engineering, safe-incremental-refactoring, semiconductor-equipment-domain-knowledge, software-quality-iso25010, teach-while-building, using-cloudbox-skills |
 | `hybrid` | Core judgment portable; some documented workflow steps invoke repository scripts and will not function in a sandbox | developing-skills |
-| `cli-only` | Excluded from sandboxed packaging | local-runtime-eval-debugging |
+| `cli-only` | Excluded from sandboxed packaging | local-runtime-eval-debugging, developing-eval |
 
 `scripts/validate_skill_portability.py` (part of `run_all_checks.py`) proves
 this table stays accurate two ways: it re-scans every `portable`-tier
@@ -77,10 +77,12 @@ produced zip as ready to try, not as confirmed working.
 
 - Gemini CLI compatibility is a documentation claim, not a local test.
 - `hybrid`-tier Skills are packaged as-is; a user who uploads
-  `developing-skills` to claude.ai will see its interaction-capture workflow
-  steps in the Skill body even though those steps cannot execute there. This
-  is disclosed, not hidden, but is not the same as a sandbox-native rewrite
-  of those steps.
+  `developing-skills` to claude.ai will see release/CI steps (e.g. `gh`
+  commands, `scripts/manage_skill.py`) in the Skill body even though those
+  steps cannot execute there. This is disclosed, not hidden, but is not the
+  same as a sandbox-native rewrite of those steps. The interaction-capture
+  workflow itself moved to `developing-eval` (`cli-only`, excluded from
+  sandboxed packaging entirely) as of 2026-08-15.
 - No automated check confirms the claude.ai upload actually succeeds or that
   the uploaded Skill triggers correctly — that requires a live account with
   code execution enabled, which this repository's static validation cannot

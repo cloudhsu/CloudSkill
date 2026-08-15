@@ -11,9 +11,17 @@ CONTRACT_VALIDATOR = ROOT / "scripts" / "validate_behavior_contract.py"
 
 errors: list[str] = []
 
-for path in (RUBRICS, GRADER, CONTRACT_VALIDATOR):
+for path in (RUBRICS, GRADER):
     if not path.exists():
         errors.append(f"missing Behavior Eval file: {path.relative_to(ROOT)}")
+
+# CONTRACT_VALIDATOR (validate_behavior_contract.py) is part of the private
+# runtime-eval harness and is legitimately absent in a public checkout
+# (scripts/export_public_bundle.py excludes it, along with its exclusive
+# dependency chain, keyed off the same run_runtime_evals.py presence check
+# used elsewhere as the private-checkout signal).
+if (ROOT / "scripts" / "run_runtime_evals.py").exists() and not CONTRACT_VALIDATOR.exists():
+    errors.append(f"missing Behavior Eval file: {CONTRACT_VALIDATOR.relative_to(ROOT)}")
 
 try:
     payload = json.loads(RUBRICS.read_text(encoding="utf-8")) if RUBRICS.exists() else {}

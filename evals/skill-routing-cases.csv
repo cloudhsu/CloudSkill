@@ -19,7 +19,7 @@ CAG-02,多個Codex agent要如何用worktree分工並由Main Agent整合？,codi
 CAG-NEG-01,設計一個會讀郵件並自動分類的AI Agent。,coding-agent-project-governance,false,agent product
 AID-01,設計一個會讀Outlook郵件、呼叫工具、統計更新失敗並需要人工核准的AI Agent。,agent-development-process,true,AI agent product
 AID-02,為工具型Agent定義task contract、eval、trace、guardrail與release gate。,agent-development-process,true,AI agent lifecycle
-AID-NEG-01,幫這個用多個Codex/Claude Code agent協作開發的repo,訂一套AGENTS.md規則、風險分級與PR前的測試證據要求。,agent-development-process,false,coding-agent repo governance not agent product (see CAG-01)
+AID-NEG-01,幫這個用多個Codex/Claude Code agent協作開發的repo、訂一套AGENTS.md規則、風險分級與PR前的測試證據要求。,agent-development-process,false,coding-agent repo governance not agent product (see CAG-01)
 REF-01,BentoDatabase 還有很多 method，如何不改 API 與交易語意逐步拆成 Service 和 Repository？,safe-incremental-refactoring,true,compatibility facade and god class
 REF-02,重構 sql.js persistence 時如何測 COMMIT 後檔案寫入失敗與記憶體回復？,safe-incremental-refactoring,true,persistence failure and fault injection
 REF-03,cbComponent和cbWorkshop有同名但不同版本的Qt元件，如何選唯一來源並用forwarding header逐步遷移？,safe-incremental-refactoring,true,duplicate source authority and compatibility migration
@@ -77,21 +77,12 @@ ECA-08,PVD Recipe步驟要如何定義真空、MFC流量、壓力穩定、冷卻
 EDM-06,MFC模型要同時表示氣體種類、單位、Desired Flow、Actual Flow、Range、Pending、Stabilized與Fault，怎麼建模？,equipment-domain-modeling,true,analog regulator state command and units
 EDM-07,Chamber Pressure Snapshot不能只有double，還要處理Gauge來源、Range、Validity、Timestamp與ATM Switch，資料契約怎麼設計？,equipment-domain-modeling,true,measurement quality and source modeling
 USE-03,我先要解釋PVD與真空元件，再設計Pump/Vent Sequence與MFC資料模型，CloudSkill技能應如何選擇與排序？,using-cloudbox-skills,true,domain knowledge architecture and modeling composition
-DEVSK-03,整理成正向案例,developing-skills,true,explicit sanitized positive interaction capture
-DEVSK-04,整理成負向案例,developing-skills,true,explicit sanitized negative interaction capture
-DEVSK-NEG-02,請把剛才的討論整理成一般會議摘要且不要建立Eval。,developing-skills,false,ordinary summary explicitly excludes Eval capture
 USE-04,這個任務用Superpowers管理TDD與實作流程，用CloudBox處理設備領域與架構，技能順序怎麼排？,using-cloudbox-skills,true,hybrid plugin responsibility composition
 USE-NEG-02,請在Claude Code中停用某個已安裝的plugin。,using-cloudbox-skills,false,host plugin management is not skill routing
 USE-05,請把「系統已完成更新」翻譯成英文。,using-cloudbox-skills,false,Chinese translation must not trigger CloudBox routing
 USE-NEG-03,幫我把「系統更新之後目前都正常」寫得順一點。,using-cloudbox-skills,false,Chinese rewriting must not trigger CloudBox routing
 USE-06,Design ownership shared-resource arbitration restart recovery reconnect and failover for a distributed equipment system where each chamber has an independent IPC.,using-cloudbox-skills,true,English engineering task must route by decision boundary
 USE-07,Review 這段 C# callback ordering timeout late response 與 stale dictionary state 確認是否可能 duplicate send。,using-cloudbox-skills,true,mixed-language engineering task must route to code review
-LRED-01,請在本機執行 CloudSkill Runtime Eval，自動檢查 Python、Ollama、context budget、Routing與Behavior評分，最後只產生一個可上傳的ZIP。,local-runtime-eval-debugging,true,one-command local Eval execution and review bundle
-LRED-02,Runtime Eval 顯示找不到Python、prompt overflow或report不存在，請依最早失敗stage診斷並保留可上傳證據。,local-runtime-eval-debugging,true,stage-first local Eval diagnosis
-LRED-NEG-01,設計分散式Chamber IPC的共用Robot仲裁、重啟復原與failover。,local-runtime-eval-debugging,false,product recovery belongs to equipment control architecture
 DEVSK-05,建立一套標準化Skill建立與成熟度流程，包含RED/GREEN、相鄰回歸、review trigger與CI驗證。,developing-skills,true,standardized skill lifecycle and continuous evolution
-RTE-01,設計一套可執行的AI Skill評估系統，需區分Case有效性、Context、Runner、deterministic grader、semantic review與release gate。,runtime-evaluation-engineering,true,executable evaluation system design
-RTE-02,同一個contract-valid路由案例連續三次選到另一個合理Skill，請判斷是Case歧義、Grader、模型還是Skill規則問題。,runtime-evaluation-engineering,true,evaluation failure classification and case validity
-RTE-NEG-01,Ollama沒有啟動而且JSONL不存在，請幫我跑本機評分並封裝log。,runtime-evaluation-engineering,false,local execution belongs to local-runtime-eval-debugging
 TWB-01,我想一邊開發一邊透過跟你的互動把相關知識學起來，不要另外開一個學習課程。,teach-while-building,true,learn as a side effect of real work not a separate course
 TWB-NEG-01,幫我規劃一套完整的瑜珈課程，分成好幾堂課、附教材跟練習。,teach-while-building,false,full multi-session course workspace is a different heavier request

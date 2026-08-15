@@ -88,7 +88,7 @@ required = [
     'docs/CLOUDBOX_PLUGIN.md',
     'scripts/capture_eval_candidate.py', 'scripts/validate_interaction_capture.py',
     'scripts/import_eval_candidates.py', 'scripts/sync_eval_exchange.py',
-    '.agents/skills/developing-skills/assets/export_eval_candidate.py',
+    '.agents/skills/developing-eval/assets/export_eval_candidate.py',
     'scripts/package_surface_skills.py', 'scripts/validate_skill_portability.py',
     'config/skill-portability.json', 'docs/PLATFORM_SUPPORT_MATRIX.md',
     'config/cloudbox-skills-config.template.json', '.gitignore',
@@ -106,10 +106,12 @@ required = [
     'evals/runtime/contracts/multimodel-panel.schema.json',
     '.agents/skills/using-cloudbox-skills/SKILL.md',
     '.agents/skills/developing-skills/SKILL.md',
-    '.agents/skills/developing-skills/references/interaction-eval-capture.md',
-    '.agents/skills/developing-skills/assets/INTERACTION_EVAL_CANDIDATE.template.json',
-    '.agents/skills/developing-skills/assets/EVAL_MINING_REPORT.template.md',
+    '.agents/skills/developing-eval/references/interaction-eval-capture.md',
+    '.agents/skills/developing-eval/assets/INTERACTION_EVAL_CANDIDATE.template.json',
+    '.agents/skills/developing-eval/assets/EVAL_MINING_REPORT.template.md',
     '.agents/skills/developing-skills/references/skill-lifecycle-standard.md',
+    '.agents/skills/developing-eval/SKILL.md',
+    '.agents/skills/developing-eval/references/conversation-derived-optimization.md',
     '.agents/skills/developing-skills/assets/SKILL_PROPOSAL.template.md',
     '.agents/skills/developing-skills/assets/SKILL_LIFECYCLE.template.json',
     '.agents/skills/developing-skills/assets/SKILL_RELEASE_EVIDENCE.template.md',
@@ -124,7 +126,42 @@ required = [
     '.agents/skills/equipment-domain-modeling/SKILL.md',
     '.agents/skills/semiconductor-equipment-domain-knowledge/SKILL.md',
 ]
+_distribution_path = ROOT / 'config' / 'skill-distribution.json'
+_evolution_names = []
+if _distribution_path.exists():
+    _tiers = json.loads(_distribution_path.read_text(encoding='utf-8')).get('skills', {})
+    _evolution_names = [name for name, tier in _tiers.items() if tier == 'evolution-pack']
+_evolution_prefixes = tuple(f'.agents/skills/{name}/' for name in _evolution_names)
+_is_private_checkout = any((ROOT / f'.agents/skills/{name}').is_dir() for name in _evolution_names)
+# Non-skill-folder infrastructure that scripts/export_public_bundle.py also
+# excludes from a public checkout -- keep this set in sync with that script's
+# PRIVATE_INFRASTRUCTURE_PATHS.
+_private_infra = {
+    'scripts/capture_eval_candidate.py', 'scripts/cloudbox_skills_evolution.py',
+    'scripts/evolution_source_contract.py', 'scripts/sync_eval_exchange.py',
+    'scripts/sync_evolution_sources.py', 'scripts/validate_evolution_source_sync.py',
+    'scripts/validate_interaction_capture.py', 'scripts/import_eval_candidates.py',
+    'config/evolution-source.schema.json', 'config/cloudbox-skills-config.template.json',
+    '.github/workflows/evolution-source-sync.yml',
+    'scripts/run_runtime_evals.py', 'scripts/grade_runtime_evals.py',
+    'scripts/validate_runtime_evals.py', 'scripts/validate_multimodel_panel.py',
+    'scripts/multimodel_panel_contract.py', 'scripts/run_multimodel_panel.py',
+    'scripts/claude_eval_adapter.py', 'scripts/codex_eval_adapter.py',
+    'scripts/providers_contract.py', 'scripts/validate_providers_contract.py',
+    'scripts/run_local_eval_review.py', 'scripts/validate_local_eval_debugging.py',
+    'scripts/validate_codex_eval_path.py',
+    'cloudbox-skills-eval', 'cloudbox-skills-eval-codex', 'cloudbox-skills-eval-claude',
+    'scripts/validate_behavior_contract.py', 'scripts/behavior_output_contract.py',
+    'scripts/runtime_eval_common.py',
+    'evals/runtime/contracts/behavior-output-contract.json',
+    'evals/runtime/schemas/routing-decision.schema.json',
+    'evals/runtime/cases/canary.json',
+}
+
 for rel in required:
+    is_private_only = rel.startswith(_evolution_prefixes) or rel in _private_infra
+    if is_private_only and not _is_private_checkout:
+        continue
     if not (ROOT / rel).exists():
         errors.append(f'missing required file: {rel}')
 

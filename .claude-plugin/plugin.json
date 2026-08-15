@@ -1,7 +1,7 @@
 {
   "name": "cloudbox-skills",
   "displayName": "CloudBox Skills",
-  "version": "7.6.8",
+  "version": "7.6.17",
   "description": "Architecture, equipment-domain, quality, governance, refactoring, and Eval workflows for Claude Code.",
   "author": {
     "name": "CloudBox"
@@ -16,5 +16,24 @@
     "evals",
     "claude-code"
   ],
-  "skills": "./.agents/skills/"
+  "skills": [
+    "./.agents/skills/agent-development-process/",
+    "./.agents/skills/application-client-server-architecture/",
+    "./.agents/skills/architecture-review/",
+    "./.agents/skills/code-review/",
+    "./.agents/skills/coding-agent-project-governance/",
+    "./.agents/skills/cross-platform-engine-architecture/",
+    "./.agents/skills/cross-platform-native-architecture/",
+    "./.agents/skills/developing-skills/",
+    "./.agents/skills/development-process-tailoring/",
+    "./.agents/skills/document-governance/",
+    "./.agents/skills/equipment-control-architecture/",
+    "./.agents/skills/equipment-domain-modeling/",
+    "./.agents/skills/framework-design/",
+    "./.agents/skills/safe-incremental-refactoring/",
+    "./.agents/skills/semiconductor-equipment-domain-knowledge/",
+    "./.agents/skills/software-quality-iso25010/",
+    "./.agents/skills/teach-while-building/",
+    "./.agents/skills/using-cloudbox-skills/"
+  ]
 }

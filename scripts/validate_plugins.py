@@ -45,17 +45,59 @@ codex = load_json(".codex-plugin/plugin.json")
 claude = load_json(".claude-plugin/plugin.json")
 codex_market = load_json(".agents/plugins/marketplace.json")
 claude_market = load_json(".claude-plugin/marketplace.json")
+_private_plugin_path = ROOT / "private-plugin/.claude-plugin/plugin.json"
+private_claude = load_json("private-plugin/.claude-plugin/plugin.json") if _private_plugin_path.exists() else {}
+
+distribution = load_json("config/skill-distribution.json")
+tiers = distribution.get("skills", {})
+core_names = sorted(name for name, tier in tiers.items() if tier == "core")
+evolution_names = sorted(name for name, tier in tiers.items() if tier == "evolution-pack")
+expected_core_paths = sorted(f"./.agents/skills/{name}/" for name in core_names)
+expected_private_paths = sorted(f"../.agents/skills/{name}/" for name in evolution_names)
+
+
+def as_list(value: object) -> list:
+    if isinstance(value, str):
+        return [value]
+    if isinstance(value, list):
+        return value
+    return []
+
 
 for label, manifest in (("Codex", codex), ("Claude", claude)):
     if manifest.get("name") != "cloudbox-skills":
         fail(f"{label} plugin name must be cloudbox-skills")
     if manifest.get("version") != version:
         fail(f"{label} plugin version does not match VERSION")
-    if manifest.get("skills") != "./.agents/skills/":
-        fail(f"{label} plugin must point to canonical ./.agents/skills/")
-    skills_path = manifest.get("skills", "")
-    if ".." in Path(skills_path).parts:
-        fail(f"{label} plugin path traversal is not allowed")
+    skills_field = as_list(manifest.get("skills"))
+    for entry in skills_field:
+        if ".." in Path(entry).parts:
+            fail(f"{label} plugin path traversal is not allowed: {entry}")
+    if sorted(skills_field) != expected_core_paths:
+        fail(f"{label} plugin skills array does not match the core tier in config/skill-distribution.json")
+
+# A filtered public checkout physically lacks the evolution-pack skill
+# directories (scripts/export_public_bundle.py never copies them). Use that
+# as the signal for which mode this checkout is in, so this one validator
+# enforces both directions: the private repo must wire the private plugin up
+# correctly, and a public checkout must show no trace of it at all.
+evolution_dirs_present = [name for name in evolution_names if (ROOT / f".agents/skills/{name}").is_dir()]
+
+if evolution_dirs_present:
+    if private_claude.get("name") != "cloudbox-skills-private":
+        fail("Private plugin name must be cloudbox-skills-private")
+    if private_claude.get("version") != version:
+        fail("Private plugin version does not match VERSION")
+    priv_skills = sorted(as_list(private_claude.get("skills")))
+    if priv_skills != expected_private_paths:
+        fail("Private plugin skills array does not match the evolution-pack tier in config/skill-distribution.json")
+else:
+    if private_claude:
+        fail("Public checkout must not contain private-plugin/.claude-plugin/plugin.json")
+    if (ROOT / "private-plugin").exists():
+        fail("Public checkout must not contain a private-plugin/ directory at all")
+    if any("private" in p.get("name", "") for p in claude_market.get("plugins", [])):
+        fail("Public checkout's Claude marketplace must not reference any private plugin")
 
 if codex.get("interface", {}).get("displayName") != "CloudBox Skills":
     fail("Codex plugin displayName must be CloudBox Skills")
@@ -90,10 +132,21 @@ else:
         fail("Codex marketplace must point at the repository-root plugin")
 
 claude_plugins = claude_market.get("plugins", [])
-if len(claude_plugins) != 1 or claude_plugins[0].get("name") != "cloudbox-skills":
-    fail("Claude marketplace must expose exactly one cloudbox-skills plugin")
-elif claude_plugins[0].get("source") != "./":
-    fail("Claude marketplace must point at the repository-root plugin")
+claude_plugin_names = {p.get("name"): p for p in claude_plugins}
+if "cloudbox-skills" not in claude_plugin_names:
+    fail("Claude marketplace must expose cloudbox-skills")
+elif claude_plugin_names["cloudbox-skills"].get("source") != "./":
+    fail("Claude marketplace cloudbox-skills must point at the repository-root plugin")
+
+if evolution_dirs_present:
+    if "cloudbox-skills-private" not in claude_plugin_names:
+        fail("Claude marketplace must expose cloudbox-skills-private (private-repo-only add-on)")
+    elif claude_plugin_names["cloudbox-skills-private"].get("source") != "./private-plugin":
+        fail("Claude marketplace cloudbox-skills-private must point at ./private-plugin")
+    if len(claude_plugins) != 2:
+        fail(f"Claude marketplace must expose exactly cloudbox-skills and cloudbox-skills-private, found {len(claude_plugins)} entries")
+elif len(claude_plugins) != 1:
+    fail(f"Public checkout's Claude marketplace must expose exactly cloudbox-skills, found {len(claude_plugins)} entries")
 
 using_yaml = (ROOT / ".agents/skills/using-cloudbox-skills/agents/openai.yaml").read_text(encoding="utf-8")
 for marker in ("CloudBox 路由", "#00A2EA", "CloudBox skills"):

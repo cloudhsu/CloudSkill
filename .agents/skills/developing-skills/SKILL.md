@@ -1,6 +1,6 @@
 ---
 name: developing-skills
-description: Use when creating, editing, splitting, merging, evaluating, or releasing CloudSkill skills, or when mining prior interactions and user corrections for skill routing or behavior updates.
+description: Use when creating, editing, splitting, merging, evaluating, or releasing CloudSkill skills. For mining prior interactions or user corrections into evidence, use developing-eval instead.
 ---
 
 # Developing CloudSkill Skills
@@ -23,12 +23,6 @@ Read only the references required by the active workflow:
   evaluation layers, regressions, and result states.
 - `references/skill-authoring-sources.md` for external influences, adaptation,
   citations, and third-party project evidence.
-- `references/interaction-eval-capture.md` for positive/negative shorthand,
-  sanitization, configuration discovery, private Inbox routing, disconnected
-  export/import, legacy/manual handling, or promotion from candidates.
-- `references/conversation-derived-optimization.md` for several interactions,
-  Eval Inbox review, project-history mining, deterministic clustering, owner
-  analysis, token-aware synthesis, and reviewable delivery.
 - `references/skill-lifecycle-standard.md` before creating or changing a stage,
   preparing release evidence, deprecating, or replacing a Skill. The shared
   lifecycle is `draft -> experimental -> active -> stable -> deprecated`.
@@ -48,40 +42,14 @@ collision immediately and drive an explicit disambiguation decision before
 propagating the name across files, rather than discovering it after adoption and
 paying for a full rename later.
 
-## Explicit capture requests
+## Conversation mining is a different skill
 
-Treat these phrases as exact workflow triggers:
-
-- `整理成正向案例`
-- `整理成負向案例`
-- `從專案提煉優化案例`
-
-For the first two, follow `references/interaction-eval-capture.md`. For project
-history, follow its dedicated section in
-`references/conversation-derived-optimization.md`. Capture only necessary,
-sanitized evidence in the configured private queue. If sanitization or policy
-ownership is uncertain, use manual review or return `MANUAL_REQUIRED`.
-
-Capture never authorizes formal Eval/Skill edits, Git mutation, or publication.
-A candidate is evidence to review, not proof that behavior passed.
-Never preserve a raw or complete transcript. Use `manual-review` whenever safe
-sanitization, routing, or policy ownership remains uncertain.
-
-## Untrusted exchange boundary
-
-Exporter success and payload validity do not prove consumer compatibility. Run
-the final archive through the real importer before approving its format. While
-the exchange contract evolves, retain manual review, unsupported evidence, and
-explicit legacy recovery; never silently migrate or delete source bundles.
-
-Plan and validate every declared archive payload before publishing any result.
-Treat names, paths, identifiers, queue labels, sizes, compression, and resource
-references as untrusted. Executable importers must generate local collision-safe
-names, prove queue containment, bound resource use, and retain failed evidence.
-
-An explicit Inbox path does not cancel privacy policy. Reuse its owning config
-only when ownership is proved; otherwise stop or disclose the conservative
-fallback and route uncertain content to manual review.
+Turning prior interactions, user corrections, or project history into
+sanitized Eval evidence (including the `整理成正向案例` / `整理成負向案例` /
+`從專案提煉優化案例` triggers, the private Eval Inbox, and disconnected
+export/import) is owned by `developing-eval`, not this skill. That skill's
+output -- a reviewable, sanitized candidate -- is an input to the Evolution
+workflow below, same as any other RED evidence source.
 
 ## Evolution workflow
 

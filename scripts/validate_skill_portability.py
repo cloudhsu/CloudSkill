@@ -36,9 +36,18 @@ actual_skill_names = sorted(
 )
 classified_names = sorted(skills_classified)
 
+_distribution_path = ROOT / "config" / "skill-distribution.json"
+_evolution_names = set()
+if _distribution_path.exists():
+    _tiers = json.loads(_distribution_path.read_text(encoding="utf-8")).get("skills", {})
+    _evolution_names = {name for name, tier in _tiers.items() if tier == "evolution-pack"}
+
 if actual_skill_names != classified_names:
     missing = sorted(set(actual_skill_names) - set(classified_names))
-    orphaned = sorted(set(classified_names) - set(actual_skill_names))
+    # An evolution-pack skill legitimately has no directory in a public
+    # checkout (scripts/export_public_bundle.py never copies it) -- its
+    # classification staying in skill-portability.json is expected, not stale.
+    orphaned = sorted(set(classified_names) - set(actual_skill_names) - _evolution_names)
     if missing:
         errors.append(f"skill-portability.json is missing classification for: {missing}")
     if orphaned:
@@ -92,7 +101,13 @@ else:
 if packager is not None:
     with tempfile.TemporaryDirectory(prefix="cloudskill-surface-package-") as tmp_name:
         tmp = Path(tmp_name)
-        eligible = [name for name, tier in skills_classified.items() if tier in {"portable", "hybrid"}]
+        # Only attempt to package a skill that actually has a directory in
+        # this checkout -- an evolution-pack skill classified here but absent
+        # from a public checkout is expected, not a packaging failure.
+        eligible = [
+            name for name, tier in skills_classified.items()
+            if tier in {"portable", "hybrid"} and name in actual_skill_names
+        ]
         for skill_name in sorted(eligible):
             try:
                 zip_path = packager.package_skill(skill_name, tmp)

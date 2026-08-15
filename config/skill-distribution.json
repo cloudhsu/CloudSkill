@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "description": "Classifies each Skill's eventual distribution tier for the deferred public/private split described in docs/future/PUBLIC_PRIVATE_PACKAGE_SPLIT.md. This is a label-only ledger: it does not move files, change packaging, or affect the current single-repository install in any way. Its only purpose is to keep an always-current answer to 'which side does this Skill go on' so the eventual split reads from a maintained source of truth instead of requiring a fresh audit of all Skills at that time. Update this file whenever a Skill is added, renamed, or its distribution intent changes -- do not let it go stale the way a one-time audit would.",
+  "description": "Classifies each Skill's distribution tier. As of 2026-08-15 this is enforced, not label-only: scripts/export_public_bundle.py reads this file to build the public/marketplace-facing bundle and the private-only plugin manifest, and refuses to emit an evolution-pack skill into the public bundle. Update this file whenever a Skill is added, renamed, or its distribution intent changes -- a stale entry here now directly causes an under- or over-inclusive export, not just a stale label.",
   "tiers": {
     "core": "Public CloudBox Core: ordinary software-development Skills (architecture, design, implementation, review, quality, documents, lifecycle, agent-product engineering, and generalized/sanitized domain-engineering knowledge with no company/project/customer identifiers). Dual-published going forward once the split executes, same pattern already used for teach-while-building.",
     "evolution-pack": "Private CloudBox Evolution Pack only: Skill self-development/mining/evolution machinery, the runtime-eval harness used to maintain CloudBox's own routing accuracy, and any future cloudbox-agent-* multi-role persona work. Never published to the public repository."
@@ -13,7 +13,8 @@
     "coding-agent-project-governance": "core",
     "cross-platform-engine-architecture": "core",
     "cross-platform-native-architecture": "core",
-    "developing-skills": "evolution-pack",
+    "developing-skills": "core",
+    "developing-eval": "evolution-pack",
     "development-process-tailoring": "core",
     "document-governance": "core",
     "equipment-control-architecture": "core",
@@ -28,6 +29,12 @@
     "using-cloudbox-skills": "core"
   },
   "decisions": [
+    {
+      "date": "2026-08-15",
+      "decision": "developing-skills split into developing-skills (core) and developing-eval (evolution-pack); this ledger promoted from a deferred label to an enforced export filter.",
+      "reasoning": "Marketplace submission readiness check found the temporary full-sync exception had already mirrored all three evolution-pack skills into the public CloudSkill repo, contradicting this ledger's own 'never publish' classification -- a memory/discipline-dependent gap, not a structural one. developing-skills itself turned out to bundle two different concerns: generic skill-authoring craft (RED/GREEN, lifecycle stages, routing/behavior case design -- reusable by anyone, analogous to Anthropic's own skill-creator) and CloudBox's own private conversation-mining machinery (reads this user's own interaction history via the private Eval Inbox/exchange). Splitting lets the generic half publish normally while keeping only the genuinely privacy-sensitive half, plus the two runtime-eval skills, in the evolution-pack tier -- now enforced by a script reading this file at export time instead of relying on remembering to filter during each sync.",
+      "decided_by": "user"
+    },
     {
       "date": "2026-08-14",
       "decision": "semiconductor-equipment-domain-knowledge, equipment-control-architecture, and equipment-domain-modeling classified core, not evolution-pack.",

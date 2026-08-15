@@ -1,4 +1,0 @@
-interface:
-  display_name: "Runtime 評估工程"
-  short_description: "設計與審查案例、Context、Grader、指標、回歸與發布門檻"
-  default_prompt: "Use $runtime-evaluation-engineering to review this executable evaluation system and classify the real failure layer."

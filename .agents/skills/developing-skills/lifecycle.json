@@ -7,49 +7,29 @@
   "routing_case_ids": [
     "DEVSK-01",
     "DEVSK-02",
-    "DEVSK-03",
-    "DEVSK-04",
     "DEVSK-05",
-    "DEVSK-NEG-01",
-    "DEVSK-NEG-02"
+    "DEVSK-NEG-01"
   ],
   "positive_routing_case_ids": [
     "DEVSK-01",
     "DEVSK-02",
-    "DEVSK-03",
-    "DEVSK-04",
     "DEVSK-05"
   ],
   "negative_routing_case_ids": [
-    "DEVSK-NEG-01",
-    "DEVSK-NEG-02"
+    "DEVSK-NEG-01"
   ],
   "behavior_case_ids": [
     "DEVSK-BEH-001",
     "DEVSK-BEH-002",
     "DEVSK-BEH-003",
-    "DEVSK-BEH-004",
-    "DEVSK-BEH-005",
-    "DEVSK-BEH-006",
     "DEVSK-BEH-007",
     "DEVSK-BEH-008",
-    "DEVSK-BEH-011",
-    "DEVSK-BEH-012",
-    "DEVSK-BEH-013",
-    "DEVSK-BEH-014",
-    "DEVSK-BEH-015",
     "DEVSK-BEH-016",
     "DEVSK-BEH-017",
     "DEVSK-BEH-018",
     "DEVSK-BEH-019",
     "DEVSK-BEH-020",
-    "DEVSK-BEH-021",
-    "DEVSK-CONV-001",
-    "DEVSK-CONV-002",
-    "DEVSK-CONV-003",
-    "DEVSK-CONV-004",
-    "DEVSK-CONV-005",
-    "DEVSK-CONV-006"
+    "DEVSK-BEH-021"
   ],
   "behavior_case_types": [
     "application",

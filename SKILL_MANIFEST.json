@@ -1,5 +1,5 @@
 {
-  "version": "7.6.8",
+  "version": "7.6.17",
   "skills": [
     {
       "name": "agent-development-process",
@@ -45,9 +45,9 @@
     },
     {
       "name": "developing-skills",
-      "description": "Use when creating, editing, splitting, merging, evaluating, or releasing CloudSkill skills, or when mining prior interactions and user corrections for skill routing or behavior updates.",
+      "description": "Use when creating, editing, splitting, merging, evaluating, or releasing CloudSkill skills. For mining prior interactions or user corrections into evidence, use developing-eval instead.",
       "path": ".agents/skills/developing-skills/SKILL.md",
-      "file_count": 16
+      "file_count": 11
     },
     {
       "name": "development-process-tailoring",
@@ -78,18 +78,6 @@
       "description": "Use when reusable capability must be separated from product or domain behavior through framework, SDK, plug-in, platform, extension-point, state/command, or product-line contracts.",
       "path": ".agents/skills/framework-design/SKILL.md",
       "file_count": 4
-    },
-    {
-      "name": "local-runtime-eval-debugging",
-      "description": "Use when executing, diagnosing, grading, or packaging local CloudSkill or CloudBox Runtime Evals, especially with Ollama, Python discovery, context-budget overflow, missing reports, routing versus behavior failures, or a request for one reproducible upload bundle.",
-      "path": ".agents/skills/local-runtime-eval-debugging/SKILL.md",
-      "file_count": 6
-    },
-    {
-      "name": "runtime-evaluation-engineering",
-      "description": "Use when designing, reviewing, or debugging an executable AI, agent, model, router, or skill evaluation system involving case validity, context evidence, reproducibility, structured outputs, deterministic grading, semantic judging, score interpretation, regression gates, or release decisions.",
-      "path": ".agents/skills/runtime-evaluation-engineering/SKILL.md",
-      "file_count": 7
     },
     {
       "name": "safe-incremental-refactoring",

@@ -15,6 +15,7 @@
     "cross-platform-engine-architecture": "portable",
     "cross-platform-native-architecture": "portable",
     "developing-skills": "hybrid",
+    "developing-eval": "cli-only",
     "development-process-tailoring": "portable",
     "document-governance": "portable",
     "equipment-control-architecture": "portable",
