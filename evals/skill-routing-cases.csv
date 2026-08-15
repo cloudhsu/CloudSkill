@@ -19,7 +19,7 @@ CAG-02,多個Codex agent要如何用worktree分工並由Main Agent整合？,codi
 CAG-NEG-01,設計一個會讀郵件並自動分類的AI Agent。,coding-agent-project-governance,false,agent product
 AID-01,設計一個會讀Outlook郵件、呼叫工具、統計更新失敗並需要人工核准的AI Agent。,agent-development-process,true,AI agent product
 AID-02,為工具型Agent定義task contract、eval、trace、guardrail與release gate。,agent-development-process,true,AI agent lifecycle
-AID-NEG-01,替C# repo寫commit與branch規範。,agent-development-process,false,repo governance not agent product
+AID-NEG-01,幫這個用多個Codex/Claude Code agent協作開發的repo,訂一套AGENTS.md規則、風險分級與PR前的測試證據要求。,agent-development-process,false,coding-agent repo governance not agent product (see CAG-01)
 REF-01,BentoDatabase 還有很多 method，如何不改 API 與交易語意逐步拆成 Service 和 Repository？,safe-incremental-refactoring,true,compatibility facade and god class
 REF-02,重構 sql.js persistence 時如何測 COMMIT 後檔案寫入失敗與記憶體回復？,safe-incremental-refactoring,true,persistence failure and fault injection
 REF-03,cbComponent和cbWorkshop有同名但不同版本的Qt元件，如何選唯一來源並用forwarding header逐步遷移？,safe-incremental-refactoring,true,duplicate source authority and compatibility migration

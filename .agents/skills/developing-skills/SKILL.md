@@ -1,6 +1,6 @@
 ---
 name: developing-skills
-description: Use when creating, editing, splitting, merging, evaluating, releasing, or conversation-mining CloudSkill skills, including turning available prior interactions and user corrections into sanitized routing and behavior evidence or a reviewable replacement package.
+description: Use when creating, editing, splitting, merging, evaluating, or releasing CloudSkill skills, or when mining prior interactions and user corrections for skill routing or behavior updates.
 ---
 
 # Developing CloudSkill Skills

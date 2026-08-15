@@ -1,5 +1,36 @@
 # Changelog
 
+## 7.6.8
+
+### Skill-quality pass: near-miss routing, description discipline, live-run model choice
+
+Conversation-derived, same 2026-08-15 session, prompted by comparing this
+repo's practice against Anthropic's `skill-creator` and the third-party
+`obra/superpowers` skill-writing conventions.
+
+- `evals/skill-routing-cases.csv`: `AID-NEG-01` (the sole negative case for
+  `agent-development-process`) replaced a case with no shared vocabulary
+  with the skill ("write commit/branch rules for a C# repo") with a genuine
+  near-miss testing the adjacency `agent-development-process`'s own SKILL.md
+  already names (`coding-agent-project-governance`) -- mirrors `CAG-NEG-01`'s
+  already-good pattern in the other direction. `AR-NEG-01` (architecture-review)
+  flagged as similarly weak but left open, not fixed this pass.
+- `developing-skills`'s description: removed the workflow/output-summarizing
+  tail ("...into sanitized routing and behavior evidence or a reviewable
+  replacement package"), keeping trigger conditions only -- a description
+  that summarizes workflow risks Claude following the description instead of
+  reading the skill body, per both external conventions.
+- `references/behavior-driven-skill-development.md`: when a live model run is
+  chosen for GREEN evidence, prefer the configured multi-model panel over a
+  local model as the default signal for behavior/discipline changes; local
+  stays fine for cheap structural/routing sanity checks.
+
+RED evidence: case/contract layer only. Not run through the runtime/model
+behavior-eval harness this pass.
+
+Temporary sync exception continues per 7.6.1: public CloudSkill mirror gets the
+same content, until the planned CrewAI migration resumes the private-only split.
+
 ## 7.6.7
 
 ### `agent-development-process`: fixing a deterministic gap belongs in the harness, not in memory

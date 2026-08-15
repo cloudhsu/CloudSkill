@@ -6,16 +6,13 @@
   "last_reviewed_version": "7.5.0",
   "routing_case_ids": [
     "AID-01",
-    "AID-02",
-    "AID-NEG-01"
+    "AID-02"
   ],
   "positive_routing_case_ids": [
     "AID-01",
     "AID-02"
   ],
-  "negative_routing_case_ids": [
-    "AID-NEG-01"
-  ],
+  "negative_routing_case_ids": [],
   "behavior_case_ids": [
     "AID-BEH-001",
     "AID-BEH-002",

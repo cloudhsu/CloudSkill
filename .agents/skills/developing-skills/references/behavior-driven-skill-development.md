@@ -28,6 +28,14 @@ For every new or materially changed skill record:
 
 If a live model run is unavailable, mark behavioral execution `NOT RUN`; case-schema validation alone is not GREEN evidence.
 
+When a live run is chosen, prefer the configured multi-model panel (Claude
+Sonnet 5, Claude Opus 5, GPT-5.6 Luna, GPT-5.6 Sol via
+`scripts/validate_multimodel_panel.py`) over a local model (e.g. Ollama) as
+the default -- the panel is what previously caught real semantic risk a
+deterministic/local check missed (see the 5.8.0 2x2 adjudication evidence).
+A local model stays appropriate for cheap structural/routing sanity checks,
+not as the primary GREEN signal for a discipline or behavior change.
+
 ## GREEN record
 
 Use the same case after the change. Review against explicit required and forbidden behavior. Avoid scoring only by keyword presence; architecture quality often depends on ownership, failure semantics, and reasoning relationships.
