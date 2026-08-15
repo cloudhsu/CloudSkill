@@ -5,8 +5,8 @@
   "author": {
     "name": "CloudBox"
   },
-  "homepage": "https://github.com/cloudhsu/cloudbox-skills",
-  "repository": "https://github.com/cloudhsu/cloudbox-skills",
+  "homepage": "https://github.com/cloudhsu/CloudSkill",
+  "repository": "https://github.com/cloudhsu/CloudSkill",
   "keywords": [
     "architecture",
     "equipment",
@@ -27,7 +27,7 @@
       "Read",
       "Write"
     ],
-    "websiteURL": "https://github.com/cloudhsu/cloudbox-skills",
+    "websiteURL": "https://github.com/cloudhsu/CloudSkill",
     "defaultPrompt": [
       "Use CloudBox Skills to select the smallest sufficient engineering skills for this task.",
       "Use CloudBox Skills to review this architecture, its failure boundaries, and its verification evidence."
