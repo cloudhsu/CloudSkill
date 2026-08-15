@@ -55,6 +55,50 @@ for the failing check, reasoning-based attribution is the best available
 evidence and should be reported as such, explicitly flagged as unconfirmed
 by an independent run.
 
+### Convergent Failure Across Independent Implementations
+
+When two or more independently-built implementations of the same
+capability (different libraries, different platform mechanisms/backends,
+different vendors) exhibit the identical symptom, while each one's own
+API reports success at every layer it exposes, treat that convergence
+itself as evidence pointing at something the implementations share --
+the host, the session, a common upstream dependency, a common resource or
+config file -- rather than continuing to separately hypothesize about
+each implementation in turn. Two unrelated implementations independently
+containing the same bug with the same symptom is a much lower-probability
+explanation than one shared cause underneath both.
+
+Corroborate this with a live control: run an unrelated, already-trusted
+consumer of the same shared resource (a different application, a
+previously-working build, a different device/session) and observe its
+result directly, before spending further effort hypothesizing about the
+component under test. A control that also fails narrows the search to the
+shared layer; a control that succeeds narrows it to something specific to
+the current session/instance rather than the host as a whole.
+
+Counterexample: convergence across implementations does not, by itself,
+prove environment -- a bug in a shared upstream dependency, a shared
+resource file, or shared configuration that both implementations read
+could produce the identical symptom just as easily. Only close the
+attribution once the specific shared mechanism is actually identified, or
+once a differently-configured/fresh instance of the environment is
+confirmed to work while this one does not.
+
+### Verifying Async Completion, Not the Synchronous Call That Started It
+
+A log line confirming a synchronous call returned proves the call
+returned -- nothing about a deferred, async, or eventually-consistent
+operation the call merely started. Do not report an async-backed
+operation as confirmed successful without independently verifying the
+completion signal that specific mechanism actually exposes (a callback,
+an event, a terminal status, a change to observable state) -- and confirm
+it fired, with a success payload, not merely that it was registered.
+
+If no completion signal is currently observed (neither success nor
+failure), that is not evidence of success -- add tracing at the actual
+completion point before concluding anything about the operation's
+outcome.
+
 ## Shared-Consumer Before/After State
 
 When a slice replaces, consolidates, or changes the behavior of a component

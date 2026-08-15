@@ -219,6 +219,32 @@
         "the old, working implementation is deleted as part of the same change that introduces an unverified replacement, so if the replacement turns out not to work in the target environment there is no fast, low-risk way back -- recovering it means reconstructing it from source history under pressure instead of flipping one flag"
       ],
       "review_notes": "Distinguish from REF-BEH-008: that case is about verification evidence shape for a swap already believed correct; this case is about not committing to the swap at all -- keeping a real fallback -- while correctness is still an open question. Counterexample: once the new implementation is independently confirmed and the team commits to it, keeping both implementations and the flag indefinitely is itself a cost (see compatibility-facade.md's exit-condition point) -- the old implementation and the flag should be removed in that later, separate change, not preserved forever out of caution."
+    },
+    {
+      "id": "REF-BEH-010",
+      "skill": "safe-incremental-refactoring",
+      "type": "discipline",
+      "prompt": "A component's replacement implementation is suspected of a hard bug. Two independently-built implementations of the same capability (different libraries/backends) both exhibit the identical failure symptom, and each implementation's own API/logs report success at every layer it exposes -- no exception, no error code, nothing.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "treats the identical symptom across two independently-built implementations as evidence pointing at something they share (host, session, common upstream dependency, common resource/config), not as two separate implementation bugs to keep debugging in isolation",
+        "runs an unrelated, already-trusted consumer of the same shared resource as a live control before continuing to hypothesize about either implementation",
+        "for any async-backed step in either implementation, verifies the actual completion signal (callback fired, terminal status observed) rather than treating a log line that only confirms the synchronous call returned as evidence the operation succeeded"
+      ],
+      "forbidden_behaviors": [
+        "continues alternating between the two implementations' internals as if the bug must be in one of them, without first testing whether the shared environment itself is the common cause",
+        "reports an async operation as confirmed successful because the call that started it returned without error, without checking for or adding tracing at the operation's actual completion point",
+        "declares the failure 'environment, not a defect' purely from the convergence, without a specific shared mechanism identified or a differently-configured/fresh instance actually confirmed working"
+      ],
+      "required_artifacts": [
+        "control-test result from an unrelated consumer of the same shared resource",
+        "confirmed completion-signal trace for any async step in either implementation"
+      ],
+      "baseline_expected_failure": [
+        "repeated, deepening investigation of implementation A, then implementation B, then back to A, chasing a symptom that is actually caused by something both implementations depend on, because the convergence itself was never used as evidence and no control test against the shared resource was run"
+      ],
+      "review_notes": "Complements the existing 'Environment vs. Defect Attribution' rule: that rule is about whether an independent run on a DIFFERENT environment corroborates a defect-vs-environment call; this case is about using multiple DIFFERENT IMPLEMENTATIONS on the SAME environment as evidence, which is a distinct signal available even when no differently-configured environment exists to test against."
     }
   ]
 }

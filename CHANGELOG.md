@@ -1,5 +1,37 @@
 # Changelog
 
+## 7.6.3
+
+### `safe-incremental-refactoring`: convergent-implementation elimination and async completion verification
+
+Same originating engine-revival session, a third follow-on correction.
+During a live debugging investigation, two independently-built
+implementations of the same capability (different libraries/backends)
+both failed identically while each reported success at every API layer
+it exposed. The investigation kept alternating between the two
+implementations until a live control test (launching an unrelated,
+already-trusted consumer of the same shared resource) and explicit
+completion-signal tracing (distinguishing "the synchronous call returned"
+from "the async operation actually completed") together narrowed the
+search meaningfully.
+
+- New behavior case `REF-BEH-010` (discipline).
+- `evidence-checklist.md`: two new subsections under the existing
+  "Environment vs. Defect Attribution" heading -- "Convergent Failure
+  Across Independent Implementations" (treat identical symptoms across
+  independently-built implementations as evidence pointing at a shared
+  cause, corroborated by a live control test) and "Verifying Async
+  Completion, Not the Synchronous Call That Started It" (a log line
+  confirming a call returned is not evidence an async operation it
+  started actually completed -- trace the real completion signal).
+
+RED evidence: case/contract layer, same disclosure basis as 7.6.1/7.6.2.
+Not run through the runtime/model behavior-eval harness this pass.
+
+`validate_behavior_evals.py` (165 behavior case contracts, up from 164)
+passes. Synced to the public mirror per the same temporary exception
+noted in 7.6.1.
+
 ## 7.6.2
 
 ### `safe-incremental-refactoring`: dual implementation behind a single compile-time switch
