@@ -92,3 +92,13 @@ Report each evidence class separately:
 - release/tag/push status.
 
 A generated scaffold is not an active skill. A passing static validator is not a behavior pass.
+
+A `release:` commit is not a release. Tag and GitHub Release creation are part of
+the same release step, not a follow-up: after pushing a `release:` commit, in the
+same turn, create the matching `git tag`, push it, then `gh release create`, then
+confirm both with `gh release list` before reporting the release as done. In a
+session that ships several releases back-to-back, re-run that confirmation for
+every version shipped in the run, not just the latest -- an omitted tag/Release
+repeats identically each time rather than surfacing on its own (2026-08-15: 5
+consecutive versions across 2 repos shipped commits with no tag or Release,
+undetected for a whole session until the user separately noticed).

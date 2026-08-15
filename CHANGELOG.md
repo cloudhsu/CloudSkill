@@ -1,5 +1,25 @@
 # Changelog
 
+## 7.6.6
+
+### `developing-skills`: tag + Release are part of the release step, not a follow-up
+
+On 2026-08-15, five consecutive releases (7.6.1-7.6.5) shipped correctly-worded
+`release:`/`sync:` commits in both `cloudbox-skills` and the public `CloudSkill`
+mirror, but the `git tag` and `gh release create` steps were silently skipped in
+every one, in both repos, undetected for a whole session. Backfilled the 5
+missing tag/Release pairs in both repos.
+
+- `references/skill-lifecycle-standard.md`: "Release truth" section now states
+  explicitly that a `release:` commit is not a release -- tag, push, `gh release
+  create`, and a `gh release list` confirmation are the same step, required
+  before reporting a release as done, re-verified for every version in a
+  back-to-back run, not just the latest.
+
+RED evidence: case/contract layer (this is a process-discipline change to the
+release procedure itself, not a new behavior case). `run_all_checks.py` suite
+passes at 7.6.6.
+
 ## 7.6.5
 
 ### `safe-incremental-refactoring`: escalating evidence shape as complexity grows
