@@ -3,7 +3,7 @@
   "skill": "developing-skills",
   "stage": "active",
   "introduced_version": "unknown",
-  "last_reviewed_version": "7.5.0",
+  "last_reviewed_version": "7.6.4",
   "routing_case_ids": [
     "DEVSK-01",
     "DEVSK-02",
@@ -43,6 +43,7 @@
     "DEVSK-BEH-018",
     "DEVSK-BEH-019",
     "DEVSK-BEH-020",
+    "DEVSK-BEH-021",
     "DEVSK-CONV-001",
     "DEVSK-CONV-002",
     "DEVSK-CONV-003",
@@ -66,5 +67,5 @@
     "the skill has not been reviewed for two feature releases"
   ],
   "replacement_skill": null,
-  "notes": "Baseline lifecycle evidence generated from committed routing and behavior cases."
+  "notes": "Baseline lifecycle evidence generated from committed routing and behavior cases. 7.6.4: adds DEVSK-BEH-021 plus a SKILL.md Step 6 addition requiring release-change reports to use a table (id/owner Skill/pressure closed/RED layer) rather than prose, per direct repeated user preference in the originating session. RED evidence type: case/contract layer -- not run through the runtime/model behavior-eval harness this pass."
 }

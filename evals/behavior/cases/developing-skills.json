@@ -346,6 +346,29 @@
         "agent reports success from local validation and never checks CI; CI has actually been failing on prior pushes for several releases, unnoticed"
       ],
       "review_notes": "Observed directly in this project's own history: CI failed on three consecutive pushes for a config gap local validators didn't catch, and it went unnoticed until a later, unrelated full-suite run happened to surface it."
+    },
+    {
+      "id": "DEVSK-BEH-021",
+      "skill": "developing-skills",
+      "type": "discipline",
+      "prompt": "A user asks what a Skill release or optimization changed.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "reports the change as a table with one row per case/rule added, columns for id, owner Skill, a one-line summary of the pressure it closes, and RED evidence layer",
+        "keeps the table scoped to what actually changed in that release, not a restatement of the whole Skill's contents"
+      ],
+      "forbidden_behaviors": [
+        "reporting the change only as prose paragraphs when a table would make the per-case mapping clearer",
+        "omitting a changed case/rule from the table because it seems minor"
+      ],
+      "required_artifacts": [
+        "release-change table"
+      ],
+      "baseline_expected_failure": [
+        "a multi-paragraph prose summary of a release that requires the reader to reconstruct which specific case closed which specific gap themselves"
+      ],
+      "review_notes": "Direct user preference, observed repeatedly in the same session across several consecutive Skill releases -- table requested explicitly as the standing reporting shape for 'what did this optimization change.'"
     }
   ]
 }

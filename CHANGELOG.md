@@ -1,5 +1,28 @@
 # Changelog
 
+## 7.6.4
+
+### `developing-skills`: report Skill-release changes as a table
+
+Same originating engine-revival session. The user asked, across several
+consecutive Skill releases in the same session, to have "what changed"
+reported as a table (id / owner Skill / pressure closed / RED layer)
+rather than prose, and asked for this to be written into the Skill itself
+so it becomes the standing behavior going forward, not a one-off request.
+
+- New behavior case `DEVSK-BEH-021` (discipline).
+- `SKILL.md` Step 6 ("Report execution truthfully and control release"):
+  added the table-reporting rule, scoped to what actually changed in the
+  release being reported, not the whole Skill's contents.
+
+RED evidence: case/contract layer. Not run through the runtime/model
+behavior-eval harness this pass.
+
+`validate_behavior_evals.py` and `validate_skill_context_budget.py` (this
+Skill's `SKILL.md` stayed under the 10,500-byte budget, 10,111 bytes)
+pass. Synced to the public mirror per the same temporary exception noted
+in 7.6.1.
+
 ## 7.6.3
 
 ### `safe-incremental-refactoring`: convergent-implementation elimination and async completion verification

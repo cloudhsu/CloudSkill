@@ -155,6 +155,13 @@ sanitization/deduplication, contract, RED result, minimal change, GREEN and
 adjacent regression, structural/install checks, delivery form, release status,
 and remaining limitations.
 
+When reporting what changed in a Skill release, or when asked what a
+Skill optimization changed, use a table with one row per case/rule added
+(id, owner Skill, one-line summary of the pressure it closes, RED
+evidence layer) rather than prose paragraphs — prose buries which
+specific case closed which specific gap, and makes it hard to tell one
+release's changes from another's at a glance.
+
 Before releasing any change that touches a `SKILL.md`, run
 `scripts/validate_skill_context_budget.py`. It enforces a hard per-skill byte
 budget (default 10,500 bytes; a short, dated list of frozen ceilings exists
