@@ -143,6 +143,40 @@ The table earns its cost specifically when a shared component serves more
 than one consumer, because that is where an asymmetric regression can hide
 behind prose about the consumers that improved.
 
+## Escalating Evidence Shape as Complexity Grows
+
+When recording comparison/verification data (e.g. the shared-consumer
+table above), default to the flattest shape that stays correct, and
+escalate only when a concrete complexity signal appears -- do not default
+to the most structured format "to be safe," and do not stay on prose past
+the point a table would already remove ambiguity.
+
+**Start with a flat table** (one row per entity, one column per fact)
+when facts are short, few, and directly comparable across entities; a
+human is the primary consumer scanning for an asymmetric outcome; and no
+downstream tooling needs to parse or validate the data.
+
+**Escalate to a schema'd, self-labeling format** (JSON, or an equivalent
+key-value structure) once any of these appear: a single entity needs more
+than one fact per "cell" (a list of sub-results, not one value -- a 2D
+table cannot represent this cleanly without collapsing structure into a
+delimited string); the data needs a machine-checkable schema (a
+validator, a CI check, a downstream consumer parsing it) rather than only
+human review; or the data will be revised repeatedly and diffed over
+time -- a schema'd format with stable keys diffs predictably, while a
+table's column/row identity depends on position, which shifts under
+edits.
+
+This is the same principle `developing-skills` already applies to its own
+evidence: a RED finding starts as a short, typed note (case/contract
+layer, etc.) and is escalated into a formal JSON case file
+(`evals/behavior/cases/*.json`, schema-validated) once it needs to be a
+repeatable, machine-checked contract rather than a one-time observation.
+Do not jump straight to JSON for a quick, one-off comparison a table would
+represent just as correctly with less overhead -- the escalation should
+track an actual complexity signal, not a general instinct toward more
+structure.
+
 ## Delivery
 
 - Focused tests pass.

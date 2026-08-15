@@ -1,5 +1,33 @@
 # Changelog
 
+## 7.6.5
+
+### `safe-incremental-refactoring`: escalating evidence shape as complexity grows
+
+Same originating engine-revival session. Direct user discussion about why
+the session's own artifacts moved from prose, to a flat table (the
+shared-consumer table), to JSON (the eval case files) as complexity grew
+-- generalized into an explicit escalation rule: default to the flattest
+shape that stays correct, escalate to a schema'd/self-labeling format
+only on a concrete complexity signal (multi-fact cells, need for
+machine-checkable schema, need for reliable diffing over revisions), not
+by default or "to be safe."
+
+- New behavior case `REF-BEH-011` (discipline).
+- `evidence-checklist.md`: new "Escalating Evidence Shape as Complexity
+  Grows" section.
+- `developing-skills`' `SKILL.md` Step 3: one-sentence cross-reference to
+  this rule (not duplicated) -- the same principle already governs how a
+  RED note escalates into a formal JSON case file.
+
+RED evidence: case/contract layer. Not run through the runtime/model
+behavior-eval harness this pass.
+
+`validate_behavior_evals.py` (167 behavior case contracts, up from 166)
+and `validate_skill_context_budget.py` (`developing-skills` `SKILL.md`
+10,372/10,500 bytes) pass. Synced to the public mirror per the same
+temporary exception noted in 7.6.1.
+
 ## 7.6.4
 
 ### `developing-skills`: report Skill-release changes as a table

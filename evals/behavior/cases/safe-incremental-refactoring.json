@@ -245,6 +245,27 @@
         "repeated, deepening investigation of implementation A, then implementation B, then back to A, chasing a symptom that is actually caused by something both implementations depend on, because the convergence itself was never used as evidence and no control test against the shared resource was run"
       ],
       "review_notes": "Complements the existing 'Environment vs. Defect Attribution' rule: that rule is about whether an independent run on a DIFFERENT environment corroborates a defect-vs-environment call; this case is about using multiple DIFFERENT IMPLEMENTATIONS on the SAME environment as evidence, which is a distinct signal available even when no differently-configured environment exists to test against."
+    },
+    {
+      "id": "REF-BEH-011",
+      "skill": "safe-incremental-refactoring",
+      "type": "discipline",
+      "prompt": "Comparison/verification data is about to be recorded (e.g. a per-entity before/after state, a set of test results across configurations). The data is currently a short list of flat, directly comparable facts.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "defaults to a flat table (one row per entity, one column per fact) while the data stays flat, few, and human-reviewed",
+        "escalates to a schema'd, self-labeling format (JSON or equivalent) only once a concrete complexity signal appears -- a single entity needing more than one fact per cell, a need for machine-checkable schema/validation, or a need to diff the data reliably across repeated revisions"
+      ],
+      "forbidden_behaviors": [
+        "defaulting to JSON or another heavily structured format for a quick, flat, one-off comparison a table would represent just as correctly with less overhead",
+        "staying in prose past the point a table would already remove entity/fact ambiguity, out of habit rather than a reason"
+      ],
+      "required_artifacts": [],
+      "baseline_expected_failure": [
+        "either prose that makes a human reconstruct which fact belongs to which entity, or premature JSON/schema overhead applied to three flat facts that a table would have represented just as correctly"
+      ],
+      "review_notes": "Same principle developing-skills already applies internally: a RED finding starts as a short typed note and is escalated into a formal JSON case file only once it needs to be a repeatable, machine-checked contract. The escalation should track an actual complexity signal, not a general instinct toward more structure."
     }
   ]
 }

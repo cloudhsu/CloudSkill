@@ -120,7 +120,11 @@ or release/field effectiveness. A RED authorizes correction only at its failed
 layer and authoritative owner; implementation RED cannot substitute for Skill
 behavior RED. Re-run the same case at the same layer for GREEN, then add only
 the adjacent and higher-layer evidence required by lifecycle stage and risk.
-Never promote a lower-layer GREEN into a higher-layer claim.
+Never promote a lower-layer GREEN into a higher-layer claim. A RED note
+itself starts flat/short and escalates to the formal JSON case shape only
+once it needs to be machine-checked, not by default (see
+`../safe-incremental-refactoring/references/evidence-checklist.md`'s
+"Escalating Evidence Shape as Complexity Grows").
 
 ### 4. Define and implement the minimum contract
 
