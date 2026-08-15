@@ -89,6 +89,27 @@
         "the decision is settled and work proceeds on it; the documentation gap is discovered only incidentally, by a later and otherwise-unrelated question, forcing the architecture to be reversed after the fact"
       ],
       "review_notes": "The check belongs at decision time, not as a hedge applied after adopting the riskier structure -- verifying early is cheaper than reversing a decision already built on top of."
+    },
+    {
+      "id": "AID-BEH-005",
+      "skill": "agent-development-process",
+      "type": "discipline",
+      "prompt": "A required step in an agent's or team's operating process was silently skipped (e.g. a follow-up action that must always happen the same way after a main step completes), the gap went undetected until a stakeholder noticed missing external evidence, and a fix is being decided.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "classifies the gap as either a fixed-answer harness defect or a judgment call whose correct answer changes over time",
+        "for a fixed-answer gap, encodes the missing step directly into the harness component that owns it (instructions, a tool contract, a workflow script, a CI gate) so it structurally cannot be silently skipped again"
+      ],
+      "forbidden_behaviors": [
+        "proposing a memory note, reminder, or scheduled/background monitor as the primary fix for a gap that has one correct fixed procedure",
+        "leaving the gap fixed only for the one instance that was caught, without changing the process that produced it"
+      ],
+      "required_artifacts": [],
+      "baseline_expected_failure": [
+        "the single missed instance is patched by hand, and a note is written asking a future run to remember to re-check, or a monitor is added to detect a recurrence after the fact; the same class of gap can recur silently because the process itself was never fixed"
+      ],
+      "review_notes": "Conversation-derived, 2026-08-15: a release process silently skipped its tag/GitHub-Release step for 5 consecutive versions across 2 repos, undetected for a whole session. The first proposed fixes were a standing memory reminder, then a scheduled cron audit; the user rejected both and required the fix to go into the process artifact that governs releases instead, reserving memory for judgment-based state that actually changes over time."
     }
   ]
 }

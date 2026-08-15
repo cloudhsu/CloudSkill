@@ -1,5 +1,29 @@
 # Changelog
 
+## 7.6.7
+
+### `agent-development-process`: fixing a deterministic gap belongs in the harness, not in memory
+
+Conversation-derived, same 2026-08-15 session as 7.6.6's tag/Release incident.
+Generalized beyond that one repo's release process: when a discovered gap has
+one fixed, repeatable answer, the fix belongs in the harness component that
+owns it, not in a memory note or a scheduled/background monitor. The user
+explicitly rejected both a standing memory reminder and a proposed cron-based
+audit as the fix, requiring the process artifact itself to change instead, and
+reserved memory for judgment-based state that actually changes over time.
+
+- New behavior case `AID-BEH-005` (discipline).
+- `references/tool-and-state-design.md`: new "Fixing a Gap: Harness Component
+  vs. Memory" section.
+- `SKILL.md` Step 8: one-sentence cross-reference to this rule (not
+  duplicated).
+
+RED evidence: case/contract layer only. Not run through the runtime/model
+behavior-eval harness this pass.
+
+Temporary sync exception continues per 7.6.1: public CloudSkill mirror gets the
+same content, until the planned CrewAI migration resumes the private-only split.
+
 ## 7.6.6
 
 ### `developing-skills`: tag + Release are part of the release step, not a follow-up

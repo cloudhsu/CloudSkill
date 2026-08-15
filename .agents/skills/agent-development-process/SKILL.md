@@ -136,7 +136,7 @@ Review:
 
 ### 8. Operate and improve
 
-Use production traces and feedback to create repeatable evaluation evidence. Do not close a recurring issue only by changing prompt text.
+Use production traces and feedback to create repeatable evaluation evidence. Do not close a recurring issue only by changing prompt text or a memory note when it has one fixed answer — fix the harness component that owns it (`references/tool-and-state-design.md`).
 
 ## Required Output
 

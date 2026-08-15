@@ -20,7 +20,8 @@
     "AID-BEH-001",
     "AID-BEH-002",
     "AID-BEH-003",
-    "AID-BEH-004"
+    "AID-BEH-004",
+    "AID-BEH-005"
   ],
   "behavior_case_types": [
     "application",
