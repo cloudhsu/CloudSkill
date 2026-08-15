@@ -53,7 +53,13 @@ tiers = distribution.get("skills", {})
 core_names = sorted(name for name, tier in tiers.items() if tier == "core")
 evolution_names = sorted(name for name, tier in tiers.items() if tier == "evolution-pack")
 expected_core_paths = sorted(f"./.agents/skills/{name}/" for name in core_names)
-expected_private_paths = sorted(f"../.agents/skills/{name}/" for name in evolution_names)
+# The real Claude Code plugin loader forbids ".." in a plugin's skills field
+# (confirmed 2026-08-15 by an actual failed `claude plugin install` --
+# "Copied plugins cannot reference files outside their directory"). The
+# private plugin instead uses the documented cross-plugin symlink pattern:
+# private-plugin/skills/<name> -> ../../.agents/skills/<name>, referenced
+# here with a forward-only path relative to the private plugin's own root.
+expected_private_paths = sorted(f"./skills/{name}/" for name in evolution_names)
 
 
 def as_list(value: object) -> list:
@@ -91,6 +97,12 @@ if evolution_dirs_present:
     priv_skills = sorted(as_list(private_claude.get("skills")))
     if priv_skills != expected_private_paths:
         fail("Private plugin skills array does not match the evolution-pack tier in config/skill-distribution.json")
+    for name in evolution_names:
+        link = ROOT / "private-plugin" / "skills" / name
+        if not link.is_symlink():
+            fail(f"private-plugin/skills/{name} must be a symlink (cross-plugin sharing requires the documented symlink pattern, not a path with '..')")
+        elif not (ROOT / f".agents/skills/{name}/SKILL.md").is_file():
+            fail(f"private-plugin/skills/{name} symlink target is missing SKILL.md")
 else:
     if private_claude:
         fail("Public checkout must not contain private-plugin/.claude-plugin/plugin.json")

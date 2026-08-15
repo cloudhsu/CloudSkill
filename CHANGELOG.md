@@ -1,5 +1,35 @@
 # Changelog
 
+## 7.6.19
+
+### Fix `cloudbox-skills-private`: real install was broken, `..` path traversal is forbidden
+
+Found running an actual `claude plugin install cloudbox-skills-private@cloudbox-marketplace`
+for the first time (never tested end to end before this release): it failed
+with "skills: Invalid input". `private-plugin/.claude-plugin/plugin.json`'s
+`skills` field used `../.agents/skills/<name>/` paths, but the real Claude
+Code plugin loader forbids `..` traversal ("Copied plugins cannot reference
+files outside their directory"). `scripts/validate_plugins.py`'s own check
+for this was never actually exercised against the real installer and had
+been allowing it for the private plugin.
+
+- Switched to the documented cross-plugin sharing pattern: symlinks under
+  `private-plugin/skills/<name>` -> `../../.agents/skills/<name>` (dereferenced
+  and copied into the cache at install time, not blocked like a direct `..`
+  path), referenced in `plugin.json` with forward-only `./skills/<name>/`
+  paths.
+- `validate_plugins.py`: updated expected paths to match, and added a check
+  that each entry is an actual symlink resolving to a skill with a real
+  `SKILL.md`.
+- Verified for real: `claude plugin marketplace update cloudbox-marketplace`
+  + `claude plugin install cloudbox-skills-private@cloudbox-marketplace`
+  succeeds, `claude plugin details` shows all 3 evolution-pack skills
+  correctly resolved.
+
+RED evidence: case/contract layer plus one real `claude plugin install` run
+(the actual bug reproduction and fix verification). Full run_all_checks.py
+suite passes at 7.6.19.
+
 ## 7.6.18
 
 ### `safe-incremental-refactoring`: Transitive-Consumer Discovery Before a Split
