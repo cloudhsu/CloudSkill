@@ -1,0 +1,4 @@
+interface:
+  display_name: "半導體設備領域知識"
+  short_description: "EFEM、真空、設備元件、PVD與物理製程語意"
+  default_prompt: "Use $semiconductor-equipment-domain-knowledge to interpret the semiconductor-equipment topology, component purpose, vacuum/process physics, readiness, and software implications for this task."

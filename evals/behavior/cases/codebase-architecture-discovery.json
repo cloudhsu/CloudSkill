@@ -1,0 +1,78 @@
+{
+  "suite": "codebase-architecture-discovery-behavior",
+  "skill": "codebase-architecture-discovery",
+  "cases": [
+    {
+      "id": "CAD-BEH-001",
+      "skill": "codebase-architecture-discovery",
+      "type": "recognition",
+      "prompt": "We have a `services/` directory with about 60 Python files, roughly 25,000 lines, that's grown over two years with no architecture doc and no one who has read all of it recently. We're about to add a new billing-reconciliation service into it. Before I write anything, what should happen first?",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "Proposes reading the existing directory in staged, thematically-grouped batches rather than one unstructured pass or file-by-file reaction",
+        "Proposes checkpointing raw findings into a durable, resumable record after each batch before drawing cross-file conclusions",
+        "States that duplication/naming-convention conclusions should wait until enough of the set is read, not be drawn from the first pattern seen",
+        "States the expected output includes a maintained architecture map/duplication-cluster list, not only a prose summary"
+      ],
+      "forbidden_behaviors": [
+        "Jumping directly into writing the new billing-reconciliation service without first surveying the existing 60 files",
+        "Proposing to read the whole directory in one unstructured pass with no checkpointing",
+        "Claiming a specific duplication finding before any files have actually been read"
+      ],
+      "required_artifacts": [],
+      "baseline_expected_failure": [
+        "A general-purpose approach typically either starts writing the new service directly, treating the existing 60 files as background context to skim rather than read, or reads them but reacts to the first apparent duplicate found instead of holding cross-file conclusions until more of the set is read -- both were observed directly in this skill's own source session before this discipline was made explicit."
+      ],
+      "review_notes": "Conversation-derived RED evidence (real session, not synthetic): the source session read a 64-file/25,900-line codebase in unstaged, ad-hoc fashion until the user explicitly required batch checkpointing for crash-safety; before that instruction, the working assumption was to keep reading with no durable checkpoint. Behavioral execution NOT RUN -- no live model call has been made against this case; case-schema validation only."
+    },
+    {
+      "id": "CAD-BEH-002",
+      "skill": "codebase-architecture-discovery",
+      "type": "application",
+      "prompt": "While extending our codebase I noticed `auth_adapter.py::run_request()` and `billing_adapter.py::run_request()` look nearly identical -- same subprocess call, same error handling shape, just a different exception class raised at the end. Should I just merge them into one shared function?",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "Does not conclude the merge is safe from visual/structural similarity alone",
+        "Requires running both original implementations against real inputs/consumers the codebase actually exercises and comparing results before merging",
+        "Requires identifying and separately testing the specific points where behavior could diverge (e.g. the different exception class, any other subtle parameter difference), not just the parts that look the same",
+        "States that after the rename/extraction, the whole repository must be searched for the exact old private function name (not just confirming imports still resolve or a syntax/compile check passes) before declaring the extraction complete",
+        "Proposes preserving each caller's own distinguishing behavior (e.g. via a parameter) rather than silently dropping the difference"
+      ],
+      "forbidden_behaviors": [
+        "Declaring the two functions safe to merge because they 'look the same' without any verification step",
+        "Silently dropping the differing exception-class behavior during the merge without flagging it",
+        "Treating a passing compile/import check as sufficient proof the extraction is complete",
+        "Skipping a repository-wide search for the old function name after renaming it"
+      ],
+      "required_artifacts": [],
+      "baseline_expected_failure": [
+        "A general-purpose approach typically treats visual/structural similarity as sufficient evidence to merge, and treats a passing import/compile check as proof the rename is complete -- this skill's own source session initially declared one such merge verified via `run_all_checks.py` passing alone, and only caught a real broken reference (a sibling test file calling the old private function name directly) via a subsequent explicit repository-wide grep for the exact old name, which was not part of the default verification step until this pattern was recognized."
+      ],
+      "required_artifacts": [],
+      "review_notes": "Conversation-derived RED evidence: mirrors a real incident from this skill's own source session -- during a JSON-Schema-interpreter consolidation, the static check suite passed after the rename, but a grep across the whole repository (not just the edited files) found `validate_task_continuity_evals.py`'s own adversarial test still calling the old private function name directly. Behavioral execution NOT RUN."
+    },
+    {
+      "id": "CAD-BEH-003",
+      "skill": "codebase-architecture-discovery",
+      "type": "counterexample",
+      "prompt": "We already agreed in the design review that `PaymentValidator.legacy_check()` should move out of the monolith into the new `payments` service, keeping its exact public signature. Please extract it now.",
+      "expected_routing": false,
+      "expected_alternative_skill": "safe-incremental-refactoring",
+      "required_behaviors": [
+        "Recognizes the specific extraction slice is already decided and does not propose re-surveying the codebase before proceeding",
+        "Defers to safe-incremental-refactoring's own slice/verify/rollback workflow for the actual move"
+      ],
+      "forbidden_behaviors": [
+        "Proposing a full codebase-wide discovery/architecture-mapping pass before an already-agreed, already-scoped extraction",
+        "Treating this as a discovery task when the slice, target, and compatibility surface are already fully specified"
+      ],
+      "required_artifacts": [],
+      "baseline_expected_failure": [
+        "A general-purpose approach without a clear discovery/execution boundary might apply broad codebase-survey discipline even when the slice is already fully decided, adding unnecessary cost with no new decision to make."
+      ],
+      "review_notes": "Adjacent-skill boundary case, not a conversation-derived incident: this skill owns discovery before a slice is known; safe-incremental-refactoring owns execution once it is. Behavioral execution NOT RUN."
+    }
+  ]
+}

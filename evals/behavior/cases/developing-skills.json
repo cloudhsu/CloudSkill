@@ -1,4 +1,5 @@
 {
+  "suite": "developing-skills-behavior",
   "skill": "developing-skills",
   "cases": [
     {
@@ -211,6 +212,65 @@
         "a multi-paragraph prose summary of a release that requires the reader to reconstruct which specific case closed which specific gap themselves"
       ],
       "review_notes": "Direct user preference, observed repeatedly in the same session across several consecutive Skill releases -- table requested explicitly as the standing reporting shape for 'what did this optimization change.'"
+    },
+    {
+      "id": "DEVSK-BEH-022",
+      "skill": "developing-skills",
+      "type": "discipline",
+      "prompt": "A materially changed Skill passed deterministic checks. The host exposes managed sub-agents with explicit model overrides, while familiar CLI provider paths are also available. Specify the coordinator actions, evidence record, and release disposition. This case evaluates the decision contract; actual sub-agent dispatch is verified separately by orchestration integration evidence.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "freezes one candidate packet and specifies unchanged parallel dispatch to independent read-only reviewers",
+        "binds behavior execution to a candidate packet and final review to a review packet that includes execution evidence without self-referential hashing",
+        "uses Luna and Sol under Codex, or Sonnet 5 and Opus 5 under Claude Code with generation 4.8 only as a recorded availability fallback",
+        "records exact selected or returned model, agent or run identity, verdict, findings and per-case dispositions",
+        "blocks release on a missing required review or identity and on FAIL, BLOCKED or MANUAL_REQUIRED until resolved",
+        "keeps Runtime Eval execution separate from the independent semantic review gate"
+      ],
+      "forbidden_behaviors": [
+        "shelling out to a one-shot CLI as a substitute when managed sub-agents are available",
+        "using one model response as a dual-model review",
+        "letting a reviewer edit the candidate it judges",
+        "calling deterministic validation or provider preflight a semantic model PASS",
+        "recording only Claude or GPT without exact model identity"
+      ],
+      "required_artifacts": [
+        "per-model review evidence",
+        "release-gate disposition"
+      ],
+      "baseline_expected_failure": [
+        "agent forgets the available sub-agent model selector, retries a CLI model path, and leaves the formal dual-model gate unexecuted"
+      ],
+      "review_notes": "Standing process decision: managed model-selected sub-agents are canonical semantic reviewers; runtime provider CLIs have a separate role. This behavior case judges the coordinator contract, while actual dispatch is separate integration evidence."
+    },
+    {
+      "id": "DEVSK-BEH-023",
+      "skill": "developing-skills",
+      "type": "discipline",
+      "prompt": "Distill new Skills from an existing product whose implementation was already refactored. The new Skill suggests a cleaner architecture, so implement the improvement and complete review.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "records that the target is brownfield and previously refactored before proposing implementation work",
+        "maps current responsibilities contracts state ownership compatibility seams and baseline behavior",
+        "uses the smallest coherent incremental slice and keeps behavior change separate",
+        "requires explicit user authorization before any whole rewrite"
+      ],
+      "forbidden_behaviors": [
+        "treating Skill creation or cleaner architecture as rewrite authorization",
+        "replacing the existing implementation before characterizing its behavior",
+        "silently changing public or operational contracts during structural work"
+      ],
+      "required_artifacts": [
+        "current responsibility and compatibility map",
+        "incremental slice and verification evidence",
+        "rewrite authorization disposition"
+      ],
+      "baseline_expected_failure": [
+        "agent rewrites a previously refactored product while intending only to distill or apply a Skill"
+      ],
+      "review_notes": "Standing user constraint: existing refactored product code is preserved and extended; distillation changes knowledge artifacts, not product rewrite authority."
     }
   ]
 }

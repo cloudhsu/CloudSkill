@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+import hashlib
 import json
 import re
 import struct
@@ -43,15 +44,20 @@ if not re.fullmatch(r"\d+\.\d+\.\d+", version):
 
 codex = load_json(".codex-plugin/plugin.json")
 claude = load_json(".claude-plugin/plugin.json")
+gemini = load_json("gemini-plugin/gemini-extension.json")
 codex_market = load_json(".agents/plugins/marketplace.json")
 claude_market = load_json(".claude-plugin/marketplace.json")
 _private_plugin_path = ROOT / "private-plugin/.claude-plugin/plugin.json"
 private_claude = load_json("private-plugin/.claude-plugin/plugin.json") if _private_plugin_path.exists() else {}
+_private_codex_plugin_path = ROOT / "private-plugin/.codex-plugin/plugin.json"
+private_codex = load_json("private-plugin/.codex-plugin/plugin.json") if _private_codex_plugin_path.exists() else {}
+_private_gemini_path = ROOT / "private-gemini-plugin/gemini-extension.json"
+private_gemini = load_json("private-gemini-plugin/gemini-extension.json") if _private_gemini_path.exists() else {}
 
 distribution = load_json("config/skill-distribution.json")
 tiers = distribution.get("skills", {})
 core_names = sorted(name for name, tier in tiers.items() if tier == "core")
-evolution_names = sorted(name for name, tier in tiers.items() if tier == "evolution-pack")
+evolution_names = sorted(name for name, tier in tiers.items() if tier != "core")  # any non-core tier is private (private-meta/private-game/private-operation/private-art/...)
 expected_core_paths = sorted(f"./.agents/skills/{name}/" for name in core_names)
 # The real Claude Code plugin loader forbids ".." in a plugin's skills field
 # (confirmed 2026-08-15 by an actual failed `claude plugin install` --
@@ -60,6 +66,7 @@ expected_core_paths = sorted(f"./.agents/skills/{name}/" for name in core_names)
 # private-plugin/skills/<name> -> ../../.agents/skills/<name>, referenced
 # here with a forward-only path relative to the private plugin's own root.
 expected_private_paths = sorted(f"./skills/{name}/" for name in evolution_names)
+expected_private_codex_paths = sorted(f"./codex-skills/{name}/" for name in evolution_names)
 
 
 def as_list(value: object) -> list:
@@ -68,6 +75,21 @@ def as_list(value: object) -> list:
     if isinstance(value, list):
         return value
     return []
+
+
+def relative_files(root: Path) -> list[Path]:
+    return sorted(
+        path.relative_to(root)
+        for path in root.rglob("*")
+        if path.is_file()
+    )
+
+
+def tree_hashes(root: Path) -> dict[str, str]:
+    return {
+        str(relative): hashlib.sha256((root / relative).read_bytes()).hexdigest()
+        for relative in relative_files(root)
+    }
 
 
 for label, manifest in (("Codex", codex), ("Claude", claude)):
@@ -81,6 +103,18 @@ for label, manifest in (("Codex", codex), ("Claude", claude)):
             fail(f"{label} plugin path traversal is not allowed: {entry}")
     if sorted(skills_field) != expected_core_paths:
         fail(f"{label} plugin skills array does not match the core tier in config/skill-distribution.json")
+
+if gemini.get("name") != "cloudbox-skills" or gemini.get("version") != version:
+    fail("Gemini extension name/version must match CloudBox and VERSION")
+if set(gemini) - {"name", "version", "description"}:
+    fail("Gemini extension manifest contains unsupported fields")
+gemini_skills = ROOT / "gemini-plugin" / "skills"
+gemini_names = sorted(path.name for path in gemini_skills.iterdir() if path.is_dir()) if gemini_skills.is_dir() else []
+if gemini_names != core_names:
+    fail("Gemini extension skills do not match the core tier")
+for name in core_names:
+    if tree_hashes(ROOT / ".agents" / "skills" / name) != tree_hashes(gemini_skills / name):
+        fail(f"gemini-plugin/skills/{name} is stale")
 
 # A filtered public checkout physically lacks the evolution-pack skill
 # directories (scripts/export_public_bundle.py never copies them). Use that
@@ -96,18 +130,45 @@ if evolution_dirs_present:
         fail("Private plugin version does not match VERSION")
     priv_skills = sorted(as_list(private_claude.get("skills")))
     if priv_skills != expected_private_paths:
-        fail("Private plugin skills array does not match the evolution-pack tier in config/skill-distribution.json")
+        fail("Private plugin skills array does not match the private (non-core) tiers in config/skill-distribution.json")
     for name in evolution_names:
         link = ROOT / "private-plugin" / "skills" / name
         if not link.is_symlink():
             fail(f"private-plugin/skills/{name} must be a symlink (cross-plugin sharing requires the documented symlink pattern, not a path with '..')")
         elif not (ROOT / f".agents/skills/{name}/SKILL.md").is_file():
             fail(f"private-plugin/skills/{name} symlink target is missing SKILL.md")
+
+    if private_codex.get("name") != "cloudbox-skills-private":
+        fail("Private Codex plugin name must be cloudbox-skills-private")
+    if private_codex.get("version") != version:
+        fail("Private Codex plugin version does not match VERSION")
+    if sorted(as_list(private_codex.get("skills"))) != expected_private_codex_paths:
+        fail("Private Codex plugin skills array does not match the private (non-core) tiers in config/skill-distribution.json")
+    for name in evolution_names:
+        canonical = ROOT / ".agents" / "skills" / name
+        packaged = ROOT / "private-plugin" / "codex-skills" / name
+        if not packaged.is_dir():
+            fail(f"private-plugin/codex-skills/{name} is missing; run scripts/sync_private_codex_plugin.py")
+        elif tree_hashes(canonical) != tree_hashes(packaged):
+            fail(f"private-plugin/codex-skills/{name} is stale; run scripts/sync_private_codex_plugin.py")
+    if private_gemini.get("name") != "cloudbox-skills-private" or private_gemini.get("version") != version:
+        fail("Private Gemini extension name/version must match CloudBox private and VERSION")
+    private_gemini_skills = ROOT / "private-gemini-plugin" / "skills"
+    private_gemini_names = sorted(path.name for path in private_gemini_skills.iterdir() if path.is_dir()) if private_gemini_skills.is_dir() else []
+    if private_gemini_names != evolution_names:
+        fail("Private Gemini extension skills do not match the private tiers")
+    for name in evolution_names:
+        if tree_hashes(ROOT / ".agents" / "skills" / name) != tree_hashes(private_gemini_skills / name):
+            fail(f"private-gemini-plugin/skills/{name} is stale")
 else:
     if private_claude:
         fail("Public checkout must not contain private-plugin/.claude-plugin/plugin.json")
+    if private_codex:
+        fail("Public checkout must not contain private-plugin/.codex-plugin/plugin.json")
     if (ROOT / "private-plugin").exists():
         fail("Public checkout must not contain a private-plugin/ directory at all")
+    if private_gemini or (ROOT / "private-gemini-plugin").exists():
+        fail("Public checkout must not contain a private-gemini-plugin/ directory")
     if any("private" in p.get("name", "") for p in claude_market.get("plugins", [])):
         fail("Public checkout's Claude marketplace must not reference any private plugin")
 
@@ -136,12 +197,23 @@ for name in skill_dirs:
         fail(f"canonical skill missing SKILL.md: {name}")
 
 codex_plugins = codex_market.get("plugins", [])
-if len(codex_plugins) != 1 or codex_plugins[0].get("name") != "cloudbox-skills":
-    fail("Codex marketplace must expose exactly one cloudbox-skills plugin")
+codex_plugin_names = {p.get("name"): p for p in codex_plugins}
+if evolution_dirs_present:
+    if set(codex_plugin_names) != {"cloudbox-skills", "cloudbox-skills-private"}:
+        fail("Private Codex marketplace must expose exactly cloudbox-skills and cloudbox-skills-private")
 else:
-    source = codex_plugins[0].get("source", {})
+    if set(codex_plugin_names) != {"cloudbox-skills"}:
+        fail("Public Codex marketplace must expose exactly one cloudbox-skills plugin")
+if "cloudbox-skills" not in codex_plugin_names:
+    fail("Codex marketplace must expose cloudbox-skills")
+else:
+    source = codex_plugin_names["cloudbox-skills"].get("source", {})
     if source.get("source") != "local" or source.get("path") != "./":
         fail("Codex marketplace must point at the repository-root plugin")
+if evolution_dirs_present and "cloudbox-skills-private" in codex_plugin_names:
+    private_source = codex_plugin_names["cloudbox-skills-private"].get("source", {})
+    if private_source.get("source") != "local" or private_source.get("path") != "./private-plugin":
+        fail("Codex marketplace cloudbox-skills-private must point at ./private-plugin")
 
 claude_plugins = claude_market.get("plugins", [])
 claude_plugin_names = {p.get("name"): p for p in claude_plugins}
@@ -165,7 +237,7 @@ for marker in ("CloudBox 路由", "#00A2EA", "CloudBox skills"):
     if marker not in using_yaml:
         fail(f"using-cloudbox-skills OpenAI metadata missing: {marker}")
 
-print(f"Validated CloudBox Codex and Claude plugin packaging for {len(skill_dirs)} canonical skills at version {version or 'UNKNOWN'}")
+print(f"Validated CloudBox Codex, Claude, and Gemini plugin packaging for {len(skill_dirs)} canonical skills at version {version or 'UNKNOWN'}")
 for error in errors:
     print(f"ERROR: {error}")
 sys.exit(1 if errors else 0)

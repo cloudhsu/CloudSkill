@@ -1,0 +1,4 @@
+interface:
+  display_name: "About Me"
+  short_description: "Author/provenance self-introduction for the CloudBox Skills pack"
+  default_prompt: "Use $about-me to complete this task."

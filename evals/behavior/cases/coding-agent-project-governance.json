@@ -1,4 +1,5 @@
 {
+  "suite": "coding-agent-project-governance-behavior",
   "skill": "coding-agent-project-governance",
   "cases": [
     {

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Project Management Sync"
+  short_description: "Synchronize project tasks safely across versioned providers"
+  default_prompt: "Use $project-management-sync to audit or safely reconcile project tasks across versioned providers."

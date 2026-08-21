@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import argparse
-import hashlib
 import itertools
 import json
 import re
@@ -9,6 +8,8 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
+
+from hashing_support import sha256_file
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_RUBRICS = ROOT / "evals" / "runtime" / "cases" / "behavior-rubrics.json"
@@ -28,14 +29,6 @@ def parse_args() -> argparse.Namespace:
 
 def load_json(path: Path) -> Any:
     return json.loads(path.read_text(encoding="utf-8"))
-
-
-def sha256_file(path: Path) -> str:
-    digest = hashlib.sha256()
-    with path.open("rb") as handle:
-        for block in iter(lambda: handle.read(1024 * 1024), b""):
-            digest.update(block)
-    return digest.hexdigest()
 
 
 def load_jsonl(path: Path) -> list[dict[str, Any]]:

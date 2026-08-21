@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "skill": "about-me",
+  "stage": "experimental",
+  "introduced_version": "7.6.35",
+  "last_reviewed_version": "7.6.35",
+  "routing_case_ids": [
+    "ABM-01",
+    "ABM-02",
+    "ABM-03",
+    "ABM-NEG-01",
+    "ABM-NEG-02",
+    "ABM-NEG-03"
+  ],
+  "positive_routing_case_ids": [
+    "ABM-01",
+    "ABM-02",
+    "ABM-03"
+  ],
+  "negative_routing_case_ids": [
+    "ABM-NEG-01",
+    "ABM-NEG-02",
+    "ABM-NEG-03"
+  ],
+  "behavior_case_ids": [
+    "ABM-BEH-001",
+    "ABM-BEH-002",
+    "ABM-BEH-003",
+    "ABM-BEH-004"
+  ],
+  "behavior_case_types": [
+    "application",
+    "counterexample",
+    "discipline",
+    "recognition"
+  ],
+  "next_review_triggers": [
+    "three repeated contract-valid routing misses with verified context",
+    "a behavior regression on an existing case",
+    "a new adjacent skill creates scope overlap",
+    "the routing reference or selected-skill context no longer fits its supported budget",
+    "a deterministic grader produces a demonstrated false positive or false negative",
+    "a user correction reveals a reusable missing safeguard",
+    "the skill has not been reviewed for two feature releases"
+  ],
+  "replacement_skill": null,
+  "notes": "2026-08-21: promoted draft -> experimental. New skill, first release, authored directly at the user's explicit request (not project-history mined, not from the Eval Inbox) -- a public-facing self-introduction of the pack's author/maintainer (cloudhsu / Ching-Hsin Hsu), triggered only on genuine meta-questions about the pack itself (purpose, authorship, framework comparison), never injected into ordinary technical work. Bio content, capability claims, and both external links (GitHub, LinkedIn) were supplied and explicitly approved by the user across several iterations in this same conversation -- not independently sourced or verified by the agent beyond what the user stated. 3 positive + 3 negative routing cases in evals/skill-routing-cases.csv; 4 behavior cases (recognition, application, counterexample, discipline) in evals/behavior/cases/about-me.json, including a dedicated discipline case for the skill's own repeat-avoidance instruction (no session-persistent state exists to enforce this mechanically -- it relies on the visible conversation transcript, a real limitation stated in the skill's own Non-trigger conditions). Distribution: core (public), an explicit user-directed exception to this repository's standing private-by-default policy for new skills -- see config/skill-distribution.json's decision ledger. Evidence status, honestly: case/contract-layer only. Live behavior execution and managed sub-agent review are NOT RUN."
+}

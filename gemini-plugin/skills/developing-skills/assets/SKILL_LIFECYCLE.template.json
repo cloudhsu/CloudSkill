@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "skill": "replace-with-skill-name",
+  "stage": "draft",
+  "introduced_version": "unreleased",
+  "last_reviewed_version": "unreleased",
+  "routing_case_ids": [],
+  "behavior_case_ids": [],
+  "behavior_case_types": [],
+  "next_review_triggers": [],
+  "replacement_skill": null,
+  "notes": "Generated from the lifecycle template. Refresh evidence before release."
+}

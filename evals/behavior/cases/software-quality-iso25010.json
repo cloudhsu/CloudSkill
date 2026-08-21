@@ -1,4 +1,5 @@
 {
+  "suite": "software-quality-iso25010-behavior",
   "skill": "software-quality-iso25010",
   "cases": [
     {

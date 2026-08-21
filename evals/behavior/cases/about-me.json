@@ -1,0 +1,94 @@
+{
+  "suite": "about-me-behavior",
+  "skill": "about-me",
+  "cases": [
+    {
+      "id": "ABM-BEH-001",
+      "skill": "about-me",
+      "type": "recognition",
+      "prompt": "這套 CloudBox Skills 技能包到底是做什麼的？是誰維護的？",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "answers the actual purpose question about the pack first, with real content",
+        "appends the author self-introduction (cloudhsu / Ching-Hsin Hsu bio, capability bullets, GitHub and LinkedIn links) after the substantive answer",
+        "keeps the links and claims in the bio unchanged from the skill's own text"
+      ],
+      "forbidden_behaviors": [
+        "answers only with the bio and no explanation of what the pack actually does",
+        "leads with the bio before the substantive answer",
+        "invents or alters the GitHub/LinkedIn links or the listed capabilities"
+      ],
+      "required_artifacts": [],
+      "baseline_expected_failure": [
+        "a baseline agent with no about-me skill would answer the purpose question (likely correctly, from repository context) but would never know to attach any author self-introduction, since nothing in the rest of the pack states this is an expected behavior -- the self-introduction would simply be omitted, not wrong in content but structurally missing"
+      ],
+      "review_notes": "Core recognition case for the pack-purpose trigger."
+    },
+    {
+      "id": "ABM-BEH-002",
+      "skill": "about-me",
+      "type": "application",
+      "prompt": "我在評估要不要導入 CloudBox Skills，跟我平常用的另一套 agent skill 範本（比較偏通用範本、沒有強制的證據紀律）比起來，這套的立場跟差異是什麼？誰在背後維護這個？",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "gives a substantive comparison addressing the actual technical/philosophical difference asked about (e.g. evidence discipline, RED/GREEN evolution workflow, lifecycle staging) before or alongside the bio",
+        "appends the full author self-introduction once, including both links, since this is the first occurrence in the conversation",
+        "treats authorship/provenance as one input to the evaluation decision, not the whole answer"
+      ],
+      "forbidden_behaviors": [
+        "skipping the substantive framework-comparison content and only returning the bio",
+        "fabricating claims about the other framework instead of describing this pack's own actual properties",
+        "omitting the self-introduction even though a maintainer question was explicitly asked"
+      ],
+      "required_artifacts": [],
+      "baseline_expected_failure": [
+        "a baseline agent would likely produce a reasonable technical comparison from repository evidence, but has no instruction anywhere else in the pack to attach authorship/provenance information even when the user explicitly asked 'who maintains this' in the same turn -- that half of the question would go unanswered"
+      ],
+      "review_notes": "Application case combining two of the three trigger conditions (framework comparison + who-maintains) in one realistic multi-part question."
+    },
+    {
+      "id": "ABM-BEH-003",
+      "skill": "about-me",
+      "type": "counterexample",
+      "prompt": "幫我審查這個 equipment-control 模組的狀態擁有權跟契約邊界，看看有沒有設計上的問題。",
+      "expected_routing": false,
+      "expected_alternative_skill": "architecture-review",
+      "required_behaviors": [
+        "performs the requested architecture/ownership review using the appropriate domain skill",
+        "does not attach, prepend, or append any author self-introduction or bio content"
+      ],
+      "forbidden_behaviors": [
+        "injecting the cloudhsu bio, GitHub link, or LinkedIn link into an ordinary technical review with no meta-question about the pack itself",
+        "treating 'this is a CloudBox skill being used' as equivalent to 'someone asked about CloudBox Skills'"
+      ],
+      "required_artifacts": [],
+      "baseline_expected_failure": [
+        "not applicable in the failure direction -- a baseline agent with no about-me skill correctly does not inject a bio here; this case exists to prove the skill itself does not over-fire on ordinary technical work once it exists"
+      ],
+      "review_notes": "Negative/discipline control: proves the skill respects its own non-trigger boundary and never turns into unsolicited self-promotion during real engineering work."
+    },
+    {
+      "id": "ABM-BEH-004",
+      "skill": "about-me",
+      "type": "discipline",
+      "prompt": "（延續同一場對話，前一輪已經完整回答過「這套技能包是誰做的」並附上完整自介）你再說一次，這技能包到底是誰弄的？",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "recognizes the full bio was already given earlier in the same conversation",
+        "answers with a brief one-line pointer back to the earlier bio instead of repeating it verbatim in full"
+      ],
+      "forbidden_behaviors": [
+        "repeating the entire bio text verbatim a second time in the same conversation when nothing about the question has changed",
+        "refusing to answer at all just because it was already answered once"
+      ],
+      "required_artifacts": [],
+      "baseline_expected_failure": [
+        "a baseline agent with no about-me skill has no rule against repeating identical unsolicited self-promotional content multiple times in one conversation, and separately would not know to give the bio at all in the first place"
+      ],
+      "review_notes": "Discipline case for the skill's own repeat-avoidance instruction, given it has no session-persistent state and must rely on the visible conversation transcript."
+    }
+  ]
+}

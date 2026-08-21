@@ -8,6 +8,7 @@ This file defines the authoritative location for each concern.
 | Installation | `/INSTALL.md` | Provide a short link |
 | Always-on architecture guidance | `/AGENTS.md` | Import or summarize only when required by another tool |
 | Claude Code adapter | `/CLAUDE.md` | Import `AGENTS.md`; do not restate it |
+| Product-family naming convention and rename-migration status | `/NAMING.md` | Reference the pattern; do not restate per-item checklist status |
 | Architect identity and capability | `profile/ARCHITECT_PROFILE.md` | Use a short role summary |
 | Source evidence | `evidence/BENTO_SYSTEM.md`, `evidence/CLOUDBOX_ENGINE.md`, `evidence/QT_COMPONENT_SUITE.md`, `evidence/SIS_TOUCH_UTILITY.md`, `evidence/EQUIPMENT_CONTROL_PLATFORM.md`, `evidence/SEMICONDUCTOR_EQUIPMENT_TRAINING.md` | Cite, do not copy evidence lists |
 | Engineering governance overview | `standards/ENGINEERING_GOVERNANCE.md` | Detailed procedures belong inside skills |
@@ -18,8 +19,11 @@ This file defines the authoritative location for each concern.
 | CloudSkill design purpose and evolution flow | `CLOUDBOX_SKILLS_DESIGN_AND_FLOW.md` | Link or summarize only |
 | Multi-session evolution history | `CLOUDBOX_SKILLS_CHANGE_HISTORY.md` | Git remains authoritative; record rationale and evidence links |
 | Current conversation/agent continuation state | `/CLOUDBOX_SKILLS_AGENT_HANDOFF.md` | Update with each evolution increment |
+| Cross-document development status and roadmap | `CLOUDBOX_SKILLS_DEVELOPMENT_MAP.md` | Informative view only; link to registries, Eval evidence, and immutable releases |
 | Skill workflow | Each `.agents/skills/<name>/SKILL.md` | Supporting detail stays in that skill's references/assets |
 | Skill selection and composition | `.agents/skills/using-cloudbox-skills/SKILL.md` | Domain skills state only local composition rules |
+| Product Skill taxonomy and private game domains | `config/skill-domain-catalog.json`, `SKILL_TAXONOMY.md`, `GAME_SKILL_CATALOG.md` | Routing remains in the flat manifest; capability/product taxonomy lives here and distribution remains authoritative in `config/skill-distribution.json` |
+| Which Skill fires for a given scenario (greenfield/feature/bugfix/refactor/migration/archaeology/release) across equipment, game, website, and agent-product domains, plus known coverage gaps | `SKILL_ROUTING_PLAYBOOK.md` | Practical routing reference, not a second classification system; taxonomy stays authoritative for what a Skill is |
 | Skill development method | `.agents/skills/developing-skills/SKILL.md` | References may explain evaluation details |
 | Skill routing evaluation | `/evals/skill-routing-cases.csv` | Add cases; do not copy the matrix elsewhere |
 | Skill behavior evaluation contracts | `/evals/behavior/` | Execution reports must state actual run status |

@@ -25,12 +25,19 @@ with tempfile.TemporaryDirectory(prefix='cloudskill-install-') as tmp:
         errors.append('Codex smoke-install copy differs from canonical skills')
     if hashes(claude) != expected:
         errors.append('Claude smoke-install copy differs from canonical skills')
+    for package_name in ('gemini-plugin', 'private-gemini-plugin'):
+        source = ROOT / package_name / 'skills'
+        if source.is_dir():
+            installed = tmp / package_name / 'skills'
+            shutil.copytree(source, installed)
+            if hashes(installed) != hashes(source):
+                errors.append(f'{package_name} smoke-install copy differs from its projection')
 
 claude_adapter = ROOT / 'CLAUDE.md'
 if not claude_adapter.exists() or '@AGENTS.md' not in claude_adapter.read_text(encoding='utf-8'):
     errors.append('CLAUDE.md does not import @AGENTS.md')
 
-print(f'Smoke-installed {len(list(SOURCE.iterdir()))} canonical skill directories for Codex and Claude')
+print(f'Smoke-installed {len(list(SOURCE.iterdir()))} canonical Skill directories and Gemini projections')
 for error in errors:
     print(f'ERROR: {error}')
 sys.exit(1 if errors else 0)

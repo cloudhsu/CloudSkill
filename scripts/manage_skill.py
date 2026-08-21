@@ -4,9 +4,12 @@ import argparse
 import csv
 import json
 import re
+import subprocess
 import sys
 from pathlib import Path
 from typing import Any
+
+from git_support import run_git_command
 
 ROOT = Path(__file__).resolve().parents[1]
 SKILLS = ROOT / ".agents" / "skills"
@@ -20,23 +23,86 @@ NAME_RE = re.compile(r"[a-z0-9]+(?:-[a-z0-9]+)*")
 VERSION_RE = re.compile(r"([0-9]+)\.([0-9]+)\.([0-9]+)")
 
 
-def lifecycle_semantic_errors(payload: dict[str, Any], current_version: str) -> list[str]:
+def _release_tags(*, cwd: Path | None = None) -> list[tuple[int, int, int]] | None:
+    """Return every `vX.Y.Z` git tag as a (major, minor, patch) tuple, sorted
+    ascending. Returns None when tags cannot be resolved (no git, not a git
+    checkout, or no matching tags at all) -- callers must not guess a release
+    count in that case."""
+    result = run_git_command(["tag"], cwd=cwd)
+    if not result.ok:
+        return None
+    parsed: list[tuple[int, int, int]] = []
+    for line in result.stdout.splitlines():
+        line = line.strip()
+        if not line.startswith("v"):
+            continue
+        match = VERSION_RE.fullmatch(line[1:])
+        if match:
+            parsed.append((int(match.group(1)), int(match.group(2)), int(match.group(3))))
+    if not parsed:
+        return None
+    parsed.sort()
+    return parsed
+
+
+def _feature_releases_since(
+    reviewed_version: str, current_version: str, *, cwd: Path | None = None
+) -> int | None:
+    """Count distinct (major, minor) release lines strictly newer than
+    `reviewed_version`'s own line, up through `current_version`, using actual
+    tagged release history as ground truth -- not semver arithmetic, which
+    cannot see across a major-version boundary. Returns None when this
+    cannot be proven (missing git tags, or either version untagged), so a
+    caller can fall back to declining to enforce rather than fabricating a
+    count."""
+    tags = _release_tags(cwd=cwd)
+    if tags is None:
+        return None
+    reviewed_match = VERSION_RE.fullmatch(reviewed_version)
+    current_match = VERSION_RE.fullmatch(current_version)
+    if not reviewed_match or not current_match:
+        return None
+    reviewed_key = tuple(int(g) for g in reviewed_match.groups())
+    current_key = tuple(int(g) for g in current_match.groups())
+    if reviewed_key not in tags or current_key not in tags:
+        return None
+    newer_lines = {
+        (major, minor)
+        for major, minor, patch in tags
+        if (major, minor) != reviewed_key[:2] and reviewed_key < (major, minor, patch) <= current_key
+    }
+    return len(newer_lines)
+
+
+def lifecycle_semantic_errors(
+    payload: dict[str, Any], current_version: str, *, is_shipped: bool = True
+) -> list[str]:
     errors: list[str] = []
     introduced = payload.get("introduced_version")
     reviewed = payload.get("last_reviewed_version")
     current_match = VERSION_RE.fullmatch(current_version)
-    if current_match and introduced == "unreleased":
+    if current_match and introduced == "unreleased" and is_shipped:
         errors.append("introduced_version cannot remain unreleased in a shipped repository version")
     reviewed_match = VERSION_RE.fullmatch(reviewed) if isinstance(reviewed, str) else None
     triggers = payload.get("next_review_triggers") or []
     if current_match and reviewed_match and "the skill has not been reviewed for two feature releases" in triggers:
         current_major, current_minor = int(current_match.group(1)), int(current_match.group(2))
         reviewed_major, reviewed_minor = int(reviewed_match.group(1)), int(reviewed_match.group(2))
-        # A major boundary does not reveal how many intervening feature
-        # releases occurred. Only enforce the distance that this pair of
-        # semantic versions can prove without inventing release history.
         if current_major == reviewed_major and current_minor - reviewed_minor >= 2:
             errors.append("last_reviewed_version is at least two feature releases behind")
+        elif current_major != reviewed_major:
+            # A bare skip here previously hid real staleness across a major
+            # boundary undetected (2026-08-20 audit: 12 of 34 skills had
+            # last_reviewed_version stuck pre-major-bump, some 9+ minor
+            # releases behind). Count real intervening releases from tag
+            # history instead of guessing from major/minor arithmetic alone.
+            release_count = _feature_releases_since(reviewed, current_version, cwd=ROOT)
+            if release_count is not None and release_count >= 2:
+                errors.append(
+                    "last_reviewed_version is at least two feature releases behind "
+                    f"(confirmed via {release_count} intervening tagged release(s) "
+                    "across a major-version boundary)"
+                )
     return errors
 
 
@@ -62,6 +128,25 @@ def skill_names() -> list[str]:
         payload = load_json(MANIFEST)
         names.update(item["name"] for item in payload.get("skills", []))
     return sorted(names)
+
+
+def tracked_skill_names() -> set[str] | None:
+    """Return Git-tracked Skill directories, or None when Git evidence is unavailable."""
+    try:
+        result = subprocess.run(
+            ["git", "ls-files", "--", ".agents/skills/*/SKILL.md"],
+            cwd=ROOT,
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+    except (OSError, subprocess.CalledProcessError):
+        return None
+    return {
+        Path(line).parent.name
+        for line in result.stdout.splitlines()
+        if line.strip()
+    }
 
 
 def routing_evidence() -> dict[str, dict[str, list[str]]]:
@@ -174,6 +259,7 @@ def audit(check: bool = False) -> list[str]:
     required_types = set(policy.get("required_behavior_types", []))
     errors: list[str] = []
     rows: list[tuple[str, str, int, int, str]] = []
+    tracked = tracked_skill_names()
     current_version: str | None = None
     if VERSION.is_file():
         current_version = VERSION.read_text(encoding="utf-8").strip()
@@ -195,7 +281,13 @@ def audit(check: bool = False) -> list[str]:
         if payload.get("skill") != skill:
             errors.append(f"{skill}: lifecycle skill name mismatch")
         if current_version is not None:
-            errors.extend(f"{skill}: {error}" for error in lifecycle_semantic_errors(payload, current_version))
+            is_shipped = tracked is None or skill in tracked
+            errors.extend(
+                f"{skill}: {error}"
+                for error in lifecycle_semantic_errors(
+                    payload, current_version, is_shipped=is_shipped
+                )
+            )
         stage = payload.get("stage")
         if stage not in valid_stages:
             errors.append(f"{skill}: invalid lifecycle stage {stage!r}")
@@ -333,6 +425,7 @@ TODO: state the decision principle this skill owns.
 
     behavior_path = BEHAVIOR_CASES / f"{name}.json"
     behavior_payload = {
+        "suite": f"{name}-behavior",
         "skill": name,
         "cases": [
             {

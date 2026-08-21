@@ -1,0 +1,33 @@
+{
+  "suite": "wph-equipment-simulator-development-routing",
+  "schema_version": 1,
+  "description": "Routing regression for wph-equipment-simulator-development, mirroring evals/skill-routing-cases.csv WPH-SIM-REC-001/WPH-SIM-CTR-001.",
+  "cases": [
+    {
+      "id": "WPH-SIM-REC-001",
+      "prompt": "A semiconductor WPH simulator has cassette carriers, Trays, robots, aligners, PM chambers, WPH output, and animation bugs. Select the correct specialized workflow.",
+      "expected": {
+        "primary_skill": "wph-equipment-simulator-development",
+        "required_supporting_skills": [],
+        "forbidden_selected_skills": [],
+        "execution_order": [
+          "wph-equipment-simulator-development"
+        ],
+        "allow_additional_supporting_skills": true
+      }
+    },
+    {
+      "id": "WPH-SIM-CTR-001",
+      "prompt": "Build a generic WinForms dashboard for unrelated business objects with no wafer, carrier, robot, chamber, or WPH semantics.",
+      "expected": {
+        "primary_skill": null,
+        "required_supporting_skills": [],
+        "forbidden_selected_skills": [
+          "wph-equipment-simulator-development"
+        ],
+        "execution_order": [],
+        "allow_additional_supporting_skills": true
+      }
+    }
+  ]
+}

@@ -1,4 +1,5 @@
 {
+  "suite": "using-cloudbox-skills-conversation-derived-behavior",
   "skill": "using-cloudbox-skills",
   "cases": [
     {

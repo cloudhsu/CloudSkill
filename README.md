@@ -5,13 +5,13 @@
 > **This public repository is exported from the private `cloudbox-skills`
 > repository via `scripts/export_public_bundle.py`, which reads
 > `config/skill-distribution.json` to include only `core`-tier content.**
-> `evolution-pack`-tier skills (skill self-development, conversation-mining,
-> and the runtime-eval harness CloudBox uses to maintain its own routing
-> accuracy) stay private and are never exported here. This is a temporary
+> Every other tier is private (skill self-development/conversation-mining
+> tooling, and unsanitized product-derived skills split by domain: game,
+> operations/marketing, art) and never exported here. This is a temporary
 > arrangement; the split back to a private-only, public-partial-mirror model
 > resumes once the planned CrewAI migration work begins.
 
-**Current version: 7.6.19**
+**Current version: 7.6.35**
 
 CloudBox 6.4 adds pre-qualified, deterministic lifecycle templates while
 retaining risk-based Review Assurance and resumable adaptive planning. See
@@ -29,7 +29,7 @@ The same canonical `.agents/skills/` directories are used by both plugin manifes
 
 ## Install
 
-CloudBox supports Codex/ChatGPT and Claude Code plugins, plus the existing standalone user/project installation. See [INSTALL.md](INSTALL.md) and [docs/CLOUDBOX_PLUGIN.md](docs/CLOUDBOX_PLUGIN.md).
+CloudBox supports Codex/ChatGPT, Claude Code, and Gemini CLI packages, plus the existing standalone user/project installation. See [INSTALL.md](INSTALL.md) and [docs/CLOUDBOX_PLUGIN.md](docs/CLOUDBOX_PLUGIN.md).
 
 
 ## Skills
@@ -53,6 +53,7 @@ CloudBox supports Codex/ChatGPT and Claude Code plugins, plus the existing stand
 | `development-process-tailoring` | Lifecycle tailoring, product evolution, release trains, customer/field feedback, project controls |
 | `coding-agent-project-governance` | Repository instructions, risk routing, subagents, tests, release |
 | `agent-development-process` | Building an AI-agent product or agentic system |
+| `project-management-sync` | Version-aware, idempotent synchronization with external project-management systems |
 
 ## Repository map
 
@@ -60,6 +61,8 @@ CloudBox supports Codex/ChatGPT and Claude Code plugins, plus the existing stand
 CloudSkill/
 ├── .codex-plugin/           # Codex and ChatGPT plugin manifest
 ├── .claude-plugin/          # Claude Code plugin manifest and marketplace
+├── gemini-plugin/           # Generated public Gemini extension
+├── private-gemini-plugin/   # Generated private Gemini extension
 ├── assets/                  # CloudBox logo and icon
 ├── .agents/plugins/         # Codex and ChatGPT marketplace
 ├── .agents/skills/          # Canonical skill source
@@ -87,6 +90,7 @@ See [docs/README.md](docs/README.md) for the document ownership map.
 ## Evolution and handoff
 
 - [Design purpose and flow](docs/CLOUDBOX_SKILLS_DESIGN_AND_FLOW.md)
+- [Development map and roadmap](docs/CLOUDBOX_SKILLS_DEVELOPMENT_MAP.md)
 - [Evolution change history](docs/CLOUDBOX_SKILLS_CHANGE_HISTORY.md)
 - [Current agent/conversation handoff](CLOUDBOX_SKILLS_AGENT_HANDOFF.md)
 

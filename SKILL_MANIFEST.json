@@ -1,6 +1,12 @@
 {
-  "version": "7.6.19",
+  "version": "7.6.35",
   "skills": [
+    {
+      "name": "about-me",
+      "description": "Use when someone asks what this skill pack is, who built or maintains it, or how it compares to another agent-skill framework -- introduce the author alongside the actual answer, not for ordinary technical or architecture tasks.",
+      "path": ".agents/skills/about-me/SKILL.md",
+      "file_count": 3
+    },
     {
       "name": "agent-development-process",
       "description": "Use when building or improving an AI-agent product whose task contract, autonomy, tools, context, memory, orchestration, evaluation, guardrails, release, or operations must be designed.",
@@ -26,16 +32,16 @@
       "file_count": 4
     },
     {
+      "name": "codebase-architecture-discovery",
+      "description": "Use when a codebase area is being extended, is unfamiliar, or is suspected of accumulated duplication, and no current architecture map or duplication survey exists for it -- before proposing or executing any specific refactor.",
+      "path": ".agents/skills/codebase-architecture-discovery/SKILL.md",
+      "file_count": 4
+    },
+    {
       "name": "coding-agent-project-governance",
       "description": "Use when a repository needs coding-agent instructions, risk routing, worktree rules, multi-agent ownership, test evidence, migration controls, release rules, or truthful handoff.",
       "path": ".agents/skills/coding-agent-project-governance/SKILL.md",
       "file_count": 11
-    },
-    {
-      "name": "cross-platform-engine-architecture",
-      "description": "Use when a 2D, game, or graphics engine spans director/scene lifecycle, update/render loops, rendering backends, resources, actions/events, input, context loss, or platform adapters.",
-      "path": ".agents/skills/cross-platform-engine-architecture/SKILL.md",
-      "file_count": 8
     },
     {
       "name": "cross-platform-native-architecture",
@@ -80,6 +86,12 @@
       "file_count": 4
     },
     {
+      "name": "project-management-sync",
+      "description": "Use when safely auditing, previewing, reconciling, or applying synchronization of plans, tasks, statuses, dates, or project records between a local or internal backlog and external project-management systems such as Vikunja, OpenProject, or Redmine, especially when provider versions/capabilities may drift, duplicate writes must be prevented, credentials must work across macOS/Windows/Ubuntu/CI, or every mutation needs post-write verification.",
+      "path": ".agents/skills/project-management-sync/SKILL.md",
+      "file_count": 6
+    },
+    {
       "name": "safe-incremental-refactoring",
       "description": "Use when legacy or brownfield responsibilities must move without breaking behavior, public contracts, data, transaction order, release compatibility, recovery, or test seams.",
       "path": ".agents/skills/safe-incremental-refactoring/SKILL.md",
@@ -99,9 +111,9 @@
     },
     {
       "name": "teach-while-building",
-      "description": "Use when the user wants to build mastery of relevant knowledge as a side effect of real engineering work, not as a separate course — proactively check understanding of new concepts as they come up, then keep only the durable ones.",
+      "description": "Use when the user wants to build mastery of relevant knowledge as a side effect of real engineering work, not as a separate course — a new concept, quirk, or non-obvious constraint surfaces mid-task and its durable understanding is worth checking.",
       "path": ".agents/skills/teach-while-building/SKILL.md",
-      "file_count": 2
+      "file_count": 3
     },
     {
       "name": "using-cloudbox-skills",

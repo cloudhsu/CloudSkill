@@ -1,0 +1,4 @@
+interface:
+  display_name: "設備領域建模"
+  short_description: "狀態、命令、Actual/Desired、Capability與自動GUI模型"
+  default_prompt: "Use $equipment-domain-modeling to design or review this equipment state, command, capability, snapshot, configuration, and reconciliation model."

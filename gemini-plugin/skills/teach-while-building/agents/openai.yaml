@@ -1,0 +1,4 @@
+interface:
+  display_name: "邊做邊學"
+  short_description: "在實際工程工作中順帶檢查新概念的理解是否持久，不另開教學課程"
+  default_prompt: "Use $teach-while-building to check durable understanding of a concept that just surfaced mid-task, without opening a separate teaching session."

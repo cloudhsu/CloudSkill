@@ -1,6 +1,473 @@
 # Changelog
 
-## 7.6.19
+## 7.6.35
+
+### New Skill: game-art-pipeline (experimental, private-art)
+
+- Added `game-art-pipeline`, the first `art-dev` Skill distinct from
+  `game-asset-resolution-audit`: governs the art *production* pipeline
+  (style-authority/art-bible gating, spec traceability, aesthetic-vs-technical
+  conflict escalation, outsourcing partition/scope-of-work, vertical-slice
+  production throughput gating, legibility/accessibility validation, and
+  code-cross-reference asset inventory audits) rather than measured pixel
+  readiness of assets that already exist.
+- Synthesized from 7 sanitized project-history candidates, consolidated into
+  5 independently-routable mechanisms; no third-party source involved.
+- Lifecycle stage `experimental`: case/contract-layer RED evidence only (5
+  routing rows, 4 behavior cases). Live behavior execution and managed
+  sub-agent review are NOT RUN -- see the Skill's `lifecycle.json` notes.
+- Distribution tier `private-art` (new `art-dev` current Skill; never
+  public/core), matching the domain catalog's already-documented default.
+
+### New Skill: game-narrative-design (experimental, private-art)
+
+- Added `game-narrative-design`, the first `narrative-dev` Skill: premise,
+  world lore, character dialogue, ambient NPC barks, and narrative-beat
+  content, plus checking a story beat against the gameplay mechanic that
+  ships with it.
+- Honestly the lowest-confidence Skill added in this roadmap so far: 6 of 7
+  source candidates were `inferred` confidence and one workflow step rests
+  on a single tier-C secondhand source; see `references/evidence-lineage.md`.
+- Lifecycle stage `experimental`: case/contract-layer RED evidence only.
+  Live behavior execution and managed sub-agent review are NOT RUN.
+- Distribution tier `private-art`, per the `narrative-dev` category's own
+  documented default.
+
+### New Skill: game-audio-design (experimental, private-art)
+
+- Added `game-audio-design`: composer licensing/budget structure, SFX asset
+  naming and loudness/format specification, adaptive-music technique choice,
+  mix/priority hierarchy, and audio accessibility captions/runtime settings.
+- Synthesized from 6 eval-inbox candidates; source lineage (one third-party
+  MIT-licensed repository, one official platform accessibility standard, one
+  GDC talk, one self-selecting industry survey) recorded in
+  `references/evidence-sourcing.md`.
+- Lifecycle stage `experimental`: case/contract-layer RED evidence only.
+  Live behavior execution and managed sub-agent review are NOT RUN.
+- Distribution tier `private-art`, per the `audio-dev` category's own
+  documented default.
+
+### Add game-design-systems Skill (experimental, private-game)
+
+Adds `game-design-systems`, the first `design-dev` product-domain Skill:
+mechanic/formula documentation, balance-knob verification-method
+classification and domain-specific post-change audits (combat, economy,
+progression, probabilistic reward), behavioral-observation playtest
+protocol design, a cross-document fact/constant registry, staged
+paper/digital/playtest core-loop validation gates, and scope-tiered design
+documentation with explicit escalation triggers.
+
+- Lifecycle stage `experimental` (not `active`, not `stable`): case/contract
+  layer evidence only -- 1 positive + 5 negative routing cases and 4
+  behavior cases (recognition/application/counterexample/discipline) added,
+  satisfying the `draft_to_experimental` promotion gate. Live model
+  behavior execution and managed sub-agent review remain `NOT RUN`.
+- Distribution tier `private-game` (never public), per the `design-dev`
+  category's own documented `default_distribution` and the standing
+  private-by-default policy for game-related Skills.
+- `SKILL.md` kept to 8.2 KB (well under the 10,500-byte context budget)
+  with conditional detail split into three `references/*.md` files.
+- Synthesized from 6 of 8 sanitized case/contract-layer candidates from
+  project-history mining; the other 2 were deliberately excluded as
+  near-verbatim duplicates of `indie-game-product-evolution`'s existing
+  scope-lock/audience-fit territory.
+
+## 7.6.34
+
+### Remove unconfigured Git evolution-source synchronization
+
+- Removed the scheduled Git source-sync workflow, source registry, schema,
+  controller, and validator after repeated secret-preflight failures with no
+  configured remote source.
+- Removed obsolete live CI, packaging, and instruction references while
+  preserving the separate manual Eval Exchange push/pull path.
+- Archived the historical source-sync design guide for context; the commands
+  described there are no longer supported.
+- This is an internal patch update; no new public Skill behavior was added.
+
+## 7.6.32
+
+### Private equipment-family candidates and governed semantic review
+
+- Added de-identified `tray-descum-simulator-development`,
+  `cluster-tool-simulator-development`, and
+  `wafer-bonder-debonder-development` Skills to the new
+  `private-equipment` distribution tier. Public distribution is deferred until
+  the quality-plus-game increment and a later explicit publication review.
+- Refactored `wph-equipment-simulator-development` into the cross-equipment
+  discrete-event capacity owner; family Skills retain topology, material,
+  custody and process semantics.
+- Added 19 equipment behavior cases and adjacent routing controls. Luna and Sol
+  each passed all 19 packet-bound cases; hardware, field, approved recipe,
+  calibration and numeric WPH evidence remain NOT RUN.
+- Required unique Behavior Eval `suite` IDs, repaired the new-Skill scaffold,
+  and added a real scaffold regression.
+- Added immutable candidate/review packet manifests, managed reviewer policy
+  (Codex Luna/Sol; Claude Sonnet 5/Opus 5 with matching 4.8 availability
+  fallback), exact identity records, and a brownfield no-unapproved-rewrite
+  gate.
+- Bounded model review ended Luna PASS / Sol FAIL on process evidence. The
+  process defects were corrected, DEVSK-BEH-022/023 passed Luna/Sol, and the
+  repository owner approved the final manual evidence packet. A later owner
+  instruction retained the Skills privately before any push, tag, or release.
+- Added equipment closure, Luna High distillation and semantic architecture/
+  pattern-fitness assessment documents. The latter remains a candidate, not a
+  released Skill rule.
+- Version 7.6.32 remains an internal candidate; no public tag or GitHub Release
+  is authorized by this entry.
+
+## 7.6.31
+
+### Split the flat `evolution-pack` private tier into `private-meta`/`private-game`/`private-operation`/`private-art`
+
+- `config/skill-distribution.json`: replaced the single `evolution-pack` tier
+  with 4 sub-tiers, split by content kind rather than one flat bucket:
+  `private-meta` (self-referential skill/eval tooling: `developing-eval`,
+  `local-runtime-eval-debugging`, `runtime-evaluation-engineering`),
+  `private-game` (the 7 existing game-product skills, reclassified 1:1),
+  `private-operation` and `private-art` (new, reserved, currently empty —
+  motivated by 3 queued interaction-Eval candidates from this session's game/
+  engine mining passes that have no existing skill owner: a spokesmodel/
+  influencer marketing pattern, design-doc-to-art-asset-manifest extraction,
+  and style-specification/drift-check).
+- Every script that previously checked `tier == "evolution-pack"` now checks
+  `tier != "core"` instead (`scripts/export_public_bundle.py`,
+  `scripts/validate_pack.py`, `scripts/validate_plugins.py`,
+  `scripts/validate_skill_portability.py`,
+  `scripts/sync_private_codex_plugin.py`) — any future private sub-tier is
+  automatically picked up everywhere without another script edit.
+- `config/skill-domain-catalog.json`: each product-domain category now names
+  its own `default_distribution` (`art-dev` -> `private-art`, `marketing-dev`
+  -> `private-operation`, the rest -> `private-game`) instead of one flat
+  fallback. Confirmed this catalog already anticipated both new directions
+  before this session: `marketing-dev`'s `planned_skills` already listed
+  `game-marketing-and-monetization`, `art-dev`'s already listed
+  `game-art-pipeline`.
+- Updated all live documentation referencing the old flat tier name:
+  `README.md`, `INSTALL.md`, `docs/SKILL_TAXONOMY.md`,
+  `docs/CLOUDBOX_SKILLS_DEVELOPMENT_MAP.md`, `private-plugin/README.md`
+  (also fixed a stale "21 skills" count to the correct 31). Historical
+  release/evolution documents under `docs/releases/` and `docs/evolution/`
+  were deliberately left unchanged — they are point-in-time records, not
+  live state.
+- No skill's actual behavior, routing, or public/private status changed:
+  `wph-equipment-simulator-development` stays `core`; the reclassified
+  skills' effective visibility is identical to before (still fully private,
+  still excluded from the public bundle) — this is purely an internal
+  organizational relabeling plus a script generalization.
+- Version bump classified **patch**: purely internal reorganization, no new
+  public capability, no behavior change for any skill.
+
+Claude Code CLI 2.1.233, `sonnet` alias.
+
+## 7.6.30
+
+### Reclassify `wph-equipment-simulator-development` `evolution-pack` -> `core` (public), at the user's request
+
+- Sanitization review, checked against the exact bar already used for
+  `semiconductor-equipment-domain-knowledge`/`equipment-control-architecture`/
+  `equipment-domain-modeling` (no company/project/customer/recipe/safety-limit
+  identifiers), found and fixed two real gaps:
+  - `references/implementation-map.md` named literal source-file paths from
+    one specific C# codebase (`WphSimulator.Rewrite/*.cs` and friends) —
+    rewritten to describe module responsibilities generically.
+  - `references/domain-baseline.md` and `SKILL.md` step 6 stated concrete
+    calibrated machine timing values (specific CT Z-motion seconds, specific
+    slot/cassette/PM-time counts) as "confirmed machine input" — rewritten to
+    keep the identical classification-table shape and confirmed/provisional
+    discipline (the actual reusable content) while replacing every literal
+    measured value with an explicit placeholder, matching the fact that the
+    existing core-tier equipment Skills carry zero concrete numeric machine
+    values.
+  - A minor identifying detail in `references/evidence-cases.md` (a literal
+    screenshot filename from the source project) was also genericized.
+  - No company, employer, or product name was ever present in this skill;
+    every fix was about removing artifacts specific to one real codebase or
+    machine, not about names.
+- `config/skill-distribution.json`: `wph-equipment-simulator-development`
+  `evolution-pack` -> `core`, with a new decision-ledger entry.
+- Added to `.claude-plugin/plugin.json` and `.codex-plugin/plugin.json`'s
+  skills lists; removed from both `private-plugin` manifests and the
+  `private-plugin/skills/` symlink and `private-plugin/codex-skills/`
+  projection.
+- `lifecycle.json`: notes rewritten with the full sanitization + reclassify
+  summary; `last_reviewed_version` updated.
+- Version bump classified **patch** again, for the same reason disclosed in
+  `7.6.29`: the 3 skills not reviewed since `7.5.0`
+  (`agent-development-process`, `document-governance`,
+  `teach-while-building`) still block a clean minor bump today. A public-
+  tier reclassification is, in spirit, exactly the "publicly-usable"
+  trigger the confirmed versioning policy names as minor — this is
+  disclosed as a real, deliberate deviation, not an oversight, and the
+  blocking review remains tracked separately rather than rushed to force a
+  minor bump.
+
+Full evidence:
+`docs/evolution/2026-08-18-wph-equipment-simulator-development-active-promotion-evidence.md`,
+`config/skill-distribution.json`'s decision ledger.
+
+Claude Code CLI 2.1.233, `sonnet` alias.
+
+## 7.6.29
+
+### Promote `wph-equipment-simulator-development` to `active`
+
+- Gathered the live routing/behavior evidence `v7.6.28`'s import explicitly
+  disclosed as `NOT RUN`: routing 6/6 (100%) at repeat=3; behavior 9/9
+  completed across all 3 case shapes (recognition/application/
+  counterexample) at repeat=3, manually verified against each case's own
+  required/forbidden behaviors (no automated numeric rubric authored yet —
+  a disclosed, deliberate gap); adjacent-regression canary suite 30/30
+  semantically correct at repeat=3 (2 of the first 30 attempts hit a
+  transient Runner/Context-layer structured-output-retry error, confirmed
+  transient by an immediate successful retry).
+- `lifecycle.json`: `stage` `experimental` -> `active`.
+- The skill's `evolution-pack` (private) distribution-tier classification
+  is unchanged and still awaiting explicit user confirmation — tracked
+  separately, not blocking this stage promotion (stage and distribution
+  tier are independent axes).
+- Version bump classified **patch**, corrected from an initial minor-bump
+  attempt: the versioning policy confirmed this session reads "a new
+  active/publicly-usable skill" as the minor trigger, and this skill stays
+  `evolution-pack` (private), never publicly distributed, so no public
+  capability actually changed. The minor attempt also had a real, disclosed
+  side effect worth recording: crossing a 7.5→7.7 two-minor-release gap
+  triggered `scripts/validate_pack.py`'s staleness check
+  ("last_reviewed_version is at least two feature releases behind") for
+  three unrelated skills (`agent-development-process`,
+  `document-governance`, `teach-while-building`) that have not been
+  reviewed since `7.5.0` — a genuine, independent finding, not caused by
+  this change, now tracked separately rather than papered over by staying
+  on the minor version that exposed it.
+
+Full evidence:
+`docs/evolution/2026-08-18-wph-equipment-simulator-development-active-promotion-evidence.md`
+
+Claude Code CLI 2.1.233, `sonnet` alias. No provider-backed mutation,
+credential data, or private product identifiers are included.
+
+## 7.6.28
+
+### Import `wph-equipment-simulator-development` as an experimental, private-tier skill
+
+- Onboarded an externally-authored skill package
+  (`.local/eval-inbox/imports/wph-equipment-simulator-development-0.1.0-experimental.zip`)
+  distilled from a semiconductor WPH equipment simulator project: event-sourced
+  physical material flow as authority, GUI as projection, shared-resource
+  reservation (CT/EFEM robots), PM chamber interlocks, and separated raw/
+  summary/capacity report outputs.
+- Structural onboarding only this pass: skill folder placed under
+  `.agents/skills/wph-equipment-simulator-development/`; routing cases
+  (`WPH-SIM-REC-001`, `WPH-SIM-CTR-001`) merged into
+  `evals/skill-routing-cases.csv` and a new
+  `evals/runtime/cases/wph-equipment-simulator-development-routing.json`;
+  behavior cases (`WPH-SIM-REC-001`, `WPH-SIM-APP-001`, `WPH-SIM-CTR-001`)
+  registered in `evals/behavior/cases/wph-equipment-simulator-development.json`;
+  `lifecycle.json` set to `stage: experimental`,
+  `introduced_version: 7.6.28`.
+- Classified `evolution-pack` (private tier) in
+  `config/skill-distribution.json`, not `core`: unlike the already-generalized
+  `equipment-control-architecture`/`equipment-domain-modeling`/
+  `semiconductor-equipment-domain-knowledge`, this skill's reference material
+  still carries concrete calibrated machine timing values and a specific
+  reference-implementation file layout tied to one real project. Wired into
+  `private-plugin/skills/` (symlink), both private plugin manifests, and
+  `private-plugin/codex-skills/` via `scripts/sync_private_codex_plugin.py`.
+- Live routing and behavior model evaluation were **not run** this pass —
+  only structural validity is confirmed. Do not promote past `experimental`
+  without that evidence.
+
+Claude Code CLI 2.1.233, `sonnet` alias. No provider-backed mutation,
+credential data, or private product identifiers are included; the source
+package was already sanitized of company/customer names before import.
+
+## 7.6.27
+
+### Fix a real router non-trigger ambiguity found while promoting `codebase-architecture-discovery`
+
+- `using-cloudbox-skills/SKILL.md`: clarified that a settled design/scope
+  decision is not the same as "the answer is already fully determined by
+  supplied text" — the router's own non-trigger line was being conflated
+  with settled-decision prompts in 2 of 3 repeated attempts, causing
+  `primary_skill: null` instead of `safe-incremental-refactoring` on an
+  already-approved cross-service move that still carries real
+  behavior/contract/transaction-preservation risk. Added a clarifying
+  paragraph naming this exact scenario as the counter-example.
+- `evals/runtime/cases/cad-routing.json`: fixed `CAD-NEG-02`'s eval
+  over-specification — the case already tolerated an extra supporting
+  skill via `allow_additional_supporting_skills: true`, but the grader's
+  `execution_order` check ignored that flag; added
+  `allowed_execution_orders` (an existing mechanism, already used in
+  `canary.json`).
+
+Verified: the `codebase-architecture-discovery` routing suite at
+`repeat=3` went from 85.7% (18/21, gate FAIL) to 100.0% (21/21, gate
+PASS). The 10-case canary regression suite — run because the fix edits
+shared router infrastructure loaded for every routing decision — was
+unaffected, 100.0% both before and after.
+
+Full evidence:
+`docs/evolution/2026-08-18-router-non-trigger-clarification-and-cad-neg-02-tolerance.md`
+
+Claude Code CLI 2.1.233, `sonnet` alias. No provider-backed mutation,
+credential data, or private product identifiers are included.
+
+## 7.6.26
+
+### Remove dead evolution-sync CLI, promote `codebase-architecture-discovery` to `active`
+
+- Deleted `scripts/sync_evolution_sources.py`: confirmed dead, fully
+  superseded by `scripts/cloudbox_skills_evolution.py`'s `source sync`
+  subcommand (both call the identical `sync_source()`/
+  `load_source_registry()` with identical arguments, but only the latter is
+  named in `docs/AUTOMATIC_EVOLUTION_SOURCES.md`, the CI workflow, and
+  `validate_evolution_source_sync.py`). Removed its two remaining mentions
+  in `scripts/validate_pack.py`'s and `scripts/export_public_bundle.py`'s
+  private-infrastructure exclusion lists.
+- Promoted `codebase-architecture-discovery` `experimental` -> `active`:
+  added 2 new adjacent-regression routing controls (a code-review boundary
+  and a familiar-codebase-no-discovery-gap boundary); ran `repeat=3`
+  routing (this skill's own accuracy clean at 6/6 positive and 15/15
+  correctly-not-selected negative, 0% forbidden-selection violations
+  across 21 attempts) and `repeat=3` behavior GREEN (6/6 pass, mean
+  96.9/100); closed the previously disclosed behavior-RED gap with a real,
+  measured result (a genuine drop on the application case when the skill
+  is removed, landing on this skill's own two core techniques). Full
+  evidence:
+  `docs/evolution/2026-08-17-codebase-architecture-discovery-active-promotion-evidence.md`.
+
+Claude Code CLI 2.1.233, `sonnet` alias. No provider-backed mutation,
+credential data, or private product identifiers are included in these
+public Core changes.
+
+## 7.6.25
+
+### Close the Iteration Debt Ledger, consolidate 4 duplicated primitives, add `codebase-architecture-discovery`
+
+Documentation-governance sweep and internal-logic audit, converted into a
+consolidation refactor and one new Core Skill:
+
+- Iteration Debt Ledger (F1-F6) closed: removed a redundant `distribution`
+  field duplicated in `config/skill-domain-catalog.json`; deleted 5 obsolete
+  pre-5.6.0 apply-overlay files; removed 2 orphaned evidence-bundle scripts;
+  fixed the `skill-creator` PyYAML blocker and documented the `pip3` vs
+  `python3 -m pip` interpreter-mismatch gotcha; fixed stale `5.5.1` version
+  strings; closed `NAMING.md` checklist drift.
+- Removed superseded `docs/superpowers/` planning artifacts (17 files) and
+  the stale, pre-`using-cloudbox-skills`-naming `overlay/` snapshot
+  (9 files); recorded the `legacy-game-product-archaeology` /
+  `gameplay-core-modernization` routing-overlap decision (accepted as
+  intentional, sequential-collaborator redundancy); fixed roadmap/taxonomy
+  drift in `docs/CLOUDBOX_SKILLS_DEVELOPMENT_MAP.md` and
+  `docs/SKILL_TAXONOMY.md`.
+- Full internal-logic audit of all 64 `scripts/` files
+  (`docs/plans/2026-08-17-validate-scripts-internal-audit.md`), confirming
+  an organic hexagonal (ports & adapters) layering and finding 4 real
+  duplicated cross-cutting primitives. Consolidated all 4 into new shared
+  modules -- `scripts/hashing_support.py`, `scripts/git_support.py`,
+  `scripts/cli_eval_adapter_support.py`,
+  `scripts/json_schema_interpreter.py` -- each verified empirically
+  (byte-identical output against every real schema/case file, plus targeted
+  adversarial tests for the specific points of divergence) before merging.
+  Caught and fixed one transitive-consumer bug in the process: a validator
+  calling an old private function name directly instead of the new shared
+  one. Added a general "read the architecture map before adding a new
+  cross-cutting primitive" rule to `AGENTS.md`.
+- New Core Skill `codebase-architecture-discovery` (`draft` ->
+  `experimental`): a staged, checkpointed batch-discovery method for
+  surveying an unfamiliar codebase and empirically verifying duplicated
+  logic before refactoring it, paired with `safe-incremental-refactoring`
+  the same way `legacy-game-product-archaeology` is paired with
+  `gameplay-core-modernization`. Real routing RED/GREEN (5/5 GREEN vs 1/5
+  RED -- a genuine premature-execution-skill misroute closed) and behavior
+  GREEN (2/2 graded cases, 100/100) evidence recorded in
+  `docs/evolution/2026-08-17-codebase-architecture-discovery-first-pass-evidence.md`.
+
+Claude Code CLI 2.1.233, `sonnet` alias. No provider-backed mutation,
+credential data, or private product identifiers are included in these
+public Core changes.
+
+## 7.6.24
+
+### Harden project-management synchronization gates
+
+Refines `project-management-sync` using the `skill-creator` review process:
+
+- adds explicit audit, dry-run, apply, and unknown-outcome reconciliation modes;
+- separates provider-adapter responsibilities from the provider-neutral
+  reconciliation engine;
+- adds field ownership and conflict-policy rules for bidirectional sync;
+- requires non-mutating discovery and blocks writes when version/capability
+  evidence or adapter contract tests are missing;
+- adds an unknown-version/read-only routing and behavior case.
+
+The Skill remains public Core and portable across macOS, Windows, Ubuntu/Linux,
+and CI. No provider-backed mutation or credential data is included.
+
+## 7.6.23
+
+### Add cross-platform project-management synchronization
+
+Adds the Core `project-management-sync` Skill for safe synchronization with
+Vikunja, OpenProject, Redmine, and similar providers:
+
+- idempotent reconciliation and stable source/remote identity mapping;
+- provider version and capability discovery with read-only fallback;
+- post-write readback, timeout reconciliation, and timestamp provenance;
+- macOS Keychain, Windows Credential Manager/DPAPI, Ubuntu Secret Service, and
+  CI secret-store boundaries;
+- pre-serialization redaction for credentials, URLs, accounts, emails, and
+  remote identifiers.
+
+Claude Code 2.1.233 using the `sonnet` alias passed 3/3 routing and 3/3
+selected-skill behavior cases; the deterministic behavior rubric averaged
+100/100 after a first-pass privacy finding was corrected. Qwen was not used.
+
+## 7.6.22
+
+### Distill four private game-development Skills and add the two-layer taxonomy
+
+Adds four active, private `evolution-pack` Skills distilled from the sanitized
+legacy-game product evidence in CloudBox Atlas:
+
+- `gameplay-core-modernization` (`game-dev`);
+- `cloudbox-game-migration` (`cloudbox-dev` / `game-dev`);
+- `native-ios-game-rewrite` (`ios-dev` / `game-dev`);
+- `game-quality-and-release-gates` (`qa-dev` / `game-dev`).
+
+The release includes lifecycle, routing, behavior, runtime-eval, Claude, and
+Codex projections. Claude Code 2.1.233 using the `sonnet` alias was the
+provider/model for the benchmark; Qwen was not used. The behavior suite passed
+all 12 repeated application records for the four new Skills at 97.1/100
+average, and adjacent art/engine/generic-quality regression reruns passed.
+Routing primary-skill accuracy was 100%; supporting-skill composition remains
+an explicit follow-up limitation rather than an unreported pass.
+
+## 7.6.21
+
+### Promote private game Skills to active
+
+Adds the private `legacy-game-product-archaeology` and
+`game-asset-resolution-audit` Skills, their game-dev/art-dev/qa-dev taxonomy,
+behavior and runtime benchmark cases, and synchronized Claude/Codex private
+plugin projections. Both Skills pass the release evidence gates for active
+lifecycle status; they remain private and are not promoted to stable or public
+Core.
+
+The asset audit now requires representative asset rows to keep measured size
+relationships, logical display assumptions, provenance, chosen action, and
+static-versus-runtime validation limits together, preventing an upscale or
+device-readiness claim from being left only in surrounding prose.
+
+## 7.6.20
+
+### Add Codex marketplace support for `cloudbox-skills-private`
+
+The private Evolution Pack now has a Codex plugin manifest and a private-only
+Codex marketplace entry, matching the already-supported Claude Code install.
+Public bundle export filters the private entry from both Codex and Claude
+marketplace manifests. The add-on remains three private Skills, installed
+alongside the 18 core Skills.
 
 ### Fix `cloudbox-skills-private`: real install was broken, `..` path traversal is forbidden
 
@@ -28,7 +495,7 @@ been allowing it for the private plugin.
 
 RED evidence: case/contract layer plus one real `claude plugin install` run
 (the actual bug reproduction and fix verification). Full run_all_checks.py
-suite passes at 7.6.19.
+suite passes at 7.6.20.
 
 ## 7.6.18
 

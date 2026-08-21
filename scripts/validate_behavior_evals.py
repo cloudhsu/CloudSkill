@@ -8,6 +8,7 @@ CASES = ROOT / 'evals' / 'behavior' / 'cases'
 errors = []
 warnings = []
 ids = set()
+suites = set()
 items_by_id = {}
 valid_types = {'recognition','application','counterexample','discipline','reference'}
 skill_names = {p.parent.name for p in SKILLS.glob('*/SKILL.md')}
@@ -29,6 +30,13 @@ else:
             errors.append(f'{path}: invalid JSON: {exc}')
             continue
         file_skill = payload.get('skill')
+        suite = payload.get('suite')
+        if not isinstance(suite, str) or not suite.strip():
+            errors.append(f'{path}: missing nonblank suite')
+        elif suite in suites:
+            errors.append(f'{path}: duplicate behavior suite {suite!r}')
+        else:
+            suites.add(suite)
         if file_skill not in skill_names:
             errors.append(f'{path}: unknown skill {file_skill!r}')
         for item in payload.get('cases', []):
@@ -71,7 +79,13 @@ for skill in sorted(skill_names):
     if missing:
         errors.append(f'{skill}: missing behavior case types {sorted(missing)}')
 
-for cid in {'AR-BEH-004', 'AR-BEH-005', 'AR-BEH-006', 'ENG-BEH-004'}:
+# ENG-BEH-004 belongs to cross-platform-engine-architecture (private-game);
+# a filtered public checkout correctly omits it along with the rest of that
+# skill's case file -- do not require it there.
+_elicitation_contract_ids = {'AR-BEH-004', 'AR-BEH-005', 'AR-BEH-006'}
+if 'cross-platform-engine-architecture' in skill_names:
+    _elicitation_contract_ids.add('ENG-BEH-004')
+for cid in _elicitation_contract_ids:
     item = items_by_id.get(cid)
     if not item:
         errors.append(f'missing architecture elicitation behavior contract: {cid}')
@@ -97,7 +111,15 @@ else:
         'cross-platform-engine-architecture', 'cross-platform-native-architecture',
         'equipment-control-architecture', 'framework-design',
     ):
-        consumer_text = (SKILLS / consumer / 'SKILL.md').read_text(encoding='utf-8')
+        consumer_path = SKILLS / consumer / 'SKILL.md'
+        if not consumer_path.is_file():
+            # A filtered public checkout (scripts/export_public_bundle.py)
+            # can legitimately omit a private-tier consumer (e.g.
+            # cross-platform-engine-architecture, private-game) -- skip
+            # rather than fail. A genuinely missing skill folder in the
+            # canonical private repo is caught elsewhere (validate_pack.py).
+            continue
+        consumer_text = consumer_path.read_text(encoding='utf-8')
         if 'architecture-decision-elicitation.md' not in consumer_text:
             errors.append(f'{consumer}: missing architecture elicitation reference link')
 

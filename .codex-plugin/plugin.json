@@ -1,6 +1,6 @@
 {
   "name": "cloudbox-skills",
-  "version": "7.6.19",
+  "version": "7.6.35",
   "description": "Architecture, equipment-domain, quality, governance, refactoring, and Eval workflows for Codex and ChatGPT.",
   "author": {
     "name": "CloudBox"
@@ -17,12 +17,13 @@
     "claude-code"
   ],
   "skills": [
+    "./.agents/skills/about-me/",
     "./.agents/skills/agent-development-process/",
     "./.agents/skills/application-client-server-architecture/",
     "./.agents/skills/architecture-review/",
     "./.agents/skills/code-review/",
+    "./.agents/skills/codebase-architecture-discovery/",
     "./.agents/skills/coding-agent-project-governance/",
-    "./.agents/skills/cross-platform-engine-architecture/",
     "./.agents/skills/cross-platform-native-architecture/",
     "./.agents/skills/developing-skills/",
     "./.agents/skills/development-process-tailoring/",
@@ -30,6 +31,7 @@
     "./.agents/skills/equipment-control-architecture/",
     "./.agents/skills/equipment-domain-modeling/",
     "./.agents/skills/framework-design/",
+    "./.agents/skills/project-management-sync/",
     "./.agents/skills/safe-incremental-refactoring/",
     "./.agents/skills/semiconductor-equipment-domain-knowledge/",
     "./.agents/skills/software-quality-iso25010/",

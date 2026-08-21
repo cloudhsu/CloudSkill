@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "skill": "project-management-sync",
+  "stage": "active",
+  "introduced_version": "7.6.23",
+  "last_reviewed_version": "7.6.24",
+  "routing_case_ids": [
+    "PMS-01",
+    "PMS-NEG-01",
+    "PMS-NEG-02"
+  ],
+  "positive_routing_case_ids": [
+    "PMS-01"
+  ],
+  "negative_routing_case_ids": [
+    "PMS-NEG-01",
+    "PMS-NEG-02"
+  ],
+  "behavior_case_ids": [
+    "PMS-BEH-001",
+    "PMS-BEH-002",
+    "PMS-BEH-003",
+    "PMS-BEH-004"
+  ],
+  "behavior_case_types": [
+    "application",
+    "counterexample",
+    "recognition"
+  ],
+  "next_review_triggers": [
+    "three repeated contract-valid routing misses with verified context",
+    "a behavior regression on an existing case",
+    "a new adjacent skill creates scope overlap",
+    "the routing reference or selected-skill context no longer fits its supported budget",
+    "a deterministic grader produces a demonstrated false positive or false negative",
+    "a user correction reveals a reusable missing safeguard",
+    "the skill has not been reviewed for two feature releases"
+  ],
+  "replacement_skill": null,
+  "notes": "Active Core Skill. A second skill-creator review added explicit execution modes, field ownership/conflict gates, adapter responsibility boundaries, and unknown-version read-only behavior coverage."
+}

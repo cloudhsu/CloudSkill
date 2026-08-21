@@ -6,14 +6,12 @@ import ast
 import hashlib
 import inspect
 import json
-import math
-import re
 import tempfile
-from datetime import date
 from pathlib import Path
 from typing import Any, Callable
 
 import task_continuity_contract as task2
+from json_schema_interpreter import schema_errors as _task3_schema_errors
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -40,125 +38,6 @@ def _read_schema(path: Path) -> dict[str, Any]:
     if not isinstance(schema, dict):
         raise ValueError(f"contract must be an object: {path}")
     return schema
-
-
-def _schema_reference(schema: dict[str, Any], root: dict[str, Any]) -> dict[str, Any]:
-    reference = schema.get("$ref")
-    if not isinstance(reference, str):
-        return schema
-    if not reference.startswith("#/"):
-        raise ValueError(f"unsupported Task 3 schema reference: {reference!r}")
-    resolved: Any = root
-    for part in reference[2:].split("/"):
-        if not isinstance(resolved, dict) or part not in resolved:
-            raise ValueError(f"unresolved Task 3 schema reference: {reference!r}")
-        resolved = resolved[part]
-    if not isinstance(resolved, dict):
-        raise ValueError(f"Task 3 schema reference is not an object: {reference!r}")
-    return resolved
-
-
-def _json_equal(left: Any, right: Any) -> bool:
-    if isinstance(left, bool) or isinstance(right, bool):
-        return isinstance(left, bool) and isinstance(right, bool) and left is right
-    if left is None or right is None:
-        return left is None and right is None
-    if isinstance(left, (int, float)) and isinstance(right, (int, float)):
-        return left == right
-    if isinstance(left, str) or isinstance(right, str):
-        return isinstance(left, str) and isinstance(right, str) and left == right
-    if isinstance(left, list) or isinstance(right, list):
-        return isinstance(left, list) and isinstance(right, list) and len(left) == len(right) and all(_json_equal(a, b) for a, b in zip(left, right))
-    if isinstance(left, dict) or isinstance(right, dict):
-        return isinstance(left, dict) and isinstance(right, dict) and set(left) == set(right) and all(_json_equal(left[key], right[key]) for key in left)
-    return left == right
-
-
-def _schema_path(parent: str, child: str | int) -> str:
-    return f"{parent}[{child}]" if isinstance(child, int) and parent else (f"[{child}]" if isinstance(child, int) else (f"{parent}.{child}" if parent else child))
-
-
-def _task3_schema_errors(value: Any, schema: dict[str, Any], root: dict[str, Any], location: str = "") -> list[str]:
-    """Shared Task 3 interpreter for published provider, ledger, and result schemas."""
-    schema = _schema_reference(schema, root)
-    errors: list[str] = []
-    label = location or "value"
-    expected_type = schema.get("type")
-    if expected_type is not None:
-        expected = expected_type if isinstance(expected_type, list) else [expected_type]
-        matches = {
-            "object": isinstance(value, dict), "array": isinstance(value, list), "string": isinstance(value, str),
-            "integer": isinstance(value, int) and not isinstance(value, bool),
-            "number": isinstance(value, (int, float)) and not isinstance(value, bool) and math.isfinite(value),
-            "boolean": isinstance(value, bool), "null": value is None,
-        }
-        if not any(matches.get(item, False) for item in expected):
-            return [f"{label} must have type {' or '.join(expected)}"]
-    if "const" in schema and not _json_equal(value, schema["const"]):
-        errors.append(f"{label} must equal {schema['const']!r}")
-    if "enum" in schema and not any(_json_equal(value, member) for member in schema["enum"]):
-        errors.append(f"{label} must be one of {schema['enum']!r}")
-    if isinstance(value, str):
-        if len(value) < schema.get("minLength", 0):
-            errors.append(f"{label} must contain at least {schema['minLength']} character(s)")
-        pattern = schema.get("pattern")
-        if isinstance(pattern, str) and re.search(pattern, value) is None:
-            errors.append(f"{label} must match pattern {pattern!r}")
-        if schema.get("format") == "date":
-            try:
-                date.fromisoformat(value)
-            except ValueError:
-                errors.append(f"{label} must be an ISO calendar date")
-    if isinstance(value, (int, float)) and not isinstance(value, bool) and "minimum" in schema and value < schema["minimum"]:
-        errors.append(f"{label} must be at least {schema['minimum']}")
-    if isinstance(value, list):
-        if len(value) < schema.get("minItems", 0):
-            errors.append(f"{label} must contain at least {schema['minItems']} item(s)")
-        maximum = schema.get("maxItems")
-        if isinstance(maximum, int) and len(value) > maximum:
-            errors.append(f"{label} must contain at most {maximum} item(s)")
-        if schema.get("uniqueItems") is True:
-            serialized = [_canonical_json(item) for item in value]
-            if len(serialized) != len(set(serialized)):
-                errors.append(f"{label} must not contain duplicate items")
-        items = schema.get("items")
-        if isinstance(items, dict):
-            for index, item in enumerate(value):
-                errors.extend(_task3_schema_errors(item, items, root, _schema_path(location, index)))
-        contains = schema.get("contains")
-        if isinstance(contains, dict) and not any(not _task3_schema_errors(item, contains, root, _schema_path(location, index)) for index, item in enumerate(value)):
-            errors.append(f"{label} must contain an item matching its contains schema")
-    if isinstance(value, dict):
-        properties = schema.get("properties", {})
-        required = schema.get("required", [])
-        if isinstance(required, list):
-            for name in required:
-                if name not in value:
-                    errors.append(f"{_schema_path(location, name)} is required")
-        if isinstance(properties, dict):
-            if schema.get("additionalProperties") is False:
-                for name in sorted(set(value) - set(properties)):
-                    errors.append(f"{label} has unexpected field {name!r}")
-            elif isinstance(schema.get("additionalProperties"), dict):
-                for name in sorted(set(value) - set(properties)):
-                    errors.extend(_task3_schema_errors(value[name], schema["additionalProperties"], root, _schema_path(location, name)))
-            for name, child_schema in properties.items():
-                if name in value and isinstance(child_schema, dict):
-                    errors.extend(_task3_schema_errors(value[name], child_schema, root, _schema_path(location, name)))
-    for child in schema.get("allOf", []):
-        if isinstance(child, dict):
-            errors.extend(_task3_schema_errors(value, child, root, location))
-        else:
-            errors.append(f"{label}.allOf entry must be an object")
-    condition = schema.get("if")
-    if isinstance(condition, dict):
-        branch = "then" if not _task3_schema_errors(value, condition, root, location) else "else"
-        if isinstance(schema.get(branch), dict):
-            errors.extend(_task3_schema_errors(value, schema[branch], root, location))
-    negated = schema.get("not")
-    if isinstance(negated, dict) and not _task3_schema_errors(value, negated, root, location):
-        errors.append(f"{label} must not match its negated schema")
-    return errors
 
 
 def _validate_task3_schema_instance(value: Any, schema_path: Path) -> list[str]:

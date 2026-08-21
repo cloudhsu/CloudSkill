@@ -1,10 +1,10 @@
 from __future__ import annotations
 
 import json
-import re
 from pathlib import Path
 from typing import Any
 
+from json_schema_interpreter import json_equal, schema_errors
 
 ROOT = Path(__file__).resolve().parents[1]
 CASE_SCHEMA_PATH = ROOT / "evals" / "agent" / "task-continuity.schema.json"
@@ -23,73 +23,6 @@ def _read_json(path: Path) -> dict[str, Any]:
     return payload
 
 
-def _reference(schema: dict[str, Any], root: dict[str, Any]) -> dict[str, Any]:
-    reference = schema.get("$ref")
-    if not isinstance(reference, str):
-        return schema
-    if not reference.startswith("#/"):
-        raise ValueError(f"unsupported task-continuity schema reference: {reference!r}")
-    resolved: Any = root
-    for part in reference[2:].split("/"):
-        if not isinstance(resolved, dict) or part not in resolved:
-            raise ValueError(f"unresolved task-continuity schema reference: {reference!r}")
-        resolved = resolved[part]
-    if not isinstance(resolved, dict):
-        raise ValueError(f"task-continuity schema reference is not an object: {reference!r}")
-    return resolved
-
-
-def _matches_type(value: Any, expected: str) -> bool:
-    if expected == "object":
-        return isinstance(value, dict)
-    if expected == "array":
-        return isinstance(value, list)
-    if expected == "string":
-        return isinstance(value, str)
-    if expected == "integer":
-        return isinstance(value, int) and not isinstance(value, bool)
-    if expected == "number":
-        return isinstance(value, (int, float)) and not isinstance(value, bool)
-    if expected == "boolean":
-        return isinstance(value, bool)
-    if expected == "null":
-        return value is None
-    raise ValueError(f"unsupported task-continuity schema type: {expected!r}")
-
-
-def _json_equal(left: Any, right: Any) -> bool:
-    """Compare JSON values without Python's bool-is-int equivalence."""
-    if isinstance(left, bool) or isinstance(right, bool):
-        return isinstance(left, bool) and isinstance(right, bool) and left is right
-    if left is None or right is None:
-        return left is None and right is None
-    if isinstance(left, (int, float)) and isinstance(right, (int, float)):
-        return left == right
-    if isinstance(left, str) or isinstance(right, str):
-        return isinstance(left, str) and isinstance(right, str) and left == right
-    if isinstance(left, list) or isinstance(right, list):
-        return (
-            isinstance(left, list)
-            and isinstance(right, list)
-            and len(left) == len(right)
-            and all(_json_equal(a, b) for a, b in zip(left, right))
-        )
-    if isinstance(left, dict) or isinstance(right, dict):
-        return (
-            isinstance(left, dict)
-            and isinstance(right, dict)
-            and set(left) == set(right)
-            and all(_json_equal(left[key], right[key]) for key in left)
-        )
-    return left == right
-
-
-def _path(parent: str, child: str | int) -> str:
-    if isinstance(child, int):
-        return f"{parent}[{child}]" if parent else f"[{child}]"
-    return f"{parent}.{child}" if parent else child
-
-
 def _value_at(value: dict[str, Any], dotted_path: str) -> Any:
     current: Any = value
     for part in dotted_path.split("."):
@@ -97,65 +30,6 @@ def _value_at(value: dict[str, Any], dotted_path: str) -> Any:
             return None
         current = current.get(part)
     return current
-
-
-def _validate_schema(
-    value: Any, schema: dict[str, Any], root: dict[str, Any], location: str = ""
-) -> list[str]:
-    schema = _reference(schema, root)
-    errors: list[str] = []
-    label = location or "value"
-
-    expected_type = schema.get("type")
-    if expected_type is not None:
-        expected_types = expected_type if isinstance(expected_type, list) else [expected_type]
-        if not any(_matches_type(value, item) for item in expected_types):
-            errors.append(f"{label} must have type {' or '.join(expected_types)}")
-            return errors
-    if "const" in schema and not _json_equal(value, schema["const"]):
-        errors.append(f"{label} must equal {schema['const']!r}")
-    if "enum" in schema and not any(_json_equal(value, member) for member in schema["enum"]):
-        errors.append(f"{label} must be one of {schema['enum']!r}")
-
-    if isinstance(value, str):
-        if len(value) < schema.get("minLength", 0):
-            errors.append(f"{label} must contain at least {schema['minLength']} character(s)")
-        pattern = schema.get("pattern")
-        if isinstance(pattern, str) and re.search(pattern, value) is None:
-            errors.append(f"{label} must match pattern {pattern!r}")
-
-    if isinstance(value, int) and not isinstance(value, bool) and "minimum" in schema:
-        if value < schema["minimum"]:
-            errors.append(f"{label} must be at least {schema['minimum']}")
-
-    if isinstance(value, list):
-        minimum = schema.get("minItems")
-        if isinstance(minimum, int) and len(value) < minimum:
-            errors.append(f"{label} must contain at least {minimum} item(s)")
-        if schema.get("uniqueItems") is True:
-            serialized = [json.dumps(item, sort_keys=True, ensure_ascii=False) for item in value]
-            if len(serialized) != len(set(serialized)):
-                errors.append(f"{label} must not contain duplicate items")
-        item_schema = schema.get("items")
-        if isinstance(item_schema, dict):
-            for index, item in enumerate(value):
-                errors.extend(_validate_schema(item, item_schema, root, _path(location, index)))
-
-    if isinstance(value, dict):
-        properties = schema.get("properties", {})
-        required = schema.get("required", [])
-        if isinstance(required, list):
-            for name in required:
-                if name not in value:
-                    errors.append(f"{_path(location, name)} is required")
-        if schema.get("additionalProperties") is False and isinstance(properties, dict):
-            for name in sorted(set(value) - set(properties)):
-                errors.append(f"{label} has unexpected field {name!r}")
-        if isinstance(properties, dict):
-            for name, child_schema in properties.items():
-                if name in value and isinstance(child_schema, dict):
-                    errors.extend(_validate_schema(value[name], child_schema, root, _path(location, name)))
-    return errors
 
 
 def _validate_invariants(case: dict[str, Any], schema: dict[str, Any]) -> list[str]:
@@ -233,9 +107,9 @@ def _validate_result_invariants(result: dict[str, Any], schema: dict[str, Any]) 
         for row in invariant.get("rows", []):
             if not isinstance(row, dict):
                 continue
-            if not _json_equal(result.get("contract_validation"), row.get("contract_validation")):
+            if not json_equal(result.get("contract_validation"), row.get("contract_validation")):
                 continue
-            if not _json_equal(result.get("behavior_execution"), row.get("behavior_execution")):
+            if not json_equal(result.get("behavior_execution"), row.get("behavior_execution")):
                 continue
             error_rule = row.get("errors")
             result_errors = result.get("errors")
@@ -255,7 +129,7 @@ def load_cases(path: Path) -> list[dict]:
     """Load cases validated by the authoritative published case schema."""
     payload = _read_json(path)
     schema = _read_json(CASE_SCHEMA_PATH)
-    errors = _validate_schema(payload, schema, schema)
+    errors = schema_errors(payload, schema, schema)
     if errors:
         raise ValueError("invalid task-continuity case suite: " + "; ".join(errors))
     cases = payload.get("cases")
@@ -276,7 +150,7 @@ def validate_case(case: dict) -> list[str]:
         schema, case_schema = _case_schema()
     except ValueError as exc:
         return [str(exc)]
-    errors = _validate_schema(case, case_schema, schema)
+    errors = schema_errors(case, case_schema, schema)
     if isinstance(case, dict):
         errors.extend(_validate_invariants(case, case_schema))
     return errors
@@ -288,7 +162,7 @@ def validate_result(result: dict) -> list[str]:
         schema = _read_json(RESULT_SCHEMA_PATH)
     except ValueError as exc:
         return [str(exc)]
-    errors = _validate_schema(result, schema, schema)
+    errors = schema_errors(result, schema, schema)
     if isinstance(result, dict):
         errors.extend(_validate_result_invariants(result, schema))
     return errors

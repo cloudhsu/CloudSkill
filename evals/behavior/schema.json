@@ -3,10 +3,15 @@
   "title": "CloudSkill behavior evaluation case file",
   "type": "object",
   "required": [
+    "suite",
     "skill",
     "cases"
   ],
   "properties": {
+    "suite": {
+      "type": "string",
+      "minLength": 1
+    },
     "skill": {
       "type": "string"
     },

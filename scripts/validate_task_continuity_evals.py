@@ -288,9 +288,9 @@ with tempfile.TemporaryDirectory() as temporary_directory:
         errors.append("boolean true was accepted for integer schema_version const 1")
 
 numeric_enum_schema = {"enum": [1]}
-if not contract._validate_schema(True, numeric_enum_schema, numeric_enum_schema):
+if not contract.schema_errors(True, numeric_enum_schema, numeric_enum_schema):
     errors.append("boolean true was accepted for numeric enum 1")
-if contract._validate_schema(1, numeric_enum_schema, numeric_enum_schema):
+if contract.schema_errors(1, numeric_enum_schema, numeric_enum_schema):
     errors.append("integer 1 was rejected for numeric enum 1")
 
 try:

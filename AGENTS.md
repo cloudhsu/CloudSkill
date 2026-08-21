@@ -65,6 +65,7 @@ Prioritize:
 12. Architecture understandable by a mixed-seniority engineering team.
 13. Physical truth and device safety remain authoritative near the equipment boundary.
 14. Configuration, protocol, and generated UI are versioned contracts rather than implicit conventions.
+15. Before adding a new cross-cutting primitive (a wrapper, adapter, or small shared utility), verify an equivalent does not already exist elsewhere in the codebase and read the current architecture/dependency map and function-level API definitions if the project maintains one; extend or import the existing implementation rather than writing a parallel copy. A codebase that skips this check accumulates near-identical logic under different names until no single fix or bug patch reaches every copy — treat a maintained architecture map as a require-read gate before non-trivial modification, not optional background reading.
 
 ## Cross-domain checks
 
@@ -84,6 +85,7 @@ Use installed skill descriptions for normal routing. Preserve these distinctions
 
 - General Qt/native application architecture versus graphics/game-engine runtime architecture.
 - Reviewing a target architecture versus moving a live legacy system toward it safely.
+- Surveying an unfamiliar or suspect codebase area to find what needs deciding (no slice known yet) versus safely executing an already-agreed extraction (the slice is known) versus comparing named options for one already-scoped decision.
 - Governing coding agents in a repository versus building an AI-agent product.
 - Selecting and composing skills versus developing and releasing the skills themselves.
 - Semiconductor equipment terminology/process knowledge versus equipment sequence/topology/resource/recovery architecture versus equipment state/command/capability modeling.
@@ -127,14 +129,6 @@ When the user says `整理成正向案例` or `整理成負向案例`, use `deve
 - Convert candidates into formal routing or behavior Evals only from the CloudSkill repository after explicit batch-review instruction, deduplication, ownership analysis, sensitive-content scanning, and human review of the diff.
 
 ## Project-history-derived Eval capture
-
-When the user says `同步優化來源`, use `developing-skills` and the versioned
-Git evolution-source workflow. Background synchronization may persist only
-sanitized private candidates, provenance, and checkpoints. It must make zero
-model calls when unchanged and may not modify Skills, commit, push, create a
-PR, or release. Actual source/destination URLs and credentials are private
-secret references and must not appear in repository files, logs, bundles, or
-prompts.
 
 When the user says `從專案提煉優化案例`, use `developing-skills` (see `references/conversation-derived-optimization.md`, "Project-history mining") to mine the current project's commit history, architecture/design documents, and code for reusable engineering pressure — not a live interaction.
 

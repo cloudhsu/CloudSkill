@@ -1,0 +1,55 @@
+{
+  "suite": "project-management-sync-canary",
+  "schema_version": 1,
+  "description": "Version-aware, idempotent and cross-platform external project-management synchronization cases.",
+  "cases": [
+    {
+      "id": "PMS-R01-idempotent-reconciliation",
+      "prompt": "已有一個外部專案系統，其中的待辦是另一個代理先前建立的。請把內部 backlog 同步過去，但必須避免重複建立，並在更新後確認遠端狀態。請選擇最小充分的 CloudBox 技能。",
+      "expected": {
+        "primary_skill": "project-management-sync",
+        "required_supporting_skills": [],
+        "forbidden_selected_skills": ["gameplay-core-modernization", "document-governance"],
+        "execution_order": ["project-management-sync"],
+        "allow_additional_supporting_skills": false
+      },
+      "behavior_prompt": "設計一次安全同步：先列出完整遠端範圍，使用穩定來源鍵或遠端 ID 去重，只更新必要差異，寫入後重新讀取驗證；列出 no-op/create/update/ambiguous/blocked 計畫與證據，不要輸出任何真實憑證。"
+    },
+    {
+      "id": "PMS-R02-version-and-secret-boundary",
+      "prompt": "同步工具要同時支援 macOS、Windows、Ubuntu，並可能面對 OpenProject、Redmine、Vikunja 的 API 版本差異。請定義如何儲存 Token、偵測能力、處理未知版本，以及何時禁止寫入。請選擇最小充分的 CloudBox 技能。",
+      "expected": {
+        "primary_skill": "project-management-sync",
+        "required_supporting_skills": [],
+        "forbidden_selected_skills": ["cross-platform-engine-architecture", "native-ios-game-rewrite"],
+        "execution_order": ["project-management-sync"],
+        "allow_additional_supporting_skills": false
+      },
+      "behavior_prompt": "定義跨平台 SecretStore、provider/version adapter、capability discovery、read-only fallback、redaction、rotation 與 contract-test 規則。不得把 macOS Keychain、單一 API method 或明文設定檔當成跨平台共通契約。"
+    },
+    {
+      "id": "PMS-R03-generic-api-counterexample",
+      "prompt": "設計一般 Web API 的錯誤碼、RBAC 與資料庫交易，不涉及同步任何外部專案管理系統。請選擇最小充分的 CloudBox 技能。",
+      "expected": {
+        "primary_skill": "application-client-server-architecture",
+        "required_supporting_skills": [],
+        "forbidden_selected_skills": ["project-management-sync"],
+        "execution_order": ["application-client-server-architecture"],
+        "allow_additional_supporting_skills": false
+      },
+      "behavior_prompt": "不要執行 project-management-sync；只說明一般 client/server API、權限、交易與錯誤契約。"
+    },
+    {
+      "id": "PMS-R04-unknown-version-read-only",
+      "prompt": "外部專案管理系統回報的 API 版本超出目前 adapter 的支援範圍，且 capability discovery endpoint 不可用。使用者要求立即同步十個待辦。請選擇最小充分的 CloudBox 技能。",
+      "expected": {
+        "primary_skill": "project-management-sync",
+        "required_supporting_skills": [],
+        "forbidden_selected_skills": ["application-client-server-architecture", "gameplay-core-modernization"],
+        "execution_order": ["project-management-sync"],
+        "allow_additional_supporting_skills": false
+      },
+      "behavior_prompt": "處理這個請求，但不能假設相容性：只允許 audit/read-only 或 manual-review，說明缺少哪些證據；在 adapter、capability 與 contract tests 通過前禁止 create/update/delete，也不要用 2xx 或 URL 形狀推論版本安全。"
+    }
+  ]
+}

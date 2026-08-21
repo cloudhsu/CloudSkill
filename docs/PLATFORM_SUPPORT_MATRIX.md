@@ -13,8 +13,8 @@ Full local filesystem/subprocess access. Every Skill (including
 
 | Platform | Codex CLI | Claude Code CLI | Gemini CLI |
 |---|---|---|---|
-| Windows | Verified — `scripts/install.ps1`, INSTALL.md section 4 | Verified — `scripts/install.ps1`, INSTALL.md section 4 | Not yet attempted |
-| macOS / Linux / WSL | Verified — `scripts/install.sh`, INSTALL.md section 5 | Verified — `scripts/install.sh`, INSTALL.md section 5 | Not yet attempted |
+| Windows | Verified — `scripts/install.ps1`, INSTALL.md section 4 | Verified — `scripts/install.ps1`, INSTALL.md section 4 | Package checks pass; live CLI NOT RUN |
+| macOS / Linux / WSL | Verified — `scripts/install.sh`, INSTALL.md section 5 | Verified — `scripts/install.sh`, INSTALL.md section 5 | Package and isolated-copy checks pass; live CLI NOT RUN |
 
 Install method: plugin marketplace (`codex plugin marketplace add` /
 `claude plugin marketplace add`, INSTALL.md section 2) or standalone
@@ -22,14 +22,11 @@ Install method: plugin marketplace (`codex plugin marketplace add` /
 same canonical `.agents/skills/` source; nothing platform-specific lives in
 individual Skills.
 
-**Gemini CLI**: its own documentation states `.agents/skills/` is a
-supported interoperable alias path
-(<https://github.com/google-gemini/gemini-cli/blob/main/docs/cli/skills.md>),
-referencing the same Agent Skills open standard CloudSkill's `SKILL.md`
-frontmatter already follows. This is a documented claim, not something
-CloudSkill has installed and confirmed against a real Gemini CLI session —
-treat it as "likely compatible, unverified" until someone actually runs it
-and this row is updated with real evidence.
+**Gemini CLI**: `gemini-plugin/` and `private-gemini-plugin/` contain official
+`gemini-extension.json` manifests and generated regular-file Skill projections.
+Repository checks verify distribution-tier membership, byte parity, absence of
+symlinks, and isolated copying. Live `gemini extensions install` and
+`/skills list` remain `NOT RUN` because this workstation has no Gemini CLI.
 
 ## Sandboxed surfaces (claude.ai web, Claude Desktop, Claude API Skills)
 
@@ -53,7 +50,7 @@ python3 scripts/package_surface_skills.py
 
 | Tier | Meaning | Skills |
 |---|---|---|
-| `portable` | No CloudSkill-repository dependency; safe as-is | agent-development-process, application-client-server-architecture, architecture-review, code-review, coding-agent-project-governance, cross-platform-engine-architecture, cross-platform-native-architecture, development-process-tailoring, document-governance, equipment-control-architecture, equipment-domain-modeling, framework-design, runtime-evaluation-engineering, safe-incremental-refactoring, semiconductor-equipment-domain-knowledge, software-quality-iso25010, teach-while-building, using-cloudbox-skills |
+| `portable` | No CloudSkill-repository dependency; safe as-is | about-me, agent-development-process, application-client-server-architecture, architecture-review, cluster-tool-simulator-development, codebase-architecture-discovery, code-review, coding-agent-project-governance, cloudbox-game-migration, cross-platform-engine-architecture, cross-platform-native-architecture, development-process-tailoring, document-governance, equipment-control-architecture, equipment-domain-modeling, framework-design, game-art-pipeline, game-asset-resolution-audit, game-audio-design, game-design-systems, game-marketing-and-monetization, game-narrative-design, game-quality-and-release-gates, gameplay-core-modernization, indie-game-product-evolution, legacy-game-product-archaeology, native-ios-game-rewrite, project-management-sync, runtime-evaluation-engineering, safe-incremental-refactoring, semiconductor-equipment-domain-knowledge, software-quality-iso25010, teach-while-building, tray-descum-simulator-development, using-cloudbox-skills, wafer-bonder-debonder-development, wph-equipment-simulator-development |
 | `hybrid` | Core judgment portable; some documented workflow steps invoke repository scripts and will not function in a sandbox | developing-skills |
 | `cli-only` | Excluded from sandboxed packaging | local-runtime-eval-debugging, developing-eval |
 
@@ -75,7 +72,8 @@ produced zip as ready to try, not as confirmed working.
 
 ## Known unknowns
 
-- Gemini CLI compatibility is a documentation claim, not a local test.
+- Gemini CLI package compatibility has static and isolated-copy evidence, but
+  live CLI installation and Skill discovery are still untested.
 - `hybrid`-tier Skills are packaged as-is; a user who uploads
   `developing-skills` to claude.ai will see release/CI steps (e.g. `gh`
   commands, `scripts/manage_skill.py`) in the Skill body even though those

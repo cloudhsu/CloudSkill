@@ -1,0 +1,4 @@
+interface:
+  display_name: "Codebase Architecture Discovery"
+  short_description: "Map a codebase's real architecture and find duplicated logic before refactoring it"
+  default_prompt: "Use $codebase-architecture-discovery to complete this task."

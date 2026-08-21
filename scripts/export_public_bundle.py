@@ -5,13 +5,14 @@ skills are 'core' (public) vs 'evolution-pack' (private-only), then copies
 every git-tracked file EXCEPT:
 
 - .agents/skills/<name>/ for any evolution-pack skill
-- private-plugin/ (the private-only plugin manifest, whole directory)
+- private-plugin/ and private-gemini-plugin/ (private-only distributions)
 - any evals/behavior/cases/*.json whose top-level "skill" field names an
   evolution-pack skill
 - evals/skill-routing-cases.csv, with rows whose expected_skill is an
   evolution-pack skill dropped (the file itself is shared, not exclusive)
-- .claude-plugin/marketplace.json, with any plugin entry whose name contains
-  "private" dropped (the file itself is shared, not exclusive)
+- .agents/plugins/marketplace.json and .claude-plugin/marketplace.json, with
+  any plugin entry whose name contains "private" dropped (the files themselves
+  are shared, not exclusive)
 - .claude-plugin/plugin.json and .codex-plugin/plugin.json, with
   homepage/repository/websiteURL rewritten from the private repo URL to the
   public PUBLIC_REPO_URL (this repo's own plugin.json is correctly
@@ -57,16 +58,10 @@ PUBLIC_REPO_URL = "https://github.com/cloudhsu/CloudSkill"
 # script/config/workflow is added outside .agents/skills/.
 PRIVATE_INFRASTRUCTURE_PATHS = {
     "scripts/capture_eval_candidate.py",
-    "scripts/cloudbox_skills_evolution.py",
-    "scripts/evolution_source_contract.py",
     "scripts/sync_eval_exchange.py",
-    "scripts/sync_evolution_sources.py",
-    "scripts/validate_evolution_source_sync.py",
     "scripts/validate_interaction_capture.py",
     "scripts/import_eval_candidates.py",
-    "config/evolution-source.schema.json",
     "config/cloudbox-skills-config.template.json",
-    ".github/workflows/evolution-source-sync.yml",
     # Runtime-eval/multimodel-panel harness: "the runtime-eval harness used
     # to maintain CloudBox's own routing accuracy" per skill-distribution.json's
     # own evolution-pack definition. Added 2026-08-15 alongside moving the
@@ -95,9 +90,25 @@ PRIVATE_INFRASTRUCTURE_PATHS = {
     "scripts/validate_behavior_contract.py",
     "scripts/behavior_output_contract.py",
     "scripts/runtime_eval_common.py",
+    # Advisory helper for reviewing private Eval Inbox candidates
+    # (developing-eval, private-meta) -- meaningless to a public consumer,
+    # who has no .local/eval-inbox/ to run it against. Added 2026-08-21,
+    # caught before this script's first post-creation export run.
+    "scripts/rule_strength.py",
+    # Syncs private-plugin/codex-skills/ from the canonical evolution-pack
+    # Skills -- both source and destination are private-only, so this script
+    # is a no-op in a public checkout (private-plugin/ is already excluded
+    # above). Caught 2026-08-21 during the first real export run.
+    "scripts/sync_private_codex_plugin.py",
     "evals/runtime/contracts/behavior-output-contract.json",
     "evals/runtime/schemas/routing-decision.schema.json",
     "evals/runtime/cases/canary.json",
+    # Product-specific game benchmark and taxonomy are private alongside the
+    # game Skills; do not mirror them into the public Core export.
+    "evals/runtime/cases/game-skills-benchmark.json",
+    "evals/runtime/cases/game-skills-behavior-rubrics.json",
+    "config/skill-domain-catalog.json",
+    "docs/GAME_SKILL_CATALOG.md",
 }
 
 
@@ -149,7 +160,11 @@ def main() -> int:
 
     distribution = load_json(ROOT / "config" / "skill-distribution.json")
     tiers = distribution.get("skills", {})
-    evolution_names = sorted(name for name, tier in tiers.items() if tier == "evolution-pack")
+    # Any tier other than "core" is private -- this covers evolution-pack's
+    # sub-tiers (private-meta, private-game, private-operation, private-art,
+    # and any future private sub-tier) without needing a script edit each
+    # time a new private sub-tier is introduced.
+    evolution_names = sorted(name for name, tier in tiers.items() if tier != "core")
     evolution_prefixes = tuple(f".agents/skills/{name}/" for name in evolution_names)
 
     excluded_paths: list[str] = []
@@ -160,6 +175,9 @@ def main() -> int:
             excluded_paths.append(relative)
             continue
         if relative == "private-plugin" or relative.startswith("private-plugin/"):
+            excluded_paths.append(relative)
+            continue
+        if relative == "private-gemini-plugin" or relative.startswith("private-gemini-plugin/"):
             excluded_paths.append(relative)
             continue
         if relative in PRIVATE_INFRASTRUCTURE_PATHS:
@@ -192,7 +210,7 @@ def main() -> int:
             copied_paths.append(f"{relative} (filtered)")
             continue
 
-        if relative == ".claude-plugin/marketplace.json":
+        if relative in (".agents/plugins/marketplace.json", ".claude-plugin/marketplace.json"):
             doc = json.loads(content)
             doc["plugins"] = [p for p in doc.get("plugins", []) if "private" not in p.get("name", "")]
             dest_path.write_text(json.dumps(doc, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")

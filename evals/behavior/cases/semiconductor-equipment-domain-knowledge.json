@@ -1,4 +1,5 @@
 {
+  "suite": "semiconductor-equipment-domain-knowledge-behavior",
   "skill": "semiconductor-equipment-domain-knowledge",
   "cases": [
     {

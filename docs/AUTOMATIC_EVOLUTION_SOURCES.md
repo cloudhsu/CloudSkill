@@ -1,4 +1,10 @@
-# CloudBox evolution sources
+# Archived: CloudBox evolution sources
+
+> Archived on 2026-08-20. The Git source synchronization workflow, CLI,
+> schema, and validator described below were removed because no remote source
+> was configured and every scheduled run failed its secret preflight. This
+> file is retained only as historical design context; these commands are no
+> longer supported.
 
 CloudBox 6.1 supports manual versioned candidate transfer and token-free Git
 source discovery. The public repository contains control logic and schemas;

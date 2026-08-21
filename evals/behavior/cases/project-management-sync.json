@@ -1,0 +1,82 @@
+{
+  "suite": "project-management-sync-behavior",
+  "skill": "project-management-sync",
+  "cases": [
+    {
+      "id": "PMS-BEH-001",
+      "skill": "project-management-sync",
+      "type": "recognition",
+      "prompt": "A canonical backlog must synchronize tasks to a project-management server that may already contain tasks created by another agent. The server API can change between versions and the agent may run on macOS, Windows, or Ubuntu.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "recognizes idempotent reconciliation, provider adapters, version/capability discovery, and OS-specific SecretStore boundaries"
+      ],
+      "forbidden_behaviors": [
+        "treats title-only creation, hard-coded API methods, plaintext credentials, and unknown-version writes as unsafe"
+      ],
+      "required_artifacts": [],
+      "baseline_expected_failure": [
+        "agent gives a provider-specific CRUD recipe without authority, version, secret, or duplicate-write boundaries"
+      ],
+      "review_notes": "Recognition case; review ownership and platform-boundary reasoning, not keywords alone."
+    },
+    {
+      "id": "PMS-BEH-002",
+      "skill": "project-management-sync",
+      "type": "application",
+      "prompt": "Reconcile a source backlog with an existing remote project. The remote inventory contains 17 tasks, all source items have matches, and one existing task is newly complete. The provider returns a completion timestamp but no duration field. Define the plan and verification.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "lists the complete target scope, creates zero duplicates, updates only the existing task, uses the native completion timestamp, derives duration explicitly, and re-reads after mutation"
+      ],
+      "forbidden_behaviors": [
+        "creates a new task by title, marks an unrelated project, treats local POST success as final proof, invents an unsupported duration field, or echoes a real identity"
+      ],
+      "required_artifacts": [],
+      "baseline_expected_failure": [
+        "agent performs a blind create or reports completion without post-write readback and count verification"
+      ],
+      "review_notes": "Application case; require explicit counts, authority, timestamp source, and readback evidence."
+    },
+    {
+      "id": "PMS-BEH-003",
+      "skill": "project-management-sync",
+      "type": "counterexample",
+      "prompt": "Review a standalone function that converts a local date string to UTC; it does not call a project-management API, persist mappings, or handle credentials.",
+      "expected_routing": false,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "routes to a date/time or general code-review owner rather than forcing project-management synchronization"
+      ],
+      "forbidden_behaviors": [
+        "treats every date conversion as an external synchronization problem"
+      ],
+      "required_artifacts": [],
+      "baseline_expected_failure": [
+        "agent selects this skill solely because the prompt contains a date"
+      ],
+      "review_notes": "Counterexample; prevents broad routing from generic date or API vocabulary."
+    },
+    {
+      "id": "PMS-BEH-004",
+      "skill": "project-management-sync",
+      "type": "application",
+      "prompt": "A project-management server reports an API version that is outside the adapter's declared range, and its capability endpoint is unavailable. The user asks to synchronize ten tasks immediately.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "switches to audit/read-only or manual review, explains the missing compatibility evidence, and refuses create/update/delete until discovery and adapter contract tests pass"
+      ],
+      "forbidden_behaviors": [
+        "infers compatibility from a 2xx response or URL shape, writes with an unreviewed adapter, or retries an unknown mutation as a create"
+      ],
+      "required_artifacts": [],
+      "baseline_expected_failure": [
+        "agent treats an authenticated or successful HTTP response as permission to write against an unknown API version"
+      ],
+      "review_notes": "Safety gate case; require explicit read-only/manual-review behavior and non-mutating discovery."
+    }
+  ]
+}

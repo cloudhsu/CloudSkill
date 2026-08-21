@@ -1,1 +1,0 @@
-# No files need to be deleted for the 5.5.4 to 5.6.0 upgrade.

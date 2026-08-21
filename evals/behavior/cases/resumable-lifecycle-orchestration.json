@@ -1,4 +1,5 @@
 {
+  "suite":"resumable-lifecycle-orchestration-behavior",
   "skill":"development-process-tailoring",
   "cases":[
     {"id":"PROC-BEH-005","skill":"development-process-tailoring","type":"application","prompt":"Plan a feature whose first iteration is expected to expose missing constraints. The process must remain suitable for an AI agent and adapt if authority risk changes.","expected_routing":true,"expected_alternative_skill":null,"required_behaviors":["selects iterative incremental as the default rather than a fixed waterfall","creates a versioned task dependency plan","replans risk review and affected tasks from new evidence","preserves unaffected completed evidence"],"forbidden_behaviors":["requires exactly two iterations","keeps the old review level after authority risk increases"],"required_artifacts":["lifecycle plan","replan record"],"baseline_expected_failure":["process selection is described but no executable adaptive plan is owned"],"review_notes":"Planning and replanning are process-owner responsibilities."},

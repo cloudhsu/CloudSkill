@@ -6,6 +6,9 @@ import re
 import sys
 import subprocess
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from export_public_bundle import PRIVATE_INFRASTRUCTURE_PATHS  # noqa: E402
+
 ROOT = Path(__file__).resolve().parents[1]
 SKILLS = ROOT / '.agents' / 'skills'
 errors = []
@@ -83,6 +86,7 @@ required = [
     'scripts/smoke_install.py', 'scripts/run_all_checks.py', 'scripts/validate_plugins.py',
     'cloudbox-skills-eval', 'cloudbox-skills-eval-codex', 'cloudbox-skills-eval-claude', 'scripts/codex_eval_adapter.py', 'scripts/claude_eval_adapter.py', 'scripts/providers_contract.py', 'evals/runtime/contracts/providers.json', 'scripts/run_local_eval_review.py', 'scripts/validate_local_eval_debugging.py', 'scripts/validate_codex_eval_path.py', 'scripts/validate_providers_contract.py',
     '.codex-plugin/plugin.json', '.claude-plugin/plugin.json',
+    'private-plugin/.codex-plugin/plugin.json', 'private-plugin/.claude-plugin/plugin.json',
     '.agents/plugins/marketplace.json', '.claude-plugin/marketplace.json',
     'assets/cloudbox.ico', 'assets/cloudbox-icon.png', 'assets/cloudbox-logo.png',
     'docs/CLOUDBOX_PLUGIN.md',
@@ -91,6 +95,7 @@ required = [
     '.agents/skills/developing-eval/assets/export_eval_candidate.py',
     'scripts/package_surface_skills.py', 'scripts/validate_skill_portability.py',
     'config/skill-portability.json', 'docs/PLATFORM_SUPPORT_MATRIX.md',
+    'config/skill-domain-catalog.json', 'docs/GAME_SKILL_CATALOG.md',
     'config/cloudbox-skills-config.template.json', '.gitignore',
     'evals/README.md', 'evals/skill-routing-cases.csv', 'evals/behavior/README.md',
     'evals/behavior/schema.json', 'evals/behavior/RESULT.template.json',
@@ -130,36 +135,24 @@ _distribution_path = ROOT / 'config' / 'skill-distribution.json'
 _evolution_names = []
 if _distribution_path.exists():
     _tiers = json.loads(_distribution_path.read_text(encoding='utf-8')).get('skills', {})
-    _evolution_names = [name for name, tier in _tiers.items() if tier == 'evolution-pack']
+    # Any tier other than "core" is private (evolution-pack's sub-tiers:
+    # private-meta, private-game, private-operation, private-art, and any
+    # future private sub-tier).
+    _evolution_names = [name for name, tier in _tiers.items() if tier != 'core']
 _evolution_prefixes = tuple(f'.agents/skills/{name}/' for name in _evolution_names)
 _is_private_checkout = any((ROOT / f'.agents/skills/{name}').is_dir() for name in _evolution_names)
 # Non-skill-folder infrastructure that scripts/export_public_bundle.py also
-# excludes from a public checkout -- keep this set in sync with that script's
-# PRIVATE_INFRASTRUCTURE_PATHS.
-_private_infra = {
-    'scripts/capture_eval_candidate.py', 'scripts/cloudbox_skills_evolution.py',
-    'scripts/evolution_source_contract.py', 'scripts/sync_eval_exchange.py',
-    'scripts/sync_evolution_sources.py', 'scripts/validate_evolution_source_sync.py',
-    'scripts/validate_interaction_capture.py', 'scripts/import_eval_candidates.py',
-    'config/evolution-source.schema.json', 'config/cloudbox-skills-config.template.json',
-    '.github/workflows/evolution-source-sync.yml',
-    'scripts/run_runtime_evals.py', 'scripts/grade_runtime_evals.py',
-    'scripts/validate_runtime_evals.py', 'scripts/validate_multimodel_panel.py',
-    'scripts/multimodel_panel_contract.py', 'scripts/run_multimodel_panel.py',
-    'scripts/claude_eval_adapter.py', 'scripts/codex_eval_adapter.py',
-    'scripts/providers_contract.py', 'scripts/validate_providers_contract.py',
-    'scripts/run_local_eval_review.py', 'scripts/validate_local_eval_debugging.py',
-    'scripts/validate_codex_eval_path.py',
-    'cloudbox-skills-eval', 'cloudbox-skills-eval-codex', 'cloudbox-skills-eval-claude',
-    'scripts/validate_behavior_contract.py', 'scripts/behavior_output_contract.py',
-    'scripts/runtime_eval_common.py',
-    'evals/runtime/contracts/behavior-output-contract.json',
-    'evals/runtime/schemas/routing-decision.schema.json',
-    'evals/runtime/cases/canary.json',
-}
+# excludes from a public checkout. Imported directly from that script's own
+# PRIVATE_INFRASTRUCTURE_PATHS (see top of file) rather than a second
+# hand-maintained copy -- a hand-synced duplicate of this exact set drifted
+# out of sync at least twice (missing config/skill-domain-catalog.json and
+# docs/GAME_SKILL_CATALOG.md, and scripts/sync_private_codex_plugin.py) before
+# this repository's own public export was ever run against it, found
+# 2026-08-21 while actually running the export for the first time.
+_private_infra = set(PRIVATE_INFRASTRUCTURE_PATHS)
 
 for rel in required:
-    is_private_only = rel.startswith(_evolution_prefixes) or rel in _private_infra
+    is_private_only = rel.startswith(_evolution_prefixes) or rel in _private_infra or rel.startswith('private-plugin/')
     if is_private_only and not _is_private_checkout:
         continue
     if not (ROOT / rel).exists():

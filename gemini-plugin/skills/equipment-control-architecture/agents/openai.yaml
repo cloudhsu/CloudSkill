@@ -1,0 +1,4 @@
+interface:
+  display_name: "設備控制架構"
+  short_description: "Sequence、設備服務、共享資源、分散式IPC與復原架構"
+  default_prompt: "Use $equipment-control-architecture to design or review this equipment-control topology, authority, event, resource, configuration, and recovery model."

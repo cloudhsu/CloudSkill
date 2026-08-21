@@ -40,7 +40,8 @@ _distribution_path = ROOT / "config" / "skill-distribution.json"
 _evolution_names = set()
 if _distribution_path.exists():
     _tiers = json.loads(_distribution_path.read_text(encoding="utf-8")).get("skills", {})
-    _evolution_names = {name for name, tier in _tiers.items() if tier == "evolution-pack"}
+    # Any tier other than "core" is private (evolution-pack's sub-tiers).
+    _evolution_names = {name for name, tier in _tiers.items() if tier != "core"}
 
 if actual_skill_names != classified_names:
     missing = sorted(set(actual_skill_names) - set(classified_names))

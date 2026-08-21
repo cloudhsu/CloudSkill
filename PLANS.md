@@ -26,3 +26,7 @@ Rules:
 - Define rollback before high-impact changes.
 
 Use `.agents/skills/agent-development-process/assets/EXEC_PLAN.template.md` as the detailed template.
+
+Store an ExecPlan as `docs/plans/<YYYY-MM-DD>-<short-slug>.md`. Reference it from
+`CLOUDBOX_SKILLS_AGENT_HANDOFF.md`'s current increment while it is in progress, so the
+plan — not chat history — is what a fresh session or a crash recovery resumes from.

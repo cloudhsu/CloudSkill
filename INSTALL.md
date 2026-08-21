@@ -27,9 +27,20 @@ git clone https://github.com/cloudhsu/CloudSkill.git ~/Git/CloudSkill
 
 ```powershell
 codex plugin marketplace add D:\Git\CloudSkill
+codex plugin add cloudbox-skills@cloudbox-marketplace
+codex plugin add cloudbox-skills-private@cloudbox-marketplace
+codex plugin list
 ```
 
-重新整理 Plugins Directory，在 **CloudBox** marketplace 安裝 **CloudBox**。OpenAI manifest 會使用 CloudBox 圖示、Logo 與品牌色。
+重新整理 Plugins Directory，在 **CloudBox** marketplace 安裝 **CloudBox** 與 **CloudBox Skills (Private Add-on)**。私有 add-on 只會出現在包含私有 tier(`private-meta`/`private-game`/`private-operation`/`private-art`)內容的私有 repository;公開匯出會自動移除該 marketplace entry。OpenAI manifest 會使用 CloudBox 圖示、Logo 與品牌色。
+
+若更新私有 Skill，先在私有 checkout 執行：
+
+```bash
+python3 scripts/sync_private_codex_plugin.py
+```
+
+Codex 使用 `private-plugin/codex-skills/` 的 regular-file projection；Claude Code 則使用 `private-plugin/skills/` 的 symlink projection。
 
 ### Claude Code
 
@@ -204,7 +215,7 @@ Agent 應使用 `developing-skills`：
 當 Agent 只有已安裝的技能、卻沒有本機 CloudSkill Repository 可寫入時，使用這組技能自帶的匯出工具：
 
 ```bash
-python3 .claude/skills/developing-skills/assets/export_eval_candidate.py \
+python3 .claude/skills/developing-eval/assets/export_eval_candidate.py \
   --kind positive --input draft.json
 ```
 
@@ -317,11 +328,19 @@ python3 scripts/package_surface_skills.py
 
 ## 10c. Gemini CLI
 
-Gemini CLI 官方文件宣稱原生支援 `.agents/skills/` 這個路徑別名，理論上不用額外打包就能讀到 CloudSkill 的技能——但這只是查證官方文件得到的結論，**還沒有人實際裝一次 Gemini CLI 驗證過**。狀態記錄在 [docs/PLATFORM_SUPPORT_MATRIX.md](docs/PLATFORM_SUPPORT_MATRIX.md)。
+CloudBox 提供 public 與 private Gemini extension；兩者的 `skills/` 都由
+canonical `.agents/skills/` 依 distribution tier 產生，不直接修改：
 
-## 11. 驗證
+```bash
+python3 scripts/sync_gemini_plugins.py --check
+gemini extensions install /path/to/cloudbox-skills/gemini-plugin
+gemini extensions install /path/to/cloudbox-skills/private-gemini-plugin
+```
 
-## 10d. 版本化匯出與 Git 優化來源
+目前已驗證 manifest、tier、檔案內容與隔離複製；此工作站尚未安裝
+Gemini CLI，所以真實 install 與 `/skills list` 仍為 `NOT RUN`。
+
+## 10d. 版本化 Eval 匯出與匯入
 
 CloudBox 的手動匯出包含版本 manifest，檔名固定為
 `<project>-<host>-<agent>-<YYYYMMDDTHHMMSSZ>-<bundle-id8>.zip`。第一次匯出設定
@@ -331,14 +350,27 @@ CloudBox 的手動匯出包含版本 manifest，檔名固定為
 bundle 會移到 `imports/unsupported/`；損壞或不安全的檔案保留原處供人工檢查，
 不自動刪除。匯入不會修改正式 Eval、Skill 或 Git。
 
-`同步優化來源` 使用可攜 CLI 比對 Git commit/content；沒有變更時不呼叫模型。
-實際 URL 與帳密只能由 secret reference 注入。完整操作見
-[docs/AUTOMATIC_EVOLUTION_SOURCES.md](docs/AUTOMATIC_EVOLUTION_SOURCES.md)。
-
 ## 11. 驗證
 
 ```bash
 python scripts/run_all_checks.py
+```
+
+這個 repo 自己的 script 完全不依賴 PyYAML，`run_all_checks.py` 不會因為缺
+`yaml` 模組而失敗。但如果你要用 Anthropic 官方的 `skill-creator` 技能對這個
+repo 的 Skill 做 eval-loop 優化，它的 quick validator 需要 PyYAML，多次發版
+記錄都遇過同一個坑：
+
+```bash
+python3 -c "import yaml"   # 先確認目前用的 python3 有沒有裝
+```
+
+如果沒裝,**不要直接 `pip3 install pyyaml`**——這台機器上 `pip3` 可能指向
+另一個跟 script 實際執行用的 `python3` 不同的 Python(多版本 Python 常見的
+坑,`which -a python3 pip3` 可以看出來)。用同一個直譯器安裝才保證裝對地方:
+
+```bash
+python3 -m pip install pyyaml   # 用 script 實際會呼叫的那個 python3
 ```
 
 Codex：

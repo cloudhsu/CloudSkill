@@ -1,4 +1,5 @@
 {
+  "suite": "equipment-domain-modeling-behavior",
   "skill": "equipment-domain-modeling",
   "cases": [
     {

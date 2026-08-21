@@ -1,4 +1,5 @@
 {
+  "suite": "document-governance-behavior",
   "skill": "document-governance",
   "cases": [
     {

@@ -12,6 +12,36 @@
     "application",
     "counterexample"
   ],
+  "semantic_model_review": {
+    "transport": "managed_model_selected_subagents",
+    "codex_models": [
+      "gpt-5.6-luna",
+      "gpt-5.6-sol"
+    ],
+    "claude_preferred_models": [
+      "sonnet-5",
+      "opus-5"
+    ],
+    "claude_allowed_fallback_generation": "4.8",
+    "execution": "parallel_independent_same_packet",
+    "minimum_completed_reviews_per_available_family": 2,
+    "mutation_authority": "read_only",
+    "cli_substitution_allowed_when_subagents_available": false,
+    "require_exact_selected_or_returned_model_identity": true,
+    "blocking_verdicts": [
+      "FAIL",
+      "BLOCKED",
+      "MANUAL_REQUIRED"
+    ]
+  },
+  "brownfield_implementation_guard": {
+    "default_change_mode": "extend_existing_refactored_implementation",
+    "require_current_architecture_and_behavior_baseline": true,
+    "require_smallest_coherent_slice": true,
+    "preserve_public_and_operational_contracts": true,
+    "whole_rewrite_requires_explicit_user_authorization": true,
+    "skill_distillation_does_not_authorize_product_rewrite": true
+  },
   "promotion_gates": {
     "draft_to_experimental": [
       "frontmatter and ownership contract complete",
@@ -22,6 +52,7 @@
     "experimental_to_active": [
       "same RED cases pass after the change",
       "adjacent-skill regressions pass",
+      "each available model family completes its policy-declared managed sub-agent review without a blocking verdict",
       "local or CI execution evidence is attached",
       "remaining limitations are explicit"
     ],

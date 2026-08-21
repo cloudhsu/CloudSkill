@@ -5,6 +5,7 @@ import sys
 
 ROOT = Path(__file__).resolve().parents[1]
 EXCLUDED_PARTS = {'.git', 'history', 'assets'}
+GENERATED_PREFIXES = ('gemini-plugin/skills/', 'private-gemini-plugin/skills/', 'private-plugin/codex-skills/')
 MIN_CHARS = 120
 
 
@@ -17,6 +18,9 @@ def normalize(text: str) -> str:
 paragraphs = {}
 for path in ROOT.rglob('*.md'):
     if any(part in EXCLUDED_PARTS for part in path.parts):
+        continue
+    relative = str(path.relative_to(ROOT)).replace('\\', '/')
+    if relative.startswith(GENERATED_PREFIXES):
         continue
     text = path.read_text(encoding='utf-8', errors='ignore')
     for index, paragraph in enumerate(re.split(r'\n\s*\n', text), start=1):

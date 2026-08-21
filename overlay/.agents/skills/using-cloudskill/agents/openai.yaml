@@ -1,5 +1,0 @@
-interface:
-  display_name: "CloudBox 路由"
-  short_description: "依中文工程情境與歷史修正選擇、排序最小充分技能"
-  brand_color: "#00A2EA"
-  default_prompt: "Use $using-cloudskill to select and order the smallest sufficient CloudBox skill set, including conversation-derived routing cues when relevant."
