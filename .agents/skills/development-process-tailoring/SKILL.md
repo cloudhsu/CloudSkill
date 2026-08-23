@@ -184,7 +184,7 @@ For each material change record:
 - Decision and alternatives.
 - Affected architecture, product variants, and compatibility.
 - Verification and release target.
-- Status: proposed, accepted, implemented, verified, released, deferred, or rejected.
+- Status: see `$document-governance`'s separated status model; never one flat field.
 - Superseded document/baseline.
 
 A file with a higher version name is not evidence of a new approved baseline. Check title, revision history, content, approval, and release linkage.

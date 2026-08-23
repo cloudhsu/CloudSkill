@@ -140,6 +140,16 @@ Do not use subagents when tasks cannot be isolated or when they will edit the sa
   readiness. Use versioned filenames or append-only records instead of
   overwriting an earlier draft, and link each checkpoint to its commit.
 
+A dispatched, worktree-isolated subagent's own worktree is not guaranteed to
+outlive the subagent's completion -- some are torn down automatically before
+the dispatcher retrieves anything from them, others persist, and this is not
+predictable in advance. For a read-only investigation/analysis subagent whose
+deliverable is a report rather than a commit, require the full findings in
+the subagent's own final report message (the channel the dispatcher's task
+notification actually preserves), not solely in a file written inside its
+own worktree; treat any such file as a best-effort bonus copy the dispatcher
+must retrieve immediately if it wants one, never as the only copy of record.
+
 For the git mechanics themselves (branches, worktrees, commit hygiene,
 push-auth recovery, shared-checkout detection, release cadence), use
 `$coding-agent-git-discipline`.

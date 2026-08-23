@@ -5,7 +5,38 @@
 > current architecture and behavior first, preserve compatibility, and use the
 > smallest coherent slice; whole rewrites require explicit user authorization.
 
-## Current increment — 7.6.38 release cut: 2 new hooks, session self-audit, coding-agent-project-governance architecture split (2026-08-23)
+## Current increment — 7.6.39 release cut: deep-read duplicate/overlap scan, verified before acting (2026-08-23)
+
+PRs #94–98. Full detail: `CHANGELOG.md`'s 7.6.39 entry; validation
+evidence: `docs/releases/7.6.39-pre-release-evidence.md`. Key decision:
+a deep-read overlap scan's detailed report file was lost (subagent
+worktree torn down before retrieval, only its inline summary survived) --
+rather than acting on the summary at face value, each of its top findings
+was independently re-verified via direct grep/Read (or a properly-
+redispatched, inline-reporting subagent) before any fix was made. 6 of 7
+findings confirmed and fixed; 1 confirmed accurate but deliberately left
+alone (its natural owner sits at a frozen budget ceiling, and forcing the
+consolidation would have cost each Skill's standalone readability for
+low value). `python3 scripts/run_all_checks.py` PASS at the release tip.
+
+The report-loss incident itself was root-caused and closed:
+`coding-agent-project-governance` gained a rule (new case `CAG-BEH-016`)
+requiring read-only investigation subagents to report full findings
+inline in their final message, never solely to a worktree-local file --
+applied successfully to the retry that produced this release's own
+evidence.
+
+**Known gap, tracked not hidden**: the 3 new Eval cases this cycle
+(`CAG-BEH-016`, `DOC-BEH-013`, `PROC-BEH-017`) are schema-validated only,
+zero real model-behavior execution -- tracked in the standing Vikunja
+`cloudbox-skills #7` statistical-rigor backlog, not a new item. 3 of the
+5 merged PRs changed only citations/cross-references, no new
+required/forbidden-behavior fields, so no case was needed for those.
+
+**Next**: public-side push to the `CloudSkill` mirror is a separate,
+explicit step -- see below for whether it happened this increment.
+
+## Previous increment — 7.6.38 release cut: 2 new hooks, session self-audit, coding-agent-project-governance architecture split (2026-08-23)
 
 PRs #80–90. Full detail: `CHANGELOG.md`'s 7.6.38 entry; validation
 evidence: `docs/releases/7.6.38-pre-release-evidence.md`. Key decision:

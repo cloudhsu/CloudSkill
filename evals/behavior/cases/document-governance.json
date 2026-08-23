@@ -233,6 +233,74 @@
         "agent either restates content with a subtly different (invented) status than the Markdown actually records, or pulls in an external CDN dependency that silently breaks offline/local viewing"
       ],
       "review_notes": "Distilled from a real, live case (2026-08-23): a product-plus-reusable-engine repository pair added exactly this kind of static index.html overview for its product and art governance domains, committed together with the Markdown changes it summarizes. See references/html-overview-views.md for the full rule set; a companion advisory hook (html-view-sync-reminder) catches the deterministic half of this (Markdown changed, index.html didn't) without trying to judge whether a given edit was substantive enough to need it."
+    },
+    {
+      "id": "DOC-BEH-011",
+      "skill": "document-governance",
+      "type": "application",
+      "prompt": "A repository's documentation and generated-art directories accumulated as scattered top-level folders as the project grew. Reorganize them into the existing product/index.html-style human-readable-overview convention already used elsewhere in the same project, without losing any existing content, its history, or the links that point to it.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "inventories the existing authority documents, discussion/lineage history, and every reference to their current paths before moving anything",
+        "moves files with rename semantics so history is preserved, not a delete-and-recreate",
+        "repairs every reference to the moved paths in the same change, including links from other documents or sibling repositories",
+        "runs link-target, diff, and working-tree status checks before treating the reorganization as committed"
+      ],
+      "forbidden_behaviors": [
+        "restructuring the directories before inventorying what currently links to them",
+        "deleting and recreating files instead of using rename/move semantics",
+        "silently leaving a link pointing at a path that no longer exists after the reorganization"
+      ],
+      "required_artifacts": [],
+      "baseline_expected_failure": [
+        "agent reorganizes the directories via delete-and-recreate, losing file history, and leaves at least one existing document's link pointing at the old path"
+      ],
+      "review_notes": "Distilled 2026-08-23 from two real, project-history-mined candidates (INT-20260823-080139-6a41d539, INT-20260823-130233-4761d45a) describing the same real reorganization pattern in two separate real repositories. Extends html-overview-views.md's 'Reorganizing existing content into this convention' section -- covers the update/migrate case, distinct from the existing rules which cover initial adoption on a fresh domain."
+    },
+    {
+      "id": "DOC-BEH-012",
+      "skill": "document-governance",
+      "type": "discipline",
+      "prompt": "Apply the same named product taxonomy (product/art, product/story, product/game_design, product/level_design) across several related repositories: a narrative-driven game product, a non-narrative utility product, and a reusable engine that has no product identity of its own.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "gives the narrative-driven product all four sub-domains",
+        "marks story/level sub-domains as an explicit NOT_APPLICABLE or RESERVED boundary for the non-narrative utility product and the reusable engine, rather than inventing placeholder content or silently omitting them",
+        "keeps engineering evidence, test records, and runtime documentation in their existing location (not moved under product/) even when they happen to mention art or game design"
+      ],
+      "forbidden_behaviors": [
+        "inventing a story or level design for a utility product or reusable engine merely to keep the taxonomy symmetrical across repositories",
+        "silently omitting a sub-domain that doesn't apply instead of marking it explicitly",
+        "moving engineering/test/runtime evidence into the product taxonomy because it references art or game design"
+      ],
+      "required_artifacts": [],
+      "baseline_expected_failure": [
+        "agent either fabricates placeholder story/level content for the utility product to keep all repositories symmetrical, or moves an engineering evidence document into product/ because it mentions art direction"
+      ],
+      "review_notes": "Distilled 2026-08-23 from a real, project-history-mined multi-repository candidate (INT-20260823-104707-4d21c8f6). Extends html-overview-views.md's new 'Applying a product taxonomy across dissimilar domains' section. Note: this candidate's source also included a forbidden-behavior line about not auto-promoting a formal Skill from a candidate-capture request -- that is an unrelated, already-covered developing-skills convention (added earlier the same session) and was deliberately not restated here to avoid duplicating it under the wrong Skill."
+    },
+    {
+      "id": "DOC-BEH-013",
+      "skill": "document-governance",
+      "type": "discipline",
+      "prompt": "Write a change-record entry for a requirement that has been accepted and its implementation has landed in code, but has not yet been tested or released.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "records requirement status, implementation status, verification status, and release status as separate fields per requirements-spec-evolution.md's status model",
+        "leaves verification status as untested and release status as unreleased rather than inferring either from implementation status"
+      ],
+      "forbidden_behaviors": [
+        "collapses requirement/implementation/verification/release status into one flat 'Status' field",
+        "infers verified or released from the fact that implementation landed"
+      ],
+      "required_artifacts": ["change record with separated status dimensions"],
+      "baseline_expected_failure": [
+        "agent writes a single Status: implemented field and treats that as sufficient, hiding that the change is untested and unreleased"
+      ],
+      "review_notes": "Distilled 2026-08-23 from a deep-read verification pass that found development-process-tailoring's own change-record template collapsing this Skill's explicit five-dimension status model into one flat field -- the exact anti-pattern Section 6 names. Fixed alongside this case in the same PR; see PROC-BEH-017 for the corresponding development-process-tailoring case."
     }
   ]
 }

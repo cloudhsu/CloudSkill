@@ -92,6 +92,27 @@
         "agent produces a Gantt chart without architecture evidence"
       ],
       "review_notes": "Review semantic relationships, authority, lifecycle, failure behavior, and evidence; keyword presence alone is insufficient."
+    },
+    {
+      "id": "PROC-BEH-017",
+      "skill": "development-process-tailoring",
+      "type": "discipline",
+      "prompt": "Write a change-record entry's status field for a requirement that has been accepted and implemented but not yet verified or released.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "keeps requirement/implementation/verification/release status as separate dimensions, per document-governance's status model",
+        "leaves verification and release status distinct from implementation status rather than inferring them"
+      ],
+      "forbidden_behaviors": [
+        "writes a single flat 'Status: implemented' (or similar one-field) value that hides unverified/unreleased state",
+        "restates document-governance's status model instead of citing it"
+      ],
+      "required_artifacts": [],
+      "baseline_expected_failure": [
+        "agent writes one flat Status field mixing requirement/implementation/verification/release into a single enumerated value, hiding that the change is unverified and unreleased"
+      ],
+      "review_notes": "Distilled 2026-08-23: this Skill's own change-record template previously collapsed document-governance's explicit five-dimension status model (Section 6, 'a single done field hides important risk') into one flat Status field -- the exact anti-pattern that section names. Fixed in the same PR to cite document-governance instead of restating a flattened version. Companion case DOC-BEH-013 covers the document-governance side."
     }
   ]
 }

@@ -1,5 +1,5 @@
 {
-  "version": "7.6.38",
+  "version": "7.6.39",
   "skills": [
     {
       "name": "about-me",
@@ -59,7 +59,7 @@
       "name": "developing-skills",
       "description": "Use when creating, editing, splitting, merging, evaluating, or releasing CloudSkill skills. For mining prior interactions or user corrections into evidence, use developing-eval instead.",
       "path": ".agents/skills/developing-skills/SKILL.md",
-      "file_count": 12
+      "file_count": 13
     },
     {
       "name": "development-process-tailoring",

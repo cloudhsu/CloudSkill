@@ -71,7 +71,8 @@ Separate:
 - Accepted requirements.
 - Decisions and rejected alternatives.
 - Risks, issues, dependencies, and actions.
-- Implementation and verification status.
+- Implementation status.
+- Verification status.
 - Release/baseline status.
 - Open questions.
 

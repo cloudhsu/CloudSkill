@@ -41,6 +41,17 @@ The kernel should contain only concepts that:
 
 Keep product policy outside the kernel.
 
+Classify a framework repository's own demo scenes and legacy product-
+specific implementations as compatibility baggage, not as the public
+consumer API -- keep validated examples as regression baselines while the
+real kernel is extracted in a separately gated slice, but do not promote a
+legacy product-specific implementation into the kernel merely because it
+already exists there, and do not remove a legacy example solely to make
+the kernel look smaller. A successful compile, or evidence from a single
+consumer, does not prove the boundary is final; require adoption evidence
+from more than one real or credibly-planned consumer before calling a
+kernel boundary stable.
+
 ### 4. Design extension points
 
 For each extension point define:

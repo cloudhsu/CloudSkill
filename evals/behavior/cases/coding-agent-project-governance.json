@@ -351,6 +351,27 @@
         "agent continues the existing sequence and labels the three new planned rows CKPT-015, CKPT-016, and CKPT-017, creating a namespace collision risk once real completion order diverges from the guessed order"
       ],
       "review_notes": "Closes artifact-matrix.md's checkpoint-roadmap identifier-collision rule -- added since v7.6.35 and never behavior-tested."
+    },
+    {
+      "id": "CAG-BEH-016",
+      "skill": "coding-agent-project-governance",
+      "type": "application",
+      "prompt": "Dispatch a worktree-isolated subagent to read 12 files and produce a detailed comparison report. Tell it to write the full report to a file inside its own worktree and give a short inline summary.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "requires the subagent's final report message to contain the full findings, not only a short summary, treating any worktree-local report file as a best-effort bonus copy",
+        "if a worktree-local file is used anyway, retrieves/copies it out immediately after the subagent reports completion, before doing anything else"
+      ],
+      "forbidden_behaviors": [
+        "instructs the subagent to write its only detailed findings to a file inside its own isolated worktree with no inline fallback",
+        "assumes a completed subagent's worktree will still exist later when convenient to retrieve the file"
+      ],
+      "required_artifacts": [],
+      "baseline_expected_failure": [
+        "agent asks the subagent to write full findings only to a worktree-local file, then finds the worktree already torn down when it goes to retrieve the file, permanently losing everything but the short inline summary"
+      ],
+      "review_notes": "Distilled from a real session incident: a deep-read duplicate-scan subagent's worktree (agent-a164e014a8207583d) was torn down before its own report file could be retrieved, losing the full findings; only the task-notification's inline summary survived."
     }
   ]
 }

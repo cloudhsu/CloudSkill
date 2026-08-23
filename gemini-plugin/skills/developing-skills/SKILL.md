@@ -62,9 +62,8 @@ observed, inferred, and unknown evidence. Classify the pressure as routing,
 missing behavior/artifact, prohibited action, unsupported claim, duplication,
 wrong ownership, or a mechanical rule better enforced by tooling.
 
-Sanitize before synthesis. Generalize organizations, people, projects,
-products, equipment, sites, accounts, addresses, paths, URLs, schedules,
-recipes, safety limits, credentials, and other identifying details.
+Sanitize before synthesis using `$developing-eval`'s identifying-detail
+list; do not restate it here.
 
 ### 2. Locate the authoritative owner
 
@@ -88,7 +87,10 @@ Type every RED and GREEN by evidence layer: case/contract, deterministic
 implementation, Skill/agent behavior, adjacent composition, runtime/provider,
 or release/field effectiveness. A RED authorizes correction only at its failed
 layer and authoritative owner; implementation RED cannot substitute for Skill
-behavior RED. Re-run the same case at the same layer for GREEN, then add only
+behavior RED. See `$runtime-evaluation-engineering`'s layer taxonomy for the
+adjacent eval-execution-failure axis (a different question: where an eval
+run failed, not where a fix belongs). Re-run the same case at the same
+layer for GREEN, then add only
 the adjacent and higher-layer evidence required by lifecycle stage and risk.
 Never promote a lower-layer GREEN into a higher-layer claim. A RED note
 itself starts flat/short and escalates to the formal JSON case shape only

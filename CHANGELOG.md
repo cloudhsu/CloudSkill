@@ -1,5 +1,82 @@
 # Changelog
 
+## 7.6.39
+
+Covers PRs #94–98: a deep-read duplicate/overlap scan across the full
+Skill portfolio, verified item-by-item before acting (not taken on faith),
+plus the process fix for a real data-loss incident hit while producing
+that scan. `python3 scripts/run_all_checks.py` passes clean at the
+release tip.
+
+### Fork report-loss incident, root-caused and closed
+
+A worktree-isolated subagent's full findings file, written inside its own
+worktree's `.local/`, was permanently lost when that worktree was torn
+down before the dispatching session retrieved it -- only the short inline
+summary survived. Redispatched twice (the first retry was separately
+killed by an unrelated tool-use mistake in the dispatching session, not a
+sandbox/security issue) until a properly-completed run (57 real tool
+uses, full citations returned inline) produced trustworthy evidence.
+Root-caused and closed: `coding-agent-project-governance` gained a rule
+requiring any read-only investigation subagent to report full findings in
+its own final message, never solely to a worktree-local file (new case
+`CAG-BEH-016`).
+
+### 6 of 7 findings verified and fixed; 1 verified and deliberately left alone
+
+- **Equipment cardinality taxonomy drift** (PR #94): `cluster-tool-
+  simulator-development` restated `wph-equipment-simulator-development`'s
+  owning cardinality taxonomy under different names, missing its 4th
+  category entirely -- fixed by cross-referencing instead of restating.
+- **Status-model contradiction** (PR #95): `development-process-
+  tailoring`'s own change-record template collapsed `document-
+  governance`'s explicit five-dimension status model into one flat
+  field -- the exact anti-pattern that model's own rule ("a single done
+  field hides important risk") names. Fixed by citing instead of
+  restating; also closed two smaller internal drifts inside
+  `document-governance` itself (a combined status field, a document-role
+  list that had drifted between `SKILL.md` and its own reference file).
+- **Evidence-tier vocabulary** (PR #96): `game-audio-design`,
+  `game-narrative-design`, and `game-marketing-and-monetization` each
+  independently invented an incompatible evidence-tier vocabulary for
+  grading how authoritative a cited external domain fact is. Consolidated
+  into a new canonical scale, `developing-skills/references/domain-fact-
+  evidence-tiers.md`, explicitly distinguished from the pre-existing
+  observed/inferred confidence axis (a different question).
+- **Skill-eval-dev cluster overlaps** (PR #97): a near-verbatim
+  sanitization-detail list duplicated between `developing-skills` and
+  `developing-eval` (despite the former's own text already saying the
+  latter owns it); `local-runtime-eval-debugging`'s own two internal
+  failure-classification lists didn't map onto each other; `developing-
+  skills` and `runtime-evaluation-engineering` independently classify
+  related-but-different failure/evidence-layer axes with no
+  cross-reference either direction. All three cross-referenced/reconciled.
+- **Self-contradicting verdict vocabulary** (PR #98): `game-quality-and-
+  release-gates`' own Core principle used a different 5-value status
+  vocabulary than its own Output Format item 4, in the same file --
+  reconciled. `runtime-evaluation-engineering`'s AMBIGUOUS-for-NOT-RUN
+  swap was confirmed as legitimate domain variation, not drift, and
+  documented as such rather than forced to match.
+- **Left alone, deliberately**: the equipment "GUI/animation is a
+  projection" principle is worded 4 different ways across
+  `tray-descum-simulator-development`, `equipment-control-architecture`,
+  `wph-equipment-simulator-development`, and `cluster-tool-simulator-
+  development` -- verified consistent in meaning (no real drift), and
+  its natural owner (`equipment-control-architecture`) sits at a frozen,
+  zero-growth budget ceiling. Judged the lowest-value item in the scan
+  and not worth the resulting loss of each Skill's standalone
+  readability; documented, not forced.
+
+### Evidence discipline
+
+Every fix in this release changed only citations/cross-references, not
+required/forbidden behavior fields -- no new Eval case was authored for
+PRs #96–98, disclosed explicitly in each affected Skill's `lifecycle.json`
+notes. The 3 new cases from PR #94 (`CAG-BEH-016`) and PR #95
+(`DOC-BEH-013`, `PROC-BEH-017`) are schema-validated only; none has real
+model-behavior execution yet (tracked in the standing Vikunja `cloudbox-
+skills #7` statistical-rigor backlog, not a new item).
+
 ## 7.6.38
 
 Covers PRs #80–90: two new hooks, a session self-audit that produced real

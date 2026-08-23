@@ -40,6 +40,42 @@ artifact that needs a server, framework, or external dependency.
    "human-readable overview" pointer) so a reader who lands on the
    directory listing first can still find it.
 
+## Reorganizing existing content into this convention
+
+Adopting or extending this convention on a domain that already has content
+scattered across other locations (not creating a fresh domain from
+nothing) is a different, riskier operation than rule 2's initial setup:
+
+1. **Inventory before moving.** List the domain's existing authority
+   documents, discussion/lineage history, and every place something links
+   to their current paths, before changing the reading entry — do not
+   restructure first and discover what broke afterward.
+2. **Preserve history on move.** Use rename semantics (`git mv` or
+   equivalent) so blame/log continuity survives; a delete-and-recreate
+   that loses history is a regression even if the end-state file layout
+   looks identical.
+3. **Repair every reference in the same change**, including links from
+   sibling repositories that point at the old path — a link left pointing
+   at a path that no longer exists is a silent 404, not a cosmetic gap.
+4. **Verify before committing**, not after: run link-target, diff, and
+   working-tree status checks as part of the same change, and never
+   silently drop an existing document link when introducing a new
+   overview page.
+
+## Applying a product taxonomy across dissimilar domains
+
+When the same named taxonomy (for example `product/art`, `product/story`,
+`product/game_design`, `product/level_design`) is applied to more than one
+product or repository, the set of sub-domains that actually apply is not
+identical everywhere: a narrative-driven product needs all of them, while
+a non-narrative utility product or a reusable engine may have no story or
+level content at all. Mark a sub-domain that genuinely does not apply as
+an explicit `NOT_APPLICABLE`/`RESERVED` boundary rather than inventing
+placeholder content or silently omitting it. Do not extend the taxonomy
+over content that is not product-owned (engineering evidence, test/runtime
+records) merely because it happens to mention art or design — that
+content keeps its existing home (typically `docs/`), not `product/`.
+
 ## What this is not
 
 Not a documentation site generator, not a replacement for the Markdown

@@ -6,15 +6,22 @@ Use this reference when requirements and specifications change over time, especi
 
 Keep these roles distinct:
 
+This list matches SKILL.md Section 1's document-role enumeration exactly; keep
+both in sync rather than letting either drift its own item names or count.
+
 - **Request/input** - customer, operator, PM, field, regulation, or incident input.
 - **Analysis** - problem interpretation, use cases, alternatives, feasibility, and risk.
 - **Decision** - accepted choice, owner, date, rationale, and rejected alternatives.
 - **Current specification** - authoritative current product/engineering intent.
 - **Release baseline** - immutable approved scope/applicability for one release.
-- **Plan/status** - dates, capacity, dependencies, risk, and execution state.
-- **Verification evidence** - test environment, result, limitation, and trace link.
+- **Plan** - dates, capacity, dependencies, risk, and execution state.
+- **Test evidence** - test environment, result, limitation, and trace link.
 - **Release notes** - verified user/operator-visible change and known limitation.
 - **Field evidence** - actual environment, symptom, version, logs, resolution, and closure.
+- **Product direction** - archetype, target user, promise, scope, non-goals,
+  continuity, and stop condition; see SKILL.md Section 1 for the full rule.
+- **Training view** - audience-adapted teaching material derived from, and
+  never itself authoritative over, the roles above.
 
 A request is not an accepted requirement. A mockup is not implemented behavior. An implementation is not released behavior.
 
