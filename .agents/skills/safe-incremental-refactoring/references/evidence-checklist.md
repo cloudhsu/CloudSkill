@@ -25,6 +25,75 @@
 - Duplicate/retry behavior is defined.
 - Audit/event writes follow the required order.
 
+## Disabled Assignment on the Return Path
+
+Before considering a function's implementation complete, grep it for a
+commented-out line that assigns to (or reads from) the function's own return
+value or output parameter -- a disabled assignment on the return path
+silently produces a default/empty result on every call, with no exception
+and no error. Do not trust a logging wrapper's "succeed"/"complete" message
+as evidence a call produced a real result when that logging only measures
+the call returning without throwing -- verify the actual returned/output
+value is non-default on at least one real invocation. Do not leave a
+commented-out assignment on the result path of a function that is otherwise
+wired up and called in production without a companion issue/TODO explaining
+why it is disabled.
+
+## Configured Field Shadowed by a Hardcoded Literal
+
+When a class exposes a configurable field intended to control a downstream
+call, grep every call site that performs the actual operation the field is
+supposed to influence, and confirm it reads the field rather than a
+hardcoded literal -- especially one matching the field's default value,
+which makes the bug invisible until the field is changed away from that
+default. When a user-facing "change X" feature appears to have no effect,
+check first whether the value is correctly stored but never actually read
+at the point of use, rather than assuming the storage or UI layer is broken.
+
+## A Rate/Metric Formula Must Actually Use Its Time Term
+
+When a formula is supposed to compute a rate or an average over a time
+window (frames/sec, requests/sec, throughput), verify algebraically or
+empirically that the formula's result actually changes when the
+elapsed-time input changes -- a formula with multiple terms and
+coefficients can still algebraically reduce to a constant or to one of its
+inputs alone, disguising the fact that it never uses the time measurement
+it claims to depend on. When replacing a formula that looked simplistically
+wrong (a bare count with no time normalization), confirm the replacement
+actually incorporates the time measurement already available in the
+surrounding code, rather than trusting that a more complex-looking
+expression is automatically more correct.
+
+## Paired/Symmetric Computation With One Side Un-Updated
+
+When a code block that computes one side of a paired/symmetric calculation
+(left/right, before/after, source/target) is duplicated to compute the
+other side, verify by direct read that every input reference inside the
+duplicated block was updated to the second side's own source -- not only
+that the output variable was renamed. A renamed output with an un-updated
+input compiles and runs cleanly while silently combining two values from
+the same side. Confirm each side's inputs actually trace back to a
+distinct, correct source by reading the variable's assignment, not by
+trusting the variable's name. When a loop consumes two independently-
+populated collections that are supposed to stay in lockstep, check the
+loop bound accounts for a possible length mismatch between them rather
+than assuming both are always the same size, and verify an accumulating
+output container is cleared at the start of each call unless
+accumulation-across-calls is the explicit, documented intent.
+
+## Copy-Pasted Sibling Branch in an Enum/Case Dispatch
+
+When reviewing or writing an enum-to-resource dispatch table (a switch or
+if-else chain mapping a discrete value to a resource/config identifier),
+verify each branch's returned/selected value actually corresponds to that
+branch's own case label, not a copy-pasted neighbor's -- the function can
+still compile, still return a non-empty, valid-looking value, and produce
+no crash for any input, while silently loading the wrong resource for
+specific cases. Test each enum value's dispatch outcome individually
+(assert the actual returned identifier per case) rather than only
+confirming the function returns some non-null/non-error value for a
+sample input.
+
 ## Environment vs. Defect Attribution
 
 Before treating an independent run on a differently-configured environment
@@ -98,6 +167,70 @@ If no completion signal is currently observed (neither success nor
 failure), that is not evidence of success -- add tracing at the actual
 completion point before concluding anything about the operation's
 outcome.
+
+### Development-Tool Presentation State Is Not App State
+
+A visual symptom (rotated/mirrored layout, wrong colors, misplaced UI) can
+originate from a simulator, emulator, or dev-tool presentation setting that
+merely displays the app differently, rather than from the app's own logic.
+Before writing a source-level fix for a visual symptom, inspect the actual
+live runtime state directly -- attach a debugger and read the real object
+state the app is producing (e.g. the actual screen-bounds/orientation
+value), or use an equivalent direct-introspection mechanism -- rather than
+inferring the cause from the rendered appearance alone. If the live state
+is already correct, the defect is in the tool's presentation layer, not the
+app; revert any source change made before this was known instead of
+layering more app-side changes on top of a correctly-behaving app.
+
+Counterexample: a genuine layout defect can look identical to a
+presentation-setting artifact from a screenshot alone -- this check does
+not replace fixing a real defect once live state inspection confirms the
+app's own state is actually wrong.
+
+### Perceptual Outcomes Require a Perceptual Check
+
+Some outcomes (audible sound, visible rendering, haptic feedback) cannot
+be confirmed by API return values, logs, or callbacks alone -- every layer
+a mechanism exposes can report success while the actual perceptual result
+never occurs, because the gap is in a layer the mechanism does not
+instrument. Do not report such an outcome as working from log/API
+evidence alone; it requires a human or sensor observation of the actual
+perceptual result.
+
+When that observation channel is not currently available (the person who
+can confirm it is unavailable, or no sensor exists), stop making further
+speculative source changes rather than guessing at additional fixes with
+no way to confirm any of them worked. Report the current best-supported
+theory explicitly as unconfirmed, and hand off the cheapest untried
+diagnostic steps for when the observation channel is available again.
+
+### A Synchronous Launch With No Error Is Not Success
+
+After a build succeeds and a process launches without crashing or logging
+an error, independently verify the actual expected observable effect of
+that launch (e.g. a window/surface was created, a specific state was
+reached) via an external inspection mechanism, rather than treating "no
+crash" as evidence of correct behavior. This is distinct from the async-
+completion and perceptual-outcome sections above: a synchronous lifecycle
+bootstrap can run with zero errors while silently failing to reach its
+expected state, because the API it calls has its own contract (e.g. nib/
+storyboard delegate wiring) that a naive port from a different platform's
+equivalent API does not satisfy. Report the verification step actually
+taken (e.g. "confirmed window count = 1 via an external inspection tool"),
+not a vaguer claim like "process is running."
+
+### Known Defect as an Attribution Control
+
+When a verification pass covers a component that also carries a separate,
+already-known, unrelated open defect, deliberately exercise that known
+defect's scenario within the same pass rather than avoiding or ignoring it,
+and record its observed status explicitly (e.g. "observed / tracked,
+pre-existing, not introduced by this change"). This disambiguates a new
+symptom from a pre-existing one for a later reader, who otherwise has to
+reconstruct the distinction from memory or a separate issue tracker. This
+is distinct from -- and not a substitute for -- "Known-Issue Record Closure"
+below: that governs when a record may be *closed*; this governs keeping a
+live regression check's evidence unambiguous while the issue stays open.
 
 ## Shared-Consumer Before/After State
 
@@ -219,6 +352,49 @@ Do not jump straight to JSON for a quick, one-off comparison a table would
 represent just as correctly with less overhead -- the escalation should
 track an actual complexity signal, not a general instinct toward more
 structure.
+
+## Verify via the Pipeline Stage That Actually Parses the Changed File
+
+Identify which build/verification pipeline stage actually parses or
+processes the specific file type being changed (a manifest is validated by
+a manifest-merger step inside a full package-build tool, not by a
+native/compiler-only build step) before treating any pipeline result as
+evidence the change is valid. Run the full pipeline stage that processes
+the changed file type, not only a narrower stage that happens to already
+run for other reasons, especially for a change that "feels" doc-only or
+trivial (a single XML comment edit can still be structurally illegal).
+Treat a passing result from a stage that does not parse the changed file
+type as no evidence at all about that file's correctness, even if the
+overall build reports success.
+
+## Verifying a General Mechanism Requires a Non-Degenerate Input
+
+When verifying a fix intended to generalize over a class of inputs (a path
+resolver, a parser, a key-based lookup), identify the structural feature
+that actually distinguishes members of that class (a subdirectory
+component in a resource key, a special character, a boundary length) and
+include at least one test input exercising that feature, not only the
+simplest/flattest example. Do not consider a general-purpose mechanism
+verified merely because the one input used during development happened to
+succeed -- state explicitly which subset of the input space was actually
+exercised. When the fix involves a filesystem or I/O write whose success is
+not checked, add that check as part of the same fix, since a silent I/O
+failure is exactly the kind of defect a degenerate-input-only test cannot
+surface.
+
+## Method-Name Collision When Adding a Shared Base Class
+
+Before compiling a change that adds a shared base class (a mixin, an
+intrusive ref-counted base, any base contributing named methods) to an
+existing class, grep the target class for any pre-existing method sharing a
+name with the new base's contract. A same-name, compatible-signature method
+silently shadows the base's method instead of producing a compiler error,
+and the two can have unrelated meanings (a domain-specific "release a GPU
+handle" versus "decrement the reference count"). When a collision is found,
+rename the pre-existing method to something unambiguous -- updating its
+declaration, definition, and every call site -- before the base class is
+introduced, and verify via grep that the rename's call-site count matches
+expectations.
 
 ## Build-Wrapper Cache Trust
 

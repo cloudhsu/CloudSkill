@@ -161,6 +161,16 @@ if (-not $ConfigOnly) {
     }
 }
 
+if (-not $PSBoundParameters.ContainsKey('SkipLocalConfig') -and -not $ConfigOnly -and
+        [Environment]::UserInteractive -and -not [Console]::IsInputRedirected) {
+    # Neither -SkipLocalConfig nor its absence was stated explicitly, and this
+    # is a real interactive session (not CI/scripted/redirected) -- ask once
+    # instead of silently defaulting. A non-interactive run keeps the prior
+    # default (create it) so existing automation is unaffected.
+    $reply = Read-Host "Create a local Eval-capture config on this machine (writes to `$HOME or this project, never committed)? [Y/n]"
+    if ($reply -match '^[nN]') { $SkipLocalConfig = $true } else { $SkipLocalConfig = $false }
+}
+
 if (-not $SkipLocalConfig) {
     $inbox = if ($EvalInboxPath) {
         [System.IO.Path]::GetFullPath($EvalInboxPath)

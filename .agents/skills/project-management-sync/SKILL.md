@@ -101,6 +101,9 @@ Use these execution modes explicitly:
 5. Redacted errors, unsupported fields/capabilities, privacy-audit result, and
    next action. The report must contain no real email, account, or credential.
 
+A bundled `vikunja-sync-reminder` hook enforces the end-of-work sync habit
+deterministically (mandatory, loop-safe) at session-stop time.
+
 ## Common mistakes
 
 - Creating by title before listing and reconciling existing tasks.
@@ -115,8 +118,42 @@ Use these execution modes explicitly:
 - Storing credentials beside portable configuration or relying on macOS-only
   Keychain APIs when Windows or Ubuntu is supported.
 
+## Human-Readable Description Format
+
+When a task's `description` field is the primary channel a human reads (not
+just a sync payload), write it so the human never has to reconstruct state
+from chat scrollback:
+
+- Fixed sections: 標題 (or Title), 問題/背景, 建議處理方式 (or an equivalent
+  plan section), Acceptance Criteria, Source. Keep this shape even across a
+  single language switch mid-project; consistency matters more than which
+  language.
+- Reference the task by the provider's human-visible identifier (e.g. a
+  project-local `#N`, not a bare internal/global ID a human never sees in
+  their own UI) once that identifier has been confirmed by reading the task
+  back, not guessed from creation order.
+- Prefer concrete, checkable evidence over a narrative summary: PR numbers,
+  before/after counts or percentages, exact file paths in inline code,
+  pass/fail counts -- a claim a reader could verify against the repository
+  themselves, not "made good progress."
+- For an ongoing task, append a new dated block per update rather than
+  rewriting the description -- the description is itself an append-only
+  progress record, the same discipline `lifecycle.json`'s `notes` field
+  already requires for a Skill (see `developing-skills/references/
+  skill-lifecycle-standard.md`). Mark items done with a clear visual/textual
+  distinction (a checkmark, a "still open" list) so a skim shows status
+  without reading every paragraph.
+- Keep the chat reply itself short when a detailed description was just
+  written to the task -- point at the task rather than repeating its content
+  in the conversation.
+
 ## Supporting references
 
+- For a structured Vikunja plan that needs mechanical validation and safe local
+  execution, use `scripts/vikunja_sync.py` and read
+  `references/vikunja-script.md`. It enforces the fixed human-readable task
+  sections, append-only progress blocks, and an explicit `Agent` field; it does
+  not infer identity or accept tokens from arguments.
 - Read `references/sync-contract.md` for authority, field ownership, identity,
   operation states, conflict policy, and verification rules.
 - Read `references/provider-compatibility.md` when selecting or reviewing a

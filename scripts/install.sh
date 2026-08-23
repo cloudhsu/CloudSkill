@@ -8,6 +8,7 @@ CLOUDSKILL_REPO_PATH=""
 EVAL_INBOX_PATH=""
 SKIP_GUIDANCE=0
 SKIP_LOCAL_CONFIG=0
+SKIP_LOCAL_CONFIG_EXPLICIT=0
 CONFIG_ONLY=0
 
 while [[ $# -gt 0 ]]; do
@@ -18,7 +19,7 @@ while [[ $# -gt 0 ]]; do
     --cloudskill-repo-path) CLOUDSKILL_REPO_PATH="$2"; shift 2 ;;
     --eval-inbox-path) EVAL_INBOX_PATH="$2"; shift 2 ;;
     --skip-guidance) SKIP_GUIDANCE=1; shift ;;
-    --skip-local-config) SKIP_LOCAL_CONFIG=1; shift ;;
+    --skip-local-config) SKIP_LOCAL_CONFIG=1; SKIP_LOCAL_CONFIG_EXPLICIT=1; shift ;;
     --config-only) CONFIG_ONLY=1; shift ;;
     -h|--help)
       cat <<'EOF'
@@ -166,6 +167,18 @@ if [[ $CONFIG_ONLY -eq 0 ]]; then
       fi
     fi
   fi
+fi
+
+if [[ $SKIP_LOCAL_CONFIG_EXPLICIT -eq 0 && $CONFIG_ONLY -eq 0 && -t 0 && -t 1 ]]; then
+  # Neither --skip-local-config nor its absence was stated explicitly, and this
+  # is a real interactive terminal (not CI/scripted/piped) -- ask once instead
+  # of silently defaulting. A non-interactive run (no tty) keeps the prior
+  # default (create it) so existing automation is unaffected.
+  read -r -p "Create a local Eval-capture config on this machine (writes to \$HOME or this project, never committed)? [Y/n] " reply
+  case "$reply" in
+    [nN]|[nN][oO]) SKIP_LOCAL_CONFIG=1 ;;
+    *) SKIP_LOCAL_CONFIG=0 ;;
+  esac
 fi
 
 if [[ $SKIP_LOCAL_CONFIG -eq 0 ]]; then

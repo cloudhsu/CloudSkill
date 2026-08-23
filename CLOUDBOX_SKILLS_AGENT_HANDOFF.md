@@ -5,7 +5,61 @@
 > current architecture and behavior first, preserve compatibility, and use the
 > smallest coherent slice; whole rewrites require explicit user authorization.
 
-## In-progress equipment increment — 7.6.32 private candidate (2026-08-19)
+## Current increment — 7.6.38 release cut: 2 new hooks, session self-audit, coding-agent-project-governance architecture split (2026-08-23)
+
+PRs #80–90. Full detail: `CHANGELOG.md`'s 7.6.38 entry; validation
+evidence: `docs/releases/7.6.38-pre-release-evidence.md`. Key decision:
+resolved a 3-way "should governance split by domain (product/art/code)"
+discussion by rejecting a shared governance-content core (product/art/code
+risk taxonomies are genuinely different, not accidental duplication) in
+favor of (1) physically splitting only the self-contained, low-routing-risk
+git-mechanics content into a new skill `coding-agent-git-discipline`, and
+(2) a structural-only template (`developing-skills/references/agent-governance-section-template.md`)
+for the parts that stay in place. A real `export_public_bundle.py` bug
+(CSV comma-quoting) was found and fixed by actually running the export,
+not by the standard check suite -- confirmed working with a clean dry run.
+`python3 scripts/run_all_checks.py` PASS at the release tip.
+
+**Known gap, tracked not hidden**: `coding-agent-git-discipline` ships
+`experimental` with zero real execution evidence (both its new eval cases
+and the session-self-audit cases in `developing-skills` are structural-only
+so far). Behavior-depth coverage overall is unchanged at 10/41 Skills.
+
+**Next**: public-side push to the `CloudSkill` mirror is a separate,
+explicit step -- see below for whether it happened this increment.
+
+## Previous increment — 7.6.37 release cut: runtime-execution tooling, router/identity defect closure, Eval Inbox batch review, Skill-bundled hook mechanism (2026-08-22 to 2026-08-23)
+
+Two-day continuous session, PRs #34–79 (90 commits). Full detail:
+`CHANGELOG.md`'s 7.6.37 entry; validation evidence:
+`docs/releases/7.6.37-pre-release-evidence.md`. Four workstreams: (1) real
+runtime-execution analysis tooling (Bayesian confidence report, priority
+ranker, learning-curve tracker, ablation-study runner) against a new
+committed `evals/runtime/execution-ledger.json`; (2) a router "feels
+trivial" trap and a cross-Skill fabricated-identity leak found via ablation
+runs, closed with a deterministic scan+redact mechanism after two content-
+only fixes were defeated; (3) ~20 Eval Inbox candidates converted into real
+Skill content across game/architecture/governance Skills; (4) a new
+optional Skill-bundled hook mechanism (`scripts/install_skill_hooks.py`)
+with 7 real hooks, each tested against multiple real scenarios, verified
+against each provider's own hook docs across Claude Code/Codex CLI/Gemini
+CLI (not assumed).
+`python3 scripts/run_all_checks.py` PASS at the release tip.
+
+**Known gap, tracked not hidden**: behavior-depth real execution still
+covers only 10/40 Skills; `using-cloudbox-skills` (the router itself) is
+the statistically weakest Skill per the priority ranker's pessimistic LCB
+(0.0%). The deterministic rubric grader covers 7/303 behavior cases and a
+different pipeline than the one that produced this cycle's real ledger
+entries — those were graded by direct model judgment, no independent
+cross-check yet.
+
+**Next**: `using-cloudbox-skills`, `document-governance`,
+`game-quality-and-release-gates` are the LCB-ranked priorities. A commits-
+since-last-tag advisory hook is planned immediately after this release so
+the next version-bump gap doesn't reach 90 commits again.
+
+## Previous increment — 7.6.32 private-equipment candidate (2026-08-19, shipped as part of 7.6.32–7.6.36)
 
 Three de-identified equipment-family Skills and a generic WPH refactor are
 under full lifecycle validation. The new family Skills are held in

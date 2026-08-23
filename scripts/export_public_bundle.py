@@ -67,6 +67,11 @@ PRIVATE_INFRASTRUCTURE_PATHS = {
     # own evolution-pack definition. Added 2026-08-15 alongside moving the
     # README's "Runtime model evaluations" section to private-plugin/README.md.
     "scripts/run_runtime_evals.py",
+    # Real-execution ablation-study runner, same category as run_runtime_evals.py
+    # above (imports runtime_eval_common.py / claude_eval_adapter.py directly).
+    # Added 2026-08-22 alongside the first real ablation run (Vikunja
+    # cloudbox-skills #10).
+    "scripts/run_ablation_study.py",
     "scripts/grade_runtime_evals.py",
     "scripts/validate_runtime_evals.py",
     "scripts/validate_multimodel_panel.py",
@@ -90,11 +95,15 @@ PRIVATE_INFRASTRUCTURE_PATHS = {
     "scripts/validate_behavior_contract.py",
     "scripts/behavior_output_contract.py",
     "scripts/runtime_eval_common.py",
-    # Advisory helper for reviewing private Eval Inbox candidates
+    # Advisory helpers for reviewing private Eval Inbox candidates
     # (developing-eval, private-meta) -- meaningless to a public consumer,
-    # who has no .local/eval-inbox/ to run it against. Added 2026-08-21,
-    # caught before this script's first post-creation export run.
+    # who has no .local/eval-inbox/ to run them against. rule_strength.py
+    # added 2026-08-21; detect_candidate_similarity.py and
+    # prioritize_eval_inbox.py added 2026-08-22, same category, gated
+    # before this script's first export run touching them.
     "scripts/rule_strength.py",
+    "scripts/detect_candidate_similarity.py",
+    "scripts/prioritize_eval_inbox.py",
     # Syncs private-plugin/codex-skills/ from the canonical evolution-pack
     # Skills -- both source and destination are private-only, so this script
     # is a no-op in a public checkout (private-plugin/ is already excluded
@@ -107,6 +116,26 @@ PRIVATE_INFRASTRUCTURE_PATHS = {
     # game Skills; do not mirror them into the public Core export.
     "evals/runtime/cases/game-skills-benchmark.json",
     "evals/runtime/cases/game-skills-behavior-rubrics.json",
+    # Mixes private-game (cloudbox-game-migration, game-quality-and-release-
+    # gates, gameplay-core-modernization) and private-meta
+    # (local-runtime-eval-debugging) routing prompts in one file, same
+    # pattern as canary.json above -- excluded wholesale rather than split.
+    # Added 2026-08-22, caught before this script's first export run
+    # touching it.
+    "evals/runtime/cases/worst-margin-skills-routing.json",
+    # Same runtime-eval-harness-is-private-infrastructure category as
+    # canary.json and worst-margin-skills-routing.json above; negative
+    # routing cases for skills touched during this run's 52-case pass.
+    # Added 2026-08-22, caught before this script's first export run
+    # touching it.
+    "evals/runtime/cases/touched-skills-negative-routing.json",
+    # Same category, first-routing-pass sweep across all untested skills;
+    # mixes private-game (cloudbox-game-migration, game-quality-and-
+    # release-gates, gameplay-core-modernization) and private-meta
+    # (local-runtime-eval-debugging) prompts with public-tier skills.
+    # Added 2026-08-22, caught before this script's first export run
+    # touching it.
+    "evals/runtime/cases/coverage-sweep-first-routing-pass.json",
     "config/skill-domain-catalog.json",
     "docs/GAME_SKILL_CATALOG.md",
 }

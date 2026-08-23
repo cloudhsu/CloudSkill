@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "name": "identity-leak-backstop",
+  "owner_skill": "coding-agent-project-governance",
+  "description": "Blocks a git commit whose staged diff adds the checkout's own configured git user.email or user.name into what looks like a document field (an owner/author/submitted-by/proposer-shaped line). Deterministic backstop for references/no-fabricated-identity.md: never fill an unrequested attribution field from ambient session identity. Read at runtime from `git config user.email`/`user.name`, so it needs no per-repository configuration and has no bypass flag by design -- a genuine, requested attribution should be confirmed with the user and committed outside the agent session.",
+  "script": "script.sh",
+  "providers": {
+    "claude": {
+      "config_file": ".claude/settings.json",
+      "event": "PreToolUse",
+      "matcher": "Bash"
+    },
+    "codex": {
+      "config_file": ".codex/hooks.json",
+      "event": "PreToolUse",
+      "matcher": "Bash"
+    },
+    "gemini": {
+      "config_file": ".gemini/settings.json",
+      "event": "BeforeTool",
+      "matcher": "run_shell_command"
+    }
+  }
+}

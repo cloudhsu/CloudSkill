@@ -45,6 +45,13 @@ Define:
 
 Do not let each view maintain its own device list.
 
+A connection/handle wrapper's open call must release any handle it already
+holds before acquiring a new one -- reassigning the handle member without an
+explicit close/release first leaves the prior connection open, which can
+make the new open fail or silently talk over a stale one. Reopening the
+same logical port/device across repeated open-close cycles is a required
+verification case, not an edge case.
+
 ## 4. Protocol and transport
 
 Keep command construction and transport separate. Specify:
@@ -117,6 +124,19 @@ Specify:
 - Whether configuration/mapping must be restored.
 
 Do not present a successful file transfer as a successful firmware update without read-back/re-enumeration evidence.
+
+When more than one firmware/image format or chip family can be loaded through
+the same picker, identify which format a file is by parsing an
+identifying signature the format itself defines (a magic-byte header, an
+explicit format field) -- never by the file's byte size. A size threshold
+guessed from currently-known sample files misclassifies any legitimate
+file whose size lands on or past that boundary, and boundary values (an
+image that is exactly the guessed cutoff) are exactly the case a heuristic
+gets wrong.
+
+Check an OS file-selection or save dialog's result for cancellation (an
+empty path/no selection) before acting on it. Do not assume a dialog
+callback always carries a usable path.
 
 ## 9. Product variants
 

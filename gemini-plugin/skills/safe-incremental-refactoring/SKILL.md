@@ -22,6 +22,15 @@ Reduce structural risk without combining behavioral change, architecture migrati
 
 ### 1. Establish the behavioral baseline
 
+Before touching a shared component, inspect branch, working-tree status, and
+diff for an unfinished handoff from another agent or session. Do not reset,
+checkout, clean, or overwrite a dirty shared tree without explicit
+authorization, and do not assume uncommitted work is disposable merely
+because the prior session stopped. Build or characterize the existing
+handoff first, preserve it at an explicit commit or documented transfer
+point, keep unrelated worktree changes intact, and report unresolved
+ownership rather than silently absorbing or discarding it into this slice.
+
 Identify:
 
 - Public methods, APIs, events, files, and data contracts.

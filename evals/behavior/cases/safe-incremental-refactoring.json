@@ -27,7 +27,7 @@
       "id": "REF-BEH-002",
       "skill": "safe-incremental-refactoring",
       "type": "application",
-      "prompt": "Move transaction-heavy methods from a database façade into services without changing API or failure order.",
+      "prompt": "Move transaction-heavy methods from a database fa\u00e7ade into services without changing API or failure order.",
       "expected_routing": true,
       "expected_alternative_skill": null,
       "required_behaviors": [
@@ -59,7 +59,7 @@
       "expected_alternative_skill": "application-client-server-architecture",
       "required_behaviors": [
         "routes to application-client-server-architecture",
-        "does not invent a legacy compatibility façade"
+        "does not invent a legacy compatibility fa\u00e7ade"
       ],
       "forbidden_behaviors": [
         "assumes brownfield constraints that do not exist"
@@ -99,7 +99,7 @@
       "id": "REF-BEH-005",
       "skill": "safe-incremental-refactoring",
       "type": "application",
-      "prompt": "Extract a small policy from a legacy service whose tests monkeypatch a method, whose constructor eagerly opens an external client, and whose HTTP façade currently performs authentication before calling the service.",
+      "prompt": "Extract a small policy from a legacy service whose tests monkeypatch a method, whose constructor eagerly opens an external client, and whose HTTP fa\u00e7ade currently performs authentication before calling the service.",
       "expected_routing": true,
       "expected_alternative_skill": null,
       "required_behaviors": [
@@ -121,8 +121,7 @@
         "existing guidance lists seams and narrow ports but does not jointly decide seam, test shape, dependency bootstrap and authentication ownership"
       ],
       "review_notes": "Review whether each pressure changes the extraction boundary and tests; keyword presence alone is insufficient."
-    }
-    ,
+    },
     {
       "id": "REF-BEH-006",
       "skill": "safe-incremental-refactoring",
@@ -267,6 +266,346 @@
         "either prose that makes a human reconstruct which fact belongs to which entity, or premature JSON/schema overhead applied to three flat facts that a table would have represented just as correctly"
       ],
       "review_notes": "Same principle developing-skills already applies internally: a RED finding starts as a short typed note and is escalated into a formal JSON case file only once it needs to be a repeatable, machine-checked contract. The escalation should track an actual complexity signal, not a general instinct toward more structure."
+    },
+    {
+      "id": "REF-BEH-012",
+      "skill": "safe-incremental-refactoring",
+      "type": "application",
+      "prompt": "A slice extracts a `computeDiscount(order)` function from a monolithic checkout service into its own module. The new module has a line `// result = applyLoyaltyMultiplier(result, order.customer);` left commented out, and a wrapper around the call logs `\"discount computed: succeeded\"` on every invocation regardless of what value came back. Confirm the extraction is complete and correct.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "greps the extracted function for a commented-out assignment on its own return/output path",
+        "treats the logging wrapper's 'succeeded' message as evidence only that the call returned without throwing, not as evidence of a correct value",
+        "verifies the actual returned value is non-default on at least one real invocation",
+        "flags the disabled assignment as needing a companion issue/TODO or reinstatement before calling the slice complete"
+      ],
+      "forbidden_behaviors": [
+        "declares the extraction complete because the logging wrapper reports success on every call",
+        "leaves the commented-out assignment in place with no issue/TODO and no note in the handoff"
+      ],
+      "required_artifacts": [
+        "confirmed non-default return value from a real invocation"
+      ],
+      "baseline_expected_failure": [
+        "agent reports the slice as verified based on the 'discount computed: succeeded' log lines, without noticing the loyalty multiplier assignment is commented out and every order silently gets the pre-multiplier (default) discount"
+      ],
+      "review_notes": "Closes evidence-checklist.md's new 'Disabled Assignment on the Return Path' section."
+    },
+    {
+      "id": "REF-BEH-013",
+      "skill": "safe-incremental-refactoring",
+      "type": "application",
+      "prompt": "Extract a `RetryPolicy` class from a legacy HTTP client. The class exposes a configurable `maxRetries` field, defaulting to 3. A user reports that setting `maxRetries` to 10 in the config UI has no effect on retry behavior. Diagnose and fix as part of the extraction slice.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "greps every call site that actually performs the retry loop to confirm it reads `maxRetries` rather than a hardcoded literal",
+        "checks specifically for a hardcoded literal matching the field's own default (3), which would make the bug invisible until the field changes away from that default",
+        "investigates whether the value is correctly stored but never read at the point of use before assuming the storage or UI layer is broken"
+      ],
+      "forbidden_behaviors": [
+        "assumes the config UI or storage layer is broken without first checking the call site that performs the retry",
+        "fixes the storage/UI path without verifying the retry loop actually consumes the field afterward"
+      ],
+      "required_artifacts": [
+        "call-site confirmation that the retry loop reads the configured field, not a literal"
+      ],
+      "baseline_expected_failure": [
+        "agent investigates and patches the config storage/UI layer, missing that the retry loop itself is hardcoded to `for (i = 0; i < 3; i++)` and never reads `maxRetries` at all"
+      ],
+      "review_notes": "Closes evidence-checklist.md's new 'Configured Field Shadowed by a Hardcoded Literal' section."
+    },
+    {
+      "id": "REF-BEH-014",
+      "skill": "safe-incremental-refactoring",
+      "type": "application",
+      "prompt": "Replace a bare per-second event counter (`eventsThisSecond`) with a proper `eventsPerSecond` rate formula during an extraction slice, using `elapsedMs` and a smoothing coefficient already available in the surrounding code. Verify the new formula is a real improvement before merging.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "verifies algebraically or empirically that the new formula's result actually changes when `elapsedMs` changes",
+        "checks the formula does not algebraically reduce to a constant or to the raw count alone despite having multiple terms/coefficients",
+        "confirms the replacement genuinely incorporates the time measurement rather than trusting that a more complex-looking expression is automatically correct"
+      ],
+      "forbidden_behaviors": [
+        "accepts the new formula as correct merely because it looks more sophisticated (more terms/coefficients) than the old bare count",
+        "merges the replacement without testing the formula's output at two different `elapsedMs` values"
+      ],
+      "required_artifacts": [
+        "algebraic or empirical proof that varying elapsedMs changes the formula's output"
+      ],
+      "baseline_expected_failure": [
+        "agent accepts a replacement formula like `rate = count * smoothingFactor / smoothingFactor` (or an equivalent that cancels elapsedMs out algebraically) as correct because it references elapsedMs in the source text, without checking that the reference actually affects the result"
+      ],
+      "review_notes": "Closes evidence-checklist.md's new 'A Rate/Metric Formula Must Actually Use Its Time Term' section."
+    },
+    {
+      "id": "REF-BEH-015",
+      "skill": "safe-incremental-refactoring",
+      "type": "application",
+      "prompt": "A slice extracts duplicated left/right hand-tracking code into two clearly named blocks, `computeLeftHandPose` and `computeRightHandPose`, by copy-pasting the left block and renaming its output variable for the right side. Verify the extraction preserves correct per-side behavior before merging.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "reads the duplicated block's every input reference directly, not just the output variable name, to confirm each was updated to the right side's own source",
+        "traces each side's inputs back to their assignment to confirm a distinct, correct source per side rather than trusting the variable name",
+        "tests both sides' outputs independently to confirm they differ appropriately for asymmetric input"
+      ],
+      "forbidden_behaviors": [
+        "declares the extraction correct because the output variables are named `leftPose`/`rightPose` without checking the inputs inside each block",
+        "accepts identical output for genuinely asymmetric left/right input as expected behavior without investigating"
+      ],
+      "required_artifacts": [
+        "per-side input-source trace confirming distinct, correct sources"
+      ],
+      "baseline_expected_failure": [
+        "agent approves `computeRightHandPose` because its output variable is correctly named `rightPose`, without noticing the copy-pasted block still reads `leftWristJoint`/`leftElbowJoint` internally, silently computing the right hand's pose from left-hand source data"
+      ],
+      "review_notes": "Closes evidence-checklist.md's new 'Paired/Symmetric Computation With One Side Un-Updated' section."
+    },
+    {
+      "id": "REF-BEH-016",
+      "skill": "safe-incremental-refactoring",
+      "type": "application",
+      "prompt": "Review a `switch (materialType)` dispatch table that maps each `MaterialType` enum case to a resource-bundle identifier, written by copy-pasting a neighboring case and editing the label. The function compiles, returns a non-null identifier for every case, and no test currently fails. Confirm it is correct before merging the slice.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "verifies each branch's returned identifier actually corresponds to that branch's own case label, not a copy-pasted neighbor's",
+        "tests each enum value's dispatch outcome individually, asserting the specific expected returned identifier per case",
+        "does not treat 'compiles and returns non-null for a sample input' as sufficient evidence of per-case correctness"
+      ],
+      "forbidden_behaviors": [
+        "confirms the dispatch table is correct because it compiles and returns some valid-looking identifier for a spot-checked case",
+        "skips asserting the specific expected identifier for each individual enum value"
+      ],
+      "required_artifacts": [
+        "per-case assertion of the specific expected returned identifier"
+      ],
+      "baseline_expected_failure": [
+        "agent approves the dispatch table because it returns a non-empty resource identifier for the one case manually spot-checked, missing that the `CERAMIC` case still returns the `METAL` case's copy-pasted bundle identifier"
+      ],
+      "review_notes": "Closes evidence-checklist.md's new 'Copy-Pasted Sibling Branch in an Enum/Case Dispatch' section."
+    },
+    {
+      "id": "REF-BEH-017",
+      "skill": "safe-incremental-refactoring",
+      "type": "application",
+      "prompt": "During a slice that touches screen-orientation handling code, a screenshot from the iOS Simulator shows the app's layout rotated 90 degrees from expected. Fix the layout defect as part of this slice.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "inspects the actual live runtime state directly (attaches a debugger or equivalent direct-introspection mechanism) to read the real screen-bounds/orientation value the app is producing, before writing a source-level fix",
+        "checks whether the simulator's own presentation/rotation setting could be producing the symptom rather than the app's logic",
+        "if live state is already correct, reverts any speculative source change and identifies the defect as being in the tool's presentation layer, not the app"
+      ],
+      "forbidden_behaviors": [
+        "writes a source-level orientation fix based on the screenshot's rendered appearance alone, without inspecting live runtime state first",
+        "layers additional app-side changes on top of a confirmed correctly-behaving app because the simulator still renders it wrong"
+      ],
+      "required_artifacts": [
+        "live runtime state inspection result (e.g. actual screen-bounds/orientation value read via debugger)"
+      ],
+      "baseline_expected_failure": [
+        "agent adds a source-level rotation-correction transform based solely on the simulator screenshot, without ever attaching a debugger to check the app's real orientation state, when the real defect is a simulator display-rotation setting left on from a previous test"
+      ],
+      "review_notes": "Closes evidence-checklist.md's new 'Development-Tool Presentation State Is Not App State' section."
+    },
+    {
+      "id": "REF-BEH-018",
+      "skill": "safe-incremental-refactoring",
+      "type": "application",
+      "prompt": "A slice moves audio-cue playback from a legacy sound engine into a new cross-platform audio module. All API calls return success codes and no exceptions are logged, but the person who can listen to the device output is currently unavailable and there is no audio-capture sensor in the test rig. Report on whether the slice is verified.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "identifies that audible sound is a perceptual outcome that API return values and logs cannot confirm on their own",
+        "explicitly states the observation channel (human listener or sensor) is currently unavailable rather than substituting log/API evidence for it",
+        "stops making further speculative source changes and reports the current best-supported theory explicitly as unconfirmed",
+        "hands off the cheapest untried diagnostic steps for when the observation channel becomes available"
+      ],
+      "forbidden_behaviors": [
+        "reports the audio slice as working because every API call returned success and no errors were logged",
+        "makes additional speculative source changes attempting to 'fix' the audio path with no way to confirm any of them actually worked"
+      ],
+      "required_artifacts": [],
+      "baseline_expected_failure": [
+        "agent declares the audio migration verified and complete based on clean logs and success return codes, without ever noting that no one has actually heard the sound play"
+      ],
+      "review_notes": "Closes evidence-checklist.md's new 'Perceptual Outcomes Require a Perceptual Check' section."
+    },
+    {
+      "id": "REF-BEH-019",
+      "skill": "safe-incremental-refactoring",
+      "type": "application",
+      "prompt": "A slice ports an app's window-bootstrap sequence from a UIKit-based lifecycle to a programmatic SwiftUI-based one, dropping the storyboard. The build succeeds, the process launches, and no error is logged. Confirm the launch is working before closing the slice.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "independently verifies the actual expected observable effect of the launch (e.g. a window/surface was actually created) via an external inspection mechanism",
+        "does not treat 'no crash, no logged error' as evidence the new bootstrap reached its expected state",
+        "checks whether the ported API has its own contract (e.g. delegate wiring the storyboard used to satisfy automatically) that the naive port might not satisfy",
+        "reports the specific verification step taken (e.g. confirmed window count via an inspection tool), not a vague claim like 'process is running'"
+      ],
+      "forbidden_behaviors": [
+        "closes the slice as verified because the process launched without crashing or logging an error",
+        "reports the outcome as 'app is running fine' without naming the specific external inspection performed"
+      ],
+      "required_artifacts": [
+        "external inspection result confirming the expected observable effect (e.g. window count)"
+      ],
+      "baseline_expected_failure": [
+        "agent reports the lifecycle port as successful because the build passed and the process launched with a clean log, without noticing the ported bootstrap never actually attaches a window because it relied on storyboard delegate wiring the naive port omitted"
+      ],
+      "review_notes": "Closes evidence-checklist.md's new 'A Synchronous Launch With No Error Is Not Success' section."
+    },
+    {
+      "id": "REF-BEH-020",
+      "skill": "safe-incremental-refactoring",
+      "type": "application",
+      "prompt": "Run a verification pass on a payment-retry component being migrated to a new queue backend. The component also carries a separate, already-known, unrelated open defect (duplicate notification emails on retry) that is not the subject of this migration. Write up the verification evidence.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "deliberately exercises the known defect's scenario within the same verification pass rather than avoiding or ignoring it",
+        "records the known defect's observed status explicitly (e.g. 'observed / tracked, pre-existing, not introduced by this change')",
+        "keeps this distinct from closing the known-issue record -- the issue stays open, only the attribution is disambiguated for this pass"
+      ],
+      "forbidden_behaviors": [
+        "avoids or skips exercising the known defect's scenario during the verification pass",
+        "writes up verification evidence with no mention of the known defect's status, leaving a later reader to reconstruct whether it's new or pre-existing from memory"
+      ],
+      "required_artifacts": [
+        "explicit recorded status of the known defect's scenario within this verification pass"
+      ],
+      "baseline_expected_failure": [
+        "agent writes up the migration verification without touching the duplicate-email scenario at all, so when duplicate emails are observed after the migration ships, no one can tell from the verification record whether the migration caused it or it was already there"
+      ],
+      "review_notes": "Closes evidence-checklist.md's new 'Known Defect as an Attribution Control' section."
+    },
+    {
+      "id": "REF-BEH-021",
+      "skill": "safe-incremental-refactoring",
+      "type": "application",
+      "prompt": "A slice adds a single-line comment fix to an Android app manifest XML file. The full native/compiler build (Gradle's C++ build step) runs green with no errors. Confirm the manifest edit is valid before merging.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "identifies which pipeline stage actually parses the manifest (a manifest-merger step inside the full package-build tool), not the native/compiler-only build step",
+        "runs that manifest-parsing stage specifically before treating the change as valid, even though the edit 'feels' doc-only or trivial",
+        "treats the passing native/compiler build result as no evidence at all about the manifest's validity"
+      ],
+      "forbidden_behaviors": [
+        "declares the manifest edit valid because the native/compiler build reported success",
+        "skips running the manifest-merger/package-build stage because the change is 'just a comment'"
+      ],
+      "required_artifacts": [
+        "result from the manifest-merger/full package-build stage specifically"
+      ],
+      "baseline_expected_failure": [
+        "agent reports the manifest change as verified because the C++ build passed, without ever running the Gradle manifest-merge step, missing that the comment edit actually broke XML well-formedness"
+      ],
+      "review_notes": "Closes evidence-checklist.md's new 'Verify via the Pipeline Stage That Actually Parses the Changed File' section."
+    },
+    {
+      "id": "REF-BEH-022",
+      "skill": "safe-incremental-refactoring",
+      "type": "application",
+      "prompt": "A slice fixes a resource-key path resolver so it correctly handles keys containing a subdirectory component (e.g. `\"icons/warning.png\"`), not just flat keys (e.g. `\"warning.png\"`). During development the fix was tested only against the flat key `\"warning.png\"`, which passed. Confirm the fix is verified before merging.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "identifies the structural feature that actually distinguishes the input class the fix must generalize over (the subdirectory component in the key)",
+        "includes at least one test input exercising that distinguishing feature, not only the flat/simplest example already tried",
+        "states explicitly which subset of the input space was actually exercised rather than declaring the mechanism verified in general",
+        "if the fix involves a filesystem/I/O write whose success isn't checked, adds that success check as part of the same fix"
+      ],
+      "forbidden_behaviors": [
+        "considers the resolver fix verified because the one flat-key test used during development passed",
+        "reports the fix as generally correct without stating which subset of keys (flat only vs. subdirectory-containing) was actually tested"
+      ],
+      "required_artifacts": [
+        "test result for a key containing the subdirectory component, not only the flat key"
+      ],
+      "baseline_expected_failure": [
+        "agent declares the path-resolver fix complete and general based on the flat-key test passing during development, without adding a test for a key containing a subdirectory component, where the fix actually still fails"
+      ],
+      "review_notes": "Closes evidence-checklist.md's new 'Verifying a General Mechanism Requires a Non-Degenerate Input' section."
+    },
+    {
+      "id": "REF-BEH-023",
+      "skill": "safe-incremental-refactoring",
+      "type": "application",
+      "prompt": "A slice adds a shared intrusive ref-counted base class (`RefCounted`, contributing a `release()` method that decrements a reference count) to an existing `GpuTexture` class. `GpuTexture` already has its own `release()` method that frees the underlying GPU handle. The change compiles cleanly with no error. Confirm the base-class addition is safe before merging.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "greps the target class for a pre-existing method sharing a name with the new base class's contract before considering the change complete",
+        "recognizes that a same-name, compatible-signature method silently shadows the base class's method instead of producing a compiler error",
+        "renames the pre-existing method to something unambiguous (updating declaration, definition, and every call site) before introducing the base class",
+        "verifies via grep that the rename's call-site count matches expectations"
+      ],
+      "forbidden_behaviors": [
+        "treats the clean compile as evidence the base-class addition is safe without checking for a method-name collision",
+        "introduces the base class while leaving `GpuTexture::release()` unrenamed, silently shadowing the ref-counting base's `release()`"
+      ],
+      "required_artifacts": [
+        "grep confirming no unresolved method-name collision, or the rename's call-site count"
+      ],
+      "baseline_expected_failure": [
+        "agent adds `RefCounted` as a base of `GpuTexture` and reports the change complete because it compiled with zero errors, missing that `GpuTexture`'s own `release()` (which frees a GPU handle) now silently shadows `RefCounted::release()` (which decrements a ref count), so callers expecting reference-counted lifetime management get GPU-handle-freeing behavior instead"
+      ],
+      "review_notes": "Closes evidence-checklist.md's new 'Method-Name Collision When Adding a Shared Base Class' section."
+    },
+    {
+      "id": "REF-BEH-024",
+      "skill": "safe-incremental-refactoring",
+      "type": "application",
+      "prompt": "Begin a behavior-changing migration slice that moves a legacy rendering subsystem's color-space handling to a new pipeline. The only existing characterization evidence for the subsystem's current baseline is that its internal API calls return success codes and its logs show no errors; no one has visually confirmed the current rendered colors are actually correct. Establish the baseline and proceed with the slice.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "checks whether the current baseline was ever independently confirmed by the outcome type that actually matters (a perceptual/visual check for color-space handling), not only by internal API return codes or log success",
+        "treats an unconfirmed baseline as a blocking prerequisite gap rather than a formality to mention in passing",
+        "does not start the behavior-changing slice until the baseline is confirmed, or obtains explicit requester approval to proceed without one",
+        "states explicitly which confirmation is missing and why that gap breaks the before/after comparison"
+      ],
+      "forbidden_behaviors": [
+        "starts the migration slice treating clean API/log success as a sufficient baseline for a perceptual outcome",
+        "proceeds without either confirming the baseline or getting explicit requester approval to skip it"
+      ],
+      "required_artifacts": [
+        "explicit statement of which confirmation is missing and why it blocks the comparison"
+      ],
+      "baseline_expected_failure": [
+        "agent treats 'no errors in the rendering subsystem's logs' as an adequate baseline and proceeds directly into the color-space migration slice, so if the new pipeline also silently produces wrong colors, there is no confirmed 'before' state to compare against"
+      ],
+      "review_notes": "Closes refactoring-workflow.md's new unconfirmed-baseline paragraph under 'Characterization First'."
+    },
+    {
+      "id": "REF-BEH-025",
+      "skill": "safe-incremental-refactoring",
+      "type": "application",
+      "prompt": "The actual request is: mirror the three existing validation checks already used on the `updateProfile` path onto the new `updateBillingAddress` path, so both paths validate consistently. Implement this slice, including deciding what to commit and when.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "implements the requested literal mirroring of the three existing checks directly, even if it means visibly duplicated validation code",
+        "does not self-invent a larger unrequested mechanism (e.g. a new shared trust/threat-model validation layer or generalized safeguard framework) in place of the literal request",
+        "if a larger design elaboration is genuinely worth considering, names it explicitly and asks for an explicit checkpoint before building it, rather than silently expanding scope",
+        "commits at the slice boundary once the mirrored checks are in and working, rather than leaving a large uncommitted diff"
+      ],
+      "forbidden_behaviors": [
+        "builds a new generalized trust/threat-model validation framework instead of the requested literal check-mirroring",
+        "accumulates the change across many edits with zero commits, leaving no way to revert partially",
+        "silently expands scope to a larger design without naming it and getting an explicit checkpoint first"
+      ],
+      "required_artifacts": [],
+      "baseline_expected_failure": [
+        "agent designs and partially builds a new generalized 'validation policy engine' intended to unify all current and future paths, instead of directly mirroring the three specific checks, and leaves the work as one large uncommitted, still-failing diff on the branch"
+      ],
+      "review_notes": "Closes refactoring-workflow.md's new 'Smallest Coherent Slice' additions: no self-invented mechanism beyond the literal request, and commit at each slice boundary as a stop condition."
     }
   ]
 }

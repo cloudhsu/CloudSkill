@@ -1,5 +1,274 @@
 # Changelog
 
+## 7.6.38
+
+Covers PRs #80–90: two new hooks, a session self-audit that produced real
+process fixes, and a 3-way architecture split of
+`coding-agent-project-governance` reached through real discussion (rejected
+a "shared governance core" in favor of respecting that product/art/code
+risk taxonomies are genuinely different, not accidental duplication).
+`python3 scripts/run_all_checks.py` passes clean; a real dry-run of
+`scripts/export_public_bundle.py` also verified clean (see below).
+
+### 2 new hooks
+
+- `coding-agent-project-governance/release-cut-reminder`: advisory,
+  commits-since-last-tag threshold (default 6) -- direct response to this
+  repository's own version tags falling 90 commits behind before 7.6.37.
+- `coding-agent-project-governance/shared-checkout-guard`: advisory,
+  warns at commit time when unstaged/untracked content exists that isn't
+  part of the commit -- response to a real pattern hit 3+ times this
+  session (editing in a checkout another concurrent agent was also
+  working in, caught only reactively).
+
+### Session self-audit (real mistakes, not hypothetical)
+
+- `developing-skills`: candidate-capture-status discipline (answer from
+  the capture tool's actual output, not chat memory) and parallel-dispatch
+  case-ID range coordination (this session's own real `DOC-BEH-009`
+  collision between two forks).
+- `coding-agent-project-governance/references/git-commit-and-branch-hygiene.md`
+  (new): a commit-message backtick/shell-quoting bug and a wrong-guessed-
+  PR-branch-name incident, both hit and fixed this session.
+
+### Architecture split: `coding-agent-git-discipline` (new skill)
+
+Git-mechanics content physically extracted from
+`coding-agent-project-governance` into a new skill: branch/worktree
+control, push-auth recovery, commit/branch hygiene, plus 4 hooks
+(`record-push-outcome`, `block-push-auth-loop`, `release-cut-reminder`,
+`shared-checkout-guard`). `coding-agent-project-governance` freed real
+byte budget (10476 -> 9542/10500). `vikunja-sync-reminder` ownership also
+corrected to `project-management-sync`.
+
+`developing-skills` gained `references/agent-governance-section-template.md`
+-- explicitly a structural checklist (risk taxonomy / evidence definition
+/ stop-condition / release-safety slots), not shared content: product,
+art, and code governance are expected to fill those slots differently,
+not converge on one shared prose core. `document-governance`'s product-
+direction section and `game-art-pipeline`'s Draft Governance step were
+deliberately NOT physically moved or forced to cite it -- zero routing
+risk, zero eval-case migration.
+
+Registry gaps found and fixed while landing the split (none introduced
+today, some pre-existing): the new skill wasn't registered in
+`SKILL_TAXONOMY.md`, `skill-domain-catalog.json`, `skill-distribution.json`,
+or the Claude/Codex plugin manifests; separately, `game-design-systems` and
+`game-narrative-design` were found never registered in
+`skill-domain-catalog.json`'s `skill_classification` at all.
+
+### Public-export bug found and fixed
+
+Actually running `scripts/export_public_bundle.py` (not just
+`run_all_checks.py`, which doesn't cover this path) surfaced a real crash:
+two new routing-case rows had an unescaped comma in their `notes` field,
+same bug class already fixed once for 5 rows in 7.6.36. Fixed and
+re-verified with a full dry-run export to a scratch destination: exit 0,
+new skill correctly included, private-tier skills correctly excluded.
+
+### Docs
+
+`docs/CLOUDBOX_SKILLS_DEVELOPMENT_MAP.md` refreshed from a 2026-08-17/
+v7.6.24 snapshot (90+ commits stale) to current: skill counts, a full
+rewrite of the Hooks section (from "not yet built" to "9 real hooks,
+cross-3-provider" with a full table), roadmap milestones marked done,
+unresolved-items table updated with evidence.
+
+`docs/index.html` (new): a local, git-tracked, human-readable registry
+view of all 41 skills by capability layer, the hooks table, and the
+known-gaps list -- committed as a real file, same
+`html-view-sync-reminder` convention already applied to `product/`/`art/`
+domains, not an external link.
+
+## 7.6.37
+
+Covers PRs #34–79 (2026-08-22 to 2026-08-23): a two-day continuous session
+spanning real runtime-execution analysis tooling, a router/identity defect
+found and closed via ablation testing, a full behavior-execution coverage
+pass, a large Eval Inbox batch review, and a new optional Skill-bundled hook
+mechanism with 7 real hooks. `python3 scripts/run_all_checks.py` passes
+clean (exit 0) at the release tip.
+
+### Runtime-execution analysis tooling
+
+- `scripts/eval_confidence_report_bayesian.py`: Beta-Binomial credible
+  interval over real outcomes recorded in a new, committed, append-only
+  `evals/runtime/execution-ledger.json` (pure-Python incomplete-beta
+  implementation, no scipy; verified against a closed-form check).
+- `scripts/eval_priority_ranker.py`: pessimistic lower-confidence-bound
+  ranking across all 40 Skills (tested or not); validated itself in real use
+  by correctly surfacing `using-cloudbox-skills` as top priority after the
+  routing-trap fix below.
+- `scripts/learning_curve_report.py`: Wright's-Law-style cost curve fit over
+  `evals/runtime/learning-curve-log.json`, with its single-session/
+  confounded-batch limitations disclosed rather than oversold.
+- `scripts/run_ablation_study.py`: bypasses the router with a fixed
+  primary/supporting-Skill decision, reusing the same real context-assembly
+  and CLI-invocation path as the main harness to measure supporting-Skill
+  cost/benefit directly.
+
+### Router routing-trap fix and fabricated-identity defect
+
+Closed a real router "feels trivial" trap where 3 independent Skills
+repeated the same failure mode, and a general, cross-Skill fabricated-
+identity defect (a model tendency to fill an unrequested attribution field
+from ambient session identity, discovered via ablation runs) — two content-
+only fixes were defeated by the model inventing a differently-named field to
+carry the same fact, so this was closed with a deterministic scan+redact
+mechanism (`scan_fabricated_identity`/`redact_fabricated_identity` in
+`runtime_eval_common.py`) instead, plus a canonical shared reference
+(`coding-agent-project-governance/references/no-fabricated-identity.md`).
+
+### Full behavior-execution coverage pass
+
+Completed the 52-case execution pass (surviving a real session usage-limit
+reset mid-run) across routing and behavior cases for the touched Skills,
+recording every real outcome to the new execution ledger — the actual
+current coverage numbers (10/40 Skills with real behavior-depth evidence,
+30/40 routing-only) are tracked going forward via the priority ranker rather
+than restated here as a point-in-time claim.
+
+### Eval Inbox batch review (PRs #66–73, #76–79)
+
+Reviewed and converted roughly 20 Eval Inbox candidates into real Skill
+content across `cloudbox-game-migration`, `native-ios-game-rewrite`,
+`cross-platform-native-architecture`, `safe-incremental-refactoring`,
+`gameplay-core-modernization`, `game-asset-resolution-audit`,
+`game-art-pipeline` (draft governance, AI-art-generation-governance
+reference, final-delivery product/variant/platform hierarchy, batch-
+generation matrix planning), `document-governance` (product-direction role,
+HTML overview-view convention), `agent-development-process` (session/agent
+continuity), and `coding-agent-project-governance` (bounded GitHub push-
+auth recovery, stale-workspace-authority pointer). One candidate found
+redundant with already-merged content and archived without new Skill
+changes rather than force-fit.
+
+### Skill-bundled hook mechanism (new)
+
+`scripts/install_skill_hooks.py`: a Skill may now optionally bundle one or
+more deterministic hooks under `hooks/<name>/{script.sh,manifest.json}`;
+this script discovers them and safely merges the wiring into a consumer
+project's Claude Code / Codex CLI / Gemini CLI config (never overwrites the
+whole file), always opt-in, never installs non-interactively without
+`--yes`. Verified working across all 3 providers' real hook systems (event
+names, matcher requirements, and blocking mechanisms confirmed via each
+provider's own docs, not assumed).
+
+7 real hooks shipped, each independently tested against multiple real
+scenarios before merge:
+
+- `game-art-pipeline/art-draft-catalog` — blocks a commit adding/modifying a
+  generated concept image without its catalog file.
+- `coding-agent-project-governance/identity-leak-backstop` — blocks a
+  commit whose staged diff adds the checkout's own git identity into a
+  document-field-shaped line (real backstop for the defect above).
+- `coding-agent-project-governance/lifecycle-evidence-reminder` — advisory
+  reminder when a Skill's content changed without its `lifecycle.json`.
+- `coding-agent-project-governance/record-push-outcome` +
+  `block-push-auth-loop` — generalized from this repository's own
+  directly-installed pair into a reusable bundle; installed into
+  lotto/cloudbox-engine/WphApp/cloudbox-skills.
+- `coding-agent-project-governance/vikunja-sync-reminder` — mandatory
+  (blocking, loop-safe via `stop_hook_active`) reminder using Claude Code's
+  `Stop`, Codex CLI's `Stop`, and Gemini CLI's `AfterAgent` events.
+- `document-governance/html-view-sync-reminder` — advisory reminder when a
+  governed domain's Markdown changed without its adopted `index.html`
+  overview.
+
+Also fixed a real, reproduced bug this mechanism surfaced: `.gitignore`
+covered the top-level `.worktrees/` pattern but not `.claude/worktrees/`
+(where fork-agent isolated worktrees actually land), which broke
+`freeze_skill_review_packet.py`'s `changed_paths()` whenever a fork agent's
+worktree existed during a checks run.
+
+### Project-management-sync formalization
+
+Formalized the standing Vikunja/task-tracker sync habit (fixed field
+format, append-only progress-in-task-not-chat for open long-running work)
+into `project-management-sync/SKILL.md`'s Human-Readable Description Format
+section, so any session working in this repository picks it up from the
+Skill itself, not only from personal memory.
+
+## 7.6.36
+
+### Eval Inbox batch review: 31 candidates, 8 owner Skills
+
+Full batch review of all remaining Eval Inbox candidates (27 equipment-dev
+candidates imported from an external mining session, plus 4 long-pending
+`indie-game-product-evolution` candidates), dispatched as 5 parallel
+clusters:
+
+- `indie-game-product-evolution`: consolidated 4 candidates into one new
+  "revisit scope/risk/milestone decisions on a recurring cadence during
+  production" workflow step (was previously a one-time-only decision).
+- `wph-equipment-simulator-development`: report-only/policy-selection input
+  authority safeguards, dispatch-vs-hardware-capacity attribution, baseline-
+  drift disclosure, fixed-flow-to-declarative-timing migration discipline,
+  plus (from a second cluster) the authoritative-simulation-state-vs-
+  projection contract -- visualization/animation/GUI layers as a read-only
+  projection, one-location-per-material custody, label-collision handling.
+- `cross-platform-engine-architecture`, `framework-design`: reusable
+  visualization DLL/component boundary and projection-test/host-adoption
+  verification safeguards.
+- `coding-agent-project-governance`, `architecture-review`: process-lock/
+  force-close safety during iterative development; don't retire a validated
+  baseline on visual parity alone, stage independently-scoped migrations.
+- `equipment-domain-modeling`, `developing-eval`: capability-declaration-
+  over-fixed-geometry modeling pattern (ports, aligners, LoadLocks, robot
+  motion profiles); SME-correction distillation authority ranking.
+
+All source candidates project-history/web-research-mined, `inferred`
+confidence, case/contract-layer evidence only -- live Skill/behavior
+execution NOT RUN. Every consumed candidate archived to
+`.local/eval-inbox/processed/` with a `review_decision` record (gitignored,
+not part of this diff).
+
+### Public-export portability fixes
+
+Found and fixed while running the public `CloudSkill` export for the first
+time since v7.6.19 (2026-08-15) -- a class of drift bugs between the export
+filter and its own consuming validators:
+
+- Quoted 5 CSV `notes` fields containing unescaped commas that broke strict
+  parsing.
+- `validate_pack.py` now imports `PRIVATE_INFRASTRUCTURE_PATHS` from
+  `export_public_bundle.py` instead of a hand-maintained duplicate that had
+  drifted (missing several already-excluded paths).
+- `validate_behavior_evals.py` and its `ENG-BEH-004` elicitation-contract
+  check now tolerate a private-tier consumer/case missing from a filtered
+  public checkout, instead of crashing.
+- The staleness-checker regression test now runs against an isolated
+  synthetic git fixture instead of this repository's own live tag history,
+  making it portable to any checkout.
+- `scripts/sync_private_codex_plugin.py` excluded from the public export
+  (both source and destination are private-only, so it was a no-op there).
+
+### Confidence-bound reporting + append-only lifecycle enforcement
+
+At the user's request, following a discussion connecting Eval-mining
+practice to discrete-math (lattice/CRDT monotonicity) and statistical
+(Hoeffding bound) frameworks for "does a change provably not make things
+worse":
+
+- `scripts/eval_confidence_report.py` (new, public): advisory CLI computing
+  the statistical confidence margin a Skill's current authored case count
+  actually supports, via Hoeffding's inequality. Referenced from
+  `developing-skills`' release-report step.
+- `scripts/validate_lifecycle_monotonicity.py` (new, public, wired into
+  `run_all_checks.py`): structural check enforcing that every
+  `lifecycle.json` `notes` field is only ever appended to, never
+  overwritten or shortened.
+
+### Install scripts ask about local config
+
+`install.sh`/`install.ps1` now ask once (interactive terminals only,
+default yes) whether to create a local Eval-capture config, instead of
+silently defaulting. `INSTALL.md` explicitly instructs a coding agent
+running an install on the user's behalf to ask the same question in the
+conversation itself -- covering both Plugin-mode and Standalone-mode
+installs -- since the script's own stdin prompt cannot fire through an
+agent-invoked subprocess.
+
 ## 7.6.35
 
 ### New Skill: game-art-pipeline (experimental, private-art)

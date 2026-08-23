@@ -77,6 +77,18 @@ Provide:
 - Operations/release/checklist docs.
 - Decision and requirement history where necessary.
 
+When the repository hosts both a product and a separately-versioned reusable
+engine or component library, give product direction (owned by
+`document-governance`'s product-direction document role) and visual-artifact
+governance (owned by `game-art-pipeline`'s draft-governance step, when the
+repository has one) their own sibling top-level lanes alongside the
+development-evidence lane above -- not nested under it. Define what each lane
+does and does not have authority over, and require an explicit cross-link
+whenever a product or visual decision changes implementation scope, rather
+than letting the change land unlinked in only one lane.
+
+Verify the real repo root/branch first; stale pointers are `document-governance` §0.
+
 ### 4. Route by risk
 
 Classify work as low, medium, or high risk based on consequence, not code size.
@@ -116,13 +128,21 @@ Possible roles:
 
 Do not use subagents when tasks cannot be isolated or when they will edit the same critical files concurrently. When two or more isolated subagents' inputs do not depend on each other's output, dispatch them in parallel within the same turn rather than serializing work that has no ordering dependency.
 
-### 6. Control branches and worktrees
+### 6. Preserve evidence before it is committed
 
-- Preserve existing changes.
-- Use isolated branches/worktrees for concurrent writers.
-- Keep commits single-purpose, testable, and reversible.
-- Do not use destructive reset or fabricate history.
-- Main/Integrator owns final diff and conflict resolution.
+- Commit product-direction and visual-artifact discussion documents,
+  proposal registers, draft images, provenance metadata, and templates once
+  they become project evidence -- do not leave the only copy in chat
+  history, an ignored worktree, or a generation cache. A commit records
+  existence and recoverability, not approval: preserve DRAFT/status
+  markers inside the committed artifact itself rather than treating the
+  commit event as human sign-off, runtime validation, or release
+  readiness. Use versioned filenames or append-only records instead of
+  overwriting an earlier draft, and link each checkpoint to its commit.
+
+For the git mechanics themselves (branches, worktrees, commit hygiene,
+push-auth recovery, shared-checkout detection, release cadence), use
+`$coding-agent-git-discipline`.
 
 ### 7. Require evidence
 
@@ -135,6 +155,13 @@ Handoff must separate:
 - MANUAL REQUIRED.
 
 Do not claim device, OS, deployment, browser, or external-system tests that were not executed.
+
+Do not fabricate an attribution, author, submitted-by, or other identity
+field that the task never supplied, even when a report-style deliverable
+"looks like" it should carry one -- see `references/no-fabricated-identity.md`
+for the rule, why it recurs across unrelated skills, and how it differs from
+the separate known-identity redaction case. A bundled `identity-leak-backstop`
+hook enforces this deterministically at commit time.
 
 A CI/PR status-check polling command (or a background task wrapping one) can
 report a nonzero exit code or a "failed"-labeled status purely because a check
@@ -164,6 +191,9 @@ continuing:
   explicit user checkpoint. A defensive change made to satisfy one review
   pass must not introduce a new conflict with the agent's own prior changes.
 
+For a failed GitHub `git push` or any other git-mechanics failure, use
+`$coding-agent-git-discipline`.
+
 ### 9. Release safely
 
 Define:
@@ -185,6 +215,11 @@ branch is clean and the tag is reachable from it. When a step remains that
 the agent cannot complete itself (a remaining push, an external approval),
 leave a precise operator handoff naming exactly what is left and why,
 rather than an ambiguous "done" that omits it.
+
+Before rebuilding a GUI or other long-running executable, verify no relevant
+process still holds the target output and remind the operator to close it
+first. Treat that lock as a stop condition for the operator to resolve —
+never force-close a user's running process merely to unblock a build.
 
 ## Output Format
 

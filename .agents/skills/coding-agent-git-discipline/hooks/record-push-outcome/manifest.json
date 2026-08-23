@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "name": "record-push-outcome",
+  "owner_skill": "coding-agent-git-discipline",
+  "description": "PostToolUse companion to block-push-auth-loop: classifies every `git push` attempt's outcome (auth_failure, protection_rejection, success, other_failure, unknown) into a local gitignored journal (.cloudskill-hooks-state/push-auth-journal.jsonl). Never blocks by itself. Generic across any git repository -- install alongside block-push-auth-loop.",
+  "script": "script.sh",
+  "providers": {
+    "claude": {
+      "config_file": ".claude/settings.json",
+      "event": "PostToolUse",
+      "matcher": "Bash"
+    },
+    "codex": {
+      "config_file": ".codex/hooks.json",
+      "event": "PostToolUse",
+      "matcher": "Bash"
+    },
+    "gemini": {
+      "config_file": ".gemini/settings.json",
+      "event": "AfterTool",
+      "matcher": "run_shell_command"
+    }
+  }
+}

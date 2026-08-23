@@ -1,0 +1,4 @@
+interface:
+  display_name: "Coding-agent Git Discipline"
+  short_description: "Git commit, branch, and push mechanics for a coding agent"
+  default_prompt: "Use $coding-agent-git-discipline to complete this task."

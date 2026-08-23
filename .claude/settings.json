@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/validate-push-readiness.sh",
+            "timeout": 30
+          },
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/block-push-auth-loop.sh",
+            "timeout": 15
+          },
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/coding-agent-git-discipline/release-cut-reminder/script.sh",
+            "timeout": 15
+          },
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/coding-agent-git-discipline/shared-checkout-guard/script.sh",
+            "timeout": 15
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/record-push-outcome.sh",
+            "timeout": 15
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/project-management-sync/vikunja-sync-reminder/script.sh",
+            "timeout": 15
+          }
+        ]
+      }
+    ]
+  }
+}

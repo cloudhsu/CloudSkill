@@ -1,5 +1,5 @@
 {
-  "version": "7.6.35",
+  "version": "7.6.38",
   "skills": [
     {
       "name": "about-me",
@@ -38,10 +38,16 @@
       "file_count": 4
     },
     {
+      "name": "coding-agent-git-discipline",
+      "description": "Use when a coding agent must commit, push, branch, or clean up git state safely -- avoiding shell-quoting bugs in commit messages, verifying an existing PR's real branch name before pushing fixes, recovering from a failed GitHub push without a login loop, detecting a possibly-shared working tree before committing, and reminding about an overdue version/release cut.",
+      "path": ".agents/skills/coding-agent-git-discipline/SKILL.md",
+      "file_count": 13
+    },
+    {
       "name": "coding-agent-project-governance",
       "description": "Use when a repository needs coding-agent instructions, risk routing, worktree rules, multi-agent ownership, test evidence, migration controls, release rules, or truthful handoff.",
       "path": ".agents/skills/coding-agent-project-governance/SKILL.md",
-      "file_count": 11
+      "file_count": 16
     },
     {
       "name": "cross-platform-native-architecture",
@@ -53,7 +59,7 @@
       "name": "developing-skills",
       "description": "Use when creating, editing, splitting, merging, evaluating, or releasing CloudSkill skills. For mining prior interactions or user corrections into evidence, use developing-eval instead.",
       "path": ".agents/skills/developing-skills/SKILL.md",
-      "file_count": 11
+      "file_count": 12
     },
     {
       "name": "development-process-tailoring",
@@ -65,7 +71,7 @@
       "name": "document-governance",
       "description": "Use when engineering documents disagree on authority, version lineage, audience, approval state, traceability, terminology, source data, or release baseline.",
       "path": ".agents/skills/document-governance/SKILL.md",
-      "file_count": 8
+      "file_count": 11
     },
     {
       "name": "equipment-control-architecture",
@@ -89,7 +95,7 @@
       "name": "project-management-sync",
       "description": "Use when safely auditing, previewing, reconciling, or applying synchronization of plans, tasks, statuses, dates, or project records between a local or internal backlog and external project-management systems such as Vikunja, OpenProject, or Redmine, especially when provider versions/capabilities may drift, duplicate writes must be prevented, credentials must work across macOS/Windows/Ubuntu/CI, or every mutation needs post-write verification.",
       "path": ".agents/skills/project-management-sync/SKILL.md",
-      "file_count": 6
+      "file_count": 12
     },
     {
       "name": "safe-incremental-refactoring",

@@ -1,13 +1,14 @@
 # CloudBox Skills 發展地圖
 
 - 文件 ID：CBX-MAP-001
-- 版本：0.1
+- 版本：0.2
 - 狀態：目前狀態與路線總覽（informative view）
-- 更新日期：2026-08-17（Asia/Taipei）
-- 觀察基準：`main` / `origin/main`，commit `e35c8f0`
-- 最新正式 tag：`v7.6.24`；目前 `main` 比該 tag 多 8 個 commits
+- 更新日期：2026-08-23（Asia/Taipei）
+- 觀察基準：`main` / `origin/main`，commit `a41d53c`
+- 最新正式 tag：`v7.6.37`；目前 `main` 比該 tag 多 10 個 commits
 - 文件 owner：CloudBox Skills 維護者
 - 權威性：本文件是跨文件的導航與狀態視圖；各項 mutable fact 仍以列出的 registry、Eval、Git tag 與 release evidence 為準
+- 人類閱讀版：[`docs/index.html`](index.html)（本機靜態頁面，直接開啟即可，非本文件的第二權威來源；技能組合有實質變動時與本文件一起更新）。另有一份對應的私有 claude.ai artifact 連結：https://claude.ai/code/artifact/7c5b1fc2-99a4-44b7-b83a-8b0ff95443a2
 
 ## 1. 目的與範圍
 
@@ -41,7 +42,7 @@ Core public 或私有子分類分發（private-meta／private-game／private-equ
         ↓
 learn：保留修正、失敗模式與下一個案例
 
-未來補入的 Hooks：在 Agent lifecycle 邊界做觸發、防護、提醒與快速檢查；不擁有 Skill lifecycle 狀態。
+Hooks：在 Agent lifecycle 邊界做觸發、防護、提醒與快速檢查；不擁有 Skill lifecycle 狀態。2026-08-23 起已從「未來補入」變成「已實作、跨 3 provider」——見第 8 節。
 ```
 
 圖的觀點是「Skill 演化與分發控制流」，不是部署圖；箭頭表示主要邏輯順序，不表示所有執行都同步或由同一程序完成。`config/`、`evals/`、Git release 與 release evidence 才是各自領域的來源。
@@ -50,18 +51,20 @@ learn：保留修正、失敗模式與下一個案例
 
 | 項目 | 目前觀察 | 來源／限制 |
 |---|---:|---|
-| canonical Skills | 29 | `.agents/skills/` 目錄快照；新增 Skill 後需重新計數 |
-| lifecycle `active` | 27 | 各 canonical `lifecycle.json` 快照 |
-| lifecycle `experimental` | 2 | 目前為 `runtime-evaluation-engineering`、`teach-while-building` |
-| public Core distribution | 19 | `config/skill-distribution.json` |
-| private `evolution-pack` | 10 | 包含 Skill 演化工具、Runtime Eval 與產品／遊戲 Skills |
-| Behavior case files | 34 | `evals/behavior/cases/`；case 存在不等於已執行模型 |
-| Runtime case files | 8 | `evals/runtime/cases/` |
+| canonical Skills | 41 | `.agents/skills/` 目錄快照；新增 Skill 後需重新計數 |
+| lifecycle `active` | 28 | 各 canonical `lifecycle.json` 快照 |
+| lifecycle `experimental` | 13 | 含 2026-08-23 新增的 `coding-agent-git-discipline`（拆分自 `coding-agent-project-governance` 的 git 操作機制） |
+| Core distribution | 21 | `config/skill-distribution.json`（含新拆分的 `coding-agent-git-discipline`） |
+| private tiers 合計 | 20 | `private-game` 9、`private-equipment` 4、`private-meta` 3、`private-art` 3、`private-operation` 1 |
+| Behavior case files | 46 | `evals/behavior/cases/`；case 存在不等於已執行模型 |
+| Runtime case files | 13 | `evals/runtime/cases/` |
 | implemented lifecycle templates | 3 | `lightweight-change`、`bounded-feature`、`skill-evolution` |
 | deferred lifecycle templates | 7 | 不得因名稱相似而自動 fallback |
-| Agent Hooks | 0 個 repo hook 配置 | 目前未納入 Codex／Claude plugin；`.git/hooks/` 不算 Agent Hooks |
+| **Agent Hooks（已實作）** | **9 個 bundled hook，跨 Claude/Codex/Gemini 3 provider** | `.agents/skills/*/hooks/*/manifest.json`；`scripts/install_skill_hooks.py` 為安裝機制；見第 8 節詳細清單 |
+| 真實 behavior-depth 執行證據 | 10/41 skills（約 24%） | `evals/runtime/execution-ledger.json`；其餘 skills 僅有 routing 層級真實執行證據，不代表行為未經檢查（結構/contract 驗證仍在跑），但不是「已跑過模型驗證行為」 |
+| 真實執行紀錄（ledger 累計） | 106 筆（42 routing／64 behavior） | 同上；`scripts/eval_priority_ranker.py` 目前 LCB 最低為 `using-cloudbox-skills`（router 本身，0.0%），其次 `document-governance`／`game-quality-and-release-gates`（各 6.2%） |
 
-以上是 `e35c8f0` 的狀態快照，不是永久數字。新增 Skill、case、template 或 plugin projection 後，應更新本文件或建立新的狀態快照。
+以上是 `a41d53c`（`v7.6.37` 之後 10 個 commit）的狀態快照，不是永久數字。新增 Skill、case、template 或 plugin projection 後，應更新本文件或建立新的狀態快照。
 
 ## 4. 能力與產品領域
 
@@ -179,34 +182,54 @@ private-game / private-equipment / private-operation / private-art
   （2026-08-18 起由單一 evolution-pack tier 拆分而來）
 ```
 
-觀察基準是 `e35c8f0`（見文件開頭），但這是一份快照，不是永久事實——這份文件自己被 commit 進去之後，`main` 就已經往前移動；讀者應以 `git rev-parse main`／`git describe --tags` 的即時結果為準，不要把本節的 commit 名稱當成目前狀態的斷言。最新 annotated tag 仍為 `v7.6.24`。因此：
+觀察基準是 `a41d53c`（見文件開頭），但這是一份快照，不是永久事實——這份文件自己被 commit 進去之後，`main` 就已經往前移動；讀者應以 `git rev-parse main`／`git describe --tags` 的即時結果為準，不要把本節的 commit 名稱當成目前狀態的斷言。最新 annotated tag 為 `v7.6.37`（2026-08-23，涵蓋 PR #34-79，見 `docs/releases/7.6.37-release-notes.md`）。因此：
 
-- `v7.6.24` 是最後正式 immutable release baseline。
-- `main` 是包含後續 `indie-game-product-evolution` active promotion 等變更的開發 tip，且會持續往前移動。
+- `v7.6.37` 是最後正式 immutable release baseline。
+- `main` 是包含後續 Skill 拆分（`coding-agent-git-discipline`）、registry 修正等變更的開發 tip，且會持續往前移動。
 - 在下一個版本 tag、CI、plugin install smoke test、post-release record 完成前，不應把目前 tip 稱為下一個正式 release。
 
 公開／私有 export 的唯一分發權威是 [`config/skill-distribution.json`](../config/skill-distribution.json)。
 
-## 8. Hooks 的位置
+## 8. Hooks 的位置（2026-08-23 起：已實作，非未來規劃）
 
-Hooks 尚未建立為 CloudBox Skills 的正式 repo 層。未來可採：
+Hooks 已建立為 CloudBox Skills 的正式、可選安裝層。機制：一個 Skill 可以在
+`hooks/<hook-name>/{script.sh,manifest.json}` 底下宣告任意數量的 hook；
+`scripts/install_skill_hooks.py` 掃描所有已安裝 Skill 的 hook，逐一詢問是否要
+安裝進消費端專案的 Claude Code／Codex CLI／Gemini CLI 設定（安全合併既有設定
+檔，不整檔覆寫；預設不裝，永遠需要明確同意或 `--yes`）。
 
-```text
-PreToolUse   workspace、secret、protected-path、side-effect guard
-PostToolUse  diff check、schema／static validator、evidence reminder
-PostCompact  重新注入 handoff、lifecycle checkpoint、canonical paths
-SessionStart 顯示 branch、版本與目前工作狀態
-```
+目前 9 個真實 hook，全部經過真實情境測試（不是只寫完沒測）：
 
-Hooks 不應：
+| Hook | Owner Skill | 類型 | 一句話 |
+|---|---|---|---|
+| `art-draft-catalog` | `game-art-pipeline` | blocking | 新增／改動生成美術草稿卻沒同步更新 catalog，擋下 commit |
+| `identity-leak-backstop` | `coding-agent-project-governance` | blocking | 偵測 commit 把使用者真實 git 身分洩漏進文件欄位 |
+| `lifecycle-evidence-reminder` | `coding-agent-project-governance` | advisory | Skill 內容改了但 `lifecycle.json` 沒動，提醒確認 |
+| `html-view-sync-reminder` | `document-governance` | advisory | 已採用 `index.html` 總覽的 domain，Markdown 改了但總覽沒同步 |
+| `record-push-outcome` / `block-push-auth-loop` | `coding-agent-git-discipline` | advisory／blocking | 記錄 push 結果、連續認證失敗達門檻時擋下重複登入迴圈 |
+| `release-cut-reminder` | `coding-agent-git-discipline` | advisory | 距離上次 tag 超過門檻 commit 數，提醒考慮切版本 |
+| `shared-checkout-guard` | `coding-agent-git-discipline` | advisory | commit 時偵測 working tree 裡有非本次改動的未追蹤／未暫存內容（可能是其他 agent 同時在同一個 checkout 工作） |
+| `vikunja-sync-reminder` | `project-management-sync` | blocking（loop-safe） | 有 commit 但 transcript 完全沒提到追蹤器關鍵字，強制多跑一輪確認 |
 
-- 擁有 durable lifecycle state。
+Provider 對應（3 個都驗證過，不是假設）：
+
+| Provider | Pre-tool 事件 | Bash matcher | Post-tool 事件 | 無 matcher 事件（Stop 類） |
+|---|---|---|---|---|
+| Claude Code | `PreToolUse` | `"Bash"` | `PostToolUse` | `Stop` |
+| Codex CLI | `PreToolUse` | `"Bash"` | `PostToolUse` | `Stop` |
+| Gemini CLI | `BeforeTool` | `"run_shell_command"` | `AfterTool` | `AfterAgent` |
+
+Hooks 仍然不應：
+
+- 擁有 durable lifecycle state（狀態只記在各自輕量的本機 journal，例如
+  `.cloudskill-hooks-state/push-auth-journal.jsonl`，不取代 lifecycle
+  registry）。
 - 複製 `config/lifecycle-templates.json` 的規則。
 - 取代 Runtime Eval 或 grader。
-- 自動 commit、tag、push 或 release。
+- 自動 commit、tag、push 或 release（`release-cut-reminder` 只提醒，不自己切版本）。
 - 把中間狀態描述成正式完成。
 
-應由 lifecycle orchestration 擁有狀態，由 Eval 擁有驗證證據，Hooks 只做觸發、防護、提醒與快速檢查。
+應由 lifecycle orchestration 擁有狀態，由 Eval 擁有驗證證據，Hooks 只做觸發、防護、提醒與快速檢查——這個分工原則沒變，只是「Hooks 尚未存在」這個前提已經不成立。
 
 ## 9. 跨 Agent 發展注意事項
 
@@ -283,30 +306,45 @@ cloudbox-skills/
 
 優先考慮 `release`、`hotfix`、`brownfield-refactor`、`incident-recovery`；每個 template 都需要自己的 RED、contract、validator 與 behavior evidence，不能從既有 template 靜默 fallback。
 
-### P2a：加入最小 Hooks 層（P2 內優先於 P2b）
+### P2a：加入最小 Hooks 層——已完成（2026-08-23）
 
-先做 `PreToolUse` 安全防護、`PostToolUse` 快速驗證與 `PostCompact` context recovery；等 lifecycle 與 release 基線穩定後再實作。
+`PreToolUse`／`PostToolUse`／`Stop` 三類都已實作，9 個真實 hook，跨 3 provider，見第 8 節。`PostCompact` context recovery 仍未做，移入 P2c。
 
-### P2b：擴展產品領域（P2 內次於 P2a——Hooks 是跨領域基礎設施，新產品領域可以晚一步）
+### P2b：擴展產品領域——`game-art-pipeline` 已完成並升級（experimental，含完整 draft governance／AI 產圖治理／批次生成驗證），其餘仍待：
 
-- `game-art-pipeline`
-- `game-marketing-and-monetization`
+- `game-marketing-and-monetization`（仍只是候選方向）
 - 非遊戲 legacy archaeology
 - 非遊戲 release-readiness／migration
 - 安全分析與 threat modeling
 
 新領域預設先進 private candidate，完成去識別化、owner／overlap review 與完整 Eval 後再考慮 Core。
 
+### P2c：`PostCompact` context recovery（新拆出，原 P2a 範圍的一部分）
+
+重新注入 handoff、lifecycle checkpoint、canonical paths；目前 9 個 hook 都是
+`PreToolUse`／`PostToolUse`／`Stop`，沒有任何一個處理 context-compaction 邊界。
+
+### P3：深化真實 behavior-depth 執行證據（新增，來自 2026-08-23 盤點）
+
+目前 41 個 Skill 只有 10 個（約 24%）有真實 behavior 層執行證據，其餘僅有
+routing 層級證據。`scripts/eval_priority_ranker.py` 的悲觀 LCB 排名目前最弱
+的是 `using-cloudbox-skills`（router 本身，0.0%）——路由器自己是驗證最薄弱的
+一環，值得優先處理。另外，決定論打分器（`grade_behavior_evals.py`）目前只
+覆蓋 303 個 behavior case 中的 7 個，且是為本機 Ollama 模型那條線設計的，不
+是這個 session 一直在用、真正產生 106 筆 ledger 紀錄的 Claude/Codex CLI 那條
+線——後者的打分依據至今仍是人工（模型）判斷，沒有獨立交叉驗證。
+
 ## 11. 未解決事項與重訪條件
 
 | ID | 未解決事項 | 重訪條件 |
 |---|---|---|
-| MAP-R01 | `main` 已超過 `v7.6.24`，下一個正式版本尚未封版 | P0 release gates 完成 |
+| MAP-R01 | ~~`main` 已超過 `v7.6.24`，下一個正式版本尚未封版~~ **已解決**：`v7.6.37` 於 2026-08-23 封版，涵蓋 PR #34-79 | 已完成 |
 | MAP-R02 | handoff、release history 與最新 main 狀態可能不同步 | 每次 evolution increment 結束時更新 |
 | MAP-R03 | Core router 在 public-only 安裝時不能路由到 private Skill | public/private split 實際執行時驗證 |
 | MAP-R04 | 部分 behavior evidence 仍只有單一 archetype | 新增第二種 application case 並完成 RED/GREEN |
 | MAP-R05 | provider-backed OpenProject／Redmine 執行仍未實測 | 提供隔離測試 instance 與非正式 credential |
-| MAP-R06 | Agent Hooks 尚無跨 Codex／Claude 的 adapter 設計 | lifecycle 與 release 基線穩定後建立最小 PoC |
+| MAP-R06 | ~~Agent Hooks 尚無跨 Codex／Claude 的 adapter 設計~~ **已解決**：9 個 hook 已跨 Claude Code／Codex CLI／Gemini CLI 3 provider 驗證並上線，見第 8 節 | 已完成 |
+| MAP-R09 | 真實 behavior-depth 執行證據僅 10/41（24%）；決定論打分器只覆蓋 7/303 case 且不是這個 session 主要使用的 Claude/Codex CLI 那條線，該線的 106 筆真實 ledger 紀錄至今仍是人工判斷、無獨立交叉驗證 | 見第 10 節 P3；優先處理 `using-cloudbox-skills`（router 自身，LCB 0.0%） |
 | MAP-R07 | Skill／Eval 契約可攜，但 runner、Hook、plugin 介面尚未形成 adapter matrix | 新增 Agent provider 時完成 portability／install／routing／behavior evidence |
 | MAP-R08 | 兩份文件都用「單一檔案持續累加敘事」模式，寫法本身沒變，之後都會持續重演成長問題：(1) `CLOUDBOX_SKILLS_AGENT_HANDOFF.md`，2026-08-18 已因長到 1898 行／110KB 做過一次手動歸檔（見 `docs/history/AGENT_HANDOFF_ARCHIVE.md`）；(2) `docs/CLOUDBOX_SKILLS_CHANGE_HISTORY.md`（2026-08-18 稽核發現，尚未處理）——2781 行／159KB，回溯到 2026-08-08，結尾「Maintenance rule」明文規定「每次新 increment 都在最上面加一筆」，且是 `AGENTS.md` Read order 第 4 項與 `validate_evolution_handoff.py` 必查 marker 檔案，強制載入成本比 handoff 更高。次要觀察：`CHANGELOG.md`（1476 行／87KB，61 個版本，非強制閱讀，`docs/history/RELEASES.md` 已明講改查它，急迫性較低）；`*-workspace/` 資料夾（`safe-incremental-refactoring-workspace/` 已有 iteration-1/iteration-2/skill-snapshot 等疊代快照，屬於「累積目錄」而非「單一文件變胖」，可能是刻意保留、未必是缺陷）；本表（MAP-R 表）自己也沒有明文的 resolved 後移除規則，目前僅 8 筆，暫不急迫。提議的根治方案（handoff／change-history 通用）：改成「每個 increment 各自獨立成檔（沿用 `docs/releases/`／`docs/evolution/` 現有模式）＋ 該文件只放一行索引（日期、版本／slug、一句話、連結）」，成長成本從 O(整段敘述) 降到 O(一行)，之後不需要再手動歸檔。**2026-08-18 已加上機制性 guardrail**：`scripts/validate_evolution_handoff.py`（既有腳本，未另開新檔）新增 `LIVING_DOC_BUDGET_BYTES` 檢查——`CLOUDBOX_SKILLS_AGENT_HANDOFF.md` 設 20,000 bytes 活動預算，`docs/CLOUDBOX_SKILLS_CHANGE_HISTORY.md` 用「凍結上限」鎖在稽核當下的 159,084 bytes（零成長空間，不是永久豁免），超標會讓 CI 直接 FAIL，概念上比照 `scripts/validate_skill_context_budget.py` 的 `GRANDFATHERED_CEILINGS` 做法。這解決了「規則沒有強制力」的問題，但索引化重寫本身仍未實作，`docs/CLOUDBOX_SKILLS_CHANGE_HISTORY.md` 仍是 159KB 的凍結狀態，不是已經修好。 | 下次規劃大範圍多步驟工作之前先設計並實作索引化重寫；凍結上限本身不需要觸發條件，已經在運作 |
 

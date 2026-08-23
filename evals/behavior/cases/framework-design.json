@@ -119,6 +119,102 @@
                 "agent centralizes a registry structurally but does not prove propagation or detect consumer drift"
             ],
             "review_notes": "The closest authoritative-contract pattern requires both positive propagation and negative injected-drift coverage."
-        }
+        },
+    {
+      "id": "FW-BEH-006",
+      "skill": "framework-design",
+      "type": "application",
+      "prompt": "We have a reusable PeriodicWorkerMixin used by several products: a scheduler thread calls the subclass's on_tick() repeatedly, and rechecks self._paused / self._stopped / self._cancel_token only in between those calls -- pause(), stop() and cancel() never interrupt a call to on_tick() itself. Design a subclass override of on_tick() for a device-polling product that must drain an entire incoming command queue, processing every queued command before returning control to the scheduler.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "identifies that an on_tick() override draining the whole queue in one call runs its own indefinite internal loop and defeats the mixin's pause/stop/cancellation flags, since those are only rechecked between ticks",
+        "bounds each override invocation to one unit of work (e.g. one command, or one small fixed-size chunk) and lets the scheduler drive repeated calls to process the rest",
+        "requires verifying that pause()/stop()/cancel() actually take effect within one tick interval, not only after an unbounded override finishes on its own",
+        "flags this as a required check for every override of the mixin's per-tick callback, not just this one product"
+      ],
+      "forbidden_behaviors": [
+        "implements or accepts an on_tick() override with an internal while/for loop that only returns once the queue is empty",
+        "assumes the mixin's cooperative flags will interrupt the override mid-loop without the override itself checking them",
+        "treats the long-draining override as merely a performance concern rather than a silent breakage of pause/stop/cancellation"
+      ],
+      "required_artifacts": [],
+      "baseline_expected_failure": [
+        "agent writes on_tick() with an internal loop that drains the full queue before returning, unaware this blocks the mixin's pause/stop checks until the loop finishes on its own"
+      ],
+      "review_notes": "Closes the new Framework Failure Modes bullet on periodic/worker mixin overrides that run their own indefinite internal loop instead of returning promptly each tick."
+    },
+    {
+      "id": "FW-BEH-007",
+      "skill": "framework-design",
+      "type": "application",
+      "prompt": "A MediaPlayer class composes two reusable bases: PlaybackController, a domain interface with play(), stop(), pause() and resume() for playback state, and ThreadWorkerMixin, a generic utility that also declares start(), stop(), pause() and resume() to control its own background processing thread. MediaPlayer needs a teardown() method that stops playback, stops the background thread, and then releases a shared hardware decoder handle on the calling thread. Design the lifecycle methods and teardown sequence.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "explicitly flags the identically-named play/stop/pause/resume methods on the domain interface and the thread-control mixin as a collision between unrelated concepts, not something to leave for MRO or qualified super calls to sort out",
+        "requires the derived class to disambiguate with distinct, purpose-specific method names (e.g. playback_stop/playback_pause versus worker_stop/worker_pause) rather than one overloaded stop()",
+        "requires teardown to confirm the background thread has actually observed cancellation and returned/joined before releasing the shared decoder handle, not merely that a cooperative stop flag was set",
+        "orders resource release strictly after confirmed thread termination, rejecting a race where the flag is set and the handle is released while the thread may still be using it"
+      ],
+      "forbidden_behaviors": [
+        "lets the subclass define a single ambiguous stop() that silently resolves the two parents via MRO without renaming",
+        "treats setting the mixin's cooperative stop/cancel flag as sufficient before releasing the shared decoder handle",
+        "releases the shared resource on the calling thread without a join/wait confirming the background thread has actually exited"
+      ],
+      "required_artifacts": [],
+      "baseline_expected_failure": [
+        "agent defines one overridden stop() that satisfies both parent signatures via MRO, sets the thread's stop flag, and immediately releases the shared decoder handle without joining the background thread first"
+      ],
+      "review_notes": "Closes the new Framework Failure Modes bullet on colliding lifecycle-method names across composed mixins and on confirming thread join before shared-resource release in teardown."
+    },
+    {
+      "id": "FW-BEH-008",
+      "skill": "framework-design",
+      "type": "application",
+      "prompt": "A reusable retry/backoff utility currently lives as source files inside HostProduct's own repository tree; a second product, OtherProduct, wants to reuse it and is planning to add OtherProduct's build as a second compiled reference pointing at HostProduct's copy of the source, rather than moving the source anywhere. Design how this utility should actually be owned and packaged for reuse by both products.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "identifies that source living in a host/test project's tree with only a compiled reference from the second consumer leaves ownership ambiguous and invites a second, drifted copy",
+        "requires the library to physically own its source in its own package/repository location, independent of any single consuming product",
+        "defines a real build/publish/versioning path for the extracted library that both HostProduct and OtherProduct consume identically",
+        "treats HostProduct's continued use of the utility as just another consumer of the now-independently-owned library, not as the library's permanent home"
+      ],
+      "forbidden_behaviors": [
+        "accepts a second product merely adding a compiled reference into the first product's own source tree as a legitimate long-term ownership model",
+        "leaves the utility's canonical source location tied to whichever product happened to write it first",
+        "allows the two products' copies to silently diverge because no single owned location exists to fix a bug once"
+      ],
+      "required_artifacts": [],
+      "baseline_expected_failure": [
+        "agent approves OtherProduct linking against HostProduct's in-tree source without extracting the library to its own owned location, leaving ambiguous ownership and duplication risk"
+      ],
+      "review_notes": "Closes the existing Framework Failure Modes bullet on reusable source living in a host/test project's tree with only a compiled reference -- confirmed via direct read that no prior case in this file exercised it."
+    },
+    {
+      "id": "FW-BEH-009",
+      "skill": "framework-design",
+      "type": "discipline",
+      "prompt": "The only confirmed consumer of a new equipment kernel needs synchronous command dispatch. A teammate argues a second product, not yet built and with no confirmed requirements, will probably need asynchronous/queued dispatch instead, and proposes locking the kernel's public command-dispatch contract as asynchronous now so the guessed future consumer will not need a breaking change later. Design the kernel's command-dispatch contract.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "rejects promoting the unconfirmed future consumer's guessed requirement (async dispatch) into confirmed kernel semantics before its actual physical requirements are known",
+        "locks the kernel's public contract to what the one confirmed consumer's real, verified requirement actually needs (synchronous dispatch)",
+        "models the guessed future need as an explicitly missing capability on a named extension point, not as a currently-implemented kernel guarantee",
+        "requires the second consumer's actual requirements to be confirmed before any breaking or non-breaking contract change is made on its behalf"
+      ],
+      "forbidden_behaviors": [
+        "locks the kernel's public dispatch contract to the guessed future consumer's requirement instead of the confirmed consumer's real one",
+        "claims the async design is validated or de-risked because a future consumer might need it, without that consumer's requirements ever being confirmed",
+        "treats an extension point for the unconfirmed capability as already implemented rather than explicitly named and missing"
+      ],
+      "required_artifacts": [],
+      "baseline_expected_failure": [
+        "agent adopts the guessed future consumer's asynchronous dispatch requirement into the kernel's locked public contract before any real second consumer exists to confirm it"
+      ],
+      "review_notes": "Closes the existing Framework Failure Modes bullet on promoting an unconfirmed future consumer's guessed requirements into confirmed kernel semantics -- confirmed via direct read that no prior case in this file exercised it."
+    }
   ]
 }

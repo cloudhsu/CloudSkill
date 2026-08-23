@@ -15,6 +15,18 @@ Useful evidence:
 - UI selectors or content contracts.
 - Deployment artifact structure.
 
+Before starting a behavior-changing migration slice, check whether the
+subsystem's current characterization/baseline was ever independently
+confirmed by the outcome type that actually matters (a perceptual,
+external, or end-to-end result), not only by internal API return codes or
+log success. Treat an unconfirmed baseline as a blocking prerequisite gap,
+not a formality to note in passing -- an unconfirmed "before" state makes
+the migration's "after" comparison meaningless. Do not start the slice
+until the baseline is confirmed, or get the requester's explicit approval
+to proceed without one; state which confirmation is missing and why that
+gap breaks the comparison, so holding the slice is auditable rather than an
+unexplained delay.
+
 ## Smallest Coherent Slice
 
 A good slice:
@@ -33,6 +45,24 @@ A bad slice:
 - Changes behavior and schema.
 - Rewrites API/UI and persistence together.
 - Has no intermediate runnable state.
+
+When the actual request is small and well-scoped (mirror a few existing
+checks from one path onto another, duplicate a narrow piece of logic),
+implement that directly -- even when it means visibly duplicated code.
+Do not self-invent a larger, harder problem (a new trust mechanism, a new
+threat model, a new safeguard layer) that was never part of the request,
+in service of an imagined "better" design; the smaller, literal
+implementation is very often the actual improvement once shipped. If a
+self-initiated design elaboration beyond the literal request is genuinely
+worth considering, name it explicitly and get an explicit checkpoint
+before building it, rather than silently expanding scope.
+
+Commit at each slice boundary. A branch accumulating a large number of
+changes with zero commits is itself a stop condition requiring a
+checkpoint -- independent of whether the current design's own validation
+is passing -- because it removes the ability to revert partially; the
+only way out of a large uncommitted, still-failing self-invented design
+becomes abandoning the whole branch.
 
 ## Refactoring Sequence Example
 

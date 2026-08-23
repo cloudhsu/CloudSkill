@@ -19,6 +19,7 @@
     "codebase-architecture-discovery": "core",
     "cloudbox-game-migration": "private-game",
     "coding-agent-project-governance": "core",
+    "coding-agent-git-discipline": "core",
     "cluster-tool-simulator-development": "private-equipment",
     "cross-platform-engine-architecture": "private-game",
     "cross-platform-native-architecture": "core",

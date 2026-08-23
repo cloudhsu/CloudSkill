@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "name": "html-view-sync-reminder",
+  "owner_skill": "document-governance",
+  "description": "Advisory-only (never blocks) reminder printed when a commit changes Markdown inside a governed domain that has already opted into a static index.html overview (references/html-overview-views.md), but the overview wasn't touched in the same commit. Only fires for domains that already have an index.html present -- it never suggests creating one. Deliberately non-blocking: whether a given edit actually needs the HTML view refreshed is a judgment call the script cannot make.",
+  "script": "script.sh",
+  "providers": {
+    "claude": {
+      "config_file": ".claude/settings.json",
+      "event": "PreToolUse",
+      "matcher": "Bash"
+    },
+    "codex": {
+      "config_file": ".codex/hooks.json",
+      "event": "PreToolUse",
+      "matcher": "Bash"
+    },
+    "gemini": {
+      "config_file": ".gemini/settings.json",
+      "event": "BeforeTool",
+      "matcher": "run_shell_command"
+    }
+  }
+}

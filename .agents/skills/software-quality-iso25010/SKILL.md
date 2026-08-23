@@ -58,7 +58,9 @@ For each selected characteristic define:
 - Expected response.
 - Measurable response criterion.
 - Verification method.
-- Owner.
+- Owner. When the task supplied no owner fact, mark it unresolved -- never
+  fill it from ambient session identity (see
+  `../coding-agent-project-governance/references/no-fabricated-identity.md`).
 - Evidence location.
 
 ### 4. Connect quality to architecture

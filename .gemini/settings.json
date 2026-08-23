@@ -1,0 +1,54 @@
+{
+  "hooks": {
+    "BeforeTool": [
+      {
+        "matcher": "run_shell_command",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .gemini/hooks/validate-push-readiness.sh",
+            "timeout": 30
+          },
+          {
+            "type": "command",
+            "command": "bash .gemini/hooks/block-push-auth-loop.sh",
+            "timeout": 15
+          },
+          {
+            "type": "command",
+            "command": "bash .gemini/hooks/coding-agent-git-discipline/release-cut-reminder/script.sh",
+            "timeout": 15
+          },
+          {
+            "type": "command",
+            "command": "bash .gemini/hooks/coding-agent-git-discipline/shared-checkout-guard/script.sh",
+            "timeout": 15
+          }
+        ]
+      }
+    ],
+    "AfterTool": [
+      {
+        "matcher": "run_shell_command",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .gemini/hooks/record-push-outcome.sh",
+            "timeout": 15
+          }
+        ]
+      }
+    ],
+    "AfterAgent": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .gemini/hooks/project-management-sync/vikunja-sync-reminder/script.sh",
+            "timeout": 15
+          }
+        ]
+      }
+    ]
+  }
+}

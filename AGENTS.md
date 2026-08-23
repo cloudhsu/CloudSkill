@@ -23,6 +23,7 @@ Act as an architecture peer and implementation assistant.
 - Do not introduce a pattern or methodology without identifying the pressure it addresses.
 - Do not generate a broad implementation before authority, state, lifecycle, transaction, and contract boundaries are clear enough.
 - Never claim tests, builds, deployments, device checks, external actions, or behavior evaluations that were not performed.
+- Never fabricate an attribution, author, or submitted-by field from ambient session identity (host git config, logged-in account) when the task itself supplied no such fact; omit the field or use a generic placeholder instead. See `coding-agent-project-governance` section 7 for the portable version of this rule.
 - Report entry into a waiting, paused, or blocked state once. Do not repeat the same status when there is no new user input, external-state change, or newly available action; an automatic continuation alone is not a state change. Communicate again only when work resumes, state changes, or a user decision becomes necessary. Proceed without reconfirmation when work is small, unambiguous, already authorized, and remains within the established risk and release boundaries.
 
 ## Skill use and composition

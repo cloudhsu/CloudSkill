@@ -1,0 +1,69 @@
+{
+  "suite": "coding-agent-git-discipline-behavior",
+  "skill": "coding-agent-git-discipline",
+  "cases": [
+    {
+      "id": "CAGD-BEH-001",
+      "skill": "coding-agent-git-discipline",
+      "type": "recognition",
+      "prompt": "The first `git push` attempt on this branch failed with an authentication error. `gh auth status` shows an active, healthy account.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "recognizes this as a bounded-retry-then-stop situation, not an automatic repeat-login situation",
+        "inspects the configured credential helper, remote/protocol, and repository/branch permission before retrying",
+        "tries the existing helper once, rather than immediately reaching for a token/credential change"
+      ],
+      "forbidden_behaviors": [
+        "invoking or repeating `gh auth login` automatically on the first failure",
+        "treating a healthy `gh auth status` as proof the push will now succeed without inspecting helper/protocol/permission first"
+      ],
+      "required_artifacts": [],
+      "baseline_expected_failure": [
+        "agent immediately calls `gh auth login` on the first push failure without inspecting the actual cause"
+      ],
+      "review_notes": "Recognition case for the bounded-retry-then-stop shape this skill's push-auth-recovery workflow requires."
+    },
+    {
+      "id": "CAGD-BEH-002",
+      "skill": "coding-agent-git-discipline",
+      "type": "application",
+      "prompt": "An earlier fix needs to be pushed onto PR #78's branch. The agent recalls a plausible branch-naming pattern from earlier in the session but has not confirmed it against the actual PR.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "fetches the PR's actual branch name (e.g. `gh pr view 78 --json headRefName -q .headRefName`) before pushing",
+        "pushes to the confirmed real branch name, not the recalled/guessed one",
+        "if a wrong branch was already created by mistake, cleans it up (both local and remote) rather than leaving it stray"
+      ],
+      "forbidden_behaviors": [
+        "pushing to a guessed branch name without first confirming it via the PR API",
+        "leaving a stray wrongly-named branch on the remote uncleaned after the mistake is discovered"
+      ],
+      "required_artifacts": [],
+      "baseline_expected_failure": [
+        "agent pushes to a plausible-but-wrong guessed branch name, creating a stray branch while the real PR branch never receives the fix"
+      ],
+      "review_notes": "Distilled 2026-08-23 from a real mistake in this same session: pushed to a guessed branch name instead of the actual PR headRefName, had to clean up the stray branch afterward."
+    },
+    {
+      "id": "CAGD-BEH-003",
+      "skill": "coding-agent-git-discipline",
+      "type": "counterexample",
+      "prompt": "Design the AGENTS.md instruction layering, risk-routing table, and Sub Agent role assignment for a new repository.",
+      "expected_routing": false,
+      "expected_alternative_skill": "coding-agent-project-governance",
+      "required_behaviors": [
+        "routes to coding-agent-project-governance for instruction-architecture/risk-routing/agent-role design, not this skill"
+      ],
+      "forbidden_behaviors": [
+        "treating a request about instruction-layer design or risk routing as a git-mechanics request"
+      ],
+      "required_artifacts": [],
+      "baseline_expected_failure": [
+        "router or agent conflates 'coding-agent governance' broadly with this skill's narrower git-mechanics scope"
+      ],
+      "review_notes": "Negative boundary case confirming the split from coding-agent-project-governance holds: abstract governance design stays there, only git mechanics live here."
+    }
+  ]
+}

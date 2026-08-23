@@ -1,0 +1,23 @@
+{
+  "source_system": "example-backlog",
+  "target_provider": "vikunja",
+  "target_profile": "local",
+  "agent": "Codex 5.6 Luna xhigh",
+  "project": {
+    "title": "example-project",
+    "description": "Project-level scope and ownership."
+  },
+  "tasks": [
+    {
+      "source_key": "EXAMPLE-1",
+      "title": "A concrete task",
+      "problem_background": "Why this task exists.",
+      "approach": "The smallest safe approach.",
+      "acceptance_criteria": [
+        "A checkable result."
+      ],
+      "source": "Repository path, issue, or decision record.",
+      "status": "planned"
+    }
+  ]
+}

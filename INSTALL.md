@@ -21,7 +21,7 @@ git clone https://github.com/cloudhsu/CloudSkill.git ~/Git/CloudSkill
 
 ## 2. Plugin 模式（建議）
 
-完整說明見 [docs/CLOUDBOX_PLUGIN.md](docs/CLOUDBOX_PLUGIN.md)。
+完整說明見 [docs/CLOUDBOX_PLUGIN.md](docs/CLOUDBOX_PLUGIN.md)。Plugin 安裝本身不會建立本機 config；若是 coding agent 代為安裝，裝完後應主動詢問是否要另外補上本機 config，見第 3 節「由 coding agent 代為安裝時」。
 
 ### Codex／ChatGPT
 
@@ -69,6 +69,16 @@ Plugin 模式若要使用 `整理成正向案例`／`整理成負向案例`，�
 - **Project scope**：只對指定專案生效，並寫入不應提交的 `<project>/.cloudbox-skills/config.local.json`。
 - **Skills-only**：使用 `-SkipGuidance` / `--skip-guidance`，不匯入個人架構 Guidance。
 - **No local config**：使用 `-SkipLocalConfig` / `--skip-local-config`；此模式無法使用簡短的正向／負向案例收集流程。
+- **互動式詢問**：若沒有明確帶 `--skip-local-config`／`-SkipLocalConfig`、也不是 `--config-only`，且在真正的互動式終端機執行（不是 CI/腳本/重導向輸入),安裝腳本會直接問一次「要不要建立本機 config」，預設 Yes；非互動環境維持原本預設（建立)不會卡住。想在公司電腦等不希望寫入 `.local/` 的機器上安裝時,直接明確帶上 `--skip-local-config` 跳過詢問。詳見下方「由 coding agent 代為安裝時」——這條規則不分 Plugin 或 Standalone 模式都適用。
+
+### 由 coding agent 代為安裝時（不分第 2 節 Plugin 模式或第 3 節 Standalone 模式）
+
+腳本的互動詢問是問 stdin，agent 透過 subprocess 呼叫時 stdin 不是真正的終端機，詢問不會跳出來（刻意設計，避免卡住）。若使用者是透過對話請 agent 執行安裝（不是自己在終端機打指令），**不論最後裝的是 Plugin 模式還是 Standalone 模式，agent 完成安裝後都必須主動在對話中問一次**，跟其他架構/發布決策一樣列出具體選項讓使用者選，而不是含糊帶過或直接沿用預設：
+
+- 「建立本機 config（可用『整理成正向案例』／『整理成負向案例』，會在這台機器寫入 `.local/eval-inbox/` 或 `~/.cloudbox-skills/`）」
+- 「跳過本機 config（適合公司電腦等不想在本機留下 `.local/` 資料的情境；之後要蒐集案例只能用第 8b 節的匯出/手動搬移流程）」
+
+若剛完成的是 Plugin 模式安裝（第 2 節），Plugin 安裝本身完全不會建立本機 config——回答「要建立」時，agent 需另外執行第 2 節示範的 `install.ps1`／`install.sh` `-ConfigOnly`／`--config-only` 補上這一步；回答「跳過」則什麼都不用做。若是 Standalone 模式（第 3 節），依回答決定要不要在原本的安裝指令帶上 `--skip-local-config`／`-SkipLocalConfig`。不能因為腳本沒跳出詢問，或這次裝的是 Plugin 模式看似「沒有本機 config 這回事」，就跳過這個決定。
 
 ## 4. Windows PowerShell
 
@@ -185,6 +195,22 @@ Inbox 結構：
 ```
 
 `.local/` 與 `config.local.json` 均由 Git 忽略。請將公司、客戶、專案、產品、設備、人員與其他私人識別字加入 `sensitive-terms.local.txt`；不要將該檔案提交。
+
+## 7b. 選用的技能 Hook 安裝
+
+Skill 本身是讀進 context 的自然語言內容，沒有能力寫入 host 層級的設定檔或腳本。少數 Skill 額外在 `.agents/skills/<skill>/hooks/<hook-name>/` 底下綁了一個選用的確定性 hook（腳本＋`manifest.json` wiring 說明）——這類 hook 在對應 Skill 已提出的規則被模型忽略時，於 commit 前用純腳本規則攔下來，而不是只依賴模型記得遵守。
+
+這一步永遠是選用的，且**永遠不會靜默覆寫**消費端專案既有的 `.claude/settings.json` / `.codex/hooks.json` / `.gemini/settings.json`——只會安全合併進去（保留既有的 permissions、其他 hook），並且逐一詢問要不要安裝每一個找到的 hook：
+
+```bash
+python3 scripts/install_skill_hooks.py --project-path /path/to/your/project
+```
+
+- 只會列出**已經安裝在該專案的 Skill**所綁定的 hook；沒裝那個 Skill 就不會出現。
+- 非互動環境（agent 透過 subprocess 呼叫、CI）預設**不安裝**，需要明確帶 `--yes` 才會裝——這跟第 7 節本機 Eval config 的「非互動維持預設建立」相反，因為 hook 可能真的擋下之後的 commit，風險層級不同，故意採取更保守的預設。
+- `--dry-run` 只報告會做什麼，不寫入任何檔案。
+- 重複執行是 idempotent 的：已經裝過的 hook 不會被重複加入。
+- 若由 coding agent 代為執行，比照第 3 節「由 coding agent 代為安裝時」的規則——完成後應在對話中明確告知裝了哪些 hook，而不是默默執行。
 
 ## 8. 日常正向與負向案例
 

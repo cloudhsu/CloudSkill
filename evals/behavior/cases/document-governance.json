@@ -182,6 +182,57 @@
         "agent writes a plausible-sounding date into the final document without flagging that it contradicted an already-stated fact"
       ],
       "review_notes": "Same discipline as DOC-BEH-006/007 (don't silently normalize conflicting source data), confirmed here to generalize beyond engineering/equipment documents to personal/career documents -- the source data is scattered, informal, and repeatedly self-corrected in exactly the way that makes silent reconciliation tempting."
+    },
+    {
+      "id": "DOC-BEH-010",
+      "skill": "document-governance",
+      "type": "discipline",
+      "prompt": "An engineering repository's active guidance document (repository-root instructions read by coding agents) still names a working-copy path, branch, and build directory from before the project was renamed and its checkout moved; the current, actual checkout is elsewhere. Implement a requested change and repair the active path authority without rewriting historical evidence.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "confirms the actual repository root, current branch, HEAD, remote, and working-tree status before editing or building, rather than trusting the stale instruction",
+        "treats the active instruction document's path/branch/build-directory pointer as mutable authority that must be corrected to name the current workspace",
+        "leaves historical checkpoints, dated reports, and release notes exactly as recorded -- their old path is not an error to fix",
+        "reports the exact workspace and branch actually used for implementation and verification"
+      ],
+      "forbidden_behaviors": [
+        "uses the stale workspace because the old instruction or a cached build directory names it",
+        "edits a historical checkpoint or dated record merely to make its old path look current",
+        "treats a successful build from the superseded checkout as verification of the current source",
+        "silently implements against a different repository, branch, or remote than requested while reporting the result as if it came from the requested workspace"
+      ],
+      "required_artifacts": [],
+      "baseline_expected_failure": [
+        "agent follows the stale active-instruction path, builds/edits the wrong (superseded) checkout, and reports success without noticing the workspace itself was wrong"
+      ],
+      "review_notes": "Distilled 2026-08-23 from a real, directly-observed defect in this same collaborative session (collaborative-distillation candidate INT-20260823-045634-a50fe17b): a project's own repository-root instructions still pointed at a retired working-copy path after the project was renamed and the checkout moved, until corrected."
+    },
+    {
+      "id": "DOC-BEH-009",
+      "skill": "document-governance",
+      "type": "application",
+      "prompt": "A governed domain (a product-direction area with several Markdown decision documents already accumulated) has grown enough history that the user asks for a single human-readable page they can open in a browser to see the current state without reading every Markdown file.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "produces a static, self-contained HTML page (no build step, external stylesheet, script, or server dependency) rather than a second Markdown summary or a tool-dependent doc-site setup",
+        "treats the Markdown documents as the sole source of authority and does not introduce a fact, decision, or status in the HTML that isn't already recorded in Markdown",
+        "includes current status, scope, decisions, open questions, and evidence boundaries, with relative links back to the authoritative Markdown documents",
+        "states explicitly that the static page is a reading view, not evidence of runtime, build, or release readiness",
+        "names the page so it stays discoverable next to what it summarizes (an index/overview file at the governed domain's own root) rather than burying it in an unrelated location"
+      ],
+      "forbidden_behaviors": [
+        "inventing a decision, status, or fact in the HTML page that isn't already stated in the governed Markdown",
+        "pulling in a remote stylesheet, font, script, or image dependency that breaks opening the file directly from disk",
+        "presenting the HTML page as proof that a build, install, or platform gate passed",
+        "treating the HTML page as an editable second source that could drift from and override the Markdown"
+      ],
+      "required_artifacts": [],
+      "baseline_expected_failure": [
+        "agent either restates content with a subtly different (invented) status than the Markdown actually records, or pulls in an external CDN dependency that silently breaks offline/local viewing"
+      ],
+      "review_notes": "Distilled from a real, live case (2026-08-23): a product-plus-reusable-engine repository pair added exactly this kind of static index.html overview for its product and art governance domains, committed together with the Markdown changes it summarizes. See references/html-overview-views.md for the full rule set; a companion advisory hook (html-view-sync-reminder) catches the deterministic half of this (Markdown changed, index.html didn't) without trying to judge whether a given edit was substantive enough to need it."
     }
   ]
 }

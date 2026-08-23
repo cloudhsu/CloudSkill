@@ -28,7 +28,7 @@ copy distribution values into a second mutable ledger.
 | `equipment-dev` | `cluster-tool-simulator-development`, `equipment-control-architecture`, `equipment-domain-modeling`, `semiconductor-equipment-domain-knowledge`, `tray-descum-simulator-development`, `wafer-bonder-debonder-development`, `wph-equipment-simulator-development` |
 | `code-change-dev` | `code-review`, `codebase-architecture-discovery`, `safe-incremental-refactoring` |
 | `quality-dev` | `game-asset-resolution-audit`, `game-quality-and-release-gates`, `software-quality-iso25010` |
-| `governance-dev` | `coding-agent-project-governance`, `development-process-tailoring`, `document-governance`, `indie-game-product-evolution` |
+| `governance-dev` | `coding-agent-project-governance`, `coding-agent-git-discipline`, `development-process-tailoring`, `document-governance`, `indie-game-product-evolution` |
 | `skill-eval-dev` | `developing-eval`, `developing-skills`, `local-runtime-eval-debugging`, `runtime-evaluation-engineering`, `using-cloudbox-skills` |
 | `learning-dev` | `teach-while-building` |
 

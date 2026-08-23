@@ -26,6 +26,9 @@ Read only the references required by the active workflow:
 - `references/skill-lifecycle-standard.md` before creating or changing a stage,
   preparing release evidence, deprecating, or replacing a Skill. The shared
   lifecycle is `draft -> experimental -> active -> stable -> deprecated`.
+- `references/agent-governance-section-template.md` when authoring/revising
+  a domain skill's own agent-governance section -- a structural checklist,
+  never shared content.
 
 Do not load every reference by default. Keep detailed mechanics in one
 authoritative reference rather than copying mutable checklists into this file.
@@ -34,13 +37,12 @@ Use the matching assets and repository commands named by those references.
 Create new Skills with `scripts/manage_skill.py new`; before commit refresh and
 audit lifecycle evidence, then run the complete repository checks.
 
-Before finalizing a new skill id, plugin identifier, or other product-facing name,
-check whether it collides with an unrelated product or identity already in scope
-(a different codebase, plugin, or project the same user works on) — a same-session
-collision is easy to miss until many files already reference the name. Surface a
-collision immediately and drive an explicit disambiguation decision before
-propagating the name across files, rather than discovering it after adoption and
-paying for a full rename later.
+Before finalizing a new skill id, plugin identifier, or other product-facing
+name, check it does not collide with an unrelated product/identity already
+in scope (a different codebase or project the same user works on) -- easy
+to miss until many files reference it. Surface a collision immediately and
+disambiguate before propagating the name, not after paying for a full
+rename.
 
 ## Conversation mining is a different skill
 
@@ -94,6 +96,15 @@ once it needs to be machine-checked, not by default (see
 `../safe-incremental-refactoring/references/evidence-checklist.md`'s
 "Escalating Evidence Shape as Complexity Grows").
 
+This same RED-then-GREEN discipline governs a proposed change to the eval
+harness's own analysis or measurement tooling, not only to a Skill's domain
+content. When a mathematical or methodological improvement to how Skills are
+verified is proposed (a new confidence estimator, a prioritization method, a
+technique for checking whether a case actually discriminates), describing the
+method is not evidence it works -- implement it as a small real tool and run
+at least one concrete pilot showing it produces a genuine, discriminating
+result, not merely that it executes without error.
+
 ### 4. Define and implement the minimum contract
 
 Specify trigger/non-trigger conditions, required and forbidden behavior,
@@ -127,12 +138,16 @@ sanitization/deduplication, contract, RED result, minimal change, GREEN and
 adjacent regression, structural/install checks, delivery form, release status,
 and remaining limitations.
 
-When reporting what changed in a Skill release, or when asked what a
-Skill optimization changed, use a table with one row per case/rule added
-(id, owner Skill, one-line summary of the pressure it closes, RED
-evidence layer) rather than prose paragraphs — prose buries which
-specific case closed which specific gap, and makes it hard to tell one
-release's changes from another's at a glance.
+When reporting what changed in a Skill release, or what an optimization
+changed, use a table (id, owner Skill, one-line pressure closed, RED
+evidence layer) rather than prose -- prose buries which case closed which
+gap, and hides one release's changes from another's at a glance.
+
+Answer a candidate-capture-status question from the capture tool's
+output, not from having listed items in chat -- discussed, drafted,
+captured, and formal change are distinct states. Dispatching parallel
+agents onto one Skill's case IDs: assign non-overlapping ranges up front,
+or forks guess the same number and collide.
 
 Before releasing any change that touches a `SKILL.md`, run
 `scripts/validate_skill_context_budget.py`. It enforces a hard per-skill byte
@@ -157,6 +172,13 @@ has CI. After pushing, check the actual CI run for that commit (e.g. `gh run
 list` / `gh run view`) before calling the release done -- do not infer CI
 result from the local run alone. A CI-configured check that was never
 observed to run is `NOT RUN`, not `PASS`, regardless of local results.
+
+When stating a Skill's evidence status in a release report, quantify it
+rather than writing "NOT RUN" or "case/contract-layer only" from memory --
+run `scripts/eval_confidence_report.py <skill>` and cite the actual margin
+its current authored case count supports (Hoeffding bound over routing +
+behavior case counts). This measures how much evidence exists, not whether
+any case was executed against a live model; state both.
 
 Before any stage or release decision, follow
 `references/skill-lifecycle-standard.md`. Distinguish structural validation,

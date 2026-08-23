@@ -90,6 +90,9 @@ Include:
 - Deprecation policy.
 - Measurement criteria.
 - Exit criteria if the framework does not provide value.
+- An adoption test per intended consumer/host proving it actually invokes the
+  shared contract with its own configuration -- not merely that it references
+  the library while still running an independent parallel implementation.
 
 ## Output Format
 

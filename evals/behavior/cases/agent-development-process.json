@@ -111,6 +111,34 @@
         "the single missed instance is patched by hand, and a note is written asking a future run to remember to re-check, or a monitor is added to detect a recurrence after the fact; the same class of gap can recur silently because the process itself was never fixed"
       ],
       "review_notes": "Conversation-derived, 2026-08-15: a release process silently skipped its tag/GitHub-Release step for 5 consecutive versions across 2 repos, undetected for a whole session. The first proposed fixes were a standing memory reminder, then a scheduled cron audit; the user rejected both and required the fix to go into the process artifact that governs releases instead, reserving memory for judgment-based state that actually changes over time."
+    },
+    {
+      "id": "AID-BEH-006",
+      "skill": "agent-development-process",
+      "type": "discipline",
+      "prompt": "A company wants a digital assistant to keep working correctly when the chat session, the underlying model, or the specific agent instance changes mid-task. Define why an Agent layer is needed above the session and what minimum data a new session must have to resume safely.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "distinguishes the short-lived session from the durable Agent role, task contract, permissions, state, evidence, and human accountability that must outlive it",
+        "treats a new session as an onboarding event that reconstructs work from a controlled source (task contract, status record, evidence store), not from private chat memory the next session can't see",
+        "defines who/what holds authority for task status, document revision, tool-call trace, ownership, approval, and recovery path",
+        "keeps planned, implemented, verified, released, and field status as separate fields rather than one collapsed label",
+        "requires reconciling current state before a resumed session performs any side effect"
+      ],
+      "forbidden_behaviors": [
+        "treats the prior transcript as the only source of workflow state",
+        "assumes a new session inherits permissions or approval the previous session had",
+        "repeats an external write because the new session can't see the prior attempt's result",
+        "claims a step is complete by inference when the current evidence for it is actually unknown"
+      ],
+      "required_artifacts": [
+        "minimum handoff package definition"
+      ],
+      "baseline_expected_failure": [
+        "the answer treats a longer or better-summarized chat transcript as sufficient continuity, without defining any durable, externally-readable state the next session/model/agent can reconcile against"
+      ],
+      "review_notes": "Distilled 2026-08-23 from a real collaborative session (collaborative-distillation candidate INT-20260823-045634-9f6633c9)."
     }
   ]
 }

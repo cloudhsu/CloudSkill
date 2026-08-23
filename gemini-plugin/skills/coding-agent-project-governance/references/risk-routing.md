@@ -55,6 +55,18 @@ Default:
 5. Integrator review.
 6. Human approval for deployment/data conversion.
 
+When a milestone's acceptance criterion is ambiguous or only implied by a
+broad instruction, state the criterion explicitly and distinguish it from
+the cheapest verifiable proxy (e.g. "compiles") before scoping work to that
+proxy -- a proxy can be a necessary but far smaller subset of the actual
+goal (e.g. the requester's real bar is opening the generated project,
+building it, and running it themselves). When narrowing scope under
+delegated/unsupervised authority because a full milestone is large, disclose
+the narrowing explicitly as a scope decision rather than silently treating
+the narrower proxy as equivalent to the requester's actual goal. When the
+requester corrects the acceptance bar, retarget the milestone to the real
+criterion rather than continuing to report against the earlier proxy.
+
 ## Delegation Scope for Irreversible Steps
 
 Refines High Risk item 6 ("Human approval for deployment/data conversion")
@@ -98,6 +110,37 @@ every individual step is reversible, and explicitly record what was held
 back and why (too large to verify unattended, not too risky to attempt) —
 do not let scale alone silently justify skipping verification instead of
 justifying a pause.
+
+## Host-Machine-Global Changes Under Repo-Scoped Delegation
+
+When delegated autonomous authority is scoped to a repository/branch, and a
+fix requires changing shared host-machine state outside the repository (a
+globally-installed compiler, SDK, or package-manager-managed tool), treat
+that as a distinct category of action from ordinary branch-scoped work and
+record it explicitly and separately, even when the change is reversible and
+no project files are affected. State plainly in the record what was
+changed, why the in-repo fix was insufficient, and that it is reversible
+via the same package manager -- do not fold it silently into the list of
+repository file changes. Confirm the host change did not silently alter
+behavior for any other project or workspace that also depends on the same
+globally-installed tool before treating it as fully low-risk.
+
+## Full-Screen Capture Risk During Visual Verification
+
+Prefer a scoped/targeted capture mechanism (a specific window, a specific
+app's bundle/rendered surface) over a full-screen capture when gathering
+visual verification evidence, since a full-screen capture can incidentally
+include unrelated windows or private content outside the scope of the
+check. If a capture mechanism unintentionally captures out-of-scope
+content, delete it immediately and do not describe, summarize, or act on
+what it contained. After such an incident, disclose the limitation
+explicitly rather than silently repeating the same risky capture method for
+a later, similar verification need in the same session -- substitute a
+narrower verification method and hand off the remaining visual confirmation
+to the user when no safe scoped-capture method is available. Report
+reduced-scope verification honestly (what was actually confirmed versus
+deferred) rather than presenting a file-level check as equivalent to a full
+visual confirmation.
 
 ## Tool-permission Allowlist Tiers
 

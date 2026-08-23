@@ -31,6 +31,16 @@ Before creating or revising a document:
 
 Do not infer authority from the highest filename version alone. Check title, internal revision history, status, approval, content, and release linkage.
 
+When an active instruction document (repository guidance such as
+`AGENTS.md`/`CLAUDE.md`, a build-directory pointer, or a "current workspace"
+record) names a path, branch, or checkout, treat that pointer as mutable
+authority that must track the actual current workspace -- confirm the real
+repository root, branch, HEAD, and remote before trusting it, and correct the
+pointer when the workspace has moved or been renamed. Never edit a historical
+checkpoint, dated report, or release note merely to make its old path look
+current; historical evidence stays exactly as recorded. A successful build or
+verification from a superseded workspace does not verify the current source.
+
 ### 1. Classify the document
 
 Identify:
@@ -39,8 +49,11 @@ Identify:
 - Audience.
 - Decision or action enabled.
 - Normative versus informative status.
-- Document role: input/request, analysis, decision, current specification, release baseline, plan, test evidence, release notes, field evidence, or training view.
-- Owner and reviewers.
+- Document role: input/request, analysis, decision, current specification, release baseline, plan, test evidence, release notes, field evidence, product direction, or training view. A **product-direction** document is a distinct role from a specification or plan: it states archetype, target user, promise, scope, non-goals, continuity, and stop condition, and requires the smallest validation step to be named before implementation scope expands from it. Do not let implementation completion stand in as evidence of product-market or user value, and do not infer product scope from legacy code alone -- these are the two failure shapes this role exists to prevent. Product decisions are appended as dated entries, never rewritten in place, matching this Skill's own supersession discipline in Section 5.
+- Owner and reviewers. When the task itself supplied no owner/author/
+  submitted-by fact, mark the field unresolved or use a generic placeholder,
+  never ambient session identity (see
+  `../coding-agent-project-governance/references/no-fabricated-identity.md`).
 - Authoritative data/source.
 - Required lifecycle, version, approval, and supersession status.
 - Product/release applicability.
@@ -152,6 +165,15 @@ Check:
 ## Review depth
 
 Default to every step above. On an explicit, one-time user request for a lighter pass (a low-stakes or exploratory document), skip only the steps the user names and record which steps were skipped in the output header. Never reduce depth silently, by default, or for a release-baseline or audit-facing document without the user's explicit override for that specific run.
+
+## Human-readable HTML overview views
+
+A governed domain (product direction, art governance) may optionally add a
+static, local-first `index.html` entry page summarizing its Markdown for
+human reading. See `references/html-overview-views.md` for the rules —
+Markdown stays authoritative, the HTML page is a view not a second source
+of truth, and it is committed together with the documentation change it
+summarizes, not left to drift out of sync.
 
 ## Skill composition
 

@@ -1,0 +1,1033 @@
+{
+  "schema_version": 1,
+  "description": "Structured summary of real (--provider claude, unless noted) executions of authored routing/behavior Eval cases against a live model, one row per case attempt. This is a SUMMARY ledger (skill, case id, kind, result) for Bayesian/priority-ranking analysis tools -- it intentionally does NOT include prompts or full model output; raw JSONL evidence for each entry lives locally under evals/runtime/results/ (gitignored, machine-local, not committed) and is cited here by filename only. Append-only: add new rows for new executions, never edit or delete an existing row's outcome after the fact -- a re-grade or correction gets a new row with a note, mirroring lifecycle.json's own append-only notes discipline.",
+  "result_values": {
+    "PASS": "content and routing both matched the case's contract cleanly",
+    "PASS_DEVIATION_ROUTING": "content fully satisfied required/forbidden behaviors, but a different primary_skill was selected than the skill under test and no expected_alternative_skill was declared",
+    "PASS_DEVIATION_MINOR": "primary skill matched but an unrequired-but-not-forbidden supporting skill was also selected (weaker model only, e.g. ollama)",
+    "FAIL_CONTENT": "primary skill matched (or deviation still graded on content) but the actual output failed to satisfy one or more required_behaviors, or triggered a forbidden_behavior",
+    "FAIL_ROUTING": "primary_skill=None or otherwise no skill selected despite expected_routing=true, so no behavior content was produced to grade"
+  },
+  "entries": [
+    {
+      "skill": "code-review",
+      "case_id": "canary-R01",
+      "kind": "routing",
+      "result": "PASS",
+      "provider": "claude",
+      "date": "2026-08-22",
+      "evidence_file": "2026-08-22-R01-claude-crosscheck.jsonl"
+    },
+    {
+      "skill": "code-review",
+      "case_id": "canary-R01",
+      "kind": "routing",
+      "result": "PASS_DEVIATION_MINOR",
+      "provider": "ollama",
+      "date": "2026-08-22",
+      "evidence_file": "2026-08-22-canary-routing-ollama-partial.jsonl",
+      "note": "over-selected an unrequired-but-not-forbidden supporting skill; did not reproduce on claude"
+    },
+    {
+      "skill": "code-review",
+      "case_id": "canary-R02",
+      "kind": "routing",
+      "result": "PASS",
+      "provider": "claude",
+      "date": "2026-08-22",
+      "evidence_file": "2026-08-22-R02-claude-crosscheck.jsonl"
+    },
+    {
+      "skill": "code-review",
+      "case_id": "canary-R02",
+      "kind": "routing",
+      "result": "PASS",
+      "provider": "ollama",
+      "date": "2026-08-22",
+      "evidence_file": "2026-08-22-canary-routing-ollama-partial.jsonl"
+    },
+    {
+      "skill": "code-review",
+      "case_id": "CR-BEH-001",
+      "kind": "behavior",
+      "result": "PASS",
+      "provider": "claude",
+      "date": "2026-08-22",
+      "evidence_file": "2026-08-22-worst-margin-5skills-behavior-claude.jsonl"
+    },
+    {
+      "skill": "code-review",
+      "case_id": "CR-BEH-002",
+      "kind": "behavior",
+      "result": "PASS",
+      "provider": "claude",
+      "date": "2026-08-22",
+      "evidence_file": "2026-08-22-worst-margin-5skills-behavior-claude.jsonl"
+    },
+    {
+      "skill": "code-review",
+      "case_id": "CR-BEH-003",
+      "kind": "behavior",
+      "result": "PASS",
+      "provider": "claude",
+      "date": "2026-08-22",
+      "evidence_file": "2026-08-22-worst-margin-5skills-behavior-claude.jsonl",
+      "note": "counterexample case; correctly routed to framework-design instead"
+    },
+    {
+      "skill": "code-review",
+      "case_id": "CR-BEH-004",
+      "kind": "behavior",
+      "result": "PASS",
+      "provider": "claude",
+      "date": "2026-08-22",
+      "evidence_file": "2026-08-22-worst-margin-5skills-behavior-claude.jsonl"
+    },
+    {
+      "skill": "code-review",
+      "case_id": "CR-BEH-005",
+      "kind": "behavior",
+      "result": "PASS",
+      "provider": "claude",
+      "date": "2026-08-22",
+      "evidence_file": "2026-08-22-batch2-fw-cr-behavior-claude.jsonl"
+    },
+    {
+      "skill": "code-review",
+      "case_id": "CR-BEH-006",
+      "kind": "behavior",
+      "result": "PASS",
+      "provider": "claude",
+      "date": "2026-08-22",
+      "evidence_file": "2026-08-22-batch2-fw-cr-behavior-claude.jsonl"
+    },
+    {
+      "skill": "code-review",
+      "case_id": "CR-BEH-007",
+      "kind": "behavior",
+      "result": "PASS",
+      "provider": "claude",
+      "date": "2026-08-22",
+      "evidence_file": "2026-08-22-batch2-fw-cr-behavior-claude.jsonl"
+    },
+    {
+      "skill": "code-review",
+      "case_id": "CR-BEH-008",
+      "kind": "behavior",
+      "result": "PASS",
+      "provider": "claude",
+      "date": "2026-08-22",
+      "evidence_file": "2026-08-22-batch2-fw-cr-behavior-claude.jsonl"
+    },
+    {
+      "skill": "code-review",
+      "case_id": "CR-BEH-009",
+      "kind": "behavior",
+      "result": "PASS",
+      "provider": "claude",
+      "date": "2026-08-22",
+      "evidence_file": "2026-08-22-batch2-fw-cr-behavior-claude.jsonl"
+    },
+    {
+      "skill": "framework-design",
+      "case_id": "FW-BEH-006",
+      "kind": "behavior",
+      "result": "PASS",
+      "provider": "claude",
+      "date": "2026-08-22",
+      "evidence_file": "2026-08-22-batch2-fw-cr-behavior-claude.jsonl"
+    },
+    {
+      "skill": "framework-design",
+      "case_id": "FW-BEH-007",
+      "kind": "behavior",
+      "result": "PASS",
+      "provider": "claude",
+      "date": "2026-08-22",
+      "evidence_file": "2026-08-22-batch2-fw-cr-behavior-claude.jsonl"
+    },
+    {
+      "skill": "framework-design",
+      "case_id": "FW-BEH-008",
+      "kind": "behavior",
+      "result": "PASS",
+      "provider": "claude",
+      "date": "2026-08-22",
+      "evidence_file": "2026-08-22-batch2-fw-cr-behavior-claude.jsonl"
+    },
+    {
+      "skill": "framework-design",
+      "case_id": "FW-BEH-009",
+      "kind": "behavior",
+      "result": "PASS",
+      "provider": "claude",
+      "date": "2026-08-22",
+      "evidence_file": "2026-08-22-batch2-fw-cr-behavior-claude.jsonl"
+    },
+    {
+      "skill": "coding-agent-project-governance",
+      "case_id": "CAG-BEH-010",
+      "kind": "behavior",
+      "result": "PASS",
+      "provider": "claude",
+      "date": "2026-08-22",
+      "evidence_file": "2026-08-22-batch3-cag-behavior-claude.jsonl"
+    },
+    {
+      "skill": "coding-agent-project-governance",
+      "case_id": "CAG-BEH-011",
+      "kind": "behavior",
+      "result": "PASS",
+      "provider": "claude",
+      "date": "2026-08-22",
+      "evidence_file": "2026-08-22-batch3-cag-behavior-claude.jsonl"
+    },
+    {
+      "skill": "coding-agent-project-governance",
+      "case_id": "CAG-BEH-012",
+      "kind": "behavior",
+      "result": "PASS",
+      "provider": "claude",
+      "date": "2026-08-22",
+      "evidence_file": "2026-08-22-batch3-cag-behavior-claude.jsonl"
+    },
+    {
+      "skill": "coding-agent-project-governance",
+      "case_id": "CAG-BEH-013",
+      "kind": "behavior",
+      "result": "PASS",
+      "provider": "claude",
+      "date": "2026-08-22",
+      "evidence_file": "2026-08-22-batch3-cag-behavior-claude.jsonl"
+    },
+    {
+      "skill": "coding-agent-project-governance",
+      "case_id": "CAG-BEH-014",
+      "kind": "behavior",
+      "result": "FAIL_ROUTING",
+      "provider": "claude",
+      "date": "2026-08-22",
+      "evidence_file": "2026-08-22-batch3-cag-behavior-claude.jsonl",
+      "note": "primary_skill=None, router judged prompt too trivial for a governance skill"
+    },
+    {
+      "skill": "coding-agent-project-governance",
+      "case_id": "CAG-BEH-015",
+      "kind": "behavior",
+      "result": "FAIL_ROUTING",
+      "provider": "claude",
+      "date": "2026-08-22",
+      "evidence_file": "2026-08-22-batch3-cag-behavior-claude.jsonl",
+      "note": "primary_skill=None, router judged prompt too trivial for a governance skill"
+    },
+    {
+      "skill": "cross-platform-native-architecture",
+      "case_id": "XPLAT-BEH-005",
+      "kind": "behavior",
+      "result": "PASS",
+      "provider": "claude",
+      "date": "2026-08-22",
+      "evidence_file": "2026-08-22-batch3-xplat-behavior-claude.jsonl"
+    },
+    {
+      "skill": "cross-platform-native-architecture",
+      "case_id": "XPLAT-BEH-006",
+      "kind": "behavior",
+      "result": "PASS_DEVIATION_ROUTING",
+      "provider": "claude",
+      "date": "2026-08-22",
+      "evidence_file": "2026-08-22-batch3-xplat-behavior-claude.jsonl",
+      "note": "routed to code-review"
+    },
+    {
+      "skill": "cross-platform-native-architecture",
+      "case_id": "XPLAT-BEH-007",
+      "kind": "behavior",
+      "result": "PASS",
+      "provider": "claude",
+      "date": "2026-08-22",
+      "evidence_file": "2026-08-22-batch3-xplat-behavior-claude.jsonl"
+    },
+    {
+      "skill": "cross-platform-native-architecture",
+      "case_id": "XPLAT-BEH-008",
+      "kind": "behavior",
+      "result": "PASS_DEVIATION_ROUTING",
+      "provider": "claude",
+      "date": "2026-08-22",
+      "evidence_file": "2026-08-22-batch3-xplat-behavior-claude.jsonl",
+      "note": "routed to framework-design"
+    },
+    {
+      "skill": "cross-platform-native-architecture",
+      "case_id": "XPLAT-BEH-009",
+      "kind": "behavior",
+      "result": "PASS",
+      "provider": "claude",
+      "date": "2026-08-22",
+      "evidence_file": "2026-08-22-batch3-xplat-behavior-claude.jsonl"
+    },
+    {
+      "skill": "cross-platform-native-architecture",
+      "case_id": "XPLAT-BEH-010",
+      "kind": "behavior",
+      "result": "PASS",
+      "provider": "claude",
+      "date": "2026-08-22",
+      "evidence_file": "2026-08-22-batch3-xplat-behavior-claude.jsonl"
+    },
+    {
+      "skill": "cross-platform-native-architecture",
+      "case_id": "XPLAT-BEH-011",
+      "kind": "behavior",
+      "result": "PASS",
+      "provider": "claude",
+      "date": "2026-08-22",
+      "evidence_file": "2026-08-22-batch3-xplat-behavior-claude.jsonl"
+    },
+    {
+      "skill": "cross-platform-native-architecture",
+      "case_id": "XPLAT-BEH-012",
+      "kind": "behavior",
+      "result": "PASS",
+      "provider": "claude",
+      "date": "2026-08-22",
+      "evidence_file": "2026-08-22-batch3-xplat-behavior-claude.jsonl"
+    },
+    {
+      "skill": "cross-platform-native-architecture",
+      "case_id": "XPLAT-BEH-013",
+      "kind": "behavior",
+      "result": "PASS",
+      "provider": "claude",
+      "date": "2026-08-22",
+      "evidence_file": "2026-08-22-batch3-xplat-behavior-claude.jsonl"
+    },
+    {
+      "skill": "cross-platform-native-architecture",
+      "case_id": "XPLAT-BEH-014",
+      "kind": "behavior",
+      "result": "PASS",
+      "provider": "claude",
+      "date": "2026-08-22",
+      "evidence_file": "2026-08-22-batch3-xplat-behavior-claude.jsonl"
+    },
+    {
+      "skill": "cross-platform-engine-architecture",
+      "case_id": "ENG-BEH-006",
+      "kind": "behavior",
+      "result": "PASS_DEVIATION_ROUTING",
+      "provider": "claude",
+      "date": "2026-08-22",
+      "evidence_file": "2026-08-22-batch4-eng-behavior-claude.jsonl",
+      "note": "routed to code-review"
+    },
+    {
+      "skill": "cross-platform-engine-architecture",
+      "case_id": "ENG-BEH-007",
+      "kind": "behavior",
+      "result": "PASS_DEVIATION_ROUTING",
+      "provider": "claude",
+      "date": "2026-08-22",
+      "evidence_file": "2026-08-22-batch4-eng-behavior-claude.jsonl",
+      "note": "routed to cross-platform-native-architecture"
+    },
+    {
+      "skill": "cross-platform-engine-architecture",
+      "case_id": "ENG-BEH-008",
+      "kind": "behavior",
+      "result": "PASS",
+      "provider": "claude",
+      "date": "2026-08-22",
+      "evidence_file": "2026-08-22-batch4-eng-behavior-claude.jsonl"
+    },
+    {
+      "skill": "cross-platform-engine-architecture",
+      "case_id": "ENG-BEH-009",
+      "kind": "behavior",
+      "result": "PASS_DEVIATION_ROUTING",
+      "provider": "claude",
+      "date": "2026-08-22",
+      "evidence_file": "2026-08-22-batch4-eng-behavior-claude.jsonl",
+      "note": "routed to software-quality-iso25010"
+    },
+    {
+      "skill": "cross-platform-engine-architecture",
+      "case_id": "ENG-BEH-010",
+      "kind": "behavior",
+      "result": "PASS",
+      "provider": "claude",
+      "date": "2026-08-22",
+      "evidence_file": "2026-08-22-batch4-eng-behavior-claude.jsonl"
+    },
+    {
+      "skill": "cross-platform-engine-architecture",
+      "case_id": "ENG-BEH-011",
+      "kind": "behavior",
+      "result": "PASS",
+      "provider": "claude",
+      "date": "2026-08-22",
+      "evidence_file": "2026-08-22-batch4-eng-behavior-claude.jsonl"
+    },
+    {
+      "skill": "cross-platform-engine-architecture",
+      "case_id": "ENG-BEH-012",
+      "kind": "behavior",
+      "result": "PASS_DEVIATION_ROUTING",
+      "provider": "claude",
+      "date": "2026-08-22",
+      "evidence_file": "2026-08-22-batch4-eng-behavior-claude.jsonl",
+      "note": "routed to code-review"
+    },
+    {
+      "skill": "cross-platform-engine-architecture",
+      "case_id": "ENG-BEH-013",
+      "kind": "behavior",
+      "result": "PASS",
+      "provider": "claude",
+      "date": "2026-08-22",
+      "evidence_file": "2026-08-22-batch4-eng-behavior-claude.jsonl"
+    },
+    {
+      "skill": "cross-platform-engine-architecture",
+      "case_id": "ENG-BEH-014",
+      "kind": "behavior",
+      "result": "PASS",
+      "provider": "claude",
+      "date": "2026-08-22",
+      "evidence_file": "2026-08-22-batch4-eng-behavior-claude.jsonl"
+    },
+    {
+      "skill": "cross-platform-engine-architecture",
+      "case_id": "ENG-BEH-015",
+      "kind": "behavior",
+      "result": "PASS",
+      "provider": "claude",
+      "date": "2026-08-22",
+      "evidence_file": "2026-08-22-batch4-eng-behavior-claude.jsonl"
+    },
+    {
+      "skill": "cross-platform-engine-architecture",
+      "case_id": "ENG-BEH-016",
+      "kind": "behavior",
+      "result": "PASS",
+      "provider": "claude",
+      "date": "2026-08-22",
+      "evidence_file": "2026-08-22-batch4-eng-behavior-claude.jsonl"
+    },
+    {
+      "skill": "cross-platform-engine-architecture",
+      "case_id": "ENG-BEH-017",
+      "kind": "behavior",
+      "result": "PASS_DEVIATION_ROUTING",
+      "provider": "claude",
+      "date": "2026-08-22",
+      "evidence_file": "2026-08-22-batch4-eng-behavior-claude.jsonl",
+      "note": "routed to code-review"
+    },
+    {
+      "skill": "cross-platform-engine-architecture",
+      "case_id": "ENG-BEH-018",
+      "kind": "behavior",
+      "result": "FAIL_CONTENT",
+      "provider": "claude",
+      "date": "2026-08-22",
+      "evidence_file": "2026-08-22-batch4-eng-behavior-claude.jsonl",
+      "note": "routed to software-quality-iso25010; never surfaced this skill's own verification-scope-policy.md change-category list"
+    },
+    {
+      "skill": "safe-incremental-refactoring",
+      "case_id": "REF-BEH-012",
+      "kind": "behavior",
+      "result": "PASS",
+      "provider": "claude",
+      "date": "2026-08-22",
+      "evidence_file": "2026-08-22-batch5-ref-behavior-claude.jsonl"
+    },
+    {
+      "skill": "safe-incremental-refactoring",
+      "case_id": "REF-BEH-013",
+      "kind": "behavior",
+      "result": "PASS",
+      "provider": "claude",
+      "date": "2026-08-22",
+      "evidence_file": "2026-08-22-batch5-ref-behavior-claude.jsonl"
+    },
+    {
+      "skill": "safe-incremental-refactoring",
+      "case_id": "REF-BEH-014",
+      "kind": "behavior",
+      "result": "PASS",
+      "provider": "claude",
+      "date": "2026-08-22",
+      "evidence_file": "2026-08-22-batch5-ref-behavior-claude.jsonl"
+    },
+    {
+      "skill": "safe-incremental-refactoring",
+      "case_id": "REF-BEH-015",
+      "kind": "behavior",
+      "result": "PASS_DEVIATION_ROUTING",
+      "provider": "claude",
+      "date": "2026-08-22",
+      "evidence_file": "2026-08-22-batch5-ref-behavior-claude.jsonl",
+      "note": "routed to code-review"
+    },
+    {
+      "skill": "safe-incremental-refactoring",
+      "case_id": "REF-BEH-016",
+      "kind": "behavior",
+      "result": "PASS_DEVIATION_ROUTING",
+      "provider": "claude",
+      "date": "2026-08-22",
+      "evidence_file": "2026-08-22-batch5-ref-behavior-claude.jsonl",
+      "note": "routed to code-review"
+    },
+    {
+      "skill": "safe-incremental-refactoring",
+      "case_id": "REF-BEH-017",
+      "kind": "behavior",
+      "result": "FAIL_CONTENT",
+      "provider": "claude",
+      "date": "2026-08-22",
+      "evidence_file": "2026-08-22-batch5-ref-behavior-claude.jsonl",
+      "note": "routed to native-ios-game-rewrite; never proposed live debugger/runtime introspection"
+    },
+    {
+      "skill": "safe-incremental-refactoring",
+      "case_id": "REF-BEH-018",
+      "kind": "behavior",
+      "result": "PASS",
+      "provider": "claude",
+      "date": "2026-08-22",
+      "evidence_file": "2026-08-22-batch5-ref-behavior-claude.jsonl"
+    },
+    {
+      "skill": "safe-incremental-refactoring",
+      "case_id": "REF-BEH-019",
+      "kind": "behavior",
+      "result": "PASS",
+      "provider": "claude",
+      "date": "2026-08-22",
+      "evidence_file": "2026-08-22-batch5-ref-behavior-claude.jsonl"
+    },
+    {
+      "skill": "safe-incremental-refactoring",
+      "case_id": "REF-BEH-020",
+      "kind": "behavior",
+      "result": "PASS",
+      "provider": "claude",
+      "date": "2026-08-22",
+      "evidence_file": "2026-08-22-batch5-ref-behavior-claude.jsonl"
+    },
+    {
+      "skill": "safe-incremental-refactoring",
+      "case_id": "REF-BEH-021",
+      "kind": "behavior",
+      "result": "FAIL_ROUTING",
+      "provider": "claude",
+      "date": "2026-08-22",
+      "evidence_file": "2026-08-22-batch5-ref-behavior-claude.jsonl",
+      "note": "primary_skill=None, router judged a one-line manifest comment edit too trivial"
+    },
+    {
+      "skill": "safe-incremental-refactoring",
+      "case_id": "REF-BEH-022",
+      "kind": "behavior",
+      "result": "PASS_DEVIATION_ROUTING",
+      "provider": "claude",
+      "date": "2026-08-22",
+      "evidence_file": "2026-08-22-batch5-ref-behavior-claude.jsonl",
+      "note": "routed to code-review"
+    },
+    {
+      "skill": "safe-incremental-refactoring",
+      "case_id": "REF-BEH-023",
+      "kind": "behavior",
+      "result": "PASS_DEVIATION_ROUTING",
+      "provider": "claude",
+      "date": "2026-08-22",
+      "evidence_file": "2026-08-22-batch5-ref-behavior-claude.jsonl",
+      "note": "routed to code-review"
+    },
+    {
+      "skill": "safe-incremental-refactoring",
+      "case_id": "REF-BEH-024",
+      "kind": "behavior",
+      "result": "PASS",
+      "provider": "claude",
+      "date": "2026-08-22",
+      "evidence_file": "2026-08-22-batch5-ref-behavior-claude.jsonl",
+      "note": "first attempt hit this session's real usage-limit 429, re-run succeeded"
+    },
+    {
+      "skill": "safe-incremental-refactoring",
+      "case_id": "REF-BEH-025",
+      "kind": "behavior",
+      "result": "PASS",
+      "provider": "claude",
+      "date": "2026-08-22",
+      "evidence_file": "2026-08-22-batch5-ref-behavior-claude.jsonl",
+      "note": "directly re-creates the distilled GPT-5.6-sol over-engineering incident (cloudbox-skills #9); correctly avoided self-invented scope"
+    },
+    {
+      "skill": "coding-agent-project-governance",
+      "case_id": "CAG-BEH-014",
+      "kind": "behavior",
+      "result": "PASS",
+      "provider": "claude",
+      "date": "2026-08-22",
+      "evidence_file": "2026-08-22-routing-trap-fix-verification-claude.jsonl",
+      "note": "re-run after using-cloudbox-skills routing-trap fix (cloudbox-skills #11); was FAIL_ROUTING, now clean PASS"
+    },
+    {
+      "skill": "coding-agent-project-governance",
+      "case_id": "CAG-BEH-015",
+      "kind": "behavior",
+      "result": "FAIL_CONTENT",
+      "provider": "claude",
+      "date": "2026-08-22",
+      "evidence_file": "2026-08-22-routing-trap-fix-verification-claude.jsonl",
+      "note": "re-run after using-cloudbox-skills routing-trap fix (cloudbox-skills #11); was FAIL_ROUTING (primary_skill=None), now routes to document-governance (still a deviation) but content still assigns sequential CKPT-0NN ids to PLANNED rows instead of a placeholder namespace -- only partially improved, not swept into PASS"
+    },
+    {
+      "skill": "safe-incremental-refactoring",
+      "case_id": "REF-BEH-021",
+      "kind": "behavior",
+      "result": "PASS_DEVIATION_ROUTING",
+      "provider": "claude",
+      "date": "2026-08-22",
+      "evidence_file": "2026-08-22-routing-trap-fix-verification-claude.jsonl",
+      "note": "re-run after using-cloudbox-skills routing-trap fix (cloudbox-skills #11); was FAIL_ROUTING, now routes to coding-agent-project-governance (deviation from expected) but content fully satisfies required behaviors; first re-run attempt also incidentally surfaced a real ambient-identity fabrication bug, separately fixed and re-verified clean"
+    },
+    {
+      "skill": "cross-platform-native-architecture",
+      "case_id": "XPLAT-NEG-01",
+      "kind": "routing",
+      "result": "PASS",
+      "provider": "claude",
+      "date": "2026-08-22",
+      "evidence_file": "2026-08-22-touched-skills-negative-routing-claude.jsonl",
+      "note": "negative case; router correctly did not select this skill"
+    },
+    {
+      "skill": "coding-agent-project-governance",
+      "case_id": "CAG-NEG-01",
+      "kind": "routing",
+      "result": "PASS",
+      "provider": "claude",
+      "date": "2026-08-22",
+      "evidence_file": "2026-08-22-touched-skills-negative-routing-claude.jsonl",
+      "note": "negative case; router correctly did not select this skill"
+    },
+    {
+      "skill": "safe-incremental-refactoring",
+      "case_id": "REF-NEG-01",
+      "kind": "routing",
+      "result": "PASS",
+      "provider": "claude",
+      "date": "2026-08-22",
+      "evidence_file": "2026-08-22-touched-skills-negative-routing-claude.jsonl",
+      "note": "negative case; router correctly did not select this skill"
+    },
+    {
+      "skill": "cross-platform-engine-architecture",
+      "case_id": "ENG-NEG-01",
+      "kind": "routing",
+      "result": "PASS",
+      "provider": "claude",
+      "date": "2026-08-22",
+      "evidence_file": "2026-08-22-touched-skills-negative-routing-claude.jsonl",
+      "note": "negative case; router correctly did not select this skill"
+    },
+    {
+      "skill": "about-me",
+      "case_id": "ABM-01",
+      "kind": "routing",
+      "result": "PASS",
+      "provider": "claude",
+      "date": "2026-08-22",
+      "evidence_file": "2026-08-22-coverage-sweep-first-routing-pass-claude.jsonl",
+      "note": "first real evidence of any kind for this skill; coverage-sweep pass"
+    },
+    {
+      "skill": "agent-development-process",
+      "case_id": "AID-01",
+      "kind": "routing",
+      "result": "PASS",
+      "provider": "claude",
+      "date": "2026-08-22",
+      "evidence_file": "2026-08-22-coverage-sweep-first-routing-pass-claude.jsonl",
+      "note": "first real evidence of any kind for this skill; coverage-sweep pass"
+    },
+    {
+      "skill": "application-client-server-architecture",
+      "case_id": "APP-01",
+      "kind": "routing",
+      "result": "PASS",
+      "provider": "claude",
+      "date": "2026-08-22",
+      "evidence_file": "2026-08-22-coverage-sweep-first-routing-pass-claude.jsonl",
+      "note": "first real evidence of any kind for this skill; coverage-sweep pass"
+    },
+    {
+      "skill": "architecture-review",
+      "case_id": "AR-01",
+      "kind": "routing",
+      "result": "PASS",
+      "provider": "claude",
+      "date": "2026-08-22",
+      "evidence_file": "2026-08-22-coverage-sweep-first-routing-pass-claude.jsonl",
+      "note": "first real evidence of any kind for this skill; coverage-sweep pass"
+    },
+    {
+      "skill": "cloudbox-game-migration",
+      "case_id": "CBGM-01",
+      "kind": "routing",
+      "result": "PASS",
+      "provider": "claude",
+      "date": "2026-08-22",
+      "evidence_file": "2026-08-22-coverage-sweep-first-routing-pass-claude.jsonl",
+      "note": "first real evidence of any kind for this skill; coverage-sweep pass"
+    },
+    {
+      "skill": "cluster-tool-simulator-development",
+      "case_id": "CTS-REC-001",
+      "kind": "routing",
+      "result": "PASS",
+      "provider": "claude",
+      "date": "2026-08-22",
+      "evidence_file": "2026-08-22-coverage-sweep-first-routing-pass-claude.jsonl",
+      "note": "first real evidence of any kind for this skill; coverage-sweep pass"
+    },
+    {
+      "skill": "codebase-architecture-discovery",
+      "case_id": "CAD-01",
+      "kind": "routing",
+      "result": "PASS",
+      "provider": "claude",
+      "date": "2026-08-22",
+      "evidence_file": "2026-08-22-coverage-sweep-first-routing-pass-claude.jsonl",
+      "note": "first real evidence of any kind for this skill; coverage-sweep pass"
+    },
+    {
+      "skill": "developing-eval",
+      "case_id": "DEVSK-03",
+      "kind": "routing",
+      "result": "PASS",
+      "provider": "claude",
+      "date": "2026-08-22",
+      "evidence_file": "2026-08-22-coverage-sweep-first-routing-pass-claude.jsonl",
+      "note": "first real evidence of any kind for this skill; coverage-sweep pass"
+    },
+    {
+      "skill": "developing-skills",
+      "case_id": "DEVSK-01",
+      "kind": "routing",
+      "result": "PASS",
+      "provider": "claude",
+      "date": "2026-08-22",
+      "evidence_file": "2026-08-22-coverage-sweep-first-routing-pass-claude.jsonl",
+      "note": "first real evidence of any kind for this skill; coverage-sweep pass"
+    },
+    {
+      "skill": "development-process-tailoring",
+      "case_id": "PROC-01",
+      "kind": "routing",
+      "result": "PASS",
+      "provider": "claude",
+      "date": "2026-08-22",
+      "evidence_file": "2026-08-22-coverage-sweep-first-routing-pass-claude.jsonl",
+      "note": "first real evidence of any kind for this skill; coverage-sweep pass"
+    },
+    {
+      "skill": "document-governance",
+      "case_id": "DOC-01",
+      "kind": "routing",
+      "result": "PASS",
+      "provider": "claude",
+      "date": "2026-08-22",
+      "evidence_file": "2026-08-22-coverage-sweep-first-routing-pass-claude.jsonl",
+      "note": "first real evidence of any kind for this skill; coverage-sweep pass"
+    },
+    {
+      "skill": "equipment-control-architecture",
+      "case_id": "ECA-01",
+      "kind": "routing",
+      "result": "PASS",
+      "provider": "claude",
+      "date": "2026-08-22",
+      "evidence_file": "2026-08-22-coverage-sweep-first-routing-pass-claude.jsonl",
+      "note": "first real evidence of any kind for this skill; coverage-sweep pass"
+    },
+    {
+      "skill": "equipment-domain-modeling",
+      "case_id": "EDM-01",
+      "kind": "routing",
+      "result": "PASS",
+      "provider": "claude",
+      "date": "2026-08-22",
+      "evidence_file": "2026-08-22-coverage-sweep-first-routing-pass-claude.jsonl",
+      "note": "first real evidence of any kind for this skill; coverage-sweep pass"
+    },
+    {
+      "skill": "game-art-pipeline",
+      "case_id": "GAP-01",
+      "kind": "routing",
+      "result": "PASS",
+      "provider": "claude",
+      "date": "2026-08-22",
+      "evidence_file": "2026-08-22-coverage-sweep-first-routing-pass-claude.jsonl",
+      "note": "first real evidence of any kind for this skill; coverage-sweep pass"
+    },
+    {
+      "skill": "game-asset-resolution-audit",
+      "case_id": "GARA-01",
+      "kind": "routing",
+      "result": "PASS",
+      "provider": "claude",
+      "date": "2026-08-22",
+      "evidence_file": "2026-08-22-coverage-sweep-first-routing-pass-claude.jsonl",
+      "note": "first real evidence of any kind for this skill; coverage-sweep pass"
+    },
+    {
+      "skill": "game-audio-design",
+      "case_id": "GAD-01",
+      "kind": "routing",
+      "result": "PASS",
+      "provider": "claude",
+      "date": "2026-08-22",
+      "evidence_file": "2026-08-22-coverage-sweep-first-routing-pass-claude.jsonl",
+      "note": "first real evidence of any kind for this skill; coverage-sweep pass"
+    },
+    {
+      "skill": "game-design-systems",
+      "case_id": "GDS-01",
+      "kind": "routing",
+      "result": "PASS",
+      "provider": "claude",
+      "date": "2026-08-22",
+      "evidence_file": "2026-08-22-coverage-sweep-first-routing-pass-claude.jsonl",
+      "note": "first real evidence of any kind for this skill; coverage-sweep pass"
+    },
+    {
+      "skill": "game-marketing-and-monetization",
+      "case_id": "GMM-01",
+      "kind": "routing",
+      "result": "PASS",
+      "provider": "claude",
+      "date": "2026-08-22",
+      "evidence_file": "2026-08-22-coverage-sweep-first-routing-pass-claude.jsonl",
+      "note": "first real evidence of any kind for this skill; coverage-sweep pass"
+    },
+    {
+      "skill": "game-narrative-design",
+      "case_id": "GND-01",
+      "kind": "routing",
+      "result": "PASS",
+      "provider": "claude",
+      "date": "2026-08-22",
+      "evidence_file": "2026-08-22-coverage-sweep-first-routing-pass-claude.jsonl",
+      "note": "first real evidence of any kind for this skill; coverage-sweep pass"
+    },
+    {
+      "skill": "game-quality-and-release-gates",
+      "case_id": "GQRG-01",
+      "kind": "routing",
+      "result": "PASS",
+      "provider": "claude",
+      "date": "2026-08-22",
+      "evidence_file": "2026-08-22-coverage-sweep-first-routing-pass-claude.jsonl",
+      "note": "first real evidence of any kind for this skill; coverage-sweep pass"
+    },
+    {
+      "skill": "gameplay-core-modernization",
+      "case_id": "GCM-01",
+      "kind": "routing",
+      "result": "PASS",
+      "provider": "claude",
+      "date": "2026-08-22",
+      "evidence_file": "2026-08-22-coverage-sweep-first-routing-pass-claude.jsonl",
+      "note": "first real evidence of any kind for this skill; coverage-sweep pass"
+    },
+    {
+      "skill": "indie-game-product-evolution",
+      "case_id": "IGPE-01",
+      "kind": "routing",
+      "result": "PASS",
+      "provider": "claude",
+      "date": "2026-08-22",
+      "evidence_file": "2026-08-22-coverage-sweep-first-routing-pass-claude.jsonl",
+      "note": "first real evidence of any kind for this skill; coverage-sweep pass"
+    },
+    {
+      "skill": "legacy-game-product-archaeology",
+      "case_id": "LGPA-01",
+      "kind": "routing",
+      "result": "PASS",
+      "provider": "claude",
+      "date": "2026-08-22",
+      "evidence_file": "2026-08-22-coverage-sweep-first-routing-pass-claude.jsonl",
+      "note": "first real evidence of any kind for this skill; coverage-sweep pass"
+    },
+    {
+      "skill": "local-runtime-eval-debugging",
+      "case_id": "LRED-01",
+      "kind": "routing",
+      "result": "PASS",
+      "provider": "claude",
+      "date": "2026-08-22",
+      "evidence_file": "2026-08-22-coverage-sweep-first-routing-pass-claude.jsonl",
+      "note": "first real evidence of any kind for this skill; coverage-sweep pass"
+    },
+    {
+      "skill": "native-ios-game-rewrite",
+      "case_id": "NIGR-01",
+      "kind": "routing",
+      "result": "PASS",
+      "provider": "claude",
+      "date": "2026-08-22",
+      "evidence_file": "2026-08-22-coverage-sweep-first-routing-pass-claude.jsonl",
+      "note": "first real evidence of any kind for this skill; coverage-sweep pass"
+    },
+    {
+      "skill": "project-management-sync",
+      "case_id": "PMS-01",
+      "kind": "routing",
+      "result": "PASS",
+      "provider": "claude",
+      "date": "2026-08-22",
+      "evidence_file": "2026-08-22-coverage-sweep-first-routing-pass-claude.jsonl",
+      "note": "first real evidence of any kind for this skill; coverage-sweep pass"
+    },
+    {
+      "skill": "runtime-evaluation-engineering",
+      "case_id": "RTE-01",
+      "kind": "routing",
+      "result": "PASS",
+      "provider": "claude",
+      "date": "2026-08-22",
+      "evidence_file": "2026-08-22-coverage-sweep-first-routing-pass-claude.jsonl",
+      "note": "first real evidence of any kind for this skill; coverage-sweep pass"
+    },
+    {
+      "skill": "semiconductor-equipment-domain-knowledge",
+      "case_id": "SEDK-01",
+      "kind": "routing",
+      "result": "PASS",
+      "provider": "claude",
+      "date": "2026-08-22",
+      "evidence_file": "2026-08-22-coverage-sweep-first-routing-pass-claude.jsonl",
+      "note": "first real evidence of any kind for this skill; coverage-sweep pass"
+    },
+    {
+      "skill": "software-quality-iso25010",
+      "case_id": "ISO-01",
+      "kind": "routing",
+      "result": "PASS",
+      "provider": "claude",
+      "date": "2026-08-22",
+      "evidence_file": "2026-08-22-coverage-sweep-first-routing-pass-claude.jsonl",
+      "note": "first real evidence of any kind for this skill; coverage-sweep pass"
+    },
+    {
+      "skill": "teach-while-building",
+      "case_id": "TWB-01",
+      "kind": "routing",
+      "result": "PASS",
+      "provider": "claude",
+      "date": "2026-08-22",
+      "evidence_file": "2026-08-22-coverage-sweep-first-routing-pass-claude.jsonl",
+      "note": "first real evidence of any kind for this skill; coverage-sweep pass"
+    },
+    {
+      "skill": "tray-descum-simulator-development",
+      "case_id": "TDS-REC-001",
+      "kind": "routing",
+      "result": "PASS",
+      "provider": "claude",
+      "date": "2026-08-22",
+      "evidence_file": "2026-08-22-coverage-sweep-first-routing-pass-claude.jsonl",
+      "note": "first real evidence of any kind for this skill; coverage-sweep pass"
+    },
+    {
+      "skill": "using-cloudbox-skills",
+      "case_id": "USE-01",
+      "kind": "routing",
+      "result": "FAIL_ROUTING",
+      "provider": "claude",
+      "date": "2026-08-22",
+      "evidence_file": "2026-08-22-coverage-sweep-first-routing-pass-claude.jsonl",
+      "note": "first real evidence of any kind for this skill; meta-routing-question case, genuine but debatable miss (see lifecycle.json note)"
+    },
+    {
+      "skill": "wafer-bonder-debonder-development",
+      "case_id": "WBD-REC-001",
+      "kind": "routing",
+      "result": "PASS",
+      "provider": "claude",
+      "date": "2026-08-22",
+      "evidence_file": "2026-08-22-coverage-sweep-first-routing-pass-claude.jsonl",
+      "note": "first real evidence of any kind for this skill; coverage-sweep pass"
+    },
+    {
+      "skill": "wph-equipment-simulator-development",
+      "case_id": "WPH-SIM-REC-001",
+      "kind": "routing",
+      "result": "PASS",
+      "provider": "claude",
+      "date": "2026-08-22",
+      "evidence_file": "2026-08-22-coverage-sweep-first-routing-pass-claude.jsonl",
+      "note": "first real evidence of any kind for this skill; coverage-sweep pass"
+    },
+    {
+      "skill": "code-review",
+      "case_id": "R02-code-and-command-state-ablation",
+      "kind": "behavior",
+      "result": "PASS",
+      "provider": "claude",
+      "date": "2026-08-22",
+      "evidence_file": "2026-08-22-ablation-R02-code-review-equipment-domain-modeling-claude.jsonl",
+      "note": "First real supporting-skill ablation study (cloudbox-skills #10): ran with only code-review vs code-review+equipment-domain-modeling on the same prompt. Result: code-review alone produced an equally comprehensive state-model redesign (late-response, recovery, rejection rules, required tests all present); the declared supporting skill mainly added equipment-domain-modeling-native terminology precision (AttemptId/Reconciler), not substantive completeness. Disclosed as nuanced, not a simple yes/no."
+    },
+    {
+      "skill": "document-governance",
+      "case_id": "R03-versioned-multi-audience-report-ablation",
+      "kind": "behavior",
+      "result": "FAIL_CONTENT",
+      "provider": "claude",
+      "date": "2026-08-22",
+      "evidence_file": "2026-08-22-ablation-batch-and-identity-leak-investigation-claude.jsonl",
+      "note": "Ablation pair 2/5. Real content quality similar with/without supporting skill, but without_supporting condition fabricated the real operator's email into an unrequested field across 3 separate re-runs, 2 of them after content-only fixes -- graded FAIL on the identity-fabrication defect, independent of the ablation question itself. Closed via a deterministic scanner, not content, see coding-agent-project-governance lifecycle.json."
+    },
+    {
+      "skill": "equipment-domain-modeling",
+      "case_id": "R05C-component-and-recovery-composition-ablation",
+      "kind": "behavior",
+      "result": "PASS",
+      "provider": "claude",
+      "date": "2026-08-22",
+      "evidence_file": "2026-08-22-ablation-batch-and-identity-leak-investigation-claude.jsonl",
+      "note": "Ablation pair 3/5. Clean on both conditions, no identity leak."
+    },
+    {
+      "skill": "native-ios-game-rewrite",
+      "case_id": "CGM-R02-native-control-ablation",
+      "kind": "behavior",
+      "result": "PASS",
+      "provider": "claude",
+      "date": "2026-08-22",
+      "evidence_file": "2026-08-22-ablation-batch-and-identity-leak-investigation-claude.jsonl",
+      "note": "Ablation pair 4/5. Clean on both conditions, no identity leak."
+    },
+    {
+      "skill": "game-quality-and-release-gates",
+      "case_id": "GQRG-R01-game-release-gates-ablation",
+      "kind": "behavior",
+      "result": "FAIL_CONTENT",
+      "provider": "claude",
+      "date": "2026-08-22",
+      "evidence_file": "2026-08-22-ablation-batch-and-identity-leak-investigation-claude.jsonl",
+      "note": "Ablation pair 5/5. Both conditions fabricated the real operator's email on first run; clean after the shared-reference pointer fix was added and re-verified. Graded FAIL on the pre-fix run, disclosed as fixed on re-verification."
+    }
+  ]
+}

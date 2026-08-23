@@ -92,6 +92,221 @@
                 "agent documents packaging generally but misses design-host ABI, process identity and OS-owned secret boundaries"
             ],
             "review_notes": "Do not prescribe a specific credential backend; preserve the OS security boundary and verification obligation."
-        }
+        },
+    {
+      "id": "XPLAT-BEH-005",
+      "skill": "cross-platform-native-architecture",
+      "type": "application",
+      "prompt": "A QObject-derived DeviceScanController owns a QThread running a background HID polling worker. Today, shutdown only happens if callers remember to call controller->stopScanning() before deleting the controller, and the application currently deletes the controller synchronously during UI teardown. Fix the shutdown and destruction design so the worker is always stopped safely.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "moves the actual shutdown-and-wait logic for the worker/thread into the controller's own destructor rather than only a separately-called stop method",
+        "destroys the controller via deleteLater() instead of synchronous delete because worker shutdown is not provably synchronous at the point of destruction",
+        "explains that this guarantees shutdown regardless of how or when the object is destroyed"
+      ],
+      "forbidden_behaviors": [
+        "leaves shutdown dependent on an external caller invoking stopScanning() before deletion",
+        "keeps or introduces a synchronous delete on the controller while the worker thread may still be running"
+      ],
+      "required_artifacts": [],
+      "baseline_expected_failure": [
+        "agent adds a stop() call at the existing external call site but does not move shutdown-and-wait into the destructor or switch to deleteLater()"
+      ],
+      "review_notes": "Closes qt-tool-checklist.md UI and Application: QObject parent/lifetime destructor-based shutdown and deleteLater() requirement."
+    },
+    {
+      "id": "XPLAT-BEH-006",
+      "skill": "cross-platform-native-architecture",
+      "type": "application",
+      "prompt": "A Qt vision pipeline runs a background graph each cycle that can produce a landmarks packet stream, a presence-flag packet stream, and an annotated-image packet stream, but not every stream is guaranteed to have output on every cycle. The current per-cycle consumer checks only the presence-flag stream's latest value and, if it is true, unconditionally calls a blocking dequeue on the landmarks stream and the annotated-image stream. Diagnose the resulting occasional hangs and stale frames and redesign per-cycle consumption.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "checks each target stream's own queue/availability state directly, immediately before that stream's blocking dequeue, and skips it gracefully when empty",
+        "identifies which of the correlated streams is the actual per-cycle completion barrier and reads it before consuming the other correlated streams",
+        "documents why the read ordering is required so a later refactor does not reorder the calls"
+      ],
+      "forbidden_behaviors": [
+        "gates consumption of a data stream on a separate, only-correlated presence-flag stream instead of the stream's own state",
+        "calls an unconditional blocking dequeue on a stream not guaranteed to produce data every cycle"
+      ],
+      "required_artifacts": [],
+      "baseline_expected_failure": [
+        "agent adds a null/timeout check around the existing blocking dequeues but keeps presence-flag as the sole gate and does not identify or order around the true completion-barrier stream"
+      ],
+      "review_notes": "Closes qt-tool-checklist.md Hardware and Communication: per-stream queue-state checks and completion-barrier stream ordering for correlated pipeline outputs."
+    },
+    {
+      "id": "XPLAT-BEH-007",
+      "skill": "cross-platform-native-architecture",
+      "type": "application",
+      "prompt": "One new source file in a Qt/CMake target needs a C++20 concept. The target currently builds under an unspecified/implicit compiler default across many unrelated files. A teammate proposes setting CMAKE_CXX_STANDARD 20 on the whole target, and separately wants to exclude a generated .cu file from a target-wide warning flag using a generator expression such as $<COMPILE_LANGUAGE:CXX>. Review and implement the standard bump correctly.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "scopes the raised C++ standard to only the files that actually need it, via a per-file compiler-flag mechanism, rather than raising it for the whole target",
+        "checks whether the project currently builds only under the old implicit/looser dialect and treats any newly surfaced strictness violation as a separate disclosed decision rather than silently folding it into this change",
+        "verifies the generator-expression-based flag exclusion actually took effect by inspecting the real generated build project for the excluded file, not by assuming a successful build proves it"
+      ],
+      "forbidden_behaviors": [
+        "raises CMAKE_CXX_STANDARD (or equivalent) for the entire target to satisfy one file's need",
+        "silently absorbs unrelated newly surfaced compiler violations into the same diff without disclosing them",
+        "accepts the generator-expression exclusion as effective without inspecting the generated project file"
+      ],
+      "required_artifacts": [],
+      "baseline_expected_failure": [
+        "agent bumps CMAKE_CXX_STANDARD target-wide and trusts the generator-expression exclusion because the build succeeds"
+      ],
+      "review_notes": "Closes qt-tool-checklist.md Build and Deployment: per-file C++ standard scoping and generated-project verification of generator-expression flag exclusion."
+    },
+    {
+      "id": "XPLAT-BEH-008",
+      "skill": "cross-platform-native-architecture",
+      "type": "application",
+      "prompt": "A shared calculator/subgraph registry already has a CPU implementation of ImageNormalizeCalculator registered under the key \"ImageNormalizeCalculator\". Add a GPU-accelerated variant of the same logical component so a graph config can select either backend.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "assigns the GPU variant a distinct registration key rather than reusing the CPU variant's existing key",
+        "greps for every existing registration of the component name (build-target registration and any config/graph file referencing it) before adding the new variant to confirm no collision"
+      ],
+      "forbidden_behaviors": [
+        "registers the GPU variant under the identical string key already used by the CPU variant",
+        "treats a later 'wrong backend ran' or link-time symptom as a generic wiring issue without checking registration-key uniqueness first"
+      ],
+      "required_artifacts": [],
+      "baseline_expected_failure": [
+        "agent registers the GPU calculator under the same \"ImageNormalizeCalculator\" key, relying on build configuration alone to select the variant"
+      ],
+      "review_notes": "Closes qt-tool-checklist.md Build and Deployment: distinct registration keys for backend-specific registry variants."
+    },
+    {
+      "id": "XPLAT-BEH-009",
+      "skill": "cross-platform-native-architecture",
+      "type": "application",
+      "prompt": "A CMake build produces a Docker image tag and an install path that embed the Android NDK version as the literal string \"25.1.8937393\", which happens to match the NDK version currently pinned in CI. Fix this so the version identifier stays correct if the pinned NDK version ever changes.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "derives the version identifier passed into the image tag/install path from the build system's own live version variable rather than a literal",
+        "checks whether an equivalent live variable already exists in the build system before introducing a separate hardcoded copy"
+      ],
+      "forbidden_behaviors": [
+        "keeps or reintroduces a hardcoded literal version string passed downstream into the tag or path",
+        "justifies the hardcoded literal because it currently matches the default/pinned version"
+      ],
+      "required_artifacts": [],
+      "baseline_expected_failure": [
+        "agent leaves the NDK version as a hardcoded string constant since it matches today's CI configuration"
+      ],
+      "review_notes": "Closes qt-tool-checklist.md Build and Deployment: toolchain/SDK version identifiers must derive from the build system's live variable."
+    },
+    {
+      "id": "XPLAT-BEH-010",
+      "skill": "cross-platform-native-architecture",
+      "type": "application",
+      "prompt": "A per-target post-build step for PluginA copies its built artifact into a shared plugins/ output directory that PluginB and PluginC also deploy into. Before copying, the step currently runs `rm -f plugins/*` to clear stale artifacts. Review and fix this cleanup step.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "scopes the deletion to a pattern matching only PluginA's own artifact name instead of an unqualified wildcard over the shared directory",
+        "verifies the directory's ownership scope (exclusive to this target or shared with others) before accepting the cleanup step"
+      ],
+      "forbidden_behaviors": [
+        "keeps an unqualified `rm -f plugins/*` (or equivalent glob/recursive delete) inside PluginA's per-target build step",
+        "accepts the wildcard delete as-is without checking whether the directory is shared with PluginB/PluginC"
+      ],
+      "required_artifacts": [],
+      "baseline_expected_failure": [
+        "agent leaves the wildcard `rm -f plugins/*` in place, only adding a comment, because the build for PluginA alone succeeds"
+      ],
+      "review_notes": "Closes qt-tool-checklist.md Build and Deployment: unscoped wildcard delete in a shared multi-target output directory."
+    },
+    {
+      "id": "XPLAT-BEH-011",
+      "skill": "cross-platform-native-architecture",
+      "type": "application",
+      "prompt": "A distributed SDK ships public headers plus a prebuilt static library. One of the public headers, sensor_result.h, depends on a Range struct that was defined in the package's shipped types.h. A refactor moves Range's definition into an internal detail/types_internal.h file that is only present in the author's private monorepo checkout and is not part of the package's shipped include tree or install rules. Review whether this change is safe to release.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "verifies every other public header in the same distributed package still resolves Range, either because the new header ships in the package's own include tree or because the package's include-path configuration is updated",
+        "attempts to resolve the changed header's include chain using only the files and include paths the package itself ships/declares, not the author's full private workspace",
+        "treats a header reachable only through a path outside what the package's own setup instructions tell a consumer to check out as a packaging defect to fix before release"
+      ],
+      "forbidden_behaviors": [
+        "moves Range into an internal-only header that is not part of the package's shipped include tree or install rules",
+        "declares the refactor safe because it compiles in the author's own private monorepo checkout"
+      ],
+      "required_artifacts": [],
+      "baseline_expected_failure": [
+        "agent approves the move because the build passes locally, without checking that consumers building only from the shipped package can resolve types_internal.h"
+      ],
+      "review_notes": "Closes qt-tool-checklist.md Build and Deployment: distributed package public headers must stay self-contained after a relocated type."
+    },
+    {
+      "id": "XPLAT-BEH-012",
+      "skill": "cross-platform-native-architecture",
+      "type": "application",
+      "prompt": "A SerialConnection wrapper class exposes open(portName). Its current implementation is `m_handle = CreateFile(portName, ...);` with no check of the existing m_handle value. The UI lets an operator switch devices repeatedly, calling open() on the same wrapper instance with a new port each time. Review and fix open().",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "open() releases/closes any handle it already holds before acquiring the new one",
+        "treats reopening the same logical port/device across repeated open-close cycles as a required verification case rather than an edge case"
+      ],
+      "forbidden_behaviors": [
+        "reassigns the m_handle member to the new CreateFile() result without an explicit close/release of the prior handle first",
+        "treats repeated open cycles on the same wrapper instance as an untested edge case"
+      ],
+      "required_artifacts": [],
+      "baseline_expected_failure": [
+        "agent adds error handling around the new CreateFile() call but does not add a close/release of the prior handle before reassignment"
+      ],
+      "review_notes": "Closes touch-device-utility-architecture.md Section 3 (Device inventory and hot-plug): connection wrapper open() must release a held handle before reacquiring."
+    },
+    {
+      "id": "XPLAT-BEH-013",
+      "skill": "cross-platform-native-architecture",
+      "type": "application",
+      "prompt": "A firmware updater's file picker accepts images for two chip families that use different binary formats. The current classification logic treats any selected file under 64KB as chip-family-A firmware and anything 64KB or larger as chip-family-B firmware. Review and fix the format-detection logic before it ships.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "identifies the loaded file's format by parsing an identifying signature the format itself defines (magic bytes or an explicit format field) rather than file size",
+        "treats a file whose size lands exactly on or past the previous size boundary as a required test case for the corrected detection logic"
+      ],
+      "forbidden_behaviors": [
+        "keeps or reintroduces a byte-size threshold to classify which firmware format a file is",
+        "assumes the size ranges observed in current sample files bound all valid future files of either format"
+      ],
+      "required_artifacts": [],
+      "baseline_expected_failure": [
+        "agent tunes the 64KB threshold to a value that fits more currently-known sample files instead of parsing a format-defined signature"
+      ],
+      "review_notes": "Closes touch-device-utility-architecture.md Section 8 (Firmware update): identify firmware/image format by signature, never by file-size threshold."
+    },
+    {
+      "id": "XPLAT-BEH-014",
+      "skill": "cross-platform-native-architecture",
+      "type": "application",
+      "prompt": "Add a 'Load Firmware' button to a Qt firmware-update dialog: on click, open a native file-selection dialog, then immediately read the returned path and begin flashing. Implement this handler.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "checks the file-selection dialog's result for cancellation (empty path/no selection) before acting on it",
+        "only proceeds to read the file and start flashing when a usable, non-empty path was actually returned"
+      ],
+      "forbidden_behaviors": [
+        "reads the file and starts flashing immediately after the dialog call without checking for an empty/cancelled result",
+        "assumes the dialog callback always carries a usable path"
+      ],
+      "required_artifacts": [],
+      "baseline_expected_failure": [
+        "agent wires QFileDialog::getOpenFileName() directly into the flashing call without a cancellation/empty-path guard"
+      ],
+      "review_notes": "Closes touch-device-utility-architecture.md Section 8 (Firmware update): check file-selection dialog result for cancellation before acting."
+    }
   ]
 }

@@ -21,6 +21,8 @@ Before substantial analysis, repository exploration, design, modification, or re
 
 Do not force a skill onto casual conversation, translation, rewriting, trivial arithmetic, inspection-only requests, or a task whose answer is already fully determined by supplied text. Prompt language alone is never a routing condition.
 
+A request's small or mechanical surface phrasing — "just verify," "just add a few rows," "just confirm this edit is fine" — is not by itself evidence that no skill applies. Judge routing by whether the concrete action matches a risk boundary an installed skill's own content already documents (a build stage that alone cannot validate the changed artifact, a capture action that can expose unrelated windows, an addition that can collide with an existing identifier), not by how procedurally small the request sounds. A confirmation request is only genuinely out of scope when every fact the confirmation needs is already supplied, not merely when the requested action is short.
+
 A settled design or scope decision is not the same as an answer already fully determined by supplied text. When the remaining work still carries real behavior, contract, transaction, or state-preservation risk — for example, an already-approved move of a responsibility across a service boundary — the execution itself is exactly what an execution-shaped skill such as `safe-incremental-refactoring` governs, not evidence that no skill applies.
 
 ## Routing decision contract

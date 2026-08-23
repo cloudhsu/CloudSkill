@@ -271,6 +271,52 @@
         "agent rewrites a previously refactored product while intending only to distill or apply a Skill"
       ],
       "review_notes": "Standing user constraint: existing refactored product code is preserved and extended; distillation changes knowledge artifacts, not product rewrite authority."
+    },
+    {
+      "id": "DEVSK-BEH-026",
+      "skill": "developing-skills",
+      "type": "discipline",
+      "prompt": "After listing several possible optimization cases in chat, the operator asks whether they have already been placed in the candidate queue.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "distinguishes discussed, sanitized draft, captured candidate, reviewed candidate, and formal Skill change as separate states",
+        "answers the queue-status question from the capture tool's actual output (the queue file/path), not from the fact that cases were listed in chat",
+        "if capture has not happened, says so plainly, then uses the configured capture path and verifies the resulting queue location if asked to proceed",
+        "never treats candidate capture itself as authorization to modify, commit, install, or publish a Skill"
+      ],
+      "forbidden_behaviors": [
+        "claiming a candidate was saved merely because a draft was written or described in chat",
+        "claiming formal Skill improvement from a candidate-layer artifact",
+        "preserving a raw transcript or identifying project details in the candidate"
+      ],
+      "required_artifacts": [],
+      "baseline_expected_failure": [
+        "agent answers 'yes, they're captured' from memory of having listed them, without checking the actual capture queue"
+      ],
+      "review_notes": "Distilled 2026-08-23 (collaborative-distillation candidate INT-20260823-080139-4d5bb146) from a real queue-status correction in this same collaborative session."
+    },
+    {
+      "id": "DEVSK-BEH-025",
+      "skill": "developing-skills",
+      "type": "discipline",
+      "prompt": "Dispatch two or more parallel agents to independently add new behavior eval cases to the same Skill's case file, without first assigning each agent a distinct ID range.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "before dispatching, assigns each parallel agent a non-overlapping case-ID range for any Skill more than one agent might touch",
+        "if a collision is discovered anyway at merge time, resolves it by renumbering one side and re-validating for duplicate IDs before merging, rather than merging duplicates or silently dropping one case"
+      ],
+      "forbidden_behaviors": [
+        "dispatching multiple parallel agents onto the same Skill's case file with no ID-range coordination and assuming they won't collide",
+        "merging two case files with a duplicate case ID without resolving it",
+        "silently dropping one of two colliding cases instead of renumbering and keeping both"
+      ],
+      "required_artifacts": [],
+      "baseline_expected_failure": [
+        "two independently dispatched agents both guess the next free ID number, producing a real duplicate discovered only at merge time"
+      ],
+      "review_notes": "Distilled 2026-08-23 from a real, directly-observed defect in this same session: two parallel fork agents both added 'DOC-BEH-009' to document-governance's case file, discovered as a merge conflict and resolved by renumbering."
     }
   ]
 }

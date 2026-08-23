@@ -1,0 +1,657 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CloudBox Skills Registry</title>
+<style>
+  :root {
+    --ink: #10151b;
+    --ink-soft: #2b3946;
+    --muted: #5c6b78;
+    --line: #d7dee3;
+    --paper: #eef1f4;
+    --panel: #ffffff;
+    --panel-2: #f4f7f9;
+    --accent: #0e8388;
+    --accent-ink: #ffffff;
+    --amber: #b9791f;
+    --amber-bg: #fbf1de;
+    --green: #227a52;
+    --green-bg: #e3f3ea;
+    --red: #b23a2e;
+    --red-bg: #fbe6e2;
+    --mono: #1d2b36;
+    --mono-bg: #eef2f4;
+    --shadow: 0 1px 2px rgba(16, 21, 27, .06), 0 8px 24px rgba(16, 21, 27, .05);
+  }
+  :root:not([data-theme="light"]) {
+    @media (prefers-color-scheme: dark) {
+      --ink: #e8edf1;
+      --ink-soft: #c3ced7;
+      --muted: #8b99a5;
+      --line: #2a343d;
+      --paper: #0d1216;
+      --panel: #141b21;
+      --panel-2: #182029;
+      --accent: #37b8bd;
+      --accent-ink: #06181a;
+      --amber: #e0a83f;
+      --amber-bg: #2c2213;
+      --green: #4fbf8b;
+      --green-bg: #12251c;
+      --red: #e07364;
+      --red-bg: #2c1613;
+      --mono: #d7e0e6;
+      --mono-bg: #1a2229;
+      --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 8px 24px rgba(0, 0, 0, .35);
+    }
+  }
+  :root[data-theme="dark"] {
+    --ink: #e8edf1;
+    --ink-soft: #c3ced7;
+    --muted: #8b99a5;
+    --line: #2a343d;
+    --paper: #0d1216;
+    --panel: #141b21;
+    --panel-2: #182029;
+    --accent: #37b8bd;
+    --accent-ink: #06181a;
+    --amber: #e0a83f;
+    --amber-bg: #2c2213;
+    --green: #4fbf8b;
+    --green-bg: #12251c;
+    --red: #e07364;
+    --red-bg: #2c1613;
+    --mono: #d7e0e6;
+    --mono-bg: #1a2229;
+    --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 8px 24px rgba(0, 0, 0, .35);
+  }
+
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: "IBM Plex Sans", -apple-system, "Noto Sans TC", "PingFang TC", sans-serif;
+    line-height: 1.55;
+    font-variant-numeric: tabular-nums;
+  }
+  .mono { font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace; }
+  a { color: var(--accent); }
+  .page { max-width: 1180px; margin: 0 auto; padding: 32px 24px 80px; }
+
+  header.top {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 16px;
+    padding-bottom: 22px;
+    border-bottom: 1px solid var(--line);
+    margin-bottom: 28px;
+  }
+  header.top h1 {
+    margin: 0;
+    font-size: clamp(1.7rem, 3.4vw, 2.35rem);
+    letter-spacing: -.01em;
+    text-wrap: balance;
+  }
+  header.top .sub { color: var(--muted); margin-top: 6px; font-size: .96rem; }
+  .stamp {
+    text-align: right;
+    font-size: .82rem;
+    color: var(--muted);
+    line-height: 1.7;
+  }
+  .stamp .tag {
+    display: inline-block;
+    background: var(--mono-bg);
+    color: var(--mono);
+    border-radius: 5px;
+    padding: 1px 7px;
+    font-size: .8rem;
+  }
+
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 1px;
+    background: var(--line);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 34px;
+  }
+  .stat {
+    background: var(--panel);
+    padding: 16px 18px;
+  }
+  .stat .n { font-size: 1.65rem; font-weight: 600; letter-spacing: -.01em; }
+  .stat .n small { font-size: 1rem; font-weight: 500; color: var(--muted); }
+  .stat .l { color: var(--muted); font-size: .78rem; margin-top: 2px; text-transform: uppercase; letter-spacing: .05em; }
+
+  section.cap { margin-bottom: 30px; }
+  .cap-head {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+  .cap-head h2 {
+    font-size: 1rem;
+    margin: 0;
+    font-family: "IBM Plex Mono", monospace;
+    color: var(--accent);
+    letter-spacing: -.01em;
+  }
+  .cap-head .desc { color: var(--muted); font-size: .86rem; }
+  .cap-head .count { color: var(--muted); font-size: .8rem; margin-left: auto; white-space: nowrap; }
+
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 10px;
+  }
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 9px;
+    padding: 13px 14px;
+    box-shadow: var(--shadow);
+  }
+  .card .name {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: .87rem;
+    font-weight: 600;
+    color: var(--ink-soft);
+    word-break: break-word;
+  }
+  .card .desc {
+    color: var(--muted);
+    font-size: .8rem;
+    margin-top: 5px;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .pills { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 9px; }
+  .pill {
+    font-size: .68rem;
+    font-weight: 600;
+    letter-spacing: .02em;
+    padding: 2px 7px;
+    border-radius: 999px;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  .pill.active { background: var(--green-bg); color: var(--green); }
+  .pill.experimental { background: var(--amber-bg); color: var(--amber); }
+  .pill.exec-behavior { background: var(--green-bg); color: var(--green); }
+  .pill.exec-routing { background: var(--amber-bg); color: var(--amber); }
+  .pill.exec-none { background: var(--red-bg); color: var(--red); }
+  .pill.tier { background: var(--mono-bg); color: var(--mono); text-transform: none; }
+  .pill.hookcount { background: var(--panel-2); color: var(--muted); border: 1px solid var(--line); text-transform: none; }
+
+  table { border-collapse: collapse; width: 100%; font-size: .86rem; }
+  .table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 9px; background: var(--panel); box-shadow: var(--shadow); }
+  th, td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  thead th { background: var(--panel-2); color: var(--muted); font-weight: 600; font-size: .74rem; text-transform: uppercase; letter-spacing: .04em; }
+  tbody tr:last-child td { border-bottom: none; }
+  td.name, td .name { font-family: "IBM Plex Mono", monospace; font-size: .82rem; }
+
+  h2.section-title {
+    font-size: 1.1rem;
+    margin: 44px 0 6px;
+    padding-top: 20px;
+    border-top: 1px solid var(--line);
+  }
+  p.section-note { color: var(--muted); font-size: .88rem; margin: 0 0 16px; max-width: 68ch; }
+
+  ul.gaps { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+  ul.gaps li {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-left: 3px solid var(--red);
+    border-radius: 0 8px 8px 0;
+    padding: 10px 14px;
+    font-size: .87rem;
+    box-shadow: var(--shadow);
+  }
+  ul.gaps li b { color: var(--ink); }
+  ul.gaps li.done { border-left-color: var(--green); }
+  ul.gaps li .status { font-size: .72rem; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); margin-left: 6px; }
+
+  footer {
+    margin-top: 50px;
+    padding-top: 18px;
+    border-top: 1px solid var(--line);
+    color: var(--muted);
+    font-size: .8rem;
+    line-height: 1.7;
+  }
+  footer code { font-family: "IBM Plex Mono", monospace; background: var(--mono-bg); color: var(--mono); padding: 1px 5px; border-radius: 4px; font-size: .78rem; }
+
+  @media (max-width: 560px) {
+    .stamp { text-align: left; }
+    header.top { flex-direction: column; align-items: flex-start; }
+  }
+</style>
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+</head>
+<body>
+
+<div class="page">
+
+  <header class="top">
+    <div>
+      <h1>CloudBox Skills Registry</h1>
+      <div class="sub">41 個技能的架構、分類與真實狀態一覽</div>
+    </div>
+    <div class="stamp">
+      <span class="tag">v7.6.37</span> · commit <span class="tag">d8dbee3</span><br>
+      更新於 2026-08-23（Asia/Taipei）<br>
+      來源：<code class="mono">docs/CLOUDBOX_SKILLS_DEVELOPMENT_MAP.md</code>
+    </div>
+  </header>
+
+  <div class="stats">
+    <div class="stat"><div class="n">41</div><div class="l">Canonical Skills</div></div>
+    <div class="stat"><div class="n">28<small>/13</small></div><div class="l">Active / Experimental</div></div>
+    <div class="stat"><div class="n">21<small>/20</small></div><div class="l">Core / Private tiers</div></div>
+    <div class="stat"><div class="n">9</div><div class="l">Hooks（3 provider）</div></div>
+    <div class="stat"><div class="n">10<small>/41</small></div><div class="l">有真實 Behavior 證據</div></div>
+    <div class="stat"><div class="n">106</div><div class="l">真實執行紀錄（Ledger）</div></div>
+  </div>
+
+  <p class="section-note">
+    每張卡片：<span class="pill active">active</span> 或 <span class="pill experimental">experimental</span> 是 lifecycle 階段；
+    <span class="pill exec-behavior">behavior</span>／<span class="pill exec-routing">routing</span>／<span class="pill exec-none">none</span> 是真實執行證據深度——
+    只有 <b>behavior</b> 代表真的跑過模型並對照 required/forbidden behaviors 評分過；<b>routing</b> 只證明路由器選對過一次；<b>none</b> 是今天新拆分、尚未有任何真實執行紀錄。
+  </p>
+
+  <!-- CAP:pack-meta-dev -->
+  <section class="cap">
+    <div class="cap-head">
+      <h2>pack-meta-dev</h2>
+      <span class="desc">套件自我介紹</span>
+      <span class="count">1 個技能</span>
+    </div>
+    <div class="cards">
+      <div class="card">
+        <div class="name">about-me</div>
+        <div class="desc">介紹這個 skill pack 是誰做的、跟其他 agent-skill 框架的差異，不是一般技術／架構問題該用的技能。</div>
+        <div class="pills"><span class="pill experimental">experimental</span><span class="pill exec-routing">routing</span><span class="pill tier">core</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CAP:agent-dev -->
+  <section class="cap">
+    <div class="cap-head">
+      <h2>agent-dev</h2>
+      <span class="desc">Agent 任務契約、工具、記憶、編排、guardrail</span>
+      <span class="count">1 個技能</span>
+    </div>
+    <div class="cards">
+      <div class="card">
+        <div class="name">agent-development-process</div>
+        <div class="desc">建立或改善 AI agent 產品的任務契約、自主性、工具、context、記憶、編排、評估、guardrail、release 或營運設計。</div>
+        <div class="pills"><span class="pill active">active</span><span class="pill exec-routing">routing</span><span class="pill tier">core</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CAP:architecture-dev -->
+  <section class="cap">
+    <div class="cap-head">
+      <h2>architecture-dev</h2>
+      <span class="desc">系統邊界、分散式設計、framework 與平台契約</span>
+      <span class="count">3 個技能</span>
+    </div>
+    <div class="cards">
+      <div class="card">
+        <div class="name">application-client-server-architecture</div>
+        <div class="desc">應用程式跨 client/server、API、persistence、identity、transaction、state-authority、資料歷史或部署邊界時使用。</div>
+        <div class="pills"><span class="pill active">active</span><span class="pill exec-routing">routing</span><span class="pill tier">core</span></div>
+      </div>
+      <div class="card">
+        <div class="name">architecture-review</div>
+        <div class="desc">比較或評估架構決策、模組邊界、state ownership、分散式設計、平台/領域分離、失敗行為或遷移風險。</div>
+        <div class="pills"><span class="pill active">active</span><span class="pill exec-routing">routing</span><span class="pill tier">core</span></div>
+      </div>
+      <div class="card">
+        <div class="name">framework-design</div>
+        <div class="desc">透過 framework、SDK、plug-in、平台、extension-point、state/command 或 product-line 契約，把可重用能力跟產品/領域行為分開。</div>
+        <div class="pills"><span class="pill active">active</span><span class="pill exec-behavior">behavior</span><span class="pill tier">core</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CAP:code-change-dev -->
+  <section class="cap">
+    <div class="cap-head">
+      <h2>code-change-dev</h2>
+      <span class="desc">code review、brownfield refactor、相容性與 recovery</span>
+      <span class="count">3 個技能</span>
+    </div>
+    <div class="cards">
+      <div class="card">
+        <div class="name">code-review</div>
+        <div class="desc">正式 C、C++、C#、Qt、WinForms、WPF、framework、裝置控制、通訊或工業程式碼需要檢查正確性、並行、state、生命週期、recovery 或邊界違規。</div>
+        <div class="pills"><span class="pill active">active</span><span class="pill exec-behavior">behavior</span><span class="pill tier">core</span></div>
+      </div>
+      <div class="card">
+        <div class="name">safe-incremental-refactoring</div>
+        <div class="desc">legacy 或 brownfield 職責要搬移，卻不能破壞行為、公開契約、資料、交易順序、release 相容性、recovery 或測試接縫。</div>
+        <div class="pills"><span class="pill active">active</span><span class="pill exec-behavior">behavior</span><span class="pill tier">core</span></div>
+      </div>
+      <div class="card">
+        <div class="name">codebase-architecture-discovery</div>
+        <div class="desc">程式碼區域要擴充、不熟悉、或懷疑已累積重複，且目前沒有架構圖或重複盤查——在提出具體重構之前先用。</div>
+        <div class="pills"><span class="pill active">active</span><span class="pill exec-routing">routing</span><span class="pill tier">core</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CAP:governance-dev -->
+  <section class="cap">
+    <div class="cap-head">
+      <h2>governance-dev</h2>
+      <span class="desc">文件、流程、lifecycle、handoff 與 ownership——含 2026-08-23 新拆分的 git 操作與各遊戲領域的治理段落</span>
+      <span class="count">9 個技能</span>
+    </div>
+    <div class="cards">
+      <div class="card">
+        <div class="name">coding-agent-project-governance</div>
+        <div class="desc">repo 需要 coding-agent 指令、風險路由、worktree 規則、多 agent 所有權、測試證據、遷移控制、release 規則或誠實 handoff。</div>
+        <div class="pills"><span class="pill active">active</span><span class="pill exec-behavior">behavior</span><span class="pill tier">core</span><span class="pill hookcount">2 hooks</span></div>
+      </div>
+      <div class="card">
+        <div class="name">coding-agent-git-discipline <span style="color:var(--accent);font-weight:600">NEW</span></div>
+        <div class="desc">2026-08-23 從上面那個技能拆出來：commit、push、branch、清理 git 狀態——避免 commit message 裡的 shell-quoting bug、推 PR 修正前先查真實分支名、無登入迴圈地從失敗的 GitHub push 復原、commit 前偵測可能被共用的 working tree、提醒過期的版本/release。</div>
+        <div class="pills"><span class="pill experimental">experimental</span><span class="pill exec-none">none</span><span class="pill tier">core</span><span class="pill hookcount">4 hooks</span></div>
+      </div>
+      <div class="card">
+        <div class="name">document-governance</div>
+        <div class="desc">工程文件在權威性、版本脈絡、讀者、核准狀態、可追溯性、術語、來源資料或 release baseline 上有分歧。</div>
+        <div class="pills"><span class="pill active">active</span><span class="pill exec-behavior">behavior</span><span class="pill tier">core</span><span class="pill hookcount">1 hook</span></div>
+      </div>
+      <div class="card">
+        <div class="name">development-process-tailoring</div>
+        <div class="desc">交付受限於不穩定需求、硬體依賴、release train、急件、field feedback、產品變體、stage gate 或互相競爭的生命週期模型。</div>
+        <div class="pills"><span class="pill active">active</span><span class="pill exec-routing">routing</span><span class="pill tier">core</span></div>
+      </div>
+      <div class="card">
+        <div class="name">indie-game-product-evolution</div>
+        <div class="desc">舊遊戲核心玩法或某個市場機會，需要變成一個當前市場可行產品的範圍、營收、存檔延續性與停止條件決策。</div>
+        <div class="pills"><span class="pill active">active</span><span class="pill exec-routing">routing</span><span class="pill tier">private-game</span></div>
+      </div>
+      <div class="card">
+        <div class="name">game-art-pipeline</div>
+        <div class="desc">治理遊戲美術生產管線：Art Bible 風格權威、逐決策規格可追溯、美學/技術衝突升級、外包分工、vertical-slice 產能把關、可讀性/無障礙驗證、程式碼交叉引用資產盤點。</div>
+        <div class="pills"><span class="pill experimental">experimental</span><span class="pill exec-routing">routing</span><span class="pill tier">private-art</span><span class="pill hookcount">1 hook</span></div>
+      </div>
+      <div class="card">
+        <div class="name">game-design-systems</div>
+        <div class="desc">core-loop、機制、公式、數值平衡、playtest 協定或內容產出決策，需要可重複的系統設計規則——公式文件化把關、調整旋鈕驗證法、跨文件事實登記、分階段核心玩法驗證閘門。</div>
+        <div class="pills"><span class="pill experimental">experimental</span><span class="pill exec-routing">routing</span><span class="pill tier">private-game</span></div>
+      </div>
+      <div class="card">
+        <div class="name">game-narrative-design</div>
+        <div class="desc">撰寫或審查遊戲的前提、世界觀、角色對白、環境 NPC 台詞或敘事節拍內容，或檢查劇情節拍跟實際出貨玩法機制是否吻合。</div>
+        <div class="pills"><span class="pill experimental">experimental</span><span class="pill exec-routing">routing</span><span class="pill tier">private-art</span></div>
+      </div>
+      <div class="card">
+        <div class="name">game-audio-design</div>
+        <div class="desc">規劃、規格化或審查遊戲音樂與音效設計：作曲授權/預算結構、音效資產命名與音量/格式規格、適應性音樂技法、混音優先層級或音訊無障礙字幕與執行時設定。</div>
+        <div class="pills"><span class="pill experimental">experimental</span><span class="pill exec-routing">routing</span><span class="pill tier">private-art</span></div>
+      </div>
+      <div class="card">
+        <div class="name">game-marketing-and-monetization</div>
+        <div class="desc">遊戲行銷執行——上架頁面與上市準備、IAP 或 live-economy 設計審查、危機或回饋驅動的公開溝通、上架費率/分潤/benchmark 數字——在被當成定案前需要證據分層與可問責的簽核。</div>
+        <div class="pills"><span class="pill experimental">experimental</span><span class="pill exec-routing">routing</span><span class="pill tier">private-operation</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CAP:game-engine-dev -->
+  <section class="cap">
+    <div class="cap-head">
+      <h2>game-engine-dev</h2>
+      <span class="desc">遊戲／圖形引擎、場景、render、resource、input、平台 adapter</span>
+      <span class="count">4 個技能</span>
+    </div>
+    <div class="cards">
+      <div class="card">
+        <div class="name">cross-platform-engine-architecture</div>
+        <div class="desc">2D、遊戲或圖形引擎橫跨 director/scene 生命週期、update/render 迴圈、渲染後端、資源、動作/事件、輸入、context loss 或平台 adapter。</div>
+        <div class="pills"><span class="pill active">active</span><span class="pill exec-behavior">behavior</span><span class="pill tier">private-game</span></div>
+      </div>
+      <div class="card">
+        <div class="name">legacy-game-product-archaeology</div>
+        <div class="desc">從原始碼、設計文件、資產、封存檔或版本歷史重建一款舊遊戲產品，準備做現代化、遷移或重寫前用。</div>
+        <div class="pills"><span class="pill active">active</span><span class="pill exec-routing">routing</span><span class="pill tier">private-game</span></div>
+      </div>
+      <div class="card">
+        <div class="name">gameplay-core-modernization</div>
+        <div class="desc">舊遊戲重寫必須把玩法規則、state ownership、時序、輸入、持久化與特徵化接縫，抽出成平台無關的核心後再接 runtime。</div>
+        <div class="pills"><span class="pill active">active</span><span class="pill exec-routing">routing</span><span class="pill tier">private-game</span></div>
+      </div>
+      <div class="card">
+        <div class="name">cloudbox-game-migration</div>
+        <div class="desc">把舊遊戲遷移到 CloudBox，同時在 CloudBox 的場景、資源、輸入、生命週期、音訊與平台 adapter 邊界上保留產品規則、關卡資料、持久化與行為。</div>
+        <div class="pills"><span class="pill active">active</span><span class="pill exec-routing">routing</span><span class="pill tier">private-game</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CAP:platform-native-dev -->
+  <section class="cap">
+    <div class="cap-head">
+      <h2>platform-native-dev</h2>
+      <span class="desc">原生 OS lifecycle、裝置整合、封裝與相容性</span>
+      <span class="count">2 個技能</span>
+    </div>
+    <div class="cards">
+      <div class="card">
+        <div class="name">cross-platform-native-architecture</div>
+        <div class="desc">原生或 Qt 系統橫跨 OS 特有生命週期、HID/USB 裝置、韌體更新、特權整合、封裝、Designer 外掛或 Qt build/版本遷移邊界。</div>
+        <div class="pills"><span class="pill active">active</span><span class="pill exec-behavior">behavior</span><span class="pill tier">core</span></div>
+      </div>
+      <div class="card">
+        <div class="name">native-ios-game-rewrite</div>
+        <div class="desc">重寫舊版原生 iOS 遊戲，換成現代生命週期、輸入、存檔、音訊、封裝與裝置邊界，同時隔離過時 framework、保留玩法行為。</div>
+        <div class="pills"><span class="pill active">active</span><span class="pill exec-behavior">behavior</span><span class="pill tier">private-game</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CAP:skill-eval-dev -->
+  <section class="cap">
+    <div class="cap-head">
+      <h2>skill-eval-dev</h2>
+      <span class="desc">Skill authoring、routing、behavior／runtime Eval 與 Skill composition</span>
+      <span class="count">5 個技能</span>
+    </div>
+    <div class="cards">
+      <div class="card">
+        <div class="name">using-cloudbox-skills</div>
+        <div class="desc">非瑣碎工程任務可能需要一或多個 CloudBox 技能，尤其涉及先前修正/互動、橫跨架構/設備/程式/流程/品質/文件/AI agent，或路由與技能組合不明確時。</div>
+        <div class="pills"><span class="pill active">active</span><span class="pill exec-routing">routing</span><span class="pill tier">core</span></div>
+      </div>
+      <div class="card">
+        <div class="name">developing-skills</div>
+        <div class="desc">建立、編輯、拆分、合併、評估或發布 CloudSkill 技能。從過往互動或使用者修正萃取證據請改用 developing-eval。</div>
+        <div class="pills"><span class="pill active">active</span><span class="pill exec-routing">routing</span><span class="pill tier">core</span></div>
+      </div>
+      <div class="card">
+        <div class="name">developing-eval</div>
+        <div class="desc">從過往互動、對話歷史、專案歷史或使用者修正萃取成 CloudSkill 技能的淨化 Eval 證據，含「整理成正向案例」「整理成負向案例」「從專案提煉優化案例」等觸發詞，或匯入/匯出私有 Eval Exchange bundle。</div>
+        <div class="pills"><span class="pill active">active</span><span class="pill exec-routing">routing</span><span class="pill tier">private-meta</span></div>
+      </div>
+      <div class="card">
+        <div class="name">local-runtime-eval-debugging</div>
+        <div class="desc">執行、診斷、評分或打包本機 CloudSkill／CloudBox Runtime Eval，尤其牽涉 Ollama、Python discovery、context-budget 溢出、缺報告、routing 對 behavior 失敗，或要求一個可重現的上傳包時。</div>
+        <div class="pills"><span class="pill active">active</span><span class="pill exec-routing">routing</span><span class="pill tier">private-meta</span></div>
+      </div>
+      <div class="card">
+        <div class="name">runtime-evaluation-engineering</div>
+        <div class="desc">設計、審查或除錯一個可執行的 AI/agent/model/router/skill 評估系統，涉及 case 有效性、context 證據、可重現性、結構化輸出、決定論打分、語意評判、分數解讀、迴歸把關或 release 決策。</div>
+        <div class="pills"><span class="pill experimental">experimental</span><span class="pill exec-routing">routing</span><span class="pill tier">private-meta</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CAP:equipment-dev -->
+  <section class="cap">
+    <div class="cap-head">
+      <h2>equipment-dev</h2>
+      <span class="desc">半導體設備語意、控制與 domain modeling</span>
+      <span class="count">7 個技能</span>
+    </div>
+    <div class="cards">
+      <div class="card">
+        <div class="name">semiconductor-equipment-domain-knowledge</div>
+        <div class="desc">半導體設備任務依賴 EFEM、load port、loadlock、傳送腔、製程腔、真空幫浦、壓力計、氣體流量、加熱器、電源、電漿、濺鍍或製程就緒狀態的物理意義。</div>
+        <div class="pills"><span class="pill active">active</span><span class="pill exec-routing">routing</span><span class="pill tier">core</span></div>
+      </div>
+      <div class="card">
+        <div class="name">equipment-control-architecture</div>
+        <div class="desc">設備軟體協調物料流動、抽真空/破真空或腔體就緒、wafer/lot 序列、機械手臂、配方、聯鎖、共用實體資源、模擬或跨設備模組的分散式控制。</div>
+        <div class="pills"><span class="pill active">active</span><span class="pill exec-routing">routing</span><span class="pill tier">core</span></div>
+      </div>
+      <div class="card">
+        <div class="name">equipment-domain-modeling</div>
+        <div class="desc">建模閥件、MFC、幫浦、壓力計、加熱器、電源供應器、機械手臂、腔體快照、設備命令、硬體讀值、Actual 與 Desired 值、能力、工程單位或 metadata 驅動 UI。</div>
+        <div class="pills"><span class="pill active">active</span><span class="pill exec-behavior">behavior</span><span class="pill tier">core</span></div>
+      </div>
+      <div class="card">
+        <div class="name">cluster-tool-simulator-development</div>
+        <div class="desc">開發、修復、驗證或撰寫可配置的半導體 cluster-tool 模擬器，涉及 EFEM、load lock、真空傳送腔、可掛載製程模組、機械手臂託管、壓力域轉換、配方、聯鎖或復原。</div>
+        <div class="pills"><span class="pill experimental">experimental</span><span class="pill exec-routing">routing</span><span class="pill tier">private-equipment</span></div>
+      </div>
+      <div class="card">
+        <div class="name">tray-descum-simulator-development</div>
+        <div class="desc">開發、修復、驗證或撰寫半導體 Tray 上料與 descum 製程模擬器，涉及物料上 Tray、整盤就緒、機械手臂與站點託管、製程模組清潔、卸料/歸還流程、復原或動畫投影。</div>
+        <div class="pills"><span class="pill experimental">experimental</span><span class="pill exec-routing">routing</span><span class="pill tier">private-equipment</span></div>
+      </div>
+      <div class="card">
+        <div class="name">wafer-bonder-debonder-development</div>
+        <div class="desc">開發、修復、驗證或撰寫半導體 wafer bonder、debonder 或合併 bond/debond 設備，涉及 carrier、對位、塗佈或膠合準備、bonding、熱滑分離、清潔、託管、配方、復原或自動化邊界。</div>
+        <div class="pills"><span class="pill experimental">experimental</span><span class="pill exec-routing">routing</span><span class="pill tier">private-equipment</span></div>
+      </div>
+      <div class="card">
+        <div class="name">wph-equipment-simulator-development</div>
+        <div class="desc">開發、修復、驗證或撰寫半導體設備產能模擬器，計算 WPH、cycle time、稼動率、排隊、瓶頸、排程、產品組合、停機或跨 Tray 製程/cluster-tool/bonder-debonder/沉積/清潔/檢測等設備家族的產能情境。</div>
+        <div class="pills"><span class="pill experimental">experimental</span><span class="pill exec-routing">routing</span><span class="pill tier">private-equipment</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CAP:quality-dev -->
+  <section class="cap">
+    <div class="cap-head">
+      <h2>quality-dev</h2>
+      <span class="desc">品質情境、指標、證據、測試與 release gate</span>
+      <span class="count">3 個技能</span>
+    </div>
+    <div class="cards">
+      <div class="card">
+        <div class="name">software-quality-iso25010</div>
+        <div class="desc">軟體品質需要依照 ISO/IEC 25010 轉譯成可量測情境、驗收標準、指標、證據、儀表板、release gate 或缺陷分析。</div>
+        <div class="pills"><span class="pill active">active</span><span class="pill exec-routing">routing</span><span class="pill tier">core</span></div>
+      </div>
+      <div class="card">
+        <div class="name">game-asset-resolution-audit</div>
+        <div class="desc">稽核舊遊戲美術的邏輯顯示尺寸、裝置密度、viewport 適配、來源畫質、衍生放大、重繪決策、記憶體成本或 export 就緒度。</div>
+        <div class="pills"><span class="pill active">active</span><span class="pill exec-routing">routing</span><span class="pill tier">private-game</span></div>
+      </div>
+      <div class="card">
+        <div class="name">game-quality-and-release-gates</div>
+        <div class="desc">遊戲重寫需要可執行的品質與 release gate：重播、時序、亂數、生命週期復原、持久化遷移、資產、viewport、安裝、升級或上架/裝置證據。</div>
+        <div class="pills"><span class="pill active">active</span><span class="pill exec-behavior">behavior</span><span class="pill tier">private-game</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CAP:learning-dev + integration-dev -->
+  <section class="cap">
+    <div class="cap-head">
+      <h2>learning-dev</h2>
+      <span class="desc">在實際工程工作中建立可保留的理解</span>
+      <span class="count">1 個技能</span>
+    </div>
+    <div class="cards">
+      <div class="card">
+        <div class="name">teach-while-building</div>
+        <div class="desc">使用者想在真實工程工作的過程中，順帶建立相關知識的掌握——不是另開一門課；任務中途冒出新概念、怪癖或非顯而易見的限制，值得確認是否真的理解時使用。</div>
+        <div class="pills"><span class="pill experimental">experimental</span><span class="pill exec-routing">routing</span><span class="pill tier">core</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="cap">
+    <div class="cap-head">
+      <h2>integration-dev</h2>
+      <span class="desc">外部系統 adapter、版本能力、同步與 reconciliation</span>
+      <span class="count">1 個技能</span>
+    </div>
+    <div class="cards">
+      <div class="card">
+        <div class="name">project-management-sync</div>
+        <div class="desc">安全稽核、預覽、調和或套用計畫/任務/狀態/日期/專案紀錄在本機或內部 backlog 與外部專案管理系統（Vikunja、OpenProject、Redmine）之間的同步，尤其涉及 provider 版本/能力可能漂移、需防止重複寫入、跨 macOS/Windows/Ubuntu/CI 的憑證、或每次異動都需要寫入後驗證時。</div>
+        <div class="pills"><span class="pill active">active</span><span class="pill exec-routing">routing</span><span class="pill tier">core</span><span class="pill hookcount">1 hook</span></div>
+      </div>
+    </div>
+  </section>
+
+  <h2 class="section-title">Hook 註冊表</h2>
+  <p class="section-note">
+    2026-08-23 起從「未來規劃」變成「已實作」——一個 Skill 可以在 <code class="mono" style="background:var(--mono-bg);color:var(--mono);padding:1px 5px;border-radius:4px">hooks/&lt;name&gt;/</code> 底下宣告 hook，<code class="mono" style="background:var(--mono-bg);color:var(--mono);padding:1px 5px;border-radius:4px">install_skill_hooks.py</code> 負責安全合併進消費端專案設定。全部 9 個都經過真實情境測試，不是只寫完沒測。
+  </p>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>Hook</th><th>Owner Skill</th><th>類型</th><th>作用</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="name">art-draft-catalog</td><td class="name">game-art-pipeline</td><td><span class="pill exec-none" style="background:var(--red-bg);color:var(--red)">blocking</span></td><td>新增／改動生成美術草稿卻沒同步更新 catalog，擋下 commit</td></tr>
+        <tr><td class="name">identity-leak-backstop</td><td class="name">coding-agent-project-governance</td><td><span class="pill exec-none" style="background:var(--red-bg);color:var(--red)">blocking</span></td><td>偵測 commit 把使用者真實 git 身分洩漏進文件欄位</td></tr>
+        <tr><td class="name">lifecycle-evidence-reminder</td><td class="name">coding-agent-project-governance</td><td><span class="pill exec-routing">advisory</span></td><td>Skill 內容改了但 lifecycle.json 沒動，提醒確認</td></tr>
+        <tr><td class="name">html-view-sync-reminder</td><td class="name">document-governance</td><td><span class="pill exec-routing">advisory</span></td><td>已採用 index.html 總覽的 domain，Markdown 改了但總覽沒同步</td></tr>
+        <tr><td class="name">record-push-outcome</td><td class="name">coding-agent-git-discipline</td><td><span class="pill exec-routing">advisory</span></td><td>記錄每次 git push 結果到本機 journal</td></tr>
+        <tr><td class="name">block-push-auth-loop</td><td class="name">coding-agent-git-discipline</td><td><span class="pill exec-none" style="background:var(--red-bg);color:var(--red)">blocking</span></td><td>連續認證失敗達門檻時，擋下重複登入迴圈</td></tr>
+        <tr><td class="name">release-cut-reminder</td><td class="name">coding-agent-git-discipline</td><td><span class="pill exec-routing">advisory</span></td><td>距離上次 tag 超過門檻 commit 數，提醒考慮切版本</td></tr>
+        <tr><td class="name">shared-checkout-guard</td><td class="name">coding-agent-git-discipline</td><td><span class="pill exec-routing">advisory</span></td><td>commit 時偵測 working tree 有非本次改動的未追蹤內容（可能是其他 agent 同時在同一個 checkout 工作）</td></tr>
+        <tr><td class="name">vikunja-sync-reminder</td><td class="name">project-management-sync</td><td><span class="pill exec-none" style="background:var(--red-bg);color:var(--red)">blocking（loop-safe）</span></td><td>有 commit 但 transcript 完全沒提到追蹤器關鍵字，強制多跑一輪確認</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="section-note" style="margin-top:10px">
+    3 個 provider 都驗證過（不是假設）：Claude Code 用 <code class="mono" style="background:var(--mono-bg);color:var(--mono);padding:1px 5px;border-radius:4px">PreToolUse/PostToolUse/Stop</code>，Codex CLI 相同，Gemini CLI 用 <code class="mono" style="background:var(--mono-bg);color:var(--mono);padding:1px 5px;border-radius:4px">BeforeTool/AfterTool/AfterAgent</code>。
+  </p>
+
+  <h2 class="section-title">已知缺口與下一步</h2>
+  <p class="section-note">不是隱藏起來，是明確追蹤——來自 <code class="mono" style="background:var(--mono-bg);color:var(--mono);padding:1px 5px;border-radius:4px">docs/CLOUDBOX_SKILLS_DEVELOPMENT_MAP.md</code> 第 11 節。</p>
+  <ul class="gaps">
+    <li><b>真實 behavior-depth 執行證據只有 10/41（約 24%）</b>，其餘 31 個只有 routing 層級真實證據。<span class="status">追蹤中</span></li>
+    <li><b>路由器自己（using-cloudbox-skills）是統計上驗證最薄弱的技能</b>——悲觀 LCB 排名目前 0.0%，其次是 document-governance／game-quality-and-release-gates（各 6.2%）。<span class="status">優先處理</span></li>
+    <li><b>決定論打分器只覆蓋 303 個 behavior case 中的 7 個</b>，且是為本機 Ollama 模型那條線設計的——這個 session 一直在用、真正產生 106 筆 ledger 紀錄的 Claude/Codex CLI 那條線，打分依據至今仍是人工（模型）判斷，沒有獨立交叉驗證。<span class="status">未解決</span></li>
+    <li class="done"><b>版本已從 v7.6.24 落後 90+ commit 追平到 v7.6.37</b>（2026-08-23 封版）。<span class="status">已完成</span></li>
+    <li class="done"><b>Agent Hooks 已從「無跨 provider adapter 設計」變成「9 個 hook、3 個 provider 都驗證過」</b>。<span class="status">已完成</span></li>
+    <li><b>PostCompact context recovery 尚未實作</b>——目前 9 個 hook 都是 PreToolUse／PostToolUse／Stop，沒有處理 context 壓縮邊界的。<span class="status">規劃中</span></li>
+  </ul>
+
+  <footer>
+    這頁是 <code>docs/CLOUDBOX_SKILLS_DEVELOPMENT_MAP.md</code>（Markdown，git 版本控管，真正的權威來源）的人類閱讀投影，不是第二份事實來源——兩者不一致時以 Markdown 為準。分類權威：<code>config/skill-domain-catalog.json</code>、<code>docs/SKILL_TAXONOMY.md</code>；分發權威：<code>config/skill-distribution.json</code>；執行證據：<code>evals/runtime/execution-ledger.json</code>。
+    <br><br>
+    由 Claude Code 在 2026-08-23 這次多日協作 session 中依真實資料產生。這是本機／git 版本控管的靜態頁面，直接開啟本檔案即可閱讀，不需要伺服器；技能組合有實質變動時，重新產生本檔案並與對應的 Markdown 變更一起 commit。
+  </footer>
+
+</div>
+</body>
+</html>

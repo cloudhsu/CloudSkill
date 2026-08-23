@@ -146,6 +146,22 @@ Test:
 - Restart and persistence recovery.
 - Packaging and deployment.
 
+## Non-negotiable safeguards
+
+- Represent money as an integer count of the smallest currency unit (e.g.
+  cents), never a floating-point value; commit every operation that couples
+  money with order state, processing state, or audit/history in a single
+  transaction.
+- Keep schema changes additive and repeatable, compatible with databases
+  already running the prior production version; run a persistence integrity
+  check after a persistence-affecting change, and specifically test an old
+  production database's upgrade path for a migration, not only a freshly
+  created database.
+- Never log passwords, tokens, cookies, full request bodies, or imported
+  file/workbook contents, including in audit or debug logs; enforce
+  admin/permission checks on the server, and audit a denied mutation attempt
+  without including secrets in the audit record.
+
 ## Output Format
 
 1. System topology

@@ -99,3 +99,8 @@ ABM-03,CloudBox Skills 跟其他 agent skill 框架（像 Superpowers 或別的�
 ABM-NEG-01,幫我審查這個模組的架構，狀態擁有權跟契約邊界在哪裡。,about-me,false,ordinary architecture-review task with no meta-question about the pack itself
 ABM-NEG-02,幫我把這個舊系統安全地拆分重構，先建立特徵測試。,about-me,false,"ordinary refactoring task, using the pack is not asking about the pack"
 ABM-NEG-03,幫我把這個 Python 腳本翻譯成使用者手冊。,about-me,false,"unrelated trivial task, no meta-question present"
+CAGD-01,幫我推送這個 commit 到 GitHub，但推送失敗說認證有問題，該怎麼處理才不會一直要求登入？,coding-agent-git-discipline,true,failed GitHub push auth recovery
+CAGD-02,要把修好的內容推到既有 PR 的分支上，但我不確定實際的分支名稱是什麼。,coding-agent-git-discipline,true,verify PR branch name before push
+CAGD-03,commit 之前這個 repo 好像有其他未預期的未提交變更，可能是別的 agent 同時在改，該怎麼確認？,coding-agent-git-discipline,true,shared checkout detection before commit
+CAGD-NEG-01,幫我設計這個 repo 的 AGENTS.md 分層、風險路由跟 Sub Agent 角色分工。,coding-agent-git-discipline,false,"belongs to coding-agent-project-governance, not git mechanics"
+CAGD-NEG-02,幫我解掉這個 merge conflict，兩邊改了同一段邏輯要選哪個。,coding-agent-git-discipline,false,"conflict content decision, not git mechanics"

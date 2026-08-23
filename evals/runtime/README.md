@@ -330,3 +330,113 @@ From the repository root, run:
 The command discovers Python 3.10+, verifies Ollama and the requested model, selects an adaptive routing context, runs the focused routing regression and R07 Behavior Eval, grades raw and refined behavior separately, and creates one ignored review ZIP. Upload the ZIP path printed as `UPLOAD THIS ZIP`; do not manually collect individual result files.
 
 A score gate failure still produces a successful diagnostic bundle. Infrastructure and packaging failures also leave a partial ZIP when possible.
+
+## Confidence and priority tooling (advisory, no live model call)
+
+Three analysis-layer scripts, none wired into `run_all_checks.py`, none costing a
+model call by themselves:
+
+- `scripts/eval_confidence_report.py` -- Hoeffding margin an authored case
+  *count* would support if fully executed. Blind to actual outcomes.
+- `scripts/eval_confidence_report_bayesian.py` -- Beta-Binomial credible
+  interval from real outcomes in `execution-ledger.json`. Tighter than
+  Hoeffding at the same n, but only exists for Skills with real executions.
+- `scripts/eval_priority_ranker.py` -- ranks every Skill (tested or not) by a
+  pessimistic lower-confidence-bound score, to answer "whose next real
+  execution is most worth spending on" without relying on someone noticing
+  the worst-margin Skill by hand.
+
+## Learning-curve tracking (Wright's Law)
+
+`learning-curve-log.json` -- append-only, cross-session log of real per-batch
+throughput, tagged with `session_id`. `scripts/learning_curve_report.py` fits
+a power-law curve (`cost(n) = a * n^(-b)`) via log-log least squares.
+Honestly limited right now: only one session's data exists (cannot yet
+distinguish a durable improvement from a session-bound prompt-cache effect),
+and the seeded batches differ in content/skill/complexity rather than being a
+literal same-task repeated trial -- treat any current fit as a rough
+throughput trend, not a validated learning curve. Both limitations are
+reported by the script itself, not just documented here.
+
+## Execution ledger
+
+`execution-ledger.json` is a small, committed, append-only *summary* of real
+executions (skill, case id, kind, result) -- distinct from `results/`, which
+holds full raw model output and is gitignored/machine-local. Add a row per
+real execution; never edit or delete an existing row's outcome, only append.
+This is what the two tools above read.
+
+## Mutation-testing a case (does the case actually discriminate?)
+
+A case that PASSes against a Skill's current content proves the instruction
+was followed. It does not by itself prove the case would have caught the
+instruction's *absence* -- a case can pass for reasons unrelated to the rule
+it claims to test (general model judgment, an unrelated overlapping rule
+already present). To check a specific case's discriminating power:
+
+```bash
+# 1. Find the commit that added the rule this case targets, and its parent.
+git log --oneline -- .agents/skills/<skill>/references/<file>.md
+
+# 2. Temporarily swap in the pre-rule content for that one file only.
+git checkout <parent-commit> -- .agents/skills/<skill>/references/<file>.md
+
+# 3. Run the case against the swapped-in old content.
+python3 scripts/run_runtime_evals.py --provider claude --eval-kind behavior \
+  --skip-model-check --num-ctx 16384 --case-id <CASE-ID> \
+  --cases evals/behavior/cases/<skill>.json --output /tmp/mutation-<CASE-ID>-old.jsonl
+
+# 4. Restore immediately, before doing anything else.
+git checkout HEAD -- .agents/skills/<skill>/references/<file>.md
+git status --short   # must show no diff on that file before continuing
+```
+
+If the case still PASSes against the old content, it is not discriminating
+for that rule and should be tightened. If it FAILs (or the model visibly
+does the thing the rule now forbids), that is real causal evidence the rule
+changes behavior, not just that the new text exists and gets mentioned.
+
+**Pilot result (2026-08-22, REF-BEH-025):** re-ran the case that models this
+session's own distilled scope-invention incident (Vikunja cloudbox-skills
+#9) against `safe-incremental-refactoring/references/refactoring-workflow.md`
+as it stood *before* that rule was added. Under the old content the model
+proposed extracting the three requested checks into a new shared-validator
+abstraction instead of the literal requested duplication -- the exact
+scope-elaboration pattern the new rule targets. Under the current content
+(same case, same day, separate real execution) the model explicitly named
+and rejected that same move ("not inventing a shared validator... a new
+abstraction layer"), doing only the literal requested mirroring. This is
+one case, not a systematic sweep -- but it is real, disclosed, causal
+evidence that this specific rule changes behavior, not merely correlated
+survivorship. Raw evidence for the old-content run:
+`results/2026-08-22-mutation-pilot-REF-BEH-025-oldcontent.jsonl` (gitignored).
+
+## Supporting-skill ablation study (does the supporting skill earn its place?)
+
+`scripts/run_ablation_study.py` runs the same case twice with a FIXED skill
+set (bypassing the router entirely) -- once with only the primary skill,
+once with primary + the one supporting skill under test -- so the graded
+difference is real, causal evidence for a `required_supporting_skills`
+claim, not just a human assertion. Costs two real model calls per case; not
+free like the tools above.
+
+```bash
+python3 scripts/run_ablation_study.py \
+  --cases evals/runtime/cases/canary.json --case-id R02-code-and-command-state \
+  --primary-skill code-review --supporting-skill equipment-domain-modeling \
+  --output /tmp/ablation-R02.jsonl
+```
+
+**Pilot result (2026-08-22, R02, code-review + equipment-domain-modeling):**
+first real ablation run. code-review alone produced an equally
+comprehensive state-model redesign (late-response semantics, recovery/
+restart handling, rejection rules, required test scenarios all present and
+detailed); the declared supporting skill mainly added
+equipment-domain-modeling-native terminology precision (AttemptId/Reconciler
+vocabulary) and an explicit self-justification of the skill choice, not
+substantive completeness the primary skill alone was missing. One case, one
+model -- not grounds to drop the supporting-skill claim, but real, honest,
+somewhat surprising evidence against assuming every declared supporting
+skill earns a large quality gain. Raw evidence:
+`results/2026-08-22-ablation-R02-code-review-equipment-domain-modeling-claude.jsonl`
+(gitignored).

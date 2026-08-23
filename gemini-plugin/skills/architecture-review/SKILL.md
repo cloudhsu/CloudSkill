@@ -131,3 +131,8 @@ Default to every step above. On an explicit, one-time user request for a lighter
 - Do not ignore state reconstruction after restart or communication loss.
 - Do not assume a distributed design improves reliability.
 - Treat framework reuse and project reuse as different goals.
+- Do not retire a validated baseline or comparison implementation because a
+  replacement reaches visual or superficial parity; require regression
+  evidence at the same layer before cutover, and stage independently-scoped
+  changes (e.g., visualization, extraction, engine rewrite) as separate
+  gated migrations rather than one unbounded change.
