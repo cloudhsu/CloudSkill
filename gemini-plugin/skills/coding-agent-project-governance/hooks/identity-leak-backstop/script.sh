@@ -32,6 +32,16 @@
 # BLOCKED state should be reported, not routed around automatically.
 #
 # Exit 0 = allow. Exit 2 = block (stderr shown to the agent).
+#
+# LOG_FILE: every block this hook issues is also appended here (gitignored)
+# so all of this project's hooks can be checked from one place --
+# `tail -f .cloudskill-hooks-state/hooks.log` -- instead of only from
+# session scrollback. Does not change the exit 2 behavior.
+LOG_FILE=".cloudskill-hooks-state/hooks.log"
+log_event() {
+    mkdir -p "$(dirname "$LOG_FILE")" 2>/dev/null
+    printf '%s\tidentity-leak-backstop\t%s\t%s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$1" "$2" >> "$LOG_FILE" 2>/dev/null
+}
 
 INPUT=$(cat)
 
@@ -83,6 +93,7 @@ while IFS= read -r file; do
 done <<< "$STAGED_FILES"
 
 if [ -n "$HITS" ]; then
+    log_event "BLOCKED" "staged addition contains this checkout's own git identity in a field-shaped line"
     echo -e "=== Identity Leak Backstop: BLOCKED ===
   A staged change adds this checkout's own configured git identity
   ($([ -n "$EMAIL" ] && echo "email: $EMAIL")$([ -n "$NAME" ] && echo ", name: $NAME"))

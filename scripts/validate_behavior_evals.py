@@ -1,3 +1,26 @@
+"""Structurally validate every evals/behavior/cases/*.json file: required
+fields present, IDs globally unique, valid `type`, expected_routing
+consistent with type, and every Skill covering recognition/application/
+counterexample at minimum.
+
+2026-08-24 note, added after a real mix-up in this repository's own
+session -- these ~320 cases across 41 Skills are a *documented behavior
+contract* layer only. Passing this validator proves the case is
+well-formed and non-duplicate-ID, NOT that any model has ever been run
+against it. This is a structurally separate, much larger corpus from
+evals/runtime/cases/behavior-rubrics.json's small set of live-model-
+gradable rubric cases (7, as of this note) that scripts/run_runtime_evals.py
+and scripts/run_local_eval_review.py actually execute -- adding a case
+here does NOT make it runnable via `--case-id` on those scripts; see
+their own module docstrings. Confirmed by direct count: `python3
+scripts/prioritize_eval_inbox.py`-adjacent tooling and a manual count on
+2026-08-24 found only 7/320 cases have ever had a live execution path.
+Do not assume "this validator passed" means "this behavior was verified
+against a model" when reporting status to a user -- state NOT RUN
+explicitly for any case without a corresponding behavior-rubrics.json
+entry and executed=true evidence.
+"""
+
 from pathlib import Path
 import json
 import sys

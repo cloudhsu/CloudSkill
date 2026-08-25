@@ -173,6 +173,30 @@
         "agent ignores gauge range and measurement quality"
       ],
       "review_notes": "Review domain identity, authority, units, quality, lifecycle, and reconciliation."
+    },
+    {
+      "id": "EDM-BEH-008",
+      "skill": "equipment-domain-modeling",
+      "type": "discipline",
+      "prompt": "A simulator displays carriers and their material while a carrier moves between a chamber, an aligner, and a robot. The projected view must show the same material exactly once before, during, and after each transfer.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "uses one authoritative custody model for carriers and the material they hold",
+        "reconciles material location on every transfer endpoint, including intermediate states like an aligner or robot hold",
+        "renders material from the custody model, not from stale scene-local flags",
+        "asserts no duplicate or orphaned material at representative pre-transfer, in-transfer, and post-transfer frames"
+      ],
+      "forbidden_behaviors": [
+        "lets the renderer invent material presence from an animation phase instead of the custody model",
+        "leaves a standalone material item rendered after its carrier has moved away",
+        "treats a disappearing or duplicated material item as an acceptable visual side effect of a transfer animation"
+      ],
+      "required_artifacts": [],
+      "baseline_expected_failure": [
+        "the projection updates the carrier's location but does not move its material custody with it, leaving a stale item in the old location or making it disappear mid-transfer"
+      ],
+      "review_notes": "Distilled 2026-08-25 from a real collaborative-distillation candidate (GPT-5.6 Luna/Sol, project-history mining): observed a leftover material item after a carrier left a chamber, and a disappearing item during alignment. Kept as this skill's domain-owner rule per the candidate's own review note, rather than duplicated into every renderer-facing skill."
     }
   ]
 }

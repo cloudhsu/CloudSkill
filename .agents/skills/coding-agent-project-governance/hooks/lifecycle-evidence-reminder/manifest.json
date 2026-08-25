@@ -4,6 +4,7 @@
   "owner_skill": "coding-agent-project-governance",
   "description": "Advisory-only (never blocks) reminder printed when a commit changes a skill's SKILL.md or references/ without also touching that skill's lifecycle.json. Not a strict pairing rule -- whether a given change actually needs a lifecycle.json update is a judgment call the script cannot make -- but it catches the exact real gap found in this repository's own PR #72 (substantive content shipped with zero lifecycle.json change). Assumes cloudbox-skills' own `.agents/skills/<name>/` repository layout; not intended for installation outside this repository.",
   "script": "script.sh",
+  "windows_script": "script.ps1",
   "providers": {
     "claude": {
       "config_file": ".claude/settings.json",

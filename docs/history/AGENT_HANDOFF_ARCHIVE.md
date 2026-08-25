@@ -1679,3 +1679,59 @@ An evolution round is complete only when it provides:
 - an interpretation separating harness defects from model/Skill defects;
 - updated design/history/handoff documentation;
 - a safe commit/push path through `cloudbox-skills-resume`.
+
+## Archived 2026-08-25 — increments 7.6.27 through 7.6.30
+
+## Previous increment — 7.6.30 release cut: reclassify `wph-equipment-simulator-development` `evolution-pack` -> `core` (2026-08-18)
+
+User explicitly asked for this skill to become public. Sanitization review
+checked it against the exact bar already used for
+`semiconductor-equipment-domain-knowledge`/`equipment-control-architecture`/
+`equipment-domain-modeling` and fixed two real gaps: literal source-file
+names in `references/implementation-map.md` generalized to responsibility
+descriptions; concrete calibrated machine timing values in
+`references/domain-baseline.md` and `SKILL.md` step 6 replaced with
+explicit placeholders, matching the zero-numeric-value bar the other
+core-tier equipment Skills hold. A minor screenshot-filename reference in
+`references/evidence-cases.md` was also genericized. No company/employer/
+product name was ever present. `config/skill-distribution.json`:
+`evolution-pack` -> `core`, new decision-ledger entry. Added to both public
+plugin manifests; removed from both private-plugin manifests, the
+`private-plugin/skills/` symlink, and the `private-plugin/codex-skills/`
+projection. Version bumped `7.6.29` -> `7.6.30` (patch again, same
+7.5.0-staleness blocker as `7.6.29` — this is disclosed as a deliberate
+deviation from what would otherwise be a minor bump, not an oversight).
+`scripts/run_all_checks.py` and `scripts/manage_skill.py audit --check`
+both PASS at the release tip. Full summary:
+`docs/releases/7.6.30-pre-release-evidence.md`.
+
+## Earlier increment — 7.6.29 release cut: promote `wph-equipment-simulator-development` to `active` (2026-08-18)
+
+Closed the live-evidence gap the previous increment disclosed. Routing 6/6
+(100%) at repeat=3; behavior 9/9 completed across all 3 case shapes at
+repeat=3, manually verified against required/forbidden behaviors (no
+automated rubric authored yet); adjacent-regression canary suite 30/30
+semantically correct at repeat=3. `lifecycle.json` stage `experimental` ->
+`active`. Version bumped `7.6.28` -> `7.6.29` (patch, after an initial
+minor attempt was corrected). Full summary:
+`docs/releases/7.6.29-pre-release-evidence.md`; full evidence:
+`docs/evolution/2026-08-18-wph-equipment-simulator-development-active-promotion-evidence.md`.
+
+## Earlier increment — 7.6.28 release cut: import `wph-equipment-simulator-development` (2026-08-18)
+
+Onboarded an externally-authored skill package
+(`.local/eval-inbox/imports/wph-equipment-simulator-development-0.1.0-experimental.zip`)
+as `stage: experimental`, `evolution-pack` (private) tier. Structural
+onboarding only — skill folder, routing/behavior case registration, tier
+decision, private-plugin wiring (`private-plugin/skills/` symlink, both
+private manifests, `private-plugin/codex-skills/` regenerated). Version
+bumped `7.6.27` -> `7.6.28`. Full summary:
+`docs/releases/7.6.28-pre-release-evidence.md`.
+
+## Earlier increment — 7.6.27 release cut (2026-08-18)
+
+Closes the one open follow-up from 7.6.26 (previous increment below) with
+a formal release. Version bumped `7.6.26` -> `7.6.27`.
+`scripts/run_all_checks.py` and `scripts/manage_skill.py audit --check`
+both PASS at the release tip. Full summary:
+`docs/releases/7.6.27-pre-release-evidence.md`.

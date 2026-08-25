@@ -17,6 +17,16 @@
 # permanent ban on ever pushing again in this project.
 #
 # Exit 0 = allow. Exit 2 = block (stderr shown to the agent).
+#
+# LOG_FILE: every block this hook issues is also appended here (gitignored)
+# so all of this project's hooks can be checked from one place --
+# `tail -f .cloudskill-hooks-state/hooks.log` -- instead of only from
+# session scrollback. Does not change the exit 2 behavior.
+LOG_FILE=".cloudskill-hooks-state/hooks.log"
+log_event() {
+    mkdir -p "$(dirname "$LOG_FILE")" 2>/dev/null
+    printf '%s\tblock-push-auth-loop\t%s\t%s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$1" "$2" >> "$LOG_FILE" 2>/dev/null
+}
 
 INPUT=$(cat)
 
@@ -72,6 +82,7 @@ PYEOF
 CONSECUTIVE=${CONSECUTIVE:-0}
 
 if [ "$CONSECUTIVE" -ge "$THRESHOLD" ]; then
+    log_event "BLOCKED" "$CONSECUTIVE consecutive auth_failure entries within ${STALE_MINUTES}m"
     echo "=== Push-Auth Loop Breaker: BLOCKED ===
   $CONSECUTIVE consecutive git push attempts recorded the same authentication-failure
   class within the last $STALE_MINUTES minutes ($JOURNAL_FILE).

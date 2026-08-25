@@ -73,6 +73,30 @@
         "A general-purpose approach without a clear discovery/execution boundary might apply broad codebase-survey discipline even when the slice is already fully decided, adding unnecessary cost with no new decision to make."
       ],
       "review_notes": "Adjacent-skill boundary case, not a conversation-derived incident: this skill owns discovery before a slice is known; safe-incremental-refactoring owns execution once it is. Behavioral execution NOT RUN."
+    },
+    {
+      "id": "CAD-BEH-004",
+      "skill": "codebase-architecture-discovery",
+      "type": "recognition",
+      "prompt": "A new host must reproduce a legacy application while reusing a portable engine. Visual and timing mismatches have already appeared once. Before continuing the component work, decide what to do next.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "reads the current architecture map and the authoritative legacy implementation before choosing new abstractions",
+        "records source-verified facts separately from inferred behavior",
+        "defines state, timing, coordinate, input, and rendering ownership in an explicit boundary map",
+        "uses the boundary map to choose the smallest compatible extraction and its regression fixtures"
+      ],
+      "forbidden_behaviors": [
+        "infers the legacy contract from filenames or a single screenshot",
+        "implements a broad renderer before identifying the authoritative state owner",
+        "treats a plausible visual approximation as evidence of behavioral compatibility"
+      ],
+      "required_artifacts": [],
+      "baseline_expected_failure": [
+        "agent continues implementing the next component increment without going back to re-read the legacy authority chain, repeating the same class of visual/timing mismatch"
+      ],
+      "review_notes": "Distilled 2026-08-25 from a real collaborative-distillation candidate (GPT-5.6 Luna/Sol, project-history mining): after visual and timing mismatches, a deeper read of the legacy documents and implementation was required before continuing -- the fact-versus-inference distinction is the reusable rule, not the specific mismatch."
     }
   ]
 }

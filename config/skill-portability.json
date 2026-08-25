@@ -40,6 +40,7 @@
     "local-runtime-eval-debugging": "cli-only",
     "native-ios-game-rewrite": "portable",
     "runtime-evaluation-engineering": "portable",
+    "technical-case-content-generation": "portable",
     "safe-incremental-refactoring": "portable",
     "semiconductor-equipment-domain-knowledge": "portable",
     "software-quality-iso25010": "portable",

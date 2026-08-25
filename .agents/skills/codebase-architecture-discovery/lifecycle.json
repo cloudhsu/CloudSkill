@@ -27,7 +27,8 @@
   "behavior_case_ids": [
     "CAD-BEH-001",
     "CAD-BEH-002",
-    "CAD-BEH-003"
+    "CAD-BEH-003",
+    "CAD-BEH-004"
   ],
   "behavior_case_types": [
     "application",

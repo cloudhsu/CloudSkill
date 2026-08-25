@@ -606,6 +606,32 @@
         "agent designs and partially builds a new generalized 'validation policy engine' intended to unify all current and future paths, instead of directly mirroring the three specific checks, and leaves the work as one large uncommitted, still-failing diff on the branch"
       ],
       "review_notes": "Closes refactoring-workflow.md's new 'Smallest Coherent Slice' additions: no self-invented mechanism beyond the literal request, and commit at each slice boundary as a stop condition."
+    },
+    {
+      "id": "REF-BEH-026",
+      "skill": "safe-incremental-refactoring",
+      "type": "application",
+      "prompt": "A reusable engine and a host application are changing together, one behavior slice at a time. Deliver the changes through completion and handoff.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "separates engine and product commits when their ownership differs, rather than mixing repositories",
+        "commits after each meaningful green slice instead of accumulating unrelated changes",
+        "keeps an authority map, visual/behavior contract, verification plan, and development log current alongside the code",
+        "reports automated tests, manual runtime checks, device checks, installation, push, and merge as separate statuses, not one aggregate 'done'",
+        "leaves a next continuation point and known limitations for the next agent/session"
+      ],
+      "forbidden_behaviors": [
+        "mixes unrelated repositories or silently rewrites history",
+        "uses a passing build as a substitute for runtime or visual verification",
+        "claims device, host reload, remote push, or merge completion when it was not actually observed",
+        "hides unfinished documentation or known visual/behavior differences behind a completed label"
+      ],
+      "required_artifacts": [],
+      "baseline_expected_failure": [
+        "agent accumulates several unrelated changes before committing, claims completion from a passing build alone, and leaves no continuation note for the next session"
+      ],
+      "review_notes": "Distilled 2026-08-25 from a real collaborative-distillation candidate (GPT-5.6 Luna/Sol, project-history mining): the user repeatedly required commits after verified slices and complete documentation for both the reusable engine and the host application before handoff. Evidence staging only; reusable delivery-governance pattern, not a claim this specific engine/host pair is complete."
     }
   ]
 }

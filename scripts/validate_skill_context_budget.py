@@ -5,24 +5,20 @@ ROOT = Path(__file__).resolve().parents[1]
 SKILLS_DIR = ROOT / ".agents/skills"
 DEVELOPING_SKILLS = SKILLS_DIR / "developing-skills/SKILL.md"
 
-# Default per-skill SKILL.md budget. SKILL.md loads into context on every
-# routing to that skill -- conditional detail belongs in references/, not
-# here. This number is the same budget developing-skills has held itself to
-# since before this check existed.
-DEFAULT_MAX_BYTES = 10_500
+# Default per-skill SKILL.md budget in UTF-8 bytes. SKILL.md loads into
+# context when the router selects that skill; conditional detail belongs in
+# references/, not here. This is a repository gate measured from
+# read_bytes(), not a provider tokenizer or billing-token measurement.
+#
+# Updated 2026-08-25 by explicit repository-owner decision from 10,500 to
+# 20,000 bytes after inventorying all 41 current Skills: the largest main
+# file was 14,876 bytes and all current files fit below the new ceiling.
+DEFAULT_MAX_BYTES = 20_000
 
-# Frozen ceilings for skills that were already over DEFAULT_MAX_BYTES when
-# this general check was introduced (2026-08-14). Each ceiling is the exact
-# byte count at that time -- these skills get zero further growth room, not
-# a permanent exemption. Shrinking a skill below DEFAULT_MAX_BYTES removes
-# its entry here; do not raise a ceiling to accommodate new content -- move
-# the new content to a reference or consolidate existing rules instead.
-GRANDFATHERED_CEILINGS = {
-    "equipment-control-architecture": 14_611,
-    "development-process-tailoring": 12_378,
-    "equipment-domain-modeling": 11_842,
-    "local-runtime-eval-debugging": 11_468,
-}
+# The historical grandfathered ceilings were retired with the 20,000-byte
+# policy. Keep the named constant so the validation/reporting flow remains
+# explicit and future policy changes have one place to review.
+GRANDFATHERED_CEILINGS = {}
 
 
 def main() -> int:

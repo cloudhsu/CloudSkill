@@ -33,7 +33,8 @@
     "DEVSK-BEH-022",
     "DEVSK-BEH-023",
     "DEVSK-BEH-025",
-    "DEVSK-BEH-026"
+    "DEVSK-BEH-026",
+    "DEVSK-BEH-027"
   ],
   "behavior_case_types": [
     "application",

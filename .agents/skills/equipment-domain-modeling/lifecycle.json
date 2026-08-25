@@ -35,7 +35,8 @@
     "EDM-BEH-004",
     "EDM-BEH-005",
     "EDM-BEH-006",
-    "EDM-BEH-007"
+    "EDM-BEH-007",
+    "EDM-BEH-008"
   ],
   "behavior_case_types": [
     "application",

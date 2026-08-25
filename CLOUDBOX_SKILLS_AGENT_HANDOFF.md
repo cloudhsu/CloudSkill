@@ -5,7 +5,36 @@
 > current architecture and behavior first, preserve compatibility, and use the
 > smallest coherent slice; whole rewrites require explicit user authorization.
 
-## Current increment — 7.6.39 release cut: deep-read duplicate/overlap scan, verified before acting (2026-08-23)
+## Current increment — 7.7.0 release cut: unified hook logging, Windows-native directly-wired hooks, technical-case-content-generation Skill, equipment-porting candidate merge, routing-cue fix (2026-08-25)
+
+PRs #99–105 plus one directly-pushed hook-logging commit (`36b611f`,
+CI-verified). Full detail: `CHANGELOG.md`'s 7.7.0 entry; validation
+evidence: `docs/releases/7.7.0-pre-release-evidence.md`. Minor bump
+(`7.6.39` -> `7.7.0`): 6 public Skills (`framework-design`,
+`equipment-control-architecture`, `equipment-domain-modeling`,
+`codebase-architecture-discovery`, `code-review`,
+`safe-incremental-refactoring`) each gained a new behavior case from
+9 real equipment-porting candidates; the bundled-hook mechanism gained
+Windows-native coverage for the 3 hooks this repository wires directly
+(not through `install_skill_hooks.py`'s manifest); `using-cloudbox-skills`
+gained a real routing-defect fix (closes `cloudbox-skills` #15). A new
+private-tier Skill, `technical-case-content-generation`, closes the
+content-generation gap next to `game-marketing-and-monetization` but does
+not itself justify the public-facing minor classification -- the public
+Skill extensions above do, independently. `python3 scripts/
+run_all_checks.py` PASS at the release tip.
+
+**Known gap, tracked not hidden**: 6 of the 9 new equipment-porting cases
+and the 3 new hook-logging Eval cases (`CAG-BEH-017`, `DEVSK-BEH-027`,
+`CAGD-BEH-004`) have no durable/repeatable formal-pipeline grading yet --
+ad hoc `codex exec`/`claude -p` spot checks only. `technical-case-
+content-generation` ships case/contract-layer RED evidence only; live
+Skill/behavior execution is `NOT RUN`.
+
+**Next**: public-side push to the `CloudSkill` mirror is a separate,
+explicit step -- see below for whether it happened this increment.
+
+## Previous increment — 7.6.39 release cut: deep-read duplicate/overlap scan, verified before acting (2026-08-23)
 
 PRs #94–98. Full detail: `CHANGELOG.md`'s 7.6.39 entry; validation
 evidence: `docs/releases/7.6.39-pre-release-evidence.md`. Key decision:
@@ -159,68 +188,11 @@ summary: `docs/releases/7.6.31-pre-release-evidence.md`.
   an explicit batch-review instruction from the user, tracked in the
   `cloudbox-skills` Vikunja project.
 
-## Previous increment — 7.6.30 release cut: reclassify `wph-equipment-simulator-development` `evolution-pack` -> `core` (2026-08-18)
-
-User explicitly asked for this skill to become public. Sanitization review
-checked it against the exact bar already used for
-`semiconductor-equipment-domain-knowledge`/`equipment-control-architecture`/
-`equipment-domain-modeling` and fixed two real gaps: literal source-file
-names in `references/implementation-map.md` generalized to responsibility
-descriptions; concrete calibrated machine timing values in
-`references/domain-baseline.md` and `SKILL.md` step 6 replaced with
-explicit placeholders, matching the zero-numeric-value bar the other
-core-tier equipment Skills hold. A minor screenshot-filename reference in
-`references/evidence-cases.md` was also genericized. No company/employer/
-product name was ever present. `config/skill-distribution.json`:
-`evolution-pack` -> `core`, new decision-ledger entry. Added to both public
-plugin manifests; removed from both private-plugin manifests, the
-`private-plugin/skills/` symlink, and the `private-plugin/codex-skills/`
-projection. Version bumped `7.6.29` -> `7.6.30` (patch again, same
-7.5.0-staleness blocker as `7.6.29` — this is disclosed as a deliberate
-deviation from what would otherwise be a minor bump, not an oversight).
-`scripts/run_all_checks.py` and `scripts/manage_skill.py audit --check`
-both PASS at the release tip. Full summary:
-`docs/releases/7.6.30-pre-release-evidence.md`.
-
-## Earlier increment — 7.6.29 release cut: promote `wph-equipment-simulator-development` to `active` (2026-08-18)
-
-Closed the live-evidence gap the previous increment disclosed. Routing 6/6
-(100%) at repeat=3; behavior 9/9 completed across all 3 case shapes at
-repeat=3, manually verified against required/forbidden behaviors (no
-automated rubric authored yet); adjacent-regression canary suite 30/30
-semantically correct at repeat=3. `lifecycle.json` stage `experimental` ->
-`active`. Version bumped `7.6.28` -> `7.6.29` (patch, after an initial
-minor attempt was corrected). Full summary:
-`docs/releases/7.6.29-pre-release-evidence.md`; full evidence:
-`docs/evolution/2026-08-18-wph-equipment-simulator-development-active-promotion-evidence.md`.
-
-## Earlier increment — 7.6.28 release cut: import `wph-equipment-simulator-development` (2026-08-18)
-
-Onboarded an externally-authored skill package
-(`.local/eval-inbox/imports/wph-equipment-simulator-development-0.1.0-experimental.zip`)
-as `stage: experimental`, `evolution-pack` (private) tier. Structural
-onboarding only — skill folder, routing/behavior case registration, tier
-decision, private-plugin wiring (`private-plugin/skills/` symlink, both
-private manifests, `private-plugin/codex-skills/` regenerated). Version
-bumped `7.6.27` -> `7.6.28`. Full summary:
-`docs/releases/7.6.28-pre-release-evidence.md`.
-
-## Earlier increment — 7.6.27 release cut (2026-08-18)
-
-Closes the one open follow-up from 7.6.26 (previous increment below) with
-a formal release. Version bumped `7.6.26` -> `7.6.27`.
-`scripts/run_all_checks.py` and `scripts/manage_skill.py audit --check`
-both PASS at the release tip. Full summary:
-`docs/releases/7.6.27-pre-release-evidence.md`.
-
-
-> **Older increments archived 2026-08-18**: this file kept growing
-> unbounded since 2026-08-09 (1898 lines / ~110KB at time of archival),
-> and `AGENTS.md` requires reading it in full before any Skill/Eval/
-> grader/runtime-tooling work — an unbounded, always-loaded file is a
-> real, growing token cost. Increments older than the ones above, and
-> a large stale `v6.x`-era "current repository state" snapshot that
-> had never been updated past CloudBox 6.4.0, live in
+> **Older increments archived 2026-08-25** (previously 2026-08-18): this
+> file kept growing past its 20,000-byte living-document budget. Increments
+> `7.6.27` through `7.6.30`, and everything archived 2026-08-18 before them
+> (a large stale `v6.x`-era "current repository state" snapshot that had
+> never been updated past CloudBox 6.4.0), live in
 > `docs/history/AGENT_HANDOFF_ARCHIVE.md` — read it only when actually
 > reconstructing history from that period, not by default.
 

@@ -16,6 +16,16 @@
 # lifecycle-evidence-reminder hook.
 #
 # Exit 0 always (advisory).
+#
+# LOG_FILE: every reminder this hook prints is also appended here (gitignored)
+# so all of this project's hooks can be checked from one place --
+# `tail -f .cloudskill-hooks-state/hooks.log` -- instead of only from
+# session scrollback.
+LOG_FILE=".cloudskill-hooks-state/hooks.log"
+log_event() {
+    mkdir -p "$(dirname "$LOG_FILE")" 2>/dev/null
+    printf '%s\thtml-view-sync-reminder\t%s\t%s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$1" "$2" >> "$LOG_FILE" 2>/dev/null
+}
 
 INPUT=$(cat)
 
@@ -53,6 +63,7 @@ while IFS= read -r file; do
 done <<< "$STAGED"
 
 if [ -n "$STALE" ]; then
+    log_event "ADVISORY" "governed Markdown changed without its domain index.html"
     echo -e "=== HTML Overview View Reminder (advisory, not blocking) ===
   This commit changes governed Markdown in a domain that already has a
   human-readable index.html overview, but the overview wasn't touched in

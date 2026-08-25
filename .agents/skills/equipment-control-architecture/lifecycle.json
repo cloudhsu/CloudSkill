@@ -37,7 +37,8 @@
     "ECA-BEH-004",
     "ECA-BEH-005",
     "ECA-BEH-006",
-    "ECA-BEH-007"
+    "ECA-BEH-007",
+    "ECA-BEH-008"
   ],
   "behavior_case_types": [
     "application",

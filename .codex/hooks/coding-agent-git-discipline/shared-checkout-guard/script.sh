@@ -23,6 +23,16 @@
 # every time, so that's where this hook checks too.
 #
 # Exit 0 always (advisory).
+#
+# LOG_FILE: every reminder this hook prints is also appended here (gitignored)
+# so all of this project's hooks can be checked from one place --
+# `tail -f .cloudskill-hooks-state/hooks.log` -- instead of only from
+# session scrollback.
+LOG_FILE=".cloudskill-hooks-state/hooks.log"
+log_event() {
+    mkdir -p "$(dirname "$LOG_FILE")" 2>/dev/null
+    printf '%s\tshared-checkout-guard\t%s\t%s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$1" "$2" >> "$LOG_FILE" 2>/dev/null
+}
 
 INPUT=$(cat)
 
@@ -45,6 +55,7 @@ DIRTY=$(git status --porcelain 2>/dev/null | grep -E '^.[MD?]|^\?\?')
 
 COUNT=$(echo "$DIRTY" | wc -l | tr -d ' ')
 
+log_event "ADVISORY" "$COUNT unstaged/untracked file(s) present at commit time"
 echo "=== Shared Checkout Guard (advisory, not blocking) ===
   $COUNT file(s) in this working tree are modified or untracked but NOT
   part of this commit:

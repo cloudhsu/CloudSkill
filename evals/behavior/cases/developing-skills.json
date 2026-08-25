@@ -317,6 +317,27 @@
         "two independently dispatched agents both guess the next free ID number, producing a real duplicate discovered only at merge time"
       ],
       "review_notes": "Distilled 2026-08-23 from a real, directly-observed defect in this same session: two parallel fork agents both added 'DOC-BEH-009' to document-governance's case file, discovered as a merge conflict and resolved by renumbering."
+    },
+    {
+      "id": "DEVSK-BEH-027",
+      "skill": "developing-skills",
+      "type": "discipline",
+      "prompt": "Two related Skills in the same family share a case-ID prefix scheme across more than one case file. Having already correctly grepped a candidate ID for the first Skill's case earlier in the same session, the agent now assigns a new behavior-case ID to the second Skill by looking at the highest number in one nearby case file and incrementing it, without separately grepping that exact new ID across every case file before writing it in.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "greps the exact candidate ID string (not a neighboring or preceding number) across every case file in the repository before writing it into any file",
+        "treats having checked a nearby ID as insufficient evidence that the next sequential ID is also free, since case-ID prefixes can be shared non-contiguously across more than one file for the same Skill family"
+      ],
+      "forbidden_behaviors": [
+        "inferring a new ID is free from having checked only a lower or neighboring number in the same sequence",
+        "relying solely on the automated commit-time validator to catch an ID collision instead of checking uniqueness before writing the ID"
+      ],
+      "required_artifacts": [],
+      "baseline_expected_failure": [
+        "agent writes a new case ID that collides with an existing case in a different file for the same Skill family, caught only by the repository's automated validator at commit time instead of before writing"
+      ],
+      "review_notes": "Distinct from DEVSK-BEH-025 (parallel agents racing on the same file with no ID-range coordination): this is a single agent, sequential within one session, that had already correctly checked ID uniqueness once earlier and then regressed to inferring-from-a-neighbor for the very next assignment -- an inconsistent-execution lapse, not an unknown-rule gap. Caught by the standard automated validator before commit; no bad data landed. Ad hoc informal check 2026-08-24 (claude -p, ~27s, no tool calls, not the formal rubric-graded pipeline -- no behavior-rubrics.json entry yet): response matched every required_behavior (re-grepped fresh rather than trusting the earlier in-session check, searched the whole shared-prefix family before computing next-ID) and none of the forbidden_behaviors. Not a durable/repeatable grade -- promote to behavior-rubrics.json before relying on this as a regression signal."
     }
   ]
 }

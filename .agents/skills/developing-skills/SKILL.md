@@ -152,14 +152,19 @@ agents onto one Skill's case IDs: assign non-overlapping ranges up front,
 or forks guess the same number and collide.
 
 Before releasing any change that touches a `SKILL.md`, run
-`scripts/validate_skill_context_budget.py`. It enforces a hard per-skill byte
-budget (default 10,500 bytes; a short, dated list of frozen ceilings exists
-for skills that were already over budget when this check was introduced --
-those get zero further growth room, not a standing exemption). A failure is
-not something to note and defer: consolidate repeated rules into fewer,
-more general statements, or move conditional detail into `references/`,
-before release. Never raise the default budget or a grandfathered ceiling to
-make a failing skill pass -- shrink the skill instead.
+`scripts/validate_skill_context_budget.py`. It enforces a hard per-skill UTF-8
+byte budget (default 20,000 bytes; this is a repository file-size gate, not a
+provider tokenizer or billing-token measurement). On 2026-08-25 the
+repository owner explicitly raised the default from 10,500 to 20,000 after
+inventorying all 41 current Skills; the largest `SKILL.md` was 14,876 bytes,
+and the historical grandfathered ceilings were retired. This larger ceiling
+is headroom, not a target: keep shared purpose, essential constraints, and
+routing in `SKILL.md`, and move conditional detail into `references/` when
+that improves context use. A failure is not something to note and defer:
+consolidate repeated rules into fewer, more general statements, or move
+conditional detail before release. Do not raise the ceiling again merely to
+make future growth pass; require a fresh inventory and an explicit policy
+decision.
 
 When any structural validator (context budget, portability, description
 hygiene) fails, read its actual detection source before responding -- the

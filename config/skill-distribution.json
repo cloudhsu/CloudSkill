@@ -48,6 +48,7 @@
     "semiconductor-equipment-domain-knowledge": "core",
     "software-quality-iso25010": "core",
     "teach-while-building": "core",
+    "technical-case-content-generation": "private-operation",
     "tray-descum-simulator-development": "private-equipment",
     "using-cloudbox-skills": "core",
     "wafer-bonder-debonder-development": "private-equipment",

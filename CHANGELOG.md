@@ -1,5 +1,89 @@
 # Changelog
 
+## 7.7.0
+
+Covers PRs #99–105 plus one directly-pushed hook-logging commit
+(`36b611f`, CI-verified, no PR): unified hook logging, Windows-native
+PowerShell hooks for the 3 hooks this repository wires directly (not
+through the bundled-hook manifest mechanism), a new private
+`technical-case-content-generation` Skill, 9 manual-review
+equipment-porting candidates merged one-owner-each across 6 public
+Skills, and a routing-cue fix for `using-cloudbox-skills`.
+`python3 scripts/run_all_checks.py` passes clean at the release tip.
+
+### Minor: cross-platform hook coverage and behavior extensions to 6 public Skills
+
+- **Unified hook logging** (`36b611f`): every hook that can print an
+  error or advisory message (6 directly-wired + 4 bundled-only optional)
+  now also appends it to a gitignored `.cloudskill-hooks-state/hooks.log`,
+  so a noisy environment can be triaged from one file instead of session
+  scrollback. Purely additive -- no hook's exit code or block/allow
+  condition changed. Added 3 new behavior Eval cases (`CAG-BEH-017`,
+  `DEVSK-BEH-027`, `CAGD-BEH-004`), ad hoc `claude -p` checked only.
+- **Windows-native hooks** (#100, completed by #104): the 3 hooks this
+  repository wires directly into its own provider configs
+  (`validate-push-readiness`, `block-push-auth-loop`,
+  `record-push-outcome`) gained native PowerShell equivalents, closing
+  the gap the bundled-hook manifest mechanism's own Windows coverage
+  didn't reach. Also raised the Skill context-budget gate to 20,000
+  bytes after inventorying all 41 Skills and retiring the historical
+  grandfathered ceilings.
+- **9 equipment-porting candidates merged** (#103): real defects from a
+  legacy-equipment-view-to-portable-engine porting session, distributed
+  one primary owner each (deduped against every owner's existing cases,
+  no overlap found) across `wph-equipment-simulator-development`,
+  `framework-design`, `cross-platform-engine-architecture`,
+  `equipment-control-architecture`, `equipment-domain-modeling`,
+  `codebase-architecture-discovery`, `code-review`, and
+  `safe-incremental-refactoring` -- new cases `WPH-SIM-DIS-001`,
+  `FW-BEH-011`, `ENG-BEH-019`, `ENG-BEH-020`, `ECA-BEH-008`,
+  `EDM-BEH-008`, `CAD-BEH-004`, `CR-BEH-010`, `REF-BEH-026`. 3 of the 9
+  spot-verified via ad hoc `codex exec` (Luna/Sol), not exhaustive.
+
+### New private Skill and a routing fix
+
+- **`technical-case-content-generation`** (#101, #102): new
+  `private-operation`-tier Skill turning one real technical case into
+  audience-matched draft content (short-video script, social post,
+  long-form article) with a hard evidence-honesty constraint -- every
+  draft keeps at least one named limitation, never self-certifies, and
+  always hands off to `game-marketing-and-monetization` for readiness/
+  evidence sign-off. A follow-up PR merged 3 Luna-distilled candidates:
+  per-case folder discipline for mixed-case packages, image/diagram
+  provenance deferring to `game-art-pipeline`'s draft catalog, and one
+  explicit publish-lifecycle state model (draft -> internal_review ->
+  public-safe-candidate -> ready-to-publish -> published) applied
+  consistently across every media type in `game-marketing-and-
+  monetization`. Not part of the public plugin; case/contract-layer RED
+  evidence only, live Skill/behavior execution `NOT RUN`.
+- **Routing-cue fix** (#105, closes `cloudbox-skills` #15): root cause of
+  `CAG-BEH-015`'s residual failure -- `using-cloudbox-skills`'s
+  conversation-routing-map never mentioned checkpoint/roadmap tracking,
+  while the adjacent `document-governance` cue superficially matched and
+  pulled routing the wrong way. Added one cue row with an explicit
+  disambiguation note. Re-verified 2/2 clean via ad hoc `codex exec`
+  (Luna/Sol), not a durable/repeatable formal grade.
+
+### Doc-only
+
+- (#99) Recorded 4 real gaps hit this session for future reference: a
+  per-provider hook launch-cwd precondition (Claude Code reads
+  `.claude/settings.json` only from the literal launch directory; Codex
+  CLI walks up from cwd to find `.git`), the structural-vs-live-execution
+  split between the ~320-case behavior corpus and the 7-case runtime
+  ledger, `--case-id` resolution scope, and calibration data confirming
+  the existing eval-inbox dedup-score judgment call. No behavior change.
+
+### Limits
+
+- `technical-case-content-generation` and its merged candidates are
+  `private-operation` tier only -- not part of the public plugin.
+- The 9 equipment-porting cases and the routing-cue fix were verified via
+  ad hoc `codex exec`/`claude -p` sampling, not the formal rubric-graded
+  pipeline -- durable/repeatable grading still owed as a follow-up, per
+  each case's `review_notes`.
+- No hardware, device, platform-install, or production-deployment claims.
+
 ## 7.6.39
 
 Covers PRs #94–98: a deep-read duplicate/overlap scan across the full

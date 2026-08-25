@@ -25,7 +25,8 @@
     "FW-BEH-007",
     "FW-BEH-008",
     "FW-BEH-009",
-    "FW-BEH-010"
+    "FW-BEH-010",
+    "FW-BEH-011"
   ],
   "behavior_case_types": [
     "application",

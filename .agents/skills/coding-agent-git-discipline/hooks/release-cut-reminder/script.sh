@@ -21,6 +21,16 @@
 
 THRESHOLD="${RELEASE_CUT_REMINDER_THRESHOLD:-6}"
 
+# LOG_FILE: every reminder this hook prints is also appended here (gitignored)
+# so all of this project's hooks can be checked from one place --
+# `tail -f .cloudskill-hooks-state/hooks.log` -- instead of only from
+# session scrollback.
+LOG_FILE=".cloudskill-hooks-state/hooks.log"
+log_event() {
+    mkdir -p "$(dirname "$LOG_FILE")" 2>/dev/null
+    printf '%s\trelease-cut-reminder\t%s\t%s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$1" "$2" >> "$LOG_FILE" 2>/dev/null
+}
+
 INPUT=$(cat)
 
 if command -v jq >/dev/null 2>&1; then
@@ -42,6 +52,7 @@ COUNT=$(git rev-list --count "${LAST_TAG}..HEAD" 2>/dev/null)
 [ -n "$COUNT" ] || exit 0
 
 if [ "$COUNT" -ge "$THRESHOLD" ]; then
+    log_event "ADVISORY" "$COUNT commits since $LAST_TAG (threshold $THRESHOLD)"
     echo "=== Release Cut Reminder (advisory, not blocking) ===
   $COUNT commits since the last tag ($LAST_TAG) -- past the $THRESHOLD-commit
   check-in point. Worth considering a version bump / release cut now, before

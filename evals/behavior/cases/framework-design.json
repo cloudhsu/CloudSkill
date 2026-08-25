@@ -239,6 +239,31 @@
         "agent declares the engine/consumer boundary final and ready for general reuse based on the current single pilot integration compiling successfully"
       ],
       "review_notes": "Distilled 2026-08-23 from a real, project-history-mined case (collaborative-distillation candidate INT-20260823-080138-a23bceaa): a real cross-platform engine/consumer boundary decision, generalized. Distinct from cloudbox-game-migration's existing 'no engine-tree copying' requirement -- that covers the migration-time boundary for one specific consumer; this covers the engine side's own internal legacy/demo-code classification and the multiple-consumer evidence bar before calling any kernel boundary stable."
+    },
+    {
+      "id": "FW-BEH-011",
+      "skill": "framework-design",
+      "type": "application",
+      "prompt": "A legacy drawing layer needs virtual components for several distinct entity families (modules, movers, carriers, containers, ports, locks, zones, routes). Existing hosts must keep working while each component becomes independently testable.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "defines the base virtual component and ownership boundaries before coding",
+        "uses one primary component class per file and isolates shared helpers rather than putting multiple components in one file",
+        "marks auxiliary overlays or route objects that intentionally do not derive from the base",
+        "preserves the old facade and aliases until downstream migration is verified",
+        "adds a contract test for construction, layout, rendering, and compatibility"
+      ],
+      "forbidden_behaviors": [
+        "uses a monolithic component source file for a componentized API",
+        "renames public concepts without documenting compatibility",
+        "deletes the old drawing entry point during a safe refactor"
+      ],
+      "required_artifacts": [],
+      "baseline_expected_failure": [
+        "agent puts multiple virtual components in one source file with class names that don't communicate the requested hierarchy, clarified only after implementation begins"
+      ],
+      "review_notes": "Distilled 2026-08-25 from a real collaborative-distillation candidate (GPT-5.6 Luna/Sol, project-history mining): a first implementation's class-to-file mapping and naming were corrected only after the fact; the fix separated implementation files, shared support code, and a compatibility facade."
     }
   ]
 }

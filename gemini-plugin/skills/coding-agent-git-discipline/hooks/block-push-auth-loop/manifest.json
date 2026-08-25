@@ -4,6 +4,7 @@
   "owner_skill": "coding-agent-git-discipline",
   "description": "Blocks `git push` or `gh auth login` once the journal written by the companion record-push-outcome hook shows 2 consecutive git-push authentication failures within 30 minutes -- a deterministic loop-breaker for the repeated-login problem, enforcing references/git-push-auth-recovery.md's stop rule without relying on the model remembering to stop. Requires record-push-outcome installed alongside it (same journal file); by itself it always allows (no journal, no block). Generic across any git repository.",
   "script": "script.sh",
+  "windows_script": "script.ps1",
   "providers": {
     "claude": {
       "config_file": ".claude/settings.json",

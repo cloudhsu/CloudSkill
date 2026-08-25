@@ -2,8 +2,9 @@
   "schema_version": 1,
   "name": "vikunja-sync-reminder",
   "owner_skill": "project-management-sync",
-  "description": "MANDATORY (blocking, not advisory) reminder that forces one more pass before the turn ends if the transcript shows git commit activity with zero mention of the project-management tracker (default keyword: 'vikunja', override via PROJECT_TRACKER_HINT env var) anywhere in it. Cannot judge what is worth tracking -- that stays a model decision -- it only forces the decision to be made explicitly instead of silently skipped. Loop-safe: uses the stop_hook_active field present in all 3 providers' Stop/AfterAgent input to fire at most once per stop attempt. Uses Claude Code's Stop event, Codex CLI's Stop event, and Gemini CLI's AfterAgent event -- these are the closest cross-provider equivalents (verified via each provider's own hook docs), all sharing the same exit-2-plus-stderr blocking mechanism, so the same script.sh works unmodified across all 3.",
+  "description": "MANDATORY (blocking, not advisory) reminder that forces one more pass before the turn ends if the transcript shows git commit activity with zero mention of the project-management tracker (default keyword: 'vikunja', override via PROJECT_TRACKER_HINT env var) anywhere in it. Cannot judge what is worth tracking -- that stays a model decision -- it only forces the decision to be made explicitly instead of silently skipped. Loop-safe: uses the stop_hook_active field present in all 3 providers' Stop/AfterAgent input to fire at most once per stop attempt. Uses Claude Code's Stop event, Codex CLI's Stop event, and Gemini CLI's AfterAgent event -- these are the closest cross-provider equivalents (verified via each provider's own hook docs), all sharing the same exit-2-plus-stderr blocking mechanism; script.sh and script.ps1 preserve that behavior on Unix-like systems and Windows.",
   "script": "script.sh",
+  "windows_script": "script.ps1",
   "providers": {
     "claude": {
       "config_file": ".claude/settings.json",

@@ -20,11 +20,13 @@
     "CR-BEH-006",
     "CR-BEH-007",
     "CR-BEH-008",
-    "CR-BEH-009"
+    "CR-BEH-009",
+    "CR-BEH-010"
   ],
   "behavior_case_types": [
     "application",
     "counterexample",
+    "discipline",
     "recognition"
   ],
   "next_review_triggers": [

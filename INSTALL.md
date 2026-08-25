@@ -210,7 +210,11 @@ python3 scripts/install_skill_hooks.py --project-path /path/to/your/project
 - 非互動環境（agent 透過 subprocess 呼叫、CI）預設**不安裝**，需要明確帶 `--yes` 才會裝——這跟第 7 節本機 Eval config 的「非互動維持預設建立」相反，因為 hook 可能真的擋下之後的 commit，風險層級不同，故意採取更保守的預設。
 - `--dry-run` 只報告會做什麼，不寫入任何檔案。
 - 重複執行是 idempotent 的：已經裝過的 hook 不會被重複加入。
+- macOS / Linux 使用 manifest 的 `script.sh`；Windows 若 manifest 提供 `windows_script`，則使用 Windows 原生 PowerShell 入口，不依賴 PATH 上的 `bash`。尚未提供 Windows 腳本的 hook 會明確標示為 unsupported，不會偷偷安裝一個可能回傳 code 1 的 Bash 命令。
+- 若 Windows 專案先前已安裝同一 hook 的 `bash .../script.sh` wiring，重新安裝會就地換成 PowerShell 命令，保留原有其他 hook 設定。
 - 若由 coding agent 代為執行，比照第 3 節「由 coding agent 代為安裝時」的規則——完成後應在對話中明確告知裝了哪些 hook，而不是默默執行。
+
+**已知缺口（2026-08-25）：cloudbox-skills 自己 repo 內三個直接寫死的 hook 不受這個機制管理**——`validate-push-readiness`、`block-push-auth-loop`、`record-push-outcome` 是直接寫在這個 repo 自己的 `.claude/settings.json` / `.codex/hooks.json` / `.gemini/settings.json` 裡（`bash .claude/hooks/<name>.sh`），不是透過上面的 `hooks/<hook-name>/manifest.json` 機制安裝，所以 `install_skill_hooks.py` 的 Windows 遷移邏輯不會碰到它們。三支對應的 `.ps1` 檔案已經補在 `.claude/hooks/`、`.codex/hooks/`、`.gemini/hooks/` 底下，但**沒有自動安裝步驟會把 settings.json 裡的指令換成 PowerShell**——在 Windows 上直接在這個 repo 本身工作（不是把 hook 裝進別的消費端專案）的人，需要手動把這三行指令從 `bash .claude/hooks/<name>.sh` 改成 `pwsh -NoProfile -File .claude\hooks\<name>.ps1`（三個 provider 的設定檔都要改），而且**不要把這個改動 commit 回 git**——這個 repo 提交的版本假設維護機器是 macOS/Linux，跟 bundled hook 目前的處理方式一致（Windows 使用者透過重新執行安裝腳本，在自己本機取得 PowerShell 版本，而不是讓 git 裡的版本跟著切換）。
 
 ## 8. 日常正向與負向案例
 

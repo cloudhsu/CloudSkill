@@ -23,11 +23,13 @@
   "behavior_case_ids": [
     "CAGD-BEH-001",
     "CAGD-BEH-002",
-    "CAGD-BEH-003"
+    "CAGD-BEH-003",
+    "CAGD-BEH-004"
   ],
   "behavior_case_types": [
     "application",
     "counterexample",
+    "discipline",
     "recognition"
   ],
   "next_review_triggers": [

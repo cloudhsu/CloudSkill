@@ -4,6 +4,7 @@
   "owner_skill": "coding-agent-git-discipline",
   "description": "Advisory-only (never blocks) reminder printed at git commit time when the working tree has unstaged-modified or untracked content not part of the commit. Direct response to a real, recurring failure (hit 3+ times in one session): editing/committing in a checkout another concurrent agent was also actively working in, without noticing until well into the work. Deliberately checks at git-commit time with the existing Bash matcher rather than at edit time, which would need unverified per-provider Edit/Write tool-matcher research -- commit time is where this class of mistake was actually caught in practice every time it happened.",
   "script": "script.sh",
+  "windows_script": "script.ps1",
   "providers": {
     "claude": {
       "config_file": ".claude/settings.json",

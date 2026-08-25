@@ -20,6 +20,16 @@
 # meant to be installed outside cloudbox-skills itself.
 #
 # Exit 0 always (advisory).
+#
+# LOG_FILE: every reminder this hook prints is also appended here (gitignored)
+# so all of this project's hooks can be checked from one place --
+# `tail -f .cloudskill-hooks-state/hooks.log` -- instead of only from
+# session scrollback.
+LOG_FILE=".cloudskill-hooks-state/hooks.log"
+log_event() {
+    mkdir -p "$(dirname "$LOG_FILE")" 2>/dev/null
+    printf '%s\tlifecycle-evidence-reminder\t%s\t%s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$1" "$2" >> "$LOG_FILE" 2>/dev/null
+}
 
 INPUT=$(cat)
 
@@ -51,6 +61,7 @@ while IFS= read -r skill; do
 done <<< "$CHANGED_SKILLS"
 
 if [ -n "$MISSING" ]; then
+    log_event "ADVISORY" "SKILL.md/references changed without matching lifecycle.json: $(echo "$CHANGED_SKILLS" | tr '\n' ',' )"
     echo -e "=== Lifecycle Evidence Reminder (advisory, not blocking) ===
   These skills' SKILL.md or references/ changed in this commit but their
   lifecycle.json did not:$MISSING

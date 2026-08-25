@@ -24,6 +24,36 @@ something is misconfigured, which is a materially different risk than
 copying Skill content or writing a passive local Eval-capture config, so it
 gets its own explicit opt-in step rather than inheriting install.sh's
 create-by-default posture for the local config.
+
+2026-08-24 IMPORTANT PRECONDITION, not previously documented anywhere in
+this script -- a correctly-installed hook can still silently never fire,
+for a reason this script cannot detect or warn about at install time:
+
+- Claude Code loads a project's .claude/settings.json (hooks included)
+  ONLY from the directory the session was actually launched in, and does
+  NOT re-scan or inherit it from a parent directory, nor pick up a
+  subdirectory's own settings.json after a later `cd` during the session
+  (confirmed against Claude Code's own docs, code.claude.com/docs/en/
+  large-codebases.md). A user whose habit is "start the agent in a parent
+  folder that holds several sibling repos, then cd into the one being
+  worked on" will have every hook installed by this script into any of
+  those sibling repos silently never fire, session after session, with
+  no error -- discovered in cloudbox-skills' own case only by noticing a
+  hook's own unconditional-write side-effect file (a journal entry that
+  should exist after a real `git push`) was simply never created.
+- Codex CLI resolves .codex/hooks.json differently: it walks up from the
+  actual OS working directory *at the moment the `codex` process itself
+  is started* to find a .git directory and treats that as project root
+  (developers.openai.com/codex/hooks) -- so a plain `cd repo && codex`
+  does pick up that repo's hooks, unlike Claude Code's fixed-at-session-
+  start behavior. The two providers are NOT interchangeable on this
+  point; do not assume verifying one confirms the other.
+
+Net effect: after running this script, the person installing hooks needs
+to be told explicitly how they actually launch each provider day to day,
+not just that the files were written -- "installed" and "will ever
+execute" are two different claims for Claude Code project-scoped hooks
+in particular.
 """
 
 import argparse
@@ -57,28 +87,80 @@ def find_bundled_hooks(cloudskill_repo: Path) -> list[dict[str, Any]]:
     return found
 
 
-def skill_is_installed(skill_name: str, project_path: Path) -> bool:
+def skill_is_installed(
+    skill_name: str, project_path: Path, *, user_home: Path | None = None
+) -> bool:
     """A Skill counts as installed if its own folder exists anywhere this
     installer's copy_skills step would have placed it (project or user
-    scope, either tool)."""
+    scope, either tool), or inside an installed Codex plugin cache.
+
+    Codex plugins are user-scoped and keep regular-file Skill projections
+    under ``~/.codex/plugins/cache/<marketplace>/<plugin>/<version>``. A
+    project can therefore have a Skill available to Codex without having a
+    project-local ``.agents`` or ``.claude`` copy; hook installation must
+    recognize that supported installation shape too.
+    """
+    home = user_home or Path.home()
     candidates = [
         project_path / ".agents" / "skills" / skill_name,
         project_path / ".claude" / "skills" / skill_name,
-        Path.home() / ".agents" / "skills" / skill_name,
-        Path.home() / ".claude" / "skills" / skill_name,
+        home / ".agents" / "skills" / skill_name,
+        home / ".claude" / "skills" / skill_name,
     ]
-    return any(c.is_dir() for c in candidates)
+    if any(c.is_dir() for c in candidates):
+        return True
+
+    codex_cache = home / ".codex" / "plugins" / "cache"
+    if not codex_cache.is_dir():
+        return False
+
+    for plugin_root in codex_cache.glob("*/*/*"):
+        codex_skill_roots = (
+            plugin_root / ".agents" / "skills",
+            plugin_root / "codex-skills",
+        )
+        if any((skill_root / skill_name).is_dir() for skill_root in codex_skill_roots):
+            return True
+    return False
 
 
-def hook_command(provider: str, skill_name: str, hook_name: str) -> str:
-    hook_dir = f".{provider}/hooks/{skill_name}/{hook_name}/script.sh"
-    return f"bash {hook_dir}"
+def hook_command(
+    provider: str,
+    skill_name: str,
+    hook_name: str,
+    *,
+    windows: bool = False,
+    script_name: str | None = None,
+) -> str:
+    """Return the provider command for one installed hook.
+
+    Hook manifests remain portable by carrying the canonical POSIX script and
+    an optional Windows-native script.  The installer chooses the native
+    entry point on Windows instead of relying on whichever ``bash`` happens
+    to be first on PATH (which may be the WSL launcher rather than Git Bash).
+    """
+    selected_script = script_name or ("script.ps1" if windows else "script.sh")
+    hook_path = f".{provider}/hooks/{skill_name}/{hook_name}/{selected_script}"
+    if windows:
+        return f"powershell.exe -NoProfile -ExecutionPolicy Bypass -File {hook_path}"
+    return f"bash {hook_path}"
 
 
-def merge_hook_entry(config: dict[str, Any], event: str, matcher: str | None, command: str) -> bool:
+def merge_hook_entry(
+    config: dict[str, Any],
+    event: str,
+    matcher: str | None,
+    command: str,
+    legacy_commands: set[str] | None = None,
+) -> bool:
     """Mutate `config` in place, adding one hook command under the given
     event/matcher. Returns True if it changed anything, False if an entry
     with this exact command already existed (idempotent re-run).
+
+    ``legacy_commands`` contains older platform-specific commands for this
+    same hook.  An exact legacy command is migrated in place so a Windows
+    reinstall does not leave the old ``bash`` command alongside the native
+    PowerShell command.
 
     matcher=None means a non-tool event (Stop / AfterAgent and similar):
     real Claude Code / Codex CLI / Gemini CLI schemas for these events omit
@@ -93,6 +175,11 @@ def merge_hook_entry(config: dict[str, Any], event: str, matcher: str | None, co
             for existing in entry.get("hooks", []):
                 if existing.get("command") == command:
                     return False
+            if legacy_commands:
+                for existing in entry.get("hooks", []):
+                    if existing.get("command") in legacy_commands:
+                        existing["command"] = command
+                        return True
             entry.setdefault("hooks", []).append({"type": "command", "command": command, "timeout": 15})
             return True
     new_entry: dict[str, Any] = {}
@@ -109,7 +196,6 @@ def install_one_hook(
     skill_name = manifest["owner_skill"]
     hook_name = manifest["name"]
     hook_dir: Path = manifest["_hook_dir"]
-    script_source = hook_dir / manifest["script"]
     actions: list[str] = []
 
     for provider in providers:
@@ -117,7 +203,25 @@ def install_one_hook(
         if provider_cfg is None:
             continue
         config_file = project_path / provider_cfg["config_file"]
-        command = hook_command(provider, skill_name, hook_name)
+        windows = sys.platform == "win32"
+        script_name = manifest.get("windows_script") if windows else manifest["script"]
+        if windows and not script_name:
+            actions.append(
+                f"{provider}: unsupported on Windows; manifest has no windows_script, so no Bash fallback was installed"
+            )
+            continue
+
+        script_source = hook_dir / script_name
+        command = hook_command(
+            provider,
+            skill_name,
+            hook_name,
+            windows=windows,
+            script_name=script_name,
+        )
+        legacy_commands = {
+            hook_command(provider, skill_name, hook_name, windows=False),
+        }
 
         config: dict[str, Any] = {}
         if config_file.is_file():
@@ -129,8 +233,14 @@ def install_one_hook(
                     "Fix it manually first, or wire this hook in by hand -- see the manifest."
                 )
 
-        changed = merge_hook_entry(config, provider_cfg["event"], provider_cfg.get("matcher"), command)
-        script_target = project_path / f".{provider}" / "hooks" / skill_name / hook_name / "script.sh"
+        changed = merge_hook_entry(
+            config,
+            provider_cfg["event"],
+            provider_cfg.get("matcher"),
+            command,
+            legacy_commands=legacy_commands,
+        )
+        script_target = project_path / f".{provider}" / "hooks" / skill_name / hook_name / script_name
 
         if dry_run:
             if changed or not script_target.is_file():
@@ -139,13 +249,14 @@ def install_one_hook(
                 actions.append(f"[dry-run] {provider}: already installed, no change")
             continue
 
-        if changed:
+        if changed or not script_target.is_file():
             script_target.parent.mkdir(parents=True, exist_ok=True)
             shutil.copy2(script_source, script_target)
             script_target.chmod(0o755)
             config_file.parent.mkdir(parents=True, exist_ok=True)
             config_file.write_text(json.dumps(config, indent=2) + "\n", encoding="utf-8")
-            actions.append(f"installed {provider}: {config_file} (+{script_target})")
+            action = "installed" if changed else "repaired"
+            actions.append(f"{action} {provider}: {config_file} (+{script_target})")
         else:
             actions.append(f"{provider}: already installed, no change")
 

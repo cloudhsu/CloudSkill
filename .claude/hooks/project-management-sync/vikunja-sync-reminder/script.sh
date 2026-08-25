@@ -33,6 +33,16 @@
 
 PROJECT_TRACKER_HINT="${PROJECT_TRACKER_HINT:-vikunja}"
 
+# LOG_FILE: every time this hook forces a continue, that event is also
+# appended here (gitignored) so all of this project's hooks can be checked
+# from one place -- `tail -f .cloudskill-hooks-state/hooks.log` -- instead
+# of only from session scrollback. Does not change the exit 2 behavior.
+LOG_FILE=".cloudskill-hooks-state/hooks.log"
+log_event() {
+    mkdir -p "$(dirname "$LOG_FILE")" 2>/dev/null
+    printf '%s\tvikunja-sync-reminder\t%s\t%s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$1" "$2" >> "$LOG_FILE" 2>/dev/null
+}
+
 INPUT=$(cat)
 
 if command -v jq >/dev/null 2>&1; then
@@ -59,6 +69,7 @@ RECENT=$(tail -c 300000 "$TRANSCRIPT" 2>/dev/null)
 echo "$RECENT" | grep -qiE 'git[[:space:]]+commit' || exit 0
 echo "$RECENT" | grep -qi "$PROJECT_TRACKER_HINT" && exit 0
 
+log_event "FORCED_CONTINUE" "commit activity with no '$PROJECT_TRACKER_HINT' mention in transcript"
 echo "=== Tracker Sync Reminder: forcing one more pass (not a permanent block) ===
   This turn's transcript shows git commit activity with no mention of
   '$PROJECT_TRACKER_HINT' anywhere in it. Per project-management-sync's

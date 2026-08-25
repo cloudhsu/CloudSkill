@@ -211,6 +211,30 @@
                 "agent accepts or does not object to making Widget copyable, or assumes the implicit move-on-return rule already applies across the StatusOr wrapper boundary, missing the need for an explicit std::move"
             ],
             "review_notes": "Closes the new Naming and Control Flow move-only-through-converting-wrapper mechanism."
+        },
+        {
+            "id": "CR-BEH-010",
+            "skill": "code-review",
+            "type": "discipline",
+            "prompt": "A visual-timeline test searches event timings and treats the first event found at time zero as a valid fixture. Review whether the lookup correctly distinguishes a real zero value from a missing result.",
+            "expected_routing": true,
+            "expected_alternative_skill": null,
+            "required_behaviors": [
+                "flags representing a missing numeric result with a value that is also a legitimate domain value (here, zero) as a defect",
+                "requires an explicit optional/impossible sentinel for missing results instead of a valid-domain-value sentinel",
+                "requires the lookup result to be checked/asserted before it is used to select a component",
+                "requires a time-zero (or equivalent boundary-value) fixture in the regression test"
+            ],
+            "forbidden_behaviors": [
+                "accepts zero, empty string, or false as a not-found sentinel when it is also a valid domain value",
+                "relies on truthiness to validate a lookup result",
+                "recommends repairing a failing assertion by changing the fixture instead of fixing the sentinel contract"
+            ],
+            "required_artifacts": [],
+            "baseline_expected_failure": [
+                "reviewer does not flag the zero-as-not-found sentinel bug, and the test continues to silently select the wrong component whenever a legitimate event starts at time zero"
+            ],
+            "review_notes": "Distilled 2026-08-25 from a real collaborative-distillation candidate (GPT-5.6 Luna/Sol, project-history mining): a time-zero event was mistaken for not-found because zero was reused as the sentinel value. Intentionally scoped to the sentinel-value pattern, separate from event/timeline semantic correctness."
         }
   ]
 }

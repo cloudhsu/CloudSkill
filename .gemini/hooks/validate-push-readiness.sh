@@ -17,6 +17,19 @@
 #
 # Exit 0 = allow. Exit 2 = block (stderr shown to the agent, which can then
 # run the sync scripts and retry).
+#
+# LOG_FILE: every real finding (blocked push, or the checker itself failing
+# to run) is appended here in addition to stderr -- gitignored, one line per
+# event, so a noisy environment can be triaged from its own history (`tail
+# -f .cloudskill-hooks-state/hooks.log`) instead of only from session
+# scrollback. This does not replace the stderr message on an actual block --
+# the agent still needs that to react -- it only adds a durable trail.
+
+LOG_FILE=".cloudskill-hooks-state/hooks.log"
+log_event() {
+    mkdir -p "$(dirname "$LOG_FILE")" 2>/dev/null
+    printf '%s\tvalidate-push-readiness\t%s\t%s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$1" "$2" >> "$LOG_FILE" 2>/dev/null
+}
 
 INPUT=$(cat)
 
@@ -47,6 +60,16 @@ done
 if ! "$PYTHON_CMD" scripts/sync_gemini_plugins.py --check >/tmp/cloudskill-push-readiness.$$ 2>&1; then
     OUTPUT=$(cat /tmp/cloudskill-push-readiness.$$)
     rm -f /tmp/cloudskill-push-readiness.$$
+
+    # Behavior unchanged from before (still always blocks push on any
+    # non-zero result, including a checker crash) -- this only mirrors the
+    # same detail into LOG_FILE as well, tagged so a script-crash can be
+    # told apart from a real staleness finding when triaging the log.
+    if echo "$OUTPUT" | grep -q "Traceback (most recent call last)"; then
+        log_event "BLOCKED_SCRIPT_ERROR" "$(echo "$OUTPUT" | tr '\n' ' ' | cut -c1-200)"
+    else
+        log_event "BLOCKED" "$(echo "$OUTPUT" | tr '\n' ' ' | cut -c1-200)"
+    fi
     echo "=== Push Readiness: BLOCKED ===
   Gemini/Codex plugin projections are stale relative to .agents/skills/ --
   the exact gap that failed this repository's own CI on a real PR tonight.

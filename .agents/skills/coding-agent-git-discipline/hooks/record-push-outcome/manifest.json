@@ -4,6 +4,7 @@
   "owner_skill": "coding-agent-git-discipline",
   "description": "PostToolUse companion to block-push-auth-loop: classifies every `git push` attempt's outcome (auth_failure, protection_rejection, success, other_failure, unknown) into a local gitignored journal (.cloudskill-hooks-state/push-auth-journal.jsonl). Never blocks by itself. Generic across any git repository -- install alongside block-push-auth-loop.",
   "script": "script.sh",
+  "windows_script": "script.ps1",
   "providers": {
     "claude": {
       "config_file": ".claude/settings.json",

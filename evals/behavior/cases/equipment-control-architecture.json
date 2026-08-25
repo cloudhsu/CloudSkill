@@ -174,6 +174,30 @@
         "agent treats the recipe as a list of commands and delays"
       ],
       "review_notes": "Review semantic relationships, authority, lifecycle, physical readiness, failure behavior, and evidence."
+    },
+    {
+      "id": "ECA-BEH-008",
+      "skill": "equipment-control-architecture",
+      "type": "discipline",
+      "prompt": "A legacy event list contains simultaneous placement events and descriptions that omit an explicit source/target arrow. Project this timeline into a live view without losing any placed item.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "parses both explicit routed events and legacy action-specific descriptions that omit an arrow",
+        "defines deterministic precedence for events sharing the same timestamp",
+        "preserves zero-duration events in both before and after frame projections",
+        "adds a fixture that specifically asserts the item remains visible through the transition"
+      ],
+      "forbidden_behaviors": [
+        "drops an event because its duration is zero",
+        "returns an unknown/missing target when it is actually recoverable from a controlled action description",
+        "claims timeline support from arrow-only fixtures alone"
+      ],
+      "required_artifacts": [],
+      "baseline_expected_failure": [
+        "a parser that only handles arrow-form descriptions drops a zero-duration, arrow-less placement event, making the item disappear from the projected view"
+      ],
+      "review_notes": "Distilled 2026-08-25 from a real collaborative-distillation candidate (GPT-5.6 Luna/Sol, project-history mining): a same-time placement event without an explicit arrow was not projected to its target, and the item visually vanished during alignment. Boundary-condition case, distinct from general parser completeness."
     }
   ]
 }

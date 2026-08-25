@@ -62,4 +62,12 @@ fi
 TIMESTAMP=$(date -u +%Y-%m-%dT%H:%M:%SZ)
 printf '{"timestamp":"%s","class":"%s"}\n' "$TIMESTAMP" "$CLASS" >> "$JOURNAL_FILE"
 
+# Also mirror non-success/non-unknown outcomes into the unified hooks log
+# (gitignored) so a failing push shows up in the same place as every other
+# hook's findings -- `tail -f .cloudskill-hooks-state/hooks.log` -- without
+# duplicating every routine successful push into it.
+if [ "$CLASS" != "success" ] && [ "$CLASS" != "unknown" ]; then
+    printf '%s\trecord-push-outcome\t%s\tgit push outcome recorded\n' "$TIMESTAMP" "$CLASS" >> ".cloudskill-hooks-state/hooks.log" 2>/dev/null
+fi
+
 exit 0

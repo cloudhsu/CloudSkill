@@ -4,6 +4,7 @@
   "owner_skill": "coding-agent-git-discipline",
   "description": "Advisory-only (never blocks) reminder printed on git push once commits-since-last-tag reaches a small threshold (default 6, override via RELEASE_CUT_REMINDER_THRESHOLD env var). Direct response to a real gap: this repository's own version tags once fell 90 commits behind before anyone noticed. Fires every push past the threshold rather than escalating -- whether a given push is actually a good moment to cut a release is a judgment call the script cannot make; 'not yet, still mid-batch' is a valid response. Degrades silently on a repo with no tags yet.",
   "script": "script.sh",
+  "windows_script": "script.ps1",
   "providers": {
     "claude": {
       "config_file": ".claude/settings.json",
