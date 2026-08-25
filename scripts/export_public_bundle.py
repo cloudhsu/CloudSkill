@@ -6,6 +6,9 @@ every git-tracked file EXCEPT:
 
 - .agents/skills/<name>/ for any evolution-pack skill
 - private-plugin/ and private-gemini-plugin/ (private-only distributions)
+- public-plugin/ (the private checkout's generated core-only marketplace
+  projection; the public checkout uses its root as the already-filtered
+  package)
 - any evals/behavior/cases/*.json whose top-level "skill" field names an
   evolution-pack skill
 - evals/skill-routing-cases.csv, with rows whose expected_skill is an
@@ -109,6 +112,10 @@ PRIVATE_INFRASTRUCTURE_PATHS = {
     # is a no-op in a public checkout (private-plugin/ is already excluded
     # above). Caught 2026-08-21 during the first real export run.
     "scripts/sync_private_codex_plugin.py",
+    # The private checkout uses a generated core-only package as the public
+    # marketplace source. The exported public checkout already has a filtered
+    # root package, so this projection must not be copied into it.
+    "scripts/sync_public_plugin.py",
     "evals/runtime/contracts/behavior-output-contract.json",
     "evals/runtime/schemas/routing-decision.schema.json",
     "evals/runtime/cases/canary.json",
@@ -209,6 +216,9 @@ def main() -> int:
         if relative == "private-gemini-plugin" or relative.startswith("private-gemini-plugin/"):
             excluded_paths.append(relative)
             continue
+        if relative == "public-plugin" or relative.startswith("public-plugin/"):
+            excluded_paths.append(relative)
+            continue
         if relative in PRIVATE_INFRASTRUCTURE_PATHS:
             excluded_paths.append(relative)
             continue
@@ -241,7 +251,18 @@ def main() -> int:
 
         if relative in (".agents/plugins/marketplace.json", ".claude-plugin/marketplace.json"):
             doc = json.loads(content)
-            doc["plugins"] = [p for p in doc.get("plugins", []) if "private" not in p.get("name", "")]
+            plugins = []
+            for plugin in doc.get("plugins", []):
+                if "private" in plugin.get("name", ""):
+                    continue
+                if plugin.get("name") == "cloudbox-skills":
+                    source = plugin.get("source")
+                    if source == "./public-plugin":
+                        plugin["source"] = "./"
+                    elif isinstance(source, dict) and source.get("path") == "./public-plugin":
+                        source["path"] = "./"
+                plugins.append(plugin)
+            doc["plugins"] = plugins
             dest_path.write_text(json.dumps(doc, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
             copied_paths.append(f"{relative} (filtered)")
             continue

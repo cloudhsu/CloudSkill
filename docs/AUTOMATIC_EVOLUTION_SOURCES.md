@@ -30,7 +30,7 @@ stored in ignored `.cloudbox-skills/config.local.json` as `export_project_name` 
 reused later. A non-interactive runner must configure it first.
 
 ```bash
-python3 .agents/skills/developing-skills/assets/export_eval_candidate.py \
+python3 .agents/skills/developing-eval/scripts/export_eval_candidate.py \
   --kind positive --input draft.json --project-name engine-core
 ```
 

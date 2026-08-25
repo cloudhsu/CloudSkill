@@ -14,6 +14,8 @@ commands = [
     [sys.executable, 'scripts/validate_planning_priority.py'],
     [sys.executable, 'scripts/validate_interaction_capture.py'],
     [sys.executable, 'scripts/validate_eval_bundle_contract.py'],
+    [sys.executable, 'scripts/sync_public_plugin.py', '--check'],
+    [sys.executable, 'scripts/sync_private_codex_plugin.py', '--check'],
     [sys.executable, 'scripts/sync_gemini_plugins.py', '--check'],
     [sys.executable, 'scripts/validate_plugins.py'],
     [sys.executable, 'scripts/smoke_install.py'],

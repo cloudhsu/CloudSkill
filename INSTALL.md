@@ -42,6 +42,17 @@ python3 scripts/sync_private_codex_plugin.py
 
 Codex 使用 `private-plugin/codex-skills/` 的 regular-file projection；Claude Code 則使用 `private-plugin/skills/` 的 symlink projection。
 
+私有 checkout 的 public plugin 不再指向 repository root，而是指向只含
+core Skills 的 `public-plugin/` regular-file projection。更新 core Skill 後，
+同步執行：
+
+```bash
+python3 scripts/sync_public_plugin.py
+```
+
+因此 `cloudbox-skills` cache 只會有公有 tier，
+`cloudbox-skills-private` cache 才會有 non-core/private tier。
+
 ### Claude Code
 
 ```powershell
@@ -245,9 +256,13 @@ Agent 應使用 `developing-skills`：
 當 Agent 只有已安裝的技能、卻沒有本機 CloudSkill Repository 可寫入時，使用這組技能自帶的匯出工具：
 
 ```bash
-python3 .claude/skills/developing-eval/assets/export_eval_candidate.py \
+python3 "${CLAUDE_SKILL_DIR}/scripts/export_eval_candidate.py" \
   --kind positive --input draft.json
 ```
+
+Codex 或其他 Host 應先解析目前安裝的 `developing-eval/SKILL.md` 所在目錄，
+再執行其同層的 `scripts/export_eval_candidate.py`；不要在非 Claude Host
+展開 Claude 專用的 `${CLAUDE_SKILL_DIR}`。
 
 行為：
 

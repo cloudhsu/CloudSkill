@@ -81,18 +81,20 @@ required = [
     'docs/evidence/EQUIPMENT_CONTROL_PLATFORM.md', 'docs/evidence/SEMICONDUCTOR_EQUIPMENT_TRAINING.md',
     'docs/standards/ENGINEERING_GOVERNANCE.md', 'docs/DOCUMENTATION_AUDIT.md',
     'scripts/install.ps1', 'scripts/install.sh', 'scripts/audit_docs.py',
+    'scripts/sync_public_plugin.py',
     'scripts/validate_descriptions.py', 'scripts/validate_behavior_evals.py',
     'scripts/manage_skill.py', 'scripts/validate_skill_lifecycle.py', 'scripts/validate_evolution_handoff.py',
     'scripts/smoke_install.py', 'scripts/run_all_checks.py', 'scripts/validate_plugins.py',
     'cloudbox-skills-eval', 'cloudbox-skills-eval-codex', 'cloudbox-skills-eval-claude', 'scripts/codex_eval_adapter.py', 'scripts/claude_eval_adapter.py', 'scripts/providers_contract.py', 'evals/runtime/contracts/providers.json', 'scripts/run_local_eval_review.py', 'scripts/validate_local_eval_debugging.py', 'scripts/validate_codex_eval_path.py', 'scripts/validate_providers_contract.py',
     '.codex-plugin/plugin.json', '.claude-plugin/plugin.json',
+    'public-plugin/.codex-plugin/plugin.json', 'public-plugin/.claude-plugin/plugin.json',
     'private-plugin/.codex-plugin/plugin.json', 'private-plugin/.claude-plugin/plugin.json',
     '.agents/plugins/marketplace.json', '.claude-plugin/marketplace.json',
     'assets/cloudbox.ico', 'assets/cloudbox-icon.png', 'assets/cloudbox-logo.png',
     'docs/CLOUDBOX_PLUGIN.md',
     'scripts/capture_eval_candidate.py', 'scripts/validate_interaction_capture.py',
     'scripts/import_eval_candidates.py', 'scripts/sync_eval_exchange.py',
-    '.agents/skills/developing-eval/assets/export_eval_candidate.py',
+    '.agents/skills/developing-eval/scripts/export_eval_candidate.py',
     'scripts/package_surface_skills.py', 'scripts/validate_skill_portability.py',
     'config/skill-portability.json', 'docs/PLATFORM_SUPPORT_MATRIX.md',
     'config/skill-domain-catalog.json', 'docs/GAME_SKILL_CATALOG.md',
@@ -152,7 +154,7 @@ _is_private_checkout = any((ROOT / f'.agents/skills/{name}').is_dir() for name i
 _private_infra = set(PRIVATE_INFRASTRUCTURE_PATHS)
 
 for rel in required:
-    is_private_only = rel.startswith(_evolution_prefixes) or rel in _private_infra or rel.startswith('private-plugin/')
+    is_private_only = rel.startswith(_evolution_prefixes) or rel in _private_infra or rel.startswith('private-plugin/') or rel.startswith('public-plugin/')
     if is_private_only and not _is_private_checkout:
         continue
     if not (ROOT / rel).exists():

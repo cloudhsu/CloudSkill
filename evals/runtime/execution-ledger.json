@@ -1028,6 +1028,206 @@
       "date": "2026-08-22",
       "evidence_file": "2026-08-22-ablation-batch-and-identity-leak-investigation-claude.jsonl",
       "note": "Ablation pair 5/5. Both conditions fabricated the real operator's email on first run; clean after the shared-reference pointer fix was added and re-verified. Graded FAIL on the pre-fix run, disclosed as fixed on re-verification."
+    },
+    {
+      "skill": "coding-agent-git-discipline",
+      "case_id": "CAGD-01",
+      "kind": "routing",
+      "result": "PASS",
+      "provider": "claude",
+      "date": "2026-08-25",
+      "evidence_file": "cagd-01-20260825T132030Z.jsonl",
+      "note": "push-auth-recovery prompt, clean primary=coding-agent-git-discipline"
+    },
+    {
+      "skill": "coding-agent-git-discipline",
+      "case_id": "CAGD-02",
+      "kind": "routing",
+      "result": "PASS",
+      "provider": "claude",
+      "date": "2026-08-25",
+      "evidence_file": "cagd-02-20260825T132058Z.jsonl",
+      "note": "verify-PR-branch-name prompt, clean primary=coding-agent-git-discipline"
+    },
+    {
+      "skill": "coding-agent-git-discipline",
+      "case_id": "CAGD-03",
+      "kind": "routing",
+      "result": "PASS",
+      "provider": "claude",
+      "date": "2026-08-25",
+      "evidence_file": "cagd-03-20260825T132115Z.jsonl",
+      "note": "shared-checkout-detection prompt, clean primary=coding-agent-git-discipline"
+    },
+    {
+      "skill": "coding-agent-git-discipline",
+      "case_id": "CAGD-NEG-01",
+      "kind": "routing",
+      "result": "PASS",
+      "provider": "claude",
+      "date": "2026-08-25",
+      "evidence_file": "cagd-neg-01-20260825T132132Z.jsonl",
+      "note": "AGENTS.md-design prompt correctly did not select this skill (routed coding-agent-project-governance)"
+    },
+    {
+      "skill": "coding-agent-git-discipline",
+      "case_id": "CAGD-NEG-02",
+      "kind": "routing",
+      "result": "PASS",
+      "provider": "claude",
+      "date": "2026-08-25",
+      "evidence_file": "cagd-neg-02-20260825T132152Z.jsonl",
+      "note": "merge-conflict-content prompt correctly did not select this skill (routed code-review)"
+    },
+    {
+      "skill": "coding-agent-git-discipline",
+      "case_id": "CAGD-BEH-001",
+      "kind": "behavior",
+      "result": "PASS",
+      "provider": "claude",
+      "date": "2026-08-25",
+      "evidence_file": "cagd-beh-001-20260825T132236Z.jsonl",
+      "note": "bounded-retry-then-stop push-auth recovery, all 3 required_behaviors satisfied; also triggered identity-leak backstop redaction on real traffic"
+    },
+    {
+      "skill": "coding-agent-git-discipline",
+      "case_id": "CAGD-BEH-002",
+      "kind": "behavior",
+      "result": "PASS",
+      "provider": "claude",
+      "date": "2026-08-25",
+      "evidence_file": "cagd-beh-002-20260825T132331Z.jsonl",
+      "note": "verify real PR branch name before push, all 3 required_behaviors satisfied"
+    },
+    {
+      "skill": "coding-agent-git-discipline",
+      "case_id": "CAGD-BEH-003",
+      "kind": "behavior",
+      "result": "PASS",
+      "provider": "claude",
+      "date": "2026-08-25",
+      "evidence_file": "cagd-beh-003-20260825T132433Z.jsonl",
+      "note": "AGENTS.md/risk-routing design correctly routed away to coding-agent-project-governance per case's own required_behavior"
+    },
+    {
+      "skill": "coding-agent-git-discipline",
+      "case_id": "CAGD-BEH-004",
+      "kind": "behavior",
+      "result": "FAIL_CONTENT",
+      "provider": "claude",
+      "date": "2026-08-25",
+      "evidence_file": "cagd-beh-004-20260825T132612Z.jsonl",
+      "note": "routed to coding-agent-project-governance; missed 2/4 required_behaviors (revert-fail-open-change, diff-per-provider-sibling-copies) that are this session's own real 36b611f lesson, not yet written into any skill's content"
+    },
+    {
+      "skill": "technical-case-content-generation",
+      "case_id": "TCCG-01",
+      "kind": "routing",
+      "result": "PASS",
+      "provider": "claude",
+      "date": "2026-08-25",
+      "evidence_file": "tccg-01-20260825T133118Z.jsonl",
+      "note": "short-video-script-drafting prompt, clean primary=technical-case-content-generation"
+    },
+    {
+      "skill": "technical-case-content-generation",
+      "case_id": "TCCG-02",
+      "kind": "routing",
+      "result": "PASS",
+      "provider": "claude",
+      "date": "2026-08-25",
+      "evidence_file": "tccg-02-20260825T133139Z.jsonl",
+      "note": "multi-format-cut prompt, clean primary=technical-case-content-generation"
+    },
+    {
+      "skill": "technical-case-content-generation",
+      "case_id": "TCCG-NEG-01",
+      "kind": "routing",
+      "result": "PASS",
+      "provider": "claude",
+      "date": "2026-08-25",
+      "evidence_file": "tccg-neg-01-20260825T133203Z.jsonl",
+      "note": "readiness-review prompt correctly did not select this skill (routed game-marketing-and-monetization)"
+    },
+    {
+      "skill": "technical-case-content-generation",
+      "case_id": "TCCG-NEG-02",
+      "kind": "routing",
+      "result": "PASS",
+      "provider": "claude",
+      "date": "2026-08-25",
+      "evidence_file": "tccg-neg-02-20260825T133236Z.jsonl",
+      "note": "monetization-model prompt correctly did not select this skill (routed indie-game-product-evolution)"
+    },
+    {
+      "skill": "technical-case-content-generation",
+      "case_id": "TCCG-NEG-03",
+      "kind": "routing",
+      "result": "PASS",
+      "provider": "claude",
+      "date": "2026-08-25",
+      "evidence_file": "tccg-neg-03-20260825T133254Z.jsonl",
+      "note": "in-fiction-narrative prompt correctly did not select this skill (routed game-narrative-design)"
+    },
+    {
+      "skill": "technical-case-content-generation",
+      "case_id": "TCCG-NEG-04",
+      "kind": "routing",
+      "result": "PASS",
+      "provider": "claude",
+      "date": "2026-08-25",
+      "evidence_file": "tccg-neg-04-20260825T133311Z.jsonl",
+      "note": "video-production/editing prompt correctly selected no skill (out of scope)"
+    },
+    {
+      "skill": "technical-case-content-generation",
+      "case_id": "TCCG-BEH-001",
+      "kind": "behavior",
+      "result": "PASS",
+      "provider": "claude",
+      "date": "2026-08-25",
+      "evidence_file": "tccg-beh-001-20260825T133352Z.jsonl",
+      "note": "audience/promise/structure decision + OBSERVED/INFERRED/NOT_RUN evidence-status vocabulary, all 3 required_behaviors satisfied"
+    },
+    {
+      "skill": "technical-case-content-generation",
+      "case_id": "TCCG-BEH-002",
+      "kind": "behavior",
+      "result": "FAIL_CONTENT",
+      "provider": "claude",
+      "date": "2026-08-25",
+      "evidence_file": "tccg-beh-002-20260825T133508Z.jsonl",
+      "note": "case-chaining gap, not a skill defect: case prompt assumes TCCG-BEH-001's inline facts, but each case executes statelessly; model correctly refused to fabricate the missing failure/root-cause detail rather than invent a Hook/CTA, but that left 2/5 required_behaviors (concrete Hook, concrete CTA) unsatisfied"
+    },
+    {
+      "skill": "technical-case-content-generation",
+      "case_id": "TCCG-BEH-003",
+      "kind": "behavior",
+      "result": "PASS",
+      "provider": "claude",
+      "date": "2026-08-25",
+      "evidence_file": "tccg-beh-003-20260825T133637Z.jsonl",
+      "note": "readiness question routed straight to game-marketing-and-monetization, never self-certified"
+    },
+    {
+      "skill": "technical-case-content-generation",
+      "case_id": "TCCG-BEH-004",
+      "kind": "behavior",
+      "result": "PASS",
+      "provider": "claude",
+      "date": "2026-08-25",
+      "evidence_file": "tccg-beh-004-20260825T133733Z.jsonl",
+      "note": "verification scope stated precisely, NOT_RUN limitation visible in the actual social-post draft text"
+    },
+    {
+      "skill": "technical-case-content-generation",
+      "case_id": "TCCG-BEH-005",
+      "kind": "behavior",
+      "result": "PASS",
+      "provider": "claude",
+      "date": "2026-08-25",
+      "evidence_file": "tccg-beh-005-20260825T133835Z.jsonl",
+      "note": "per-case dedicated folders + per-case audience/structure + image provenance all satisfied; case's own 'one main article' required_behavior text contradicts this skill's SKILL.md rule 5 -- graded on the skill's real (correct) behavior, contradiction flagged as a case-authoring defect to fix separately"
     }
   ]
 }

@@ -5,6 +5,26 @@
 > current architecture and behavior first, preserve compatibility, and use the
 > smallest coherent slice; whole rewrites require explicit user authorization.
 
+**Active 7.7.2 release follow-up (2026-08-25):** the private marketplace's
+`cloudbox-skills` entry previously pointed at `./`, so Codex/Claude copied the
+entire private repository root into the public plugin cache even though the
+manifest declared only core Skills. The approved fix is tracked in
+[`docs/plans/2026-08-25-public-private-plugin-surface.md`](docs/plans/2026-08-25-public-private-plugin-surface.md): a generated core-only
+`public-plugin/` projection, private marketplace source-path separation, and
+cache-surface validation. Repository checks and Codex/Claude reinstalls pass
+at `7.7.2`; no merge, tag, or GitHub release has occurred.
+
+The portable Eval exporter moved from `developing-eval/assets/` to its owning
+Skill's `scripts/`; every private projection has the new path, not the old one.
+
+Host evidence: Codex public/private are enabled at `7.7.2`, 21 Skills each.
+From isolated `/private/tmp` with no repository, its installed exporter made a
+valid bundle-format 2.0 ZIP (`7.7.2`, one payload+SHA-256, `unzip -t` PASS),
+routing to `manual-review` without private terms. Claude public/private are
+enabled at `7.7.2`; execution NOT RUN by request. Its private cache physically
+has both projections (42 `SKILL.md`), but the manifest loads the 21 under
+`skills/`: cross-host duplication, not public/private leakage.
+
 ## Current increment — 7.7.0 release cut: unified hook logging, Windows-native directly-wired hooks, technical-case-content-generation Skill, equipment-porting candidate merge, routing-cue fix (2026-08-25)
 
 PRs #99–105 plus one directly-pushed hook-logging commit (`36b611f`,
@@ -31,8 +51,16 @@ ad hoc `codex exec`/`claude -p` spot checks only. `technical-case-
 content-generation` ships case/contract-layer RED evidence only; live
 Skill/behavior execution is `NOT RUN`.
 
-**Next**: public-side push to the `CloudSkill` mirror is a separate,
-explicit step -- see below for whether it happened this increment.
+**Public-side push: done this increment (2026-08-25).** `scripts/
+export_public_bundle.py --dest /Users/cloudhsu/projects/cloudskill/
+CloudSkill` exported 21 public skills / 105 routing cases at v7.7.0;
+`validate_pack.py` and `run_all_checks.py` both PASS in that checkout;
+committed as `4ed1f8e` (`sync: export from private cloudbox-skills
+v7.7.0 via export_public_bundle.py`), pushed to `origin/main`, tagged
+`v7.7.0`, and released via `gh release create` -- confirmed via `gh
+release list` (Latest) and `gh run list` (CI green on `4ed1f8e`) in the
+public `cloudhsu/CloudSkill` repo, same as the private side (`34b129f`,
+tag `v7.7.0`, CI green on the private `cloudhsu/cloudbox-skills` repo).
 
 ## Previous increment — 7.6.39 release cut: deep-read duplicate/overlap scan, verified before acting (2026-08-23)
 
@@ -339,7 +367,7 @@ python3 scripts/import_eval_candidates.py --dry-run
 
 The counterpart export tool for a disconnected/external session (no
 reachable CloudSkill repository on that machine) is
-`.agents/skills/developing-eval/assets/export_eval_candidate.py` — see
+`.agents/skills/developing-eval/scripts/export_eval_candidate.py` — see
 `.agents/skills/developing-eval/references/interaction-eval-capture.md` and
 `INSTALL.md` section 8b. This did not add a new Skill: it extends
 `developing-skills`' existing `整理成正向/負向案例` capture flow with a

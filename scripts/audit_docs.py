@@ -5,7 +5,7 @@ import sys
 
 ROOT = Path(__file__).resolve().parents[1]
 EXCLUDED_PARTS = {'.git', 'history', 'assets'}
-GENERATED_PREFIXES = ('gemini-plugin/skills/', 'private-gemini-plugin/skills/', 'private-plugin/codex-skills/')
+GENERATED_PREFIXES = ('gemini-plugin/skills/', 'private-gemini-plugin/skills/', 'private-plugin/codex-skills/', 'public-plugin/skills/')
 MIN_CHARS = 120
 
 

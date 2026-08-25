@@ -11,7 +11,7 @@
 > arrangement; the split back to a private-only, public-partial-mirror model
 > resumes once the planned CrewAI migration work begins.
 
-**Current version: 7.7.0**
+**Current version: 7.7.2**
 
 CloudBox 6.4 adds pre-qualified, deterministic lifecycle templates while
 retaining risk-based Review Assurance and resumable adaptive planning. See

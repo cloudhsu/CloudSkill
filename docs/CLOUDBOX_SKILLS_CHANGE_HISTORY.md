@@ -1,5 +1,14 @@
 # CloudSkill evolution change history
 
+## 2026-08-25 — Install the disconnected Eval exporter as a Skill-local script
+
+Moved the stdlib-only `export_eval_candidate.py` from `developing-eval/assets/`
+to `developing-eval/scripts/`, matching its executable responsibility and
+ensuring it travels with the owning Skill in Codex and Claude plugin packages.
+Claude instructions resolve it with `${CLAUDE_SKILL_DIR}`; other hosts resolve
+the installed directory containing `developing-eval/SKILL.md`. Repository-level
+capture, import, release, and validation tools remain under root `scripts/`.
+
 ## 2026-08-20 — 7.6.34 version update
 
 Set the repository, public/private plugin, Gemini extension, README, and

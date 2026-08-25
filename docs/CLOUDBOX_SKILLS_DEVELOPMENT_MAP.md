@@ -279,6 +279,7 @@ cloudbox-skills/
 ├── hooks/                 # future neutral hook logic, if needed
 ├── .codex/                # Codex-specific hook/config adapter
 ├── .claude/               # Claude-specific hook/config adapter
+├── public-plugin/         # generated core-only plugin projection
 └── private-plugin/        # private projection and packaging evidence
 ```
 

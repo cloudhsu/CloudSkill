@@ -53,12 +53,17 @@ _private_codex_plugin_path = ROOT / "private-plugin/.codex-plugin/plugin.json"
 private_codex = load_json("private-plugin/.codex-plugin/plugin.json") if _private_codex_plugin_path.exists() else {}
 _private_gemini_path = ROOT / "private-gemini-plugin/gemini-extension.json"
 private_gemini = load_json("private-gemini-plugin/gemini-extension.json") if _private_gemini_path.exists() else {}
+_public_plugin_claude_path = ROOT / "public-plugin/.claude-plugin/plugin.json"
+public_plugin_claude = load_json("public-plugin/.claude-plugin/plugin.json") if _public_plugin_claude_path.exists() else {}
+_public_plugin_codex_path = ROOT / "public-plugin/.codex-plugin/plugin.json"
+public_plugin_codex = load_json("public-plugin/.codex-plugin/plugin.json") if _public_plugin_codex_path.exists() else {}
 
 distribution = load_json("config/skill-distribution.json")
 tiers = distribution.get("skills", {})
 core_names = sorted(name for name, tier in tiers.items() if tier == "core")
 evolution_names = sorted(name for name, tier in tiers.items() if tier != "core")  # any non-core tier is private (private-meta/private-game/private-operation/private-art/...)
 expected_core_paths = sorted(f"./.agents/skills/{name}/" for name in core_names)
+expected_public_plugin_paths = sorted(f"./skills/{name}/" for name in core_names)
 # The real Claude Code plugin loader forbids ".." in a plugin's skills field
 # (confirmed 2026-08-15 by an actual failed `claude plugin install` --
 # "Copied plugins cannot reference files outside their directory"). The
@@ -90,6 +95,14 @@ def tree_hashes(root: Path) -> dict[str, str]:
         str(relative): hashlib.sha256((root / relative).read_bytes()).hexdigest()
         for relative in relative_files(root)
     }
+
+
+def reject_symlinks(root: Path, label: str) -> None:
+    if not root.is_dir():
+        return
+    for path in root.rglob("*"):
+        if path.is_symlink():
+            fail(f"{label} must contain regular files, not symlinks: {path.relative_to(ROOT)}")
 
 
 for label, manifest in (("Codex", codex), ("Claude", claude)):
@@ -124,6 +137,35 @@ for name in core_names:
 evolution_dirs_present = [name for name in evolution_names if (ROOT / f".agents/skills/{name}").is_dir()]
 
 if evolution_dirs_present:
+    public_package = ROOT / "public-plugin"
+    public_skill_root = public_package / "skills"
+    if public_plugin_claude.get("name") != "cloudbox-skills":
+        fail("Public plugin projection must contain a cloudbox-skills Claude manifest")
+    if public_plugin_claude.get("version") != version:
+        fail("Public plugin projection Claude version does not match VERSION")
+    if sorted(as_list(public_plugin_claude.get("skills"))) != expected_public_plugin_paths:
+        fail("Public plugin projection Claude skills array does not match the core tier")
+    if public_plugin_codex.get("name") != "cloudbox-skills":
+        fail("Public plugin projection must contain a cloudbox-skills Codex manifest")
+    if public_plugin_codex.get("version") != version:
+        fail("Public plugin projection Codex version does not match VERSION")
+    if sorted(as_list(public_plugin_codex.get("skills"))) != expected_public_plugin_paths:
+        fail("Public plugin projection Codex skills array does not match the core tier")
+    if not public_package.is_dir():
+        fail("Private checkout must contain the generated public-plugin projection")
+    else:
+        expected_children = {".claude-plugin", ".codex-plugin", "assets", "skills"}
+        actual_children = {path.name for path in public_package.iterdir()}
+        if actual_children != expected_children:
+            fail("public-plugin must contain only its generated package surfaces")
+        public_names = sorted(path.name for path in public_skill_root.iterdir() if path.is_dir()) if public_skill_root.is_dir() else []
+        if public_names != core_names:
+            fail("public-plugin/skills must contain exactly the core tier")
+        reject_symlinks(public_package, "public-plugin")
+        for name in core_names:
+            if tree_hashes(ROOT / ".agents" / "skills" / name) != tree_hashes(public_skill_root / name):
+                fail(f"public-plugin/skills/{name} is stale; run scripts/sync_public_plugin.py")
+
     if private_claude.get("name") != "cloudbox-skills-private":
         fail("Private plugin name must be cloudbox-skills-private")
     if private_claude.get("version") != version:
@@ -169,6 +211,8 @@ else:
         fail("Public checkout must not contain a private-plugin/ directory at all")
     if private_gemini or (ROOT / "private-gemini-plugin").exists():
         fail("Public checkout must not contain a private-gemini-plugin/ directory")
+    if public_plugin_claude or public_plugin_codex or (ROOT / "public-plugin").exists():
+        fail("Public checkout must not contain a public-plugin/ private-checkout projection")
     if any("private" in p.get("name", "") for p in claude_market.get("plugins", [])):
         fail("Public checkout's Claude marketplace must not reference any private plugin")
 
@@ -208,8 +252,9 @@ if "cloudbox-skills" not in codex_plugin_names:
     fail("Codex marketplace must expose cloudbox-skills")
 else:
     source = codex_plugin_names["cloudbox-skills"].get("source", {})
-    if source.get("source") != "local" or source.get("path") != "./":
-        fail("Codex marketplace must point at the repository-root plugin")
+    expected_source_path = "./public-plugin" if evolution_dirs_present else "./"
+    if source.get("source") != "local" or source.get("path") != expected_source_path:
+        fail(f"Codex marketplace cloudbox-skills must point at {expected_source_path}")
 if evolution_dirs_present and "cloudbox-skills-private" in codex_plugin_names:
     private_source = codex_plugin_names["cloudbox-skills-private"].get("source", {})
     if private_source.get("source") != "local" or private_source.get("path") != "./private-plugin":
@@ -219,8 +264,8 @@ claude_plugins = claude_market.get("plugins", [])
 claude_plugin_names = {p.get("name"): p for p in claude_plugins}
 if "cloudbox-skills" not in claude_plugin_names:
     fail("Claude marketplace must expose cloudbox-skills")
-elif claude_plugin_names["cloudbox-skills"].get("source") != "./":
-    fail("Claude marketplace cloudbox-skills must point at the repository-root plugin")
+elif claude_plugin_names["cloudbox-skills"].get("source") != ("./public-plugin" if evolution_dirs_present else "./"):
+    fail(f"Claude marketplace cloudbox-skills must point at {'./public-plugin' if evolution_dirs_present else './'}")
 
 if evolution_dirs_present:
     if "cloudbox-skills-private" not in claude_plugin_names:

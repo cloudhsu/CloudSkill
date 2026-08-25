@@ -1,5 +1,24 @@
 # Changelog
 
+## 7.7.2
+
+Packaging patch for private local marketplaces. The public `cloudbox-skills`
+plugin now uses a generated core-only `public-plugin/` source boundary, while
+`cloudbox-skills-private` continues to use the private-only projection. This
+prevents Codex or Claude plugin managers from copying private repository files
+into the public plugin cache when the private repository is used as a local
+marketplace. Existing Skill IDs and standalone installer behavior are
+unchanged. The portable disconnected-session Eval exporter now lives under its
+owning `developing-eval/scripts/` directory instead of `assets/`. Both Codex
+and Claude plugin projections therefore install the executable with the Skill;
+Claude instructions use `${CLAUDE_SKILL_DIR}`, while other hosts resolve the
+installed directory containing `developing-eval/SKILL.md`.
+
+Validation: `python3 scripts/run_all_checks.py` passes for the 7.7.2 package.
+Codex and Claude public/private reinstalls pass; an isolated Codex test using
+only the exporter installed in the plugin cache produces a valid bundle-format
+2.0 ZIP. Claude execution was not run by operator request.
+
 ## 7.7.0
 
 Covers PRs #99–105 plus one directly-pushed hook-logging commit
