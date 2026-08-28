@@ -1,5 +1,27 @@
 # Changelog
 
+## 7.8.4
+
+Patch. Public CI failed on the v7.8.3 export (commit `676b671` in the
+public mirror): `validate_lifecycle_monotonicity.py` unconditionally
+treated any deleted `lifecycle.json` as an error, with no exception
+for a Skill whose `lifecycle.json` legitimately disappears from an
+export because the Skill moved to a non-core distribution tier
+(`developing-skills` core -> private-meta, 7.8.1) while its canonical
+source keeps existing and evolving elsewhere. This code path was
+never exercised by any committed history before 7.8.1's
+reclassification, so it could not have been caught earlier.
+
+Fix: on a deleted `lifecycle.json`, check `config/skill-distribution.json`
+at HEAD for that Skill; a non-"core" tier there is treated as an
+explained distribution fact (NOTE, not error) and the deletion is
+allowed. An unexplained deletion with no distribution record still
+fails, unchanged. Verified with a synthetic two-commit fixture repo
+covering both branches, plus the full private `run_all_checks.py`.
+Private CI was never red (the private repo's own canonical skill
+directory never deletes a `lifecycle.json`); only the filtered public
+export triggered the gap.
+
 ## 7.8.3
 
 Patch. `validate_skill_lifecycle.py` had 2 more unconditional

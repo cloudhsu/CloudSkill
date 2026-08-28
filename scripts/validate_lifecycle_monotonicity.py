@@ -63,6 +63,29 @@ def main() -> int:
         if old_text is None:
             continue  # new Skill this commit; nothing prior to compare against
         if new_text is None:
+            # A distribution-tier move (e.g. developing-skills core ->
+            # private-meta, 2026-08-28) legitimately removes a Skill's
+            # lifecycle.json from THIS repo/export while it continues to
+            # exist and evolve in its new distribution's own canonical
+            # source -- not data loss, a distribution fact. Confirmed, not
+            # assumed: the Skill must actually be present in
+            # config/skill-distribution.json at HEAD with a non-"core" tier;
+            # a plain deletion with no such record is still a real error.
+            skill_id = Path(relative).parent.name
+            distribution_text = show_at("HEAD", "config/skill-distribution.json")
+            tier = None
+            if distribution_text is not None:
+                try:
+                    tier = json.loads(distribution_text).get("skills", {}).get(skill_id)
+                except json.JSONDecodeError:
+                    tier = None
+            if tier is not None and tier != "core":
+                print(
+                    f"NOTE: {relative}: lifecycle.json removed, but {skill_id} is recorded in "
+                    f"config/skill-distribution.json at HEAD as tier {tier!r} (not core) -- "
+                    "allowed as a distribution-tier move, not data loss."
+                )
+                continue
             errors.append(f"{relative}: existed at HEAD~1 but is missing at HEAD (deleted lifecycle.json)")
             continue
         try:
