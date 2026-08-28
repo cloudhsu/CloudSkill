@@ -44,11 +44,7 @@
         "required_supporting_skills": [],
         "forbidden_selected_skills": ["codebase-architecture-discovery"],
         "execution_order": ["architecture-review"],
-        "allow_additional_supporting_skills": true,
-        "allowed_execution_orders": [
-          ["architecture-review"],
-          ["architecture-review", "application-client-server-architecture"]
-        ]
+        "allow_additional_supporting_skills": true
       }
     },
     {

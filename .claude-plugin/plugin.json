@@ -1,7 +1,7 @@
 {
   "name": "cloudbox-skills",
   "displayName": "CloudBox Skills",
-  "version": "7.7.2",
+  "version": "7.8.3",
   "description": "Architecture, equipment-domain, quality, governance, refactoring, and Eval workflows for Claude Code.",
   "author": {
     "name": "CloudBox"
@@ -26,7 +26,6 @@
     "./.agents/skills/coding-agent-git-discipline/",
     "./.agents/skills/coding-agent-project-governance/",
     "./.agents/skills/cross-platform-native-architecture/",
-    "./.agents/skills/developing-skills/",
     "./.agents/skills/development-process-tailoring/",
     "./.agents/skills/document-governance/",
     "./.agents/skills/equipment-control-architecture/",

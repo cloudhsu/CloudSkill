@@ -119,7 +119,7 @@ When equipment software is in scope:
 
 ## Interaction-derived Eval capture
 
-When the user says `整理成正向案例` or `整理成負向案例`, use `developing-skills` to capture only the relevant current interaction as an Eval candidate.
+When the user says `整理成正向案例` or `整理成負向案例`, use `developing-eval` to mine and sanitize only the relevant current interaction into an Eval candidate; hand the candidate to `developing-skills` only for the separate, explicit batch-review step that turns it into a formal Eval or Skill edit (see the last bullet below). `developing-eval` never authorizes a formal Eval/Skill edit, a Git mutation, or publication by itself.
 
 - Read project `.cloudbox-skills/config.local.json` first, then user `~/.cloudbox-skills/config.json`.
 - Sanitization is mandatory. Remove or generalize company, customer, person, project, product, machine, site, network, path, schedule, recipe, safety-limit, and other identifying details before writing.

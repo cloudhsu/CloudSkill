@@ -5,27 +5,58 @@
 > current architecture and behavior first, preserve compatibility, and use the
 > smallest coherent slice; whole rewrites require explicit user authorization.
 
-**Active 7.7.2 release follow-up (2026-08-25):** the private marketplace's
-`cloudbox-skills` entry previously pointed at `./`, so Codex/Claude copied the
-entire private repository root into the public plugin cache even though the
-manifest declared only core Skills. The approved fix is tracked in
-[`docs/plans/2026-08-25-public-private-plugin-surface.md`](docs/plans/2026-08-25-public-private-plugin-surface.md): a generated core-only
-`public-plugin/` projection, private marketplace source-path separation, and
-cache-surface validation. Repository checks and Codex/Claude reinstalls pass
-at `7.7.2`; no merge, tag, or GitHub release has occurred.
+**7.7.2 completed** (packaging patch for private local marketplaces, generated
+core-only `public-plugin/` projection). Tagged and released; confirmed via
+`git describe --tags` returning `v7.7.2` before this increment's bump.
 
-The portable Eval exporter moved from `developing-eval/assets/` to its owning
-Skill's `scripts/`; every private projection has the new path, not the old one.
+## Current increment — 7.8.0 release cut: using-cloudbox-skills real-defect fixes (twice-corrected), rejected_skills hallucination fix, hook-path fix, validator coverage extension, 13-case Eval Inbox batch (2026-08-28)
 
-Host evidence: Codex public/private are enabled at `7.7.2`, 21 Skills each.
-From isolated `/private/tmp` with no repository, its installed exporter made a
-valid bundle-format 2.0 ZIP (`7.7.2`, one payload+SHA-256, `unzip -t` PASS),
-routing to `manual-review` without private terms. Claude public/private are
-enabled at `7.7.2`; execution NOT RUN by request. Its private cache physically
-has both projections (42 `SKILL.md`), but the manifest loads the 21 under
-`skills/`: cross-host duplication, not public/private leakage.
+PRs #107–111 plus one directly-pushed follow-up commit (`957551e`,
+CI-verified). Full detail: `CHANGELOG.md`'s 7.8.0 entry; validation
+evidence: `docs/releases/7.8.0-pre-release-evidence.md`.
 
-## Current increment — 7.7.0 release cut: unified hook logging, Windows-native directly-wired hooks, technical-case-content-generation Skill, equipment-porting candidate merge, routing-cue fix (2026-08-25)
+**Key correction, disclosed in full rather than quietly folded in**: an
+earlier same-day pass (`03e412c`, `5f9d873`) diagnosed and "fixed" a
+`using-cloudbox-skills` self-reference routing gap on cases
+`USE-01/02/03/04`, verified live 4/4. That diagnosis was itself wrong --
+an independent Opus 5 review (requested by the user before merging)
+ran the actual deterministic grader against the "verified" records and
+found `overall_pass_rate=0.0` for all four: the case-authoring source
+(`evals/skill-routing-cases.csv`) had its "skill under test" column
+mistranslated into the cases' expected answers, and the "fix" was
+never checked against the grader's unconditional `router_not_downstream`
+invariant. Reverted the wrong fix, corrected the 4 cases' expected data
+to the model's own real original (always-correct) output, and
+separately found and removed a second, pre-existing self-reference hole
+in the router's own line-52 exception clause (exposed by `USE-BEH-007`,
+first recorded pre-session in `03e412c`, not caused by either paragraph
+this session added and reverted). Re-verified in both directions with
+live re-runs at every step, not assumed. Closes Vikunja
+`cloudbox-skills #17` by dissolution, not a harness change.
+
+Also in this release: the `rejected_skills` hallucination fix (Vikunja
+`#18`, 4 confirmed occurrences across 3 Skills); `document-governance`
+and `game-quality-and-release-gates` first full real-execution passes;
+a cross-provider hook-path fix (`${CLAUDE_PROJECT_DIR}` for Claude,
+`git rev-parse --show-toplevel` for Codex/Gemini); the case-file
+validator extended from `canary.json`-only to every
+`evals/runtime/cases/*.json` file (the exact gap that let the
+case-authoring bug above reach real model quota undetected); and 13 new
+formal behavior cases across 12 Skills from a reviewed Eval Inbox batch.
+
+**Known gap, tracked not hidden**: the 13 new Eval Inbox cases are
+structural/schema evidence only, `NOT RUN` against a real model yet.
+~29 of 42 Skills remain at zero or minimal real execution evidence in
+the broader Vikunja `cloudbox-skills #7` backlog. The case-file
+validator extension does not cover `behavior-rubrics.json` and its
+rubric-schema siblings.
+
+`python3 scripts/run_all_checks.py` PASS at the release tip.
+
+**Next**: public-side push to the `CloudSkill` mirror is a separate,
+explicit step -- see below for whether it happened this increment.
+
+## Previous increment — 7.7.0 release cut: unified hook logging, Windows-native directly-wired hooks, technical-case-content-generation Skill, equipment-porting candidate merge, routing-cue fix (2026-08-25)
 
 PRs #99–105 plus one directly-pushed hook-logging commit (`36b611f`,
 CI-verified). Full detail: `CHANGELOG.md`'s 7.7.0 entry; validation
@@ -147,82 +178,13 @@ cross-check yet.
 since-last-tag advisory hook is planned immediately after this release so
 the next version-bump gap doesn't reach 90 commits again.
 
-## Previous increment — 7.6.32 private-equipment candidate (2026-08-19, shipped as part of 7.6.32–7.6.36)
-
-Three de-identified equipment-family Skills and a generic WPH refactor are
-under full lifecycle validation. The new family Skills are held in
-`private-equipment`; WPH keeps its pre-existing core status. Evidence and
-inference boundaries:
-`docs/evolution/2026-08-19-public-equipment-evidence-distillation.md`.
-Standing semantic-review transport is now managed model-selected sub-agents:
-Codex Luna/Sol; Claude Code Sonnet 5/Opus 5, with 4.8 only as an availability
-fallback. Policy and observed process RED:
-`docs/evolution/2026-08-19-managed-subagent-skill-review-policy.md`.
-Do not append raw panel output here; keep this section as a status pointer and
-replace/archive it at release. Equipment behavior is Luna/Sol 19/19 GREEN.
-Bounded final review ended Luna PASS / Sol FAIL on process-layer lifecycle and
-meta-Skill evidence; those defects were corrected and DEVSK-BEH-022/023 now
-pass case/contract execution. The repository owner accepted the frozen manual
-evidence packet after the two-round model review limit was reached, then
-superseded public release with a private-distribution hold before any push,
-tag, or GitHub Release succeeded. Manual disposition:
-`docs/evolution/2026-08-19-manual-review-disposition.md`. Claude-family review
-is `NOT RUN` in this Codex host. After this private equipment candidate, process the
-quality/architecture-fitness candidate together with the game-skill increment;
-leave marketing skills until last.
-An empty-directory public export confirmed that the three new Skill trees and
-private plugin are excluded. Its full suite cannot stand in for publication CI:
-the exporter expects destination-owned catalogs and a Git checkout. Before any
-future public promotion, run the complete suite in the real public mirror.
-
-## Current increment — 7.6.31 release cut: split private tier into `private-meta`/`private-game`/`private-operation`/`private-art` (2026-08-18)
-
-Grew out of an architecture discussion: a queued marketing-strategy
-candidate (spokesmodel/influencer promotional pattern, mined from a past
-game project) had no existing skill owner, prompting the user to ask about
-building a dedicated marketing-operations skill family. Rather than a new
-repo (would duplicate the evolution/eval tooling — flagged and rejected),
-landed on: same repo, new private sub-tiers, reused tooling unchanged.
-`config/skill-distribution.json`: replaced the flat `evolution-pack` tier
-with `private-meta` (self-referential skill/eval tooling), `private-game` (7
-existing skills, reclassified 1:1), `private-operation`/`private-art` (new,
-reserved, empty). Every script checking `tier == "evolution-pack"` now
-checks `tier != "core"`, so future private sub-tiers need no script edits.
-`config/skill-domain-catalog.json`'s per-domain `default_distribution`
-updated to match; confirmed it already anticipated both new directions
-(`planned_skills` already named `game-art-pipeline` and
-`game-marketing-and-monetization` before this session). Live docs updated;
-historical release/evolution documents deliberately left unchanged. No
-skill's behavior, routing, or actual public/private visibility changed.
-Version bumped `7.6.30` -> `7.6.31` (patch — internal reorganization only).
-`scripts/run_all_checks.py`, `scripts/validate_plugins.py`, and
-`scripts/manage_skill.py audit --check` all PASS at the release tip. Full
-summary: `docs/releases/7.6.31-pre-release-evidence.md`.
-
-**Next**:
-- A dedicated router skill (analogous to `using-cloudbox-skills` but for the
-  marketing/operations family) and a tier-scoped `SKILL_MANIFEST.json`
-  generator are still needed before `private-operation` gets its first real
-  skill — deferred until there is enough mined evidence (3-5 candidates) to
-  define real trigger/non-trigger boundaries, not built on 1 thin candidate.
-- `agent-development-process`, `document-governance`, and
-  `teach-while-building` have not been reviewed since `7.5.0` — still
-  blocking a clean minor bump, now for 3 consecutive releases. Tracked as
-  Vikunja task 22 in the `cloudbox-skills` project since `7.6.29`; still
-  open and should be prioritized before a fourth release hits the same
-  wall.
-- 11 mined interaction-Eval candidates (10 + 1 new marketing candidate from
-  this increment) remain queued in `.local/eval-inbox/candidates/` awaiting
-  an explicit batch-review instruction from the user, tracked in the
-  `cloudbox-skills` Vikunja project.
-
-> **Older increments archived 2026-08-25** (previously 2026-08-18): this
+> **Older increments archived 2026-08-27** (previously 2026-08-25): this
 > file kept growing past its 20,000-byte living-document budget. Increments
-> `7.6.27` through `7.6.30`, and everything archived 2026-08-18 before them
-> (a large stale `v6.x`-era "current repository state" snapshot that had
-> never been updated past CloudBox 6.4.0), live in
-> `docs/history/AGENT_HANDOFF_ARCHIVE.md` — read it only when actually
-> reconstructing history from that period, not by default.
+> `7.6.31` through `7.6.32`, `7.6.27` through `7.6.30`, and everything
+> archived 2026-08-18 before them (a large stale `v6.x`-era "current
+> repository state" snapshot that had never been updated past CloudBox
+> 6.4.0), live in `docs/history/AGENT_HANDOFF_ARCHIVE.md` — read it only
+> when actually reconstructing history from that period, not by default.
 
 ## Read order
 

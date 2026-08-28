@@ -1,0 +1,73 @@
+{
+  "suite": "technical-case-content-generation-routing-2026-08-25",
+  "schema_version": 1,
+  "description": "Routing cases for technical-case-content-generation (exec n=0 before this run, top LCB priority per eval_priority_ranker.py), converted from evals/skill-routing-cases.csv (TCCG-01..02, TCCG-NEG-01..04) for real execution against cloudbox-skills task #7 (statistical-rigor gap).",
+  "cases": [
+    {
+      "id": "TCCG-01",
+      "prompt": "我們有一個真實的技術案例（一個引擎邊界決策），想把它拆成一支 30-40 秒的短影音腳本，需要 Hook、分鏡、口白跟 CTA。",
+      "expected": {
+        "primary_skill": "technical-case-content-generation",
+        "required_supporting_skills": [],
+        "forbidden_selected_skills": [],
+        "execution_order": ["technical-case-content-generation"],
+        "allow_additional_supporting_skills": true
+      }
+    },
+    {
+      "id": "TCCG-02",
+      "prompt": "同一篇案例文章想同時裁成部落格長文、LinkedIn 貼文跟 X 短串文三種版本，保留同一個核心主張。",
+      "expected": {
+        "primary_skill": "technical-case-content-generation",
+        "required_supporting_skills": [],
+        "forbidden_selected_skills": [],
+        "execution_order": ["technical-case-content-generation"],
+        "allow_additional_supporting_skills": true
+      }
+    },
+    {
+      "id": "TCCG-NEG-01",
+      "prompt": "幫我檢查這篇商店頁文案跟預告片，是不是真的準備好可以正式發布了。",
+      "expected": {
+        "primary_skill": null,
+        "required_supporting_skills": [],
+        "forbidden_selected_skills": ["technical-case-content-generation"],
+        "execution_order": [],
+        "allow_additional_supporting_skills": true
+      }
+    },
+    {
+      "id": "TCCG-NEG-02",
+      "prompt": "這款遊戲該用訂閱制還是買斷制，這個決定會不會影響要不要沿用舊存檔？",
+      "expected": {
+        "primary_skill": null,
+        "required_supporting_skills": [],
+        "forbidden_selected_skills": ["technical-case-content-generation"],
+        "execution_order": [],
+        "allow_additional_supporting_skills": true
+      }
+    },
+    {
+      "id": "TCCG-NEG-03",
+      "prompt": "幫我們寫主角與反派之間的過場劇情對白和世界觀設定。",
+      "expected": {
+        "primary_skill": null,
+        "required_supporting_skills": [],
+        "forbidden_selected_skills": ["technical-case-content-generation"],
+        "execution_order": [],
+        "allow_additional_supporting_skills": true
+      }
+    },
+    {
+      "id": "TCCG-NEG-04",
+      "prompt": "腳本已經寫好了，現在要幫忙把長影片剪成短片、加動態字幕跟轉場。",
+      "expected": {
+        "primary_skill": null,
+        "required_supporting_skills": [],
+        "forbidden_selected_skills": ["technical-case-content-generation"],
+        "execution_order": [],
+        "allow_additional_supporting_skills": true
+      }
+    }
+  ]
+}

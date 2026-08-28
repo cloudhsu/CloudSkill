@@ -1,5 +1,138 @@
 # Changelog
 
+## 7.8.3
+
+Patch. `validate_skill_lifecycle.py` had 2 more unconditional
+`developing-skills` reads that 7.8.2's fix missed (a reference-file
+read and a release-critical-files existence list). Found by re-running
+the actual public-side push process a second time, not assumed fixed
+after the first pass. Public mirror export (`export_public_bundle.py`
++ `validate_pack.py` + `run_all_checks.py` in the destination
+checkout) now passes clean end to end.
+
+## 7.8.2
+
+Patch. Fixes 3 validators (`validate_skill_lifecycle.py`,
+`validate_planning_priority.py`, `validate_skill_context_budget.py`)
+that unconditionally read `developing-skills/SKILL.md` and crashed
+with `FileNotFoundError` in any checkout that doesn't ship
+`private-meta` Skills -- broken by 7.8.1's `developing-skills`
+reclassification, found by actually running the public-side push
+process (`export_public_bundle.py` + `run_all_checks.py` in the
+public mirror checkout) rather than assuming the private repo's own
+passing checks meant the public mirror was clean too. Same
+optional-file guard already used elsewhere for `developing-eval`.
+
+## 7.8.1
+
+Covers PRs #112–113. Patch: two new formal Eval cases (structural
+evidence only) and one distribution-tier reclassification, following
+the same precedent as the `wph-equipment-simulator-development` and
+`cross-platform-engine-architecture` reclassifications (both shipped
+as patch bumps).
+
+- **Two real session lessons captured as formal Eval cases** (#112):
+  `coding-agent-git-discipline/CAGD-BEH-006` (a `git branch <name> HEAD`
+  trap that creates a branch ref without switching to it) and
+  `runtime-evaluation-engineering/RTE-BEH-011` (declaring a fix
+  "verified" from a raw-field comparison instead of the real
+  deterministic grader) -- both distilled via `developing-eval`'s
+  capture pipeline from real mistakes/corrections earlier in the same
+  session that authored PRs #107–111, not an imported batch.
+- **`developing-skills` reclassified `core` -> `private-meta`** (#113):
+  a full dependency audit (grepping all 21 core Skills against all 21
+  private-tier Skill names) found `developing-skills`' interaction-
+  capture triggers (`整理成正向案例`/`整理成負向案例`) were the only
+  genuine functional dependency of a public Skill on a private one --
+  its own `SKILL.md` advertised a capability entirely implemented by
+  `developing-eval`. Every other cross-reference found in the audit
+  (5 core Skills, listed in PR #113) was confirmed to be an
+  illustrative example, an explicitly conditional reference, or a
+  cross-domain routing handoff, none of which break a core Skill's own
+  advertised capability. Public core count: 21 -> 20.
+
+## 7.8.0
+
+Covers PRs #107–111 plus one directly-pushed commit (`957551e`,
+CI-verified, no PR): real execution evidence and real-defect fixes for
+`using-cloudbox-skills`, `document-governance`, and
+`game-quality-and-release-gates`; a cross-platform hook-path fix; a
+case-file validator extension; 13 new formal behavior cases across 12
+Skills from a reviewed Eval Inbox batch; and one documentation
+correction. `python3 scripts/run_all_checks.py` passes clean at the
+release tip.
+
+### Minor: real Vikunja `cloudbox-skills #7` evidence, two real-defect
+fixes, and a validator-coverage gap closed
+
+- **`using-cloudbox-skills` full real-execution pass and two real
+  fixes** (#107, #108): ran all 26 authored routing/behavior cases
+  against `--provider claude`. Found and fixed a genuine self-
+  reference gap, then an independent review found the original
+  diagnosis was itself wrong -- the case-authoring source data
+  (`evals/skill-routing-cases.csv`) had a column mistranslated into 4
+  cases' expected answers, and the "fix" was never checked against the
+  real deterministic grader (it would have failed on sight). Reverted
+  the wrong fix, corrected the case data, and separately found and
+  removed a second pre-existing self-reference hole in the router's
+  own instructions. Re-verified in both directions with live re-runs,
+  not assumed. Closes Vikunja `cloudbox-skills #17` by dissolution.
+- **`rejected_skills` hallucination fix** (#108, follow-up in
+  `957551e`): the shared runtime harness's contract-repair step
+  previously discarded all repair whenever any skill ID anywhere in a
+  routing decision was unknown, even in a field (`rejected_skills`)
+  that does not gate what actually executes -- destroying real
+  behavior evidence on 4 confirmed occurrences across 3 Skills.
+  Narrowed the repair scope to only the fields that determine the
+  executed skill set. Closes Vikunja `cloudbox-skills #18`.
+- **`document-governance` and `game-quality-and-release-gates` first
+  real execution evidence** (#107): ran all remaining authored routing
+  and behavior cases for both Skills. Found and disclosed several real
+  `FAIL_CONTENT`/`FAIL_ROUTING` results and 2 new `BLOCKED_HARNESS`
+  occurrences (same hallucination-bug shape, since fixed) rather than
+  sweeping them into a clean pass.
+- **Cross-provider hook path fix** (#107): `.claude/settings.json`,
+  `.codex/hooks.json`, and `.gemini/settings.json` wired every
+  directly-configured hook as a bare relative path, which silently
+  broke whenever the triggering tool call's working directory drifted
+  from the repository root (a prior `cd`, a git worktree). Claude Code
+  hooks now use the documented `${CLAUDE_PROJECT_DIR}` variable; Codex
+  and Gemini hooks (no verified equivalent variable) resolve their own
+  repository root via `git rev-parse --show-toplevel` instead.
+- **Case-file validator extended to every routing case file** (#109):
+  `scripts/validate_runtime_evals.py` previously validated only
+  `canary.json`'s `expected`-block contract, even though the same
+  thorough checks (unknown skill IDs, router-exclusion invariant,
+  `execution_order` consistency) already existed and would have caught
+  the `using-cloudbox-skills` case-authoring bug above on sight, had
+  they ever run against the file it was in. Now applied to every
+  `evals/runtime/cases/*.json` file sharing that shape; found and fixed
+  one real pre-existing inconsistency in `cad-routing.json` along the
+  way.
+- **13 new formal behavior cases from a reviewed Eval Inbox batch**
+  (#110): converted 13 candidates (deduplicated, sensitive-content
+  re-scanned, ownership-mapped, human-reviewed) into formal cases
+  across `architecture-review`, `cluster-tool-simulator-development`,
+  `coding-agent-git-discipline`, `coding-agent-project-governance`,
+  `developing-eval`, `document-governance`,
+  `equipment-control-architecture`, `equipment-domain-modeling`,
+  `safe-incremental-refactoring`, `software-quality-iso25010`,
+  `teach-while-building`, and `wph-equipment-simulator-development`
+  (two cases). Structural/schema evidence only -- real model execution
+  against these new cases is `NOT RUN` yet.
+- **Documentation correction** (#111): `AGENTS.md`'s interaction-
+  capture section wrongly attributed the `整理成正向案例`/
+  `整理成負向案例` triggers to `developing-skills`; both Skills' own
+  `SKILL.md` files agree the mining/sanitization step is
+  `developing-eval`'s, not `developing-skills`'.
+
+**Known gap, tracked not hidden**: the case-file validator still does
+not check `behavior-rubrics.json` and its rubric-schema siblings (a
+different, un-generalized shape); most of today's 13 new behavior
+cases and most of the broader Vikunja `cloudbox-skills #7` backlog
+(~29 of 42 Skills) still have zero or minimal real model-execution
+evidence.
+
 ## 7.7.2
 
 Packaging patch for private local marketplaces. The public `cloudbox-skills`

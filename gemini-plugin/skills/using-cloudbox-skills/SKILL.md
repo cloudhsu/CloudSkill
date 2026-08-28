@@ -49,7 +49,7 @@ Interpret the fields as follows:
 - `reason`: the concrete decision or failure boundary, not a keyword explanation.
 - `confidence`: confidence in routing based on available evidence.
 
-`using-cloudbox-skills` is the router. Do not list it as a primary or supporting downstream skill unless the task is specifically about router design, routing policy, or CloudBox skill composition itself.
+`using-cloudbox-skills` is the router. Never list it as `primary_skill` or in `supporting_skills` — the routing decision is this skill's own output, not one of its entries. When the requested deliverable is itself a change to routing policy, skill composition, or a skill's own content, the owner is `developing-skills`, not this router.
 
 ## Composition order
 

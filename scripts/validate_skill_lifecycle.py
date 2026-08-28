@@ -141,19 +141,30 @@ if not any("VERSION" in error for error in missing_version_errors):
 
 errors = module.audit(check=False)
 
-# The standardization owner must declare the lifecycle reference and CLI.
-developing = (ROOT / ".agents/skills/developing-skills/SKILL.md").read_text(encoding="utf-8")
-for marker in (
-    "references/skill-lifecycle-standard.md",
-    "scripts/manage_skill.py",
-    "draft",
-    "experimental",
-    "active",
-    "stable",
-    "deprecated",
-):
-    if marker not in developing:
-        errors.append(f"developing-skills missing lifecycle marker: {marker}")
+# The standardization owner must declare the lifecycle reference and CLI --
+# but developing-skills is private-meta (2026-08-28) and is not shipped in
+# every checkout that runs this validator (e.g. the public CloudSkill
+# mirror). Enforce every check below only where developing-skills is
+# actually present; a repo that doesn't ship the standard-defining Skill
+# can't audit its content, and that is a distribution-tier fact, not a
+# lifecycle defect. DEVELOPING_SKILLS_PRESENT gates all 3 blocks that
+# reference it further down this file.
+DEVELOPING_SKILLS_PRESENT = (ROOT / ".agents/skills/developing-skills").is_dir()
+
+developing_path = ROOT / ".agents/skills/developing-skills/SKILL.md"
+if DEVELOPING_SKILLS_PRESENT:
+    developing = developing_path.read_text(encoding="utf-8")
+    for marker in (
+        "references/skill-lifecycle-standard.md",
+        "scripts/manage_skill.py",
+        "draft",
+        "experimental",
+        "active",
+        "stable",
+        "deprecated",
+    ):
+        if marker not in developing:
+            errors.append(f"developing-skills missing lifecycle marker: {marker}")
 
 policy_path = ROOT / "config/skill-lifecycle-policy.json"
 try:
@@ -191,33 +202,39 @@ expected_brownfield_guard = {
 if policy.get("brownfield_implementation_guard") != expected_brownfield_guard:
     errors.append("lifecycle brownfield implementation guard drifted")
 
-behavior_reference = (
-    ROOT / ".agents/skills/developing-skills/references/behavior-driven-skill-development.md"
-).read_text(encoding="utf-8")
-for marker in (
-    "GPT-5.6 Luna",
-    "GPT-5.6 Sol",
-    "Sonnet 5",
-    "Opus 5",
-    "4.8",
-    "Do not substitute `codex exec`",
-    "previously refactored program",
-    "whole rewrite",
-    "two packet identities",
-    "scripts/freeze_skill_review_packet.py",
-):
-    if marker not in behavior_reference:
-        errors.append(f"behavior-driven lifecycle missing sub-agent review marker: {marker}")
+if DEVELOPING_SKILLS_PRESENT:
+    behavior_reference = (
+        ROOT / ".agents/skills/developing-skills/references/behavior-driven-skill-development.md"
+    ).read_text(encoding="utf-8")
+    for marker in (
+        "GPT-5.6 Luna",
+        "GPT-5.6 Sol",
+        "Sonnet 5",
+        "Opus 5",
+        "4.8",
+        "Do not substitute `codex exec`",
+        "previously refactored program",
+        "whole rewrite",
+        "two packet identities",
+        "scripts/freeze_skill_review_packet.py",
+    ):
+        if marker not in behavior_reference:
+            errors.append(f"behavior-driven lifecycle missing sub-agent review marker: {marker}")
 
-# The policy and templates are release-critical.
-for relative in (
-    "config/skill-lifecycle-policy.json",
-    ".agents/skills/developing-skills/references/skill-lifecycle-standard.md",
-    ".agents/skills/developing-skills/assets/SKILL_PROPOSAL.template.md",
-    ".agents/skills/developing-skills/assets/SKILL_LIFECYCLE.template.json",
-    ".agents/skills/developing-skills/assets/SKILL_RELEASE_EVIDENCE.template.md",
-    "scripts/freeze_skill_review_packet.py",
-):
+# The policy and templates are release-critical -- but only the ones this
+# checkout actually ships; developing-skills' own reference/asset files are
+# conditional on DEVELOPING_SKILLS_PRESENT, same as the blocks above.
+release_critical_files = ["config/skill-lifecycle-policy.json", "scripts/freeze_skill_review_packet.py"]
+if DEVELOPING_SKILLS_PRESENT:
+    release_critical_files.extend(
+        [
+            ".agents/skills/developing-skills/references/skill-lifecycle-standard.md",
+            ".agents/skills/developing-skills/assets/SKILL_PROPOSAL.template.md",
+            ".agents/skills/developing-skills/assets/SKILL_LIFECYCLE.template.json",
+            ".agents/skills/developing-skills/assets/SKILL_RELEASE_EVIDENCE.template.md",
+        ]
+    )
+for relative in release_critical_files:
     if not (ROOT / relative).is_file():
         errors.append(f"missing lifecycle standard file: {relative}")
 

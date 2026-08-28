@@ -27,7 +27,7 @@
       "id": "REF-BEH-002",
       "skill": "safe-incremental-refactoring",
       "type": "application",
-      "prompt": "Move transaction-heavy methods from a database fa\u00e7ade into services without changing API or failure order.",
+      "prompt": "Move transaction-heavy methods from a database façade into services without changing API or failure order.",
       "expected_routing": true,
       "expected_alternative_skill": null,
       "required_behaviors": [
@@ -59,7 +59,7 @@
       "expected_alternative_skill": "application-client-server-architecture",
       "required_behaviors": [
         "routes to application-client-server-architecture",
-        "does not invent a legacy compatibility fa\u00e7ade"
+        "does not invent a legacy compatibility façade"
       ],
       "forbidden_behaviors": [
         "assumes brownfield constraints that do not exist"
@@ -99,7 +99,7 @@
       "id": "REF-BEH-005",
       "skill": "safe-incremental-refactoring",
       "type": "application",
-      "prompt": "Extract a small policy from a legacy service whose tests monkeypatch a method, whose constructor eagerly opens an external client, and whose HTTP fa\u00e7ade currently performs authentication before calling the service.",
+      "prompt": "Extract a small policy from a legacy service whose tests monkeypatch a method, whose constructor eagerly opens an external client, and whose HTTP façade currently performs authentication before calling the service.",
       "expected_routing": true,
       "expected_alternative_skill": null,
       "required_behaviors": [
@@ -632,6 +632,30 @@
         "agent accumulates several unrelated changes before committing, claims completion from a passing build alone, and leaves no continuation note for the next session"
       ],
       "review_notes": "Distilled 2026-08-25 from a real collaborative-distillation candidate (GPT-5.6 Luna/Sol, project-history mining): the user repeatedly required commits after verified slices and complete documentation for both the reusable engine and the host application before handoff. Evidence staging only; reusable delivery-governance pattern, not a claim this specific engine/host pair is complete."
+    },
+    {
+      "id": "REF-BEH-027",
+      "skill": "safe-incremental-refactoring",
+      "type": "application",
+      "prompt": "Modernize a mature simulator without losing validated behavior and while preserving rollback checkpoints.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "Keep the validated legacy path available for comparison until the new path has acceptance evidence.",
+        "Commit independent reversible slices and test old and new modes separately."
+      ],
+      "forbidden_behaviors": [
+        "Rewrite the comparison path before equivalence is demonstrated.",
+        "Let new multi-resource behavior regress the stable single-resource path."
+      ],
+      "required_artifacts": [
+        "independent reversible commit slices with old and new modes tested separately",
+        "acceptance evidence comparing the new path against the legacy path as an oracle before the legacy path is retired"
+      ],
+      "baseline_expected_failure": [
+        "agent rewrites the comparison/legacy path before equivalence is demonstrated, or lets new multi-resource behavior regress the previously-stable single-resource path"
+      ],
+      "review_notes": "Distilled 2026-08-28 from a real Eval Inbox interaction candidate (candidate_id=INT-20260827-060246-e294957e, captured 2026-08-27T06:02:46+00:00, originally exported from a codex session at cloudskill_version=7.6.39). Batch-reviewed 2026-08-28: deduplicated against the other 12 candidates in the same import (detect_candidate_similarity.py, 0 pairs >=0.28), manually re-scanned for identifying detail (sensitization.status was MANUAL_REQUIRED -- exported without a reachable private terms file; clean on manual read). Positive preservation candidate."
     }
   ]
 }

@@ -38,9 +38,6 @@ ISO-02,替觸控IC工具的熱插拔、FW更新、螢幕mapping、權限與insta
 DOC-NEG-03,請設計HID command packet builder與CRC介面。,document-governance,false,architecture/framework task not document governance
 USE-01,這個任務同時涉及舊Qt工具、相容重構、Release Gate與文件交付，應該先載入哪些技能、順序如何？,using-cloudbox-skills,true,multi-skill selection and ordering
 USE-NEG-01,請把這句英文翻成中文。,using-cloudbox-skills,false,trivial task should not force skill routing
-DEVSK-01,我要新增一個CloudSkill技能，請先建立無技能baseline、skill contract、行為eval與相鄰技能回歸。,developing-skills,true,skill development behavior testing
-DEVSK-02,這個skill description常常誤觸發，請修改並證明新描述不會讓agent跳過SKILL.md。,developing-skills,true,description routing and behavior evidence
-DEVSK-NEG-01,幫我修正README中的一個錯字。,developing-skills,false,ordinary document edit is not skill development
 ECA-01,每片wafer各有Sequence，但Robot與Aligner是共用資源，如何切Sequence、Equipment Service與資源仲裁？,equipment-control-architecture,true,sequence service and shared physical resource ownership
 ECA-02,FrontEnd、MainFrame與多個Chamber分散在不同IPC，請定義連線方向、啟動順序、斷線重連、版本與狀態權威。,equipment-control-architecture,true,distributed equipment IPC topology and recovery
 ECA-03,Move命令timeout後Robot晚到Completed，Sequence已經重試，如何避免重複搬片並reconcile？,equipment-control-architecture,true,late completion idempotency and physical reconciliation
@@ -83,7 +80,6 @@ USE-05,請把「系統已完成更新」翻譯成英文。,using-cloudbox-skills
 USE-NEG-03,幫我把「系統更新之後目前都正常」寫得順一點。,using-cloudbox-skills,false,Chinese rewriting must not trigger CloudBox routing
 USE-06,Design ownership shared-resource arbitration restart recovery reconnect and failover for a distributed equipment system where each chamber has an independent IPC.,using-cloudbox-skills,true,English engineering task must route by decision boundary
 USE-07,Review 這段 C# callback ordering timeout late response 與 stale dictionary state 確認是否可能 duplicate send。,using-cloudbox-skills,true,mixed-language engineering task must route to code review
-DEVSK-05,建立一套標準化Skill建立與成熟度流程，包含RED/GREEN、相鄰回歸、review trigger與CI驗證。,developing-skills,true,standardized skill lifecycle and continuous evolution
 TWB-01,我想一邊開發一邊透過跟你的互動把相關知識學起來，不要另外開一個學習課程。,teach-while-building,true,learn as a side effect of real work not a separate course
 TWB-NEG-01,幫我規劃一套完整的瑜珈課程，分成好幾堂課、附教材跟練習。,teach-while-building,false,full multi-session course workspace is a different heavier request
 CAD-01,我們有一個沒人完整讀過的 60 支檔案舊子系統，接下來要在裡面加新功能，應該先做什麼？,codebase-architecture-discovery,true,"unfamiliar large codebase area, no existing map, before extension"

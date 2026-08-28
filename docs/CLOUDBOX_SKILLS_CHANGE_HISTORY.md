@@ -1,5 +1,68 @@
 # CloudSkill evolution change history
 
+## 2026-08-28 — 7.8.0: using-cloudbox-skills self-reference misdiagnosis, corrected
+
+The most notable event of this increment was catching and reversing our
+own wrong diagnosis, not just landing a fix. A same-day earlier pass
+found `using-cloudbox-skills` failing 4 meta-ordering routing cases
+(`USE-01/02/03/04`) 4/4 identically and "fixed" it by adding SKILL.md
+guidance, verified live against all 4. Before merging, an independent
+Claude Opus 5 review (requested by the user specifically to sanity-check
+convergence) ran the actual deterministic grader
+(`scripts/grade_runtime_evals.py`) against the "verified" records instead
+of trusting the raw JSONL fields the original session had read by eye,
+and found `overall_pass_rate=0.0`: the grader's unconditional
+`router_not_downstream` strict check fails the instant the router
+appears in `primary_skill`, regardless of what any case's `expected`
+block says. Tracing further, the 4 cases' expected data was itself
+wrong -- `evals/skill-routing-cases.csv`'s 3rd column is the skill
+UNDER TEST for that row, not the correct answer, and this had been
+mistranslated for exactly these 4 rows (the other rows using the same
+column, e.g. `USE-06/07`, were converted correctly). One conversion
+mistake, replicated 4 times, had been read as 4 independent
+corroborating failures.
+
+Reverted the wrong SKILL.md paragraph, corrected the 4 cases' expected
+blocks to the model's own real original (always-correct) output, and
+re-graded with the real grader against the untouched original run
+records -- not re-executed, since the original answer was already
+right. Re-verifying surfaced one more layer: `USE-BEH-007` still
+self-referenced against the fully-reverted file, traced to a second,
+independent, pre-existing SKILL.md line-52 exception clause (first
+exposed by this session's own first execution of that case, not caused
+by anything this session added). Removed that clause too, redirecting
+its named use case (routing-policy/skill-content changes) to
+`developing-skills`, which already owns it per this skill's own
+`USE-CONV-004` case. Verified with 3 more live re-runs (one
+no-regression control, two direction checks) before calling it closed.
+
+Process lesson for future sessions, stated directly because it cost a
+full session's work: reading raw JSONL `primary_skill`/`supporting_skills`
+fields against a case's `expected` block by eye is not equivalent to
+running the actual grader. The grader's strict/gating checks
+(`router_not_downstream`, `selected_set_consistent`,
+`additional_supporting_skills`, `execution_order`'s exact-list-equality
+semantics) are not reliably reproducible by inspection. Closed the
+matching process gap the same increment: `scripts/validate_runtime_evals.py`
+had this exact per-case contract check available the whole time but only
+ever ran it against `canary.json` -- extended it to every
+`evals/runtime/cases/*.json` file sharing the shape, which immediately
+found one real pre-existing inconsistency in `cad-routing.json` unrelated
+to this incident.
+
+Also in this increment: a `rejected_skills` hallucination bug in the
+shared runtime harness's `deterministic_contract_repair` (destroyed real
+behavior evidence 4x across 3 Skills, root-caused to an overly broad
+bail-out condition and fixed by narrowing repair-eligibility to only the
+fields that gate what stage 2 actually executes); first full
+real-execution passes for `document-governance` and
+`game-quality-and-release-gates`; a cross-provider hook-path fix
+(relative hook commands broke whenever a triggering tool call's cwd
+drifted from the repository root); and 13 new formal behavior cases
+across 12 Skills converted from a reviewed Eval Inbox batch (deduplicated,
+sensitive-content re-scanned, ownership-mapped, human-reviewed before
+conversion). Full detail: `CHANGELOG.md`'s 7.8.0 entry.
+
 ## 2026-08-25 — Install the disconnected Eval exporter as a Skill-local script
 
 Moved the stdlib-only `export_eval_candidate.py` from `developing-eval/assets/`

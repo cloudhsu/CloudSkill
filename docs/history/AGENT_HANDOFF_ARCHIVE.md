@@ -1735,3 +1735,71 @@ a formal release. Version bumped `7.6.26` -> `7.6.27`.
 `scripts/run_all_checks.py` and `scripts/manage_skill.py audit --check`
 both PASS at the release tip. Full summary:
 `docs/releases/7.6.27-pre-release-evidence.md`.
+
+## Earlier increment — 7.6.31 release cut: split private tier into `private-meta`/`private-game`/`private-operation`/`private-art` (2026-08-18)
+
+Grew out of an architecture discussion: a queued marketing-strategy
+candidate (spokesmodel/influencer promotional pattern, mined from a past
+game project) had no existing skill owner, prompting the user to ask about
+building a dedicated marketing-operations skill family. Rather than a new
+repo (would duplicate the evolution/eval tooling — flagged and rejected),
+landed on: same repo, new private sub-tiers, reused tooling unchanged.
+`config/skill-distribution.json`: replaced the flat `evolution-pack` tier
+with `private-meta` (self-referential skill/eval tooling), `private-game` (7
+existing skills, reclassified 1:1), `private-operation`/`private-art` (new,
+reserved, empty). Every script checking `tier == "evolution-pack"` now
+checks `tier != "core"`, so future private sub-tiers need no script edits.
+`config/skill-domain-catalog.json`'s per-domain `default_distribution`
+updated to match; confirmed it already anticipated both new directions
+(`planned_skills` already named `game-art-pipeline` and
+`game-marketing-and-monetization` before this session). Live docs updated;
+historical release/evolution documents deliberately left unchanged. No
+skill's behavior, routing, or actual public/private visibility changed.
+Version bumped `7.6.30` -> `7.6.31` (patch — internal reorganization only).
+`scripts/run_all_checks.py`, `scripts/validate_plugins.py`, and
+`scripts/manage_skill.py audit --check` all PASS at the release tip. Full
+summary: `docs/releases/7.6.31-pre-release-evidence.md`.
+
+**Next** (as of 7.6.31; later superseded by subsequent increments):
+- A dedicated router skill (analogous to `using-cloudbox-skills` but for the
+  marketing/operations family) and a tier-scoped `SKILL_MANIFEST.json`
+  generator are still needed before `private-operation` gets its first real
+  skill — deferred until there is enough mined evidence (3-5 candidates) to
+  define real trigger/non-trigger boundaries, not built on 1 thin candidate.
+- `agent-development-process`, `document-governance`, and
+  `teach-while-building` have not been reviewed since `7.5.0` — still
+  blocking a clean minor bump, now for 3 consecutive releases. Tracked as
+  Vikunja task 22 in the `cloudbox-skills` project since `7.6.29`; still
+  open and should be prioritized before a fourth release hits the same
+  wall.
+- 11 mined interaction-Eval candidates (10 + 1 new marketing candidate from
+  this increment) remain queued in `.local/eval-inbox/candidates/` awaiting
+  an explicit batch-review instruction from the user, tracked in the
+  `cloudbox-skills` Vikunja project.
+
+## Earlier increment — 7.6.32 private-equipment candidate (2026-08-19, shipped as part of 7.6.32–7.6.36)
+
+Three de-identified equipment-family Skills and a generic WPH refactor are
+under full lifecycle validation. The new family Skills are held in
+`private-equipment`; WPH keeps its pre-existing core status. Evidence and
+inference boundaries:
+`docs/evolution/2026-08-19-public-equipment-evidence-distillation.md`.
+Standing semantic-review transport is now managed model-selected sub-agents:
+Codex Luna/Sol; Claude Code Sonnet 5/Opus 5, with 4.8 only as an availability
+fallback. Policy and observed process RED:
+`docs/evolution/2026-08-19-managed-subagent-skill-review-policy.md`.
+Equipment behavior is Luna/Sol 19/19 GREEN. Bounded final review ended Luna
+PASS / Sol FAIL on process-layer lifecycle and meta-Skill evidence; those
+defects were corrected and DEVSK-BEH-022/023 now pass case/contract
+execution. The repository owner accepted the frozen manual evidence packet
+after the two-round model review limit was reached, then superseded public
+release with a private-distribution hold before any push, tag, or GitHub
+Release succeeded. Manual disposition:
+`docs/evolution/2026-08-19-manual-review-disposition.md`. Claude-family review
+is `NOT RUN` in this Codex host. After this private equipment candidate, process the
+quality/architecture-fitness candidate together with the game-skill increment;
+leave marketing skills until last.
+An empty-directory public export confirmed that the three new Skill trees and
+private plugin are excluded. Its full suite cannot stand in for publication CI:
+the exporter expects destination-owned catalogs and a Git checkout. Before any
+future public promotion, run the complete suite in the real public mirror.

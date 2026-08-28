@@ -7,22 +7,22 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash .claude/hooks/validate-push-readiness.sh",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/validate-push-readiness.sh\"",
             "timeout": 30
           },
           {
             "type": "command",
-            "command": "bash .claude/hooks/block-push-auth-loop.sh",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/block-push-auth-loop.sh\"",
             "timeout": 15
           },
           {
             "type": "command",
-            "command": "bash .claude/hooks/coding-agent-git-discipline/release-cut-reminder/script.sh",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/coding-agent-git-discipline/release-cut-reminder/script.sh\"",
             "timeout": 15
           },
           {
             "type": "command",
-            "command": "bash .claude/hooks/coding-agent-git-discipline/shared-checkout-guard/script.sh",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/coding-agent-git-discipline/shared-checkout-guard/script.sh\"",
             "timeout": 15
           }
         ]
@@ -34,7 +34,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash .claude/hooks/record-push-outcome.sh",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/record-push-outcome.sh\"",
             "timeout": 15
           }
         ]
@@ -45,7 +45,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash .claude/hooks/project-management-sync/vikunja-sync-reminder/script.sh",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/project-management-sync/vikunja-sync-reminder/script.sh\"",
             "timeout": 15
           }
         ]

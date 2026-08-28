@@ -198,6 +198,30 @@
         "a parser that only handles arrow-form descriptions drops a zero-duration, arrow-less placement event, making the item disappear from the projected view"
       ],
       "review_notes": "Distilled 2026-08-25 from a real collaborative-distillation candidate (GPT-5.6 Luna/Sol, project-history mining): a same-time placement event without an explicit arrow was not projected to its target, and the item visually vanished during alignment. Boundary-condition case, distinct from general parser completeness."
+    },
+    {
+      "id": "ECA-BEH-009",
+      "skill": "equipment-control-architecture",
+      "type": "discipline",
+      "prompt": "Design or review a multi-lane material scheduler where each transfer robot can reach only its own alignment stations while downstream process modules and buffers are shared.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "Model lane affinity as a hard reachability constraint and shared modules as dispatchable resources.",
+        "Prioritize already-waiting buffered work over a future reservation when it can execute now."
+      ],
+      "forbidden_behaviors": [
+        "Treat parallel mode as permission for any robot to use any station.",
+        "Leave an executable shared module idle because later work reserved it early."
+      ],
+      "required_artifacts": [
+        "a scheduler model where lane affinity is a hard reachability constraint separate from shared-module dispatch",
+        "a dispatch rule that prioritizes already-waiting buffered work over a future reservation when it can execute now"
+      ],
+      "baseline_expected_failure": [
+        "agent treats parallel mode as permission for any robot to use any station, or leaves an executable shared module idle because later work reserved it early"
+      ],
+      "review_notes": "Distilled 2026-08-28 from a real Eval Inbox interaction candidate (candidate_id=INT-20260827-060244-6ce0a234, captured 2026-08-27T06:02:44+00:00, originally exported from a codex session at cloudskill_version=7.6.39). Batch-reviewed 2026-08-28: deduplicated against the other 12 candidates in the same import (detect_candidate_similarity.py, 0 pairs >=0.28), manually re-scanned for identifying detail (sensitization.status was MANUAL_REQUIRED -- exported without a reachable private terms file; clean on manual read). Candidate only; confirm owner and establish RED in destination repository."
     }
   ]
 }

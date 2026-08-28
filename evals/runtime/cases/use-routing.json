@@ -1,0 +1,106 @@
+{
+  "suite": "using-cloudbox-skills-routing-2026-08-25",
+  "schema_version": 1,
+  "description": "Remaining 9 routing cases for using-cloudbox-skills (USE-01 already executed separately, per execution-ledger.json), converted from evals/skill-routing-cases.csv for real execution against cloudbox-skills task #7 (statistical-rigor gap). CORRECTED 2026-08-28: USE-02/03/04's expected.primary_skill was originally set to 'using-cloudbox-skills' by mistranslating the CSV's 3rd column (the skill UNDER TEST for this row, not the expected answer -- every USE-* row reads 'using-cloudbox-skills' there, including USE-06/07 which were converted correctly). The router is never a valid primary_skill or supporting_skill per runtime_eval_common.py's strict 'router_not_downstream' check and this skill's own SKILL.md/references/conversation-routing-map.md -- 'which skills, what order' questions are answered BY the router THROUGH supporting_skills/execution_order, not by naming itself primary_skill. USE-02/03/04's expected.primary_skill is now the real downstream deliverable owner, matching the model's own actual (pre-mistake) reasoning captured in evals/runtime/results/use-0{2,3,4}-20260825T*.jsonl. See .agents/skills/using-cloudbox-skills/lifecycle.json's 2026-08-28 note for the full incident writeup.",
+  "cases": [
+    {
+      "id": "USE-NEG-01",
+      "prompt": "請把這句英文翻成中文。",
+      "expected": {
+        "primary_skill": null,
+        "required_supporting_skills": [],
+        "forbidden_selected_skills": [],
+        "execution_order": [],
+        "allow_additional_supporting_skills": false
+      }
+    },
+    {
+      "id": "USE-02",
+      "prompt": "分散式設備平台同時涉及Sequence、分散IPC、Chamber Config、Actual/Desired、共用Framework與遷移Roadmap，技能順序怎麼選？",
+      "expected": {
+        "primary_skill": "equipment-control-architecture",
+        "required_supporting_skills": ["equipment-domain-modeling", "framework-design", "safe-incremental-refactoring"],
+        "forbidden_selected_skills": ["using-cloudbox-skills"],
+        "execution_order": ["equipment-domain-modeling", "equipment-control-architecture", "framework-design", "safe-incremental-refactoring"],
+        "allow_additional_supporting_skills": false
+      }
+    },
+    {
+      "id": "USE-03",
+      "prompt": "我先要解釋PVD與真空元件，再設計Pump/Vent Sequence與MFC資料模型，CloudSkill技能應如何選擇與排序？",
+      "expected": {
+        "primary_skill": "equipment-control-architecture",
+        "required_supporting_skills": ["semiconductor-equipment-domain-knowledge", "equipment-domain-modeling"],
+        "forbidden_selected_skills": ["using-cloudbox-skills"],
+        "execution_order": ["semiconductor-equipment-domain-knowledge", "equipment-control-architecture", "equipment-domain-modeling"],
+        "allow_additional_supporting_skills": false
+      }
+    },
+    {
+      "id": "USE-04",
+      "prompt": "這個任務用Superpowers管理TDD與實作流程，用CloudBox處理設備領域與架構，技能順序怎麼排？",
+      "expected": {
+        "primary_skill": "equipment-control-architecture",
+        "required_supporting_skills": ["semiconductor-equipment-domain-knowledge"],
+        "forbidden_selected_skills": ["using-cloudbox-skills"],
+        "execution_order": ["semiconductor-equipment-domain-knowledge", "equipment-control-architecture"],
+        "allow_additional_supporting_skills": false
+      }
+    },
+    {
+      "id": "USE-NEG-02",
+      "prompt": "請在Claude Code中停用某個已安裝的plugin。",
+      "expected": {
+        "primary_skill": null,
+        "required_supporting_skills": [],
+        "forbidden_selected_skills": [],
+        "execution_order": [],
+        "allow_additional_supporting_skills": false
+      }
+    },
+    {
+      "id": "USE-05",
+      "prompt": "請把「系統已完成更新」翻譯成英文。",
+      "expected": {
+        "primary_skill": null,
+        "required_supporting_skills": [],
+        "forbidden_selected_skills": [],
+        "execution_order": [],
+        "allow_additional_supporting_skills": false
+      }
+    },
+    {
+      "id": "USE-NEG-03",
+      "prompt": "幫我把「系統更新之後目前都正常」寫得順一點。",
+      "expected": {
+        "primary_skill": null,
+        "required_supporting_skills": [],
+        "forbidden_selected_skills": [],
+        "execution_order": [],
+        "allow_additional_supporting_skills": false
+      }
+    },
+    {
+      "id": "USE-06",
+      "prompt": "Design ownership shared-resource arbitration restart recovery reconnect and failover for a distributed equipment system where each chamber has an independent IPC.",
+      "expected": {
+        "primary_skill": "equipment-control-architecture",
+        "required_supporting_skills": [],
+        "forbidden_selected_skills": [],
+        "execution_order": ["equipment-control-architecture"],
+        "allow_additional_supporting_skills": true
+      }
+    },
+    {
+      "id": "USE-07",
+      "prompt": "Review 這段 C# callback ordering timeout late response 與 stale dictionary state 確認是否可能 duplicate send。",
+      "expected": {
+        "primary_skill": "code-review",
+        "required_supporting_skills": [],
+        "forbidden_selected_skills": [],
+        "execution_order": ["code-review"],
+        "allow_additional_supporting_skills": true
+      }
+    }
+  ]
+}

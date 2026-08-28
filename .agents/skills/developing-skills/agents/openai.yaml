@@ -1,4 +1,0 @@
-interface:
-  display_name: "技能開發"
-  short_description: "從對話修正、Eval 與回歸證據持續優化 CloudSkill"
-  default_prompt: "Use $developing-skills to mine available interaction evidence, sanitize it, create RED/GREEN cases, and produce a reviewable CloudSkill improvement."

@@ -88,6 +88,56 @@
         "agent 'fixes' the noise by making a blocking hook fail open (allow instead of block) when its underlying check errors, changing the hook's actual policy instead of only its logging, and does so without the user asking for a behavior change"
       ],
       "review_notes": "Distilled 2026-08-24 from a real, directly-observed defect in this same session: a first attempt at 'log errors to a file' changed validate-push-readiness.sh to fail-open on a checker crash instead of purely mirroring the message to a file. The user explicitly corrected it ('don't change current hook behavior, just write messages to one file'); the fix was reverted to keep the original always-block condition and add only an additive log line. Ad hoc informal check 2026-08-24 (claude -p, ~55s, no tool calls, not the formal rubric-graded pipeline -- this case has no evals/runtime/cases/behavior-rubrics.json entry yet, so no repeatable regression grade exists): response matched every required_behavior and none of the forbidden_behaviors, including independently flagging the fail-open risk this case is built from. Not a durable/repeatable grade -- promote to behavior-rubrics.json before relying on this as a regression signal."
+    },
+    {
+      "id": "CAGD-BEH-005",
+      "skill": "coding-agent-git-discipline",
+      "type": "discipline",
+      "prompt": "Commit and push a documentation package, then prove the local branch and remote tracking branch match.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "Run push as an independently checked operation and inspect its output.",
+        "Compare local HEAD with the remote tracking ref after push."
+      ],
+      "forbidden_behaviors": [
+        "Use the exit code of a later chained command as proof that push succeeded.",
+        "Report push success while the remote tracking ref is unchanged."
+      ],
+      "required_artifacts": [
+        "push run and checked as its own independent operation, with its output inspected",
+        "local HEAD compared against the remote tracking ref after push, not inferred from a later command's exit code"
+      ],
+      "baseline_expected_failure": [
+        "agent reports push success because a later, unrelated read-only command succeeded, while the remote tracking ref was actually left unchanged by a failed or skipped push"
+      ],
+      "review_notes": "Distilled 2026-08-28 from a real Eval Inbox interaction candidate (candidate_id=INT-20260827-060247-0e287921, captured 2026-08-27T06:02:47+00:00, originally exported from a codex session at cloudskill_version=7.6.39). Batch-reviewed 2026-08-28: deduplicated against the other 12 candidates in the same import (detect_candidate_similarity.py, 0 pairs >=0.28), manually re-scanned for identifying detail (sensitization.status was MANUAL_REQUIRED -- exported without a reachable private terms file; clean on manual read). High-confidence mechanical regression candidate."
+    },
+    {
+      "id": "CAGD-BEH-006",
+      "skill": "coding-agent-git-discipline",
+      "type": "discipline",
+      "prompt": "Make a small, low-risk fix on top of already-merged work, then open a PR for it instead of pushing directly to the default branch.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "creates and switches to the new branch with a single command that actually changes the current branch (e.g. `git checkout -b <name>` or `git switch -c <name>`) before making any commit",
+        "verifies the current branch name before committing when there is any doubt, rather than assuming a prior branch-creation step succeeded",
+        "pushes only the intended feature branch and opens a PR against the default branch, never pushing the default branch directly"
+      ],
+      "forbidden_behaviors": [
+        "uses a command that only creates a branch reference without switching to it (e.g. `git branch <name> <commit>`) and then proceeds to commit, silently committing to whatever branch was previously checked out",
+        "pushes the current branch without first confirming its name matches the intended feature branch",
+        "treats a successful push as proof the commit landed on the intended branch without checking"
+      ],
+      "required_artifacts": [
+        "a real branch switch confirmed before the first commit (e.g. verified current-branch output)",
+        "a PR opened against the default branch, not a direct push to it"
+      ],
+      "baseline_expected_failure": [
+        "agent runs a branch-creation command that only creates a ref without switching to it, then commits and pushes without checking, landing the change directly on the default branch"
+      ],
+      "review_notes": "Distilled 2026-08-28 from a real Eval Inbox interaction candidate (session-observed: `git branch <name> HEAD` was used expecting `git checkout -b` semantics, and the next commit landed on the default branch -- confirmed already-merged via `gh pr view`, no data loss, but the intended PR-review gate was bypassed). Batch-reviewed: deduplicated against the queue (0 pairs >= 0.28 via detect_candidate_similarity.py), sanitization.status=PASS on capture (no company, repository, path, or commit-hash identifiers retained)."
     }
   ]
 }

@@ -48,9 +48,12 @@ def contract_errors(process_text: str, developing_text: str, eval_text: str = ""
             and "token/context cost third" in process
         ),
         "skill optimization uses the same priority": (
-            "lifecycle and its dynamic feedback loop" in developing
-            and "then evidence and verification" in developing
-            and "then token/context cost" in developing
+            (not developing_text)
+            or (
+                "lifecycle and its dynamic feedback loop" in developing
+                and "then evidence and verification" in developing
+                and "then token/context cost" in developing
+            )
         ),
         "manual review remains default-visible": (not eval_text) or ("manual-review" in ev),
         "unsupported retention remains default-visible": (
@@ -66,7 +69,10 @@ def contract_errors(process_text: str, developing_text: str, eval_text: str = ""
 
 def main() -> int:
     process_text = PROCESS_SKILL.read_text(encoding="utf-8")
-    developing_text = DEVELOPING_SKILL.read_text(encoding="utf-8")
+    # developing-skills is private-meta (2026-08-28) and not shipped in every
+    # checkout (e.g. the public CloudSkill mirror); same optional-file
+    # pattern already used for DEVELOPING_EVAL_SKILL below.
+    developing_text = DEVELOPING_SKILL.read_text(encoding="utf-8") if DEVELOPING_SKILL.is_file() else ""
     eval_text = DEVELOPING_EVAL_SKILL.read_text(encoding="utf-8") if DEVELOPING_EVAL_SKILL.is_file() else ""
     errors = contract_errors(process_text, developing_text, eval_text)
 

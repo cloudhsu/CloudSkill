@@ -40,25 +40,29 @@ def main() -> int:
         else:
             reports.append(f"{skill_id}: {len(data)} bytes (budget {budget})")
 
-    text = DEVELOPING_SKILLS.read_text(encoding="utf-8")
-    required_main_invariants = {
-        "RED evidence": "RED evidence",
-        "authoritative owner": "authoritative owner",
-        "Never store raw transcripts": "Never store raw transcripts",
-        "Report execution truthfully": "Report execution truthfully",
-    }
-    for label, marker in required_main_invariants.items():
-        if marker.lower() not in text.lower():
-            errors.append(f"developing-skills: missing universal main-file invariant: {label}")
+    # developing-skills is private-meta (2026-08-28) and not shipped in every
+    # checkout (e.g. the public CloudSkill mirror); same optional-file guard
+    # already used for developing-eval below.
+    if DEVELOPING_SKILLS.is_file():
+        text = DEVELOPING_SKILLS.read_text(encoding="utf-8")
+        required_main_invariants = {
+            "RED evidence": "RED evidence",
+            "authoritative owner": "authoritative owner",
+            "Never store raw transcripts": "Never store raw transcripts",
+            "Report execution truthfully": "Report execution truthfully",
+        }
+        for label, marker in required_main_invariants.items():
+            if marker.lower() not in text.lower():
+                errors.append(f"developing-skills: missing universal main-file invariant: {label}")
 
-    required_routes = {
-        "lifecycle and release": "references/skill-lifecycle-standard.md",
-    }
-    for label, path in required_routes.items():
-        if path not in text:
-            errors.append(
-                f"developing-skills: missing direct conditional reference route: {label} -> {path}"
-            )
+        required_routes = {
+            "lifecycle and release": "references/skill-lifecycle-standard.md",
+        }
+        for label, path in required_routes.items():
+            if path not in text:
+                errors.append(
+                    f"developing-skills: missing direct conditional reference route: {label} -> {path}"
+                )
 
     developing_eval = SKILLS_DIR / "developing-eval/SKILL.md"
     if developing_eval.is_file():
