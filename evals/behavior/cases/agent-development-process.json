@@ -138,7 +138,7 @@
       "baseline_expected_failure": [
         "the answer treats a longer or better-summarized chat transcript as sufficient continuity, without defining any durable, externally-readable state the next session/model/agent can reconcile against"
       ],
-      "review_notes": "Distilled 2026-08-23 from a real collaborative session (collaborative-distillation candidate INT-20260823-045634-9f6633c9)."
+      "review_notes": "Distilled 2026-08-23 from a real collaborative session (collaborative-distillation candidate sanitized-interaction-evidence)."
     }
   ]
 }

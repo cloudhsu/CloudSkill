@@ -81,34 +81,6 @@
       "review_notes": "Separates factory context from equipment-control semantics."
     },
     {
-      "id": "USE-CONV-004",
-      "skill": "using-cloudbox-skills",
-      "type": "recognition",
-      "prompt": "請根據我們過去的對話，自動優化已安裝的技能與插件，並提供可覆蓋本機 clone 的版本。",
-      "expected_routing": true,
-      "expected_alternative_skill": null,
-      "required_behaviors": [
-        "routes downstream work to developing-skills",
-        "does not list using-cloudbox-skills as a supporting downstream skill",
-        "uses only available interaction evidence and repository content",
-        "requires sanitization, owner mapping, RED cases and a reviewable delivery",
-        "reports connector write limitations truthfully"
-      ],
-      "forbidden_behaviors": [
-        "claims access to every historical conversation",
-        "rewrites all skills without owner or regression analysis",
-        "claims a branch or PR exists after a failed write"
-      ],
-      "required_artifacts": [
-        "evidence inventory",
-        "reviewable branch overlay or patch"
-      ],
-      "baseline_expected_failure": [
-        "agent asks the user to upload the same skill package again or overclaims installed-skill source access"
-      ],
-      "review_notes": "Directly exercises conversation-derived skill optimization routing."
-    },
-    {
       "id": "USE-CONV-005",
       "skill": "using-cloudbox-skills",
       "type": "counterexample",

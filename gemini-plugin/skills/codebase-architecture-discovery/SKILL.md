@@ -16,8 +16,8 @@ grepping for filenames or trusting naming conventions -- then produce a
 map durable enough that the next change doesn't have to re-derive it. This
 skill owns the *discovery* phase only: it hands off a confirmed cluster and
 a recommended target to `safe-incremental-refactoring` for the actual
-extraction, the same way `legacy-game-product-archaeology` hands a
-reconstructed core loop to `gameplay-core-modernization` rather than doing
+extraction, the same way a private companion capability hands a
+reconstructed core loop to a private companion capability rather than doing
 the extraction itself.
 
 ## Trigger conditions

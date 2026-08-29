@@ -25,14 +25,9 @@ Use this reference for recurring engineering scenarios and routing counterexampl
 | Component-only Commanded/Pending/Actual/Readback, ACK versus physical completion, and late-readback reconciliation contract; Sequence/service ownership is explicitly out of scope | `equipment-domain-modeling` | Do not add `equipment-control-architecture` or `semiconductor-equipment-domain-knowledge` when physical meaning and completion evidence are already supplied |
 | Sequence versus Equipment Service timeout, late-completion, interlock, retry/recovery, or shared-resource responsibility; component DTO/state contract is already defined | `equipment-control-architecture` | Do not add `equipment-domain-modeling` or `semiconductor-equipment-domain-knowledge` when no component redesign or physical-domain interpretation is requested |
 | Component state/command contract is the explicit main deliverable and cross-layer timeout/recovery responsibility is a separate secondary deliverable | `equipment-domain-modeling` | Add `equipment-control-architecture`; execute modeling before architecture. Do not add `semiconductor-equipment-domain-knowledge` when physical meaning and completion evidence are already supplied |
-| Executable Eval design or review: case validity, context evidence, reproducibility, deterministic versus semantic grading, false positives, score interpretation, or release gates | `runtime-evaluation-engineering` | Add `developing-skills` only when the requested output changes Skill behavior; add `local-runtime-eval-debugging` only when host execution or packaging is also required |
-| Local Runtime Eval execution or diagnosis: Python/Ollama discovery, context overflow, missing JSONL/report, Routing versus Behavior grading, or one uploadable review ZIP | `local-runtime-eval-debugging` | Add `runtime-evaluation-engineering` when the task also questions case, metric, rubric, grader, or release-gate validity; add `developing-skills` only when Skill behavior will change |
-| AGENTS.md, coding-agent worktrees, repository risk routing, release evidence, skill descriptions, Eval mining or plugin packaging | `coding-agent-project-governance` or `developing-skills` | Use `developing-skills` when the requested output changes CloudSkill routing or behavior |
 | Long-running/multi-session checkpoint or roadmap tracking: forward roadmap of planned stopping points, a current-status snapshot, an immutable dated record per stopping point, or a PLANNED-row identifier scheme | `coding-agent-project-governance` | Do not route this to `document-governance` merely because it is "one source split into multiple views" (row above) -- the checkpoint convention's view split, identifier-collision rule, and PLANNED-vs-completed numbering are this Skill's own artifact-matrix.md content, not a generic document-authority/version-lineage question |
-| Cross-equipment WPH, cycle-time, utilization, queue, bottleneck, scheduling, product-mix, downtime or capacity simulation | `wph-equipment-simulator-development` | Add the relevant equipment-family Skill for physical topology and custody; WPH is not a product-line identity or physical-interlock owner |
-| Individual materials fill Tray pockets, a complete Tray enters descum/plasma cleaning, then unload/return preserves identity | `tray-descum-simulator-development` | Add `wph-equipment-simulator-development` only when capacity analysis is requested; do not infer map-based die sorting or cluster-tool vacuum stages |
-| EFEM/load ports, load locks, transfer chamber, atmospheric/vacuum robots and configurable process modules with recipe routes | `cluster-tool-simulator-development` | Add `wph-equipment-simulator-development` for capacity; add control/domain Skills for production interlock or physical semantics |
-| Device wafer/carrier preparation, alignment, bonding, debonding, cleaning, pair provenance or combo equipment | `wafer-bonder-debonder-development` | Add WPH for capacity; do not route generic die attach or wire bonding by keyword overlap |
+| Dispatching a worktree-isolated or background subagent to read files / investigate and report, including any instruction about where it writes its findings | `coding-agent-project-governance` | A subagent told to keep its only detailed report inside a worktree that may be torn down before retrieval is exactly this Skill's read-only-investigation reporting rule. The instruction being fully specified is why the skill is needed, not why it is not -- do not return no-skill because "the steps are all given". |
+| Writing a change-record's status for a requirement that is accepted / implemented but not yet verified or released | `development-process-tailoring` | Add `document-governance` for its separated requirement/implementation/verification/release status model. Producing one flat "Status: implemented" value is the named anti-pattern; do not return no-skill because the field looks like trivial rewriting. |
 
 ## Language-neutral counterexamples
 
@@ -46,10 +41,8 @@ Use this reference for recurring engineering scenarios and routing counterexampl
 | `Define only the Valve Commanded/Pending/Actual/Readback contract; Sequence recovery is out of scope.` | `equipment-domain-modeling` only. |
 | `Allocate Sequence/Equipment Service timeout and recovery ownership; the component contract is already fixed.` | `equipment-control-architecture` only. |
 | `The component contract is the main deliverable, then allocate cross-service recovery responsibility; physical semantics are already known.` | `equipment-domain-modeling` plus `equipment-control-architecture`, in that order; no domain-knowledge skill. |
-| `Estimate capacity for three different equipment families.` | `wph-equipment-simulator-development` plus each relevant equipment-family Skill; WPH owns simulation mechanics. |
-| `Sort dies by wafer map into output bins; there is no descum process.` | Do not use `tray-descum-simulator-development`; visual Tray similarity is insufficient. |
-| `A fixed atmospheric Tray-loading line has one descum PM and no load lock.` | `tray-descum-simulator-development`, not `cluster-tool-simulator-development`. |
-| `Perform die attach and wire bonding.` | Do not use `wafer-bonder-debonder-development` unless wafer/carrier pair semantics exist. |
+| `Dispatch a worktree-isolated subagent to read 12 files and write its full report to a file in its own worktree, with a short inline summary.` | `coding-agent-project-governance`; the worktree-report retrieval rule applies precisely because the instruction is fully specified, not no-skill. |
+| `Write the status field for a change record whose requirement is accepted and implemented but not verified or released.` | `development-process-tailoring` (add `document-governance`); keep the status dimensions separate -- not no-skill "trivial rewriting". |
 
 ## Owner versus execution order
 
@@ -69,9 +62,7 @@ For historical interaction optimization:
 
 ```json
 {
-  "primary_skill": "developing-skills",
   "supporting_skills": [],
-  "execution_order": ["developing-skills"]
 }
 ```
 

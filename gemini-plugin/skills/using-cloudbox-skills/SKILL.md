@@ -23,6 +23,8 @@ Do not force a skill onto casual conversation, translation, rewriting, trivial a
 
 A request's small or mechanical surface phrasing — "just verify," "just add a few rows," "just confirm this edit is fine" — is not by itself evidence that no skill applies. Judge routing by whether the concrete action matches a risk boundary an installed skill's own content already documents (a build stage that alone cannot validate the changed artifact, a capture action that can expose unrelated windows, an addition that can collide with an existing identifier), not by how procedurally small the request sounds. A confirmation request is only genuinely out of scope when every fact the confirmation needs is already supplied, not merely when the requested action is short.
 
+A fully specified sequence of mechanical steps is not the same as a fully determined answer. When following the instruction exactly as written would violate a constraint an installed skill documents but the prompt does not state — a dispatched subagent told to keep its only report inside a worktree that may be torn down before retrieval, a change-record status written as one flat value that hides unverified or unreleased state — the skill applies because the instruction omits that safeguard, not despite the instruction being complete. "No unresolved decision" is a conclusion about the risk boundary, not about how completely the steps are dictated.
+
 A settled design or scope decision is not the same as an answer already fully determined by supplied text. When the remaining work still carries real behavior, contract, transaction, or state-preservation risk — for example, an already-approved move of a responsibility across a service boundary — the execution itself is exactly what an execution-shaped skill such as `safe-incremental-refactoring` governs, not evidence that no skill applies.
 
 ## Routing decision contract
@@ -49,7 +51,7 @@ Interpret the fields as follows:
 - `reason`: the concrete decision or failure boundary, not a keyword explanation.
 - `confidence`: confidence in routing based on available evidence.
 
-`using-cloudbox-skills` is the router. Never list it as `primary_skill` or in `supporting_skills` — the routing decision is this skill's own output, not one of its entries. When the requested deliverable is itself a change to routing policy, skill composition, or a skill's own content, the owner is `developing-skills`, not this router.
+`using-cloudbox-skills` is the router. Never list it as `primary_skill` or in `supporting_skills` — the routing decision is this skill's own output, not one of its entries. When the requested deliverable is itself a change to routing policy, skill composition, or a skill's own content, the owner is a private companion capability, not this router.
 
 ## Composition order
 
@@ -81,7 +83,7 @@ Treat examples as semantic pressure tests, not keyword rules. Keep detailed case
 
 When the user asks to optimize skills from prior conversations:
 
-- Route the downstream work to `developing-skills`.
+- Route the downstream work to a private companion capability.
 - Use only conversation context, memory, uploaded exports, or connected sources that are actually available.
 - State unavailable history explicitly; never imply complete account-wide transcript access.
 - Generalize reusable engineering pressure and remove company, customer, project, person, path, URL, machine, recipe, schedule, and safety-limit identifiers.
@@ -92,6 +94,7 @@ When the user asks to optimize skills from prior conversations:
 
 - An explicitly requested skill takes priority unless it conflicts with higher-level instructions.
 - Do not load adjacent skills merely because they share vocabulary.
+- Do not add an adjacent skill as a "prerequisite analysis", "reconstruct-first", "extract-safely", or "supporting evidence" step when the primary skill's own documented workflow already covers that step. Add a supporting skill only when its own distinct deliverable or evidence is separately required, not to narrate a phase the primary owner already performs.
 - Do not use an architecture skill for an isolated terminology or process-principle question.
 - Do not use domain knowledge alone when the task requires state ownership, event lifecycle, resource arbitration, or recovery design.
 - Do not use equipment architecture for a component DTO question unless sequence, physical readiness, resource, interlock, topology, or recovery semantics are material.

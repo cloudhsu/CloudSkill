@@ -22,8 +22,8 @@ Install method: plugin marketplace (`codex plugin marketplace add` /
 same canonical `.agents/skills/` source; nothing platform-specific lives in
 individual Skills.
 
-**Gemini CLI**: `gemini-plugin/` and `private-gemini-plugin/` contain official
-`gemini-extension.json` manifests and generated regular-file Skill projections.
+**Gemini CLI**: `gemini-plugin/` contains an official
+`gemini-extension.json` manifest and generated regular-file Skill projection.
 Repository checks verify distribution-tier membership, byte parity, absence of
 symlinks, and isolated copying. Live `gemini extensions install` and
 `/skills list` remain `NOT RUN` because this workstation has no Gemini CLI.
@@ -50,9 +50,8 @@ python3 scripts/package_surface_skills.py
 
 | Tier | Meaning | Skills |
 |---|---|---|
-| `portable` | No CloudSkill-repository dependency; safe as-is | about-me, agent-development-process, application-client-server-architecture, architecture-review, cluster-tool-simulator-development, codebase-architecture-discovery, code-review, coding-agent-project-governance, coding-agent-git-discipline, cloudbox-game-migration, cross-platform-engine-architecture, cross-platform-native-architecture, development-process-tailoring, document-governance, equipment-control-architecture, equipment-domain-modeling, framework-design, game-art-pipeline, game-asset-resolution-audit, game-audio-design, game-design-systems, game-marketing-and-monetization, game-narrative-design, game-quality-and-release-gates, gameplay-core-modernization, indie-game-product-evolution, legacy-game-product-archaeology, native-ios-game-rewrite, runtime-evaluation-engineering, safe-incremental-refactoring, semiconductor-equipment-domain-knowledge, software-quality-iso25010, teach-while-building, technical-case-content-generation, tray-descum-simulator-development, using-cloudbox-skills, wafer-bonder-debonder-development, wph-equipment-simulator-development |
-| `hybrid` | Core judgment portable; some documented workflow steps invoke repository scripts and will not function in a sandbox | developing-skills, project-management-sync |
-| `cli-only` | Excluded from sandboxed packaging | local-runtime-eval-debugging, developing-eval |
+| `portable` | No dependency on scripts/*.py, cloudbox-skills-eval*, .local/, or other CloudSkill-repository-relative tooling. Safe to package as a standalone zip for claude.ai/Desktop/API upload as-is. | about-me, agent-development-process, application-client-server-architecture, architecture-review, code-review, codebase-architecture-discovery, coding-agent-git-discipline, coding-agent-project-governance, cross-platform-native-architecture, development-process-tailoring, document-governance, equipment-control-architecture, equipment-domain-modeling, framework-design, safe-incremental-refactoring, semiconductor-equipment-domain-knowledge, software-quality-iso25010, teach-while-building, using-cloudbox-skills |
+| `hybrid` | Core judgment/methodology is portable, but some documented workflow steps invoke CloudSkill-repository scripts or assume repository-relative paths that will not function in a sandboxed surface. Package as-is but disclose the non-functional steps; do not silently strip them. | project-management-sync |
 
 `scripts/validate_skill_portability.py` (part of `run_all_checks.py`) proves
 this table stays accurate two ways: it re-scans every `portable`-tier
@@ -74,13 +73,6 @@ produced zip as ready to try, not as confirmed working.
 
 - Gemini CLI package compatibility has static and isolated-copy evidence, but
   live CLI installation and Skill discovery are still untested.
-- `hybrid`-tier Skills are packaged as-is; a user who uploads
-  `developing-skills` to claude.ai will see release/CI steps (e.g. `gh`
-  commands, `scripts/manage_skill.py`) in the Skill body even though those
-  steps cannot execute there. This is disclosed, not hidden, but is not the
-  same as a sandbox-native rewrite of those steps. The interaction-capture
-  workflow itself moved to `developing-eval` (`cli-only`, excluded from
-  sandboxed packaging entirely) as of 2026-08-15.
 - No automated check confirms the claude.ai upload actually succeeds or that
   the uploaded Skill triggers correctly — that requires a live account with
   code execution enabled, which this repository's static validation cannot

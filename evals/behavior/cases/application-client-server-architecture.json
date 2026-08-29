@@ -55,9 +55,8 @@
       "type": "counterexample",
       "prompt": "Design texture recovery after an Android OpenGL context loss.",
       "expected_routing": false,
-      "expected_alternative_skill": "cross-platform-engine-architecture",
       "required_behaviors": [
-        "routes to cross-platform-engine-architecture",
+        "routes to a more specific domain capability",
         "does not force API or persistence design"
       ],
       "forbidden_behaviors": [
@@ -108,7 +107,9 @@
         "treats SQL commit as proof that the durable file was updated",
         "continues accepting dependent writes after unexplained persistence divergence"
       ],
-      "required_artifacts": ["durability state and recovery contract"],
+      "required_artifacts": [
+        "durability state and recovery contract"
+      ],
       "baseline_expected_failure": [
         "existing guidance names post-commit persistence but does not define divergence as an explicit fail-stop state"
       ],
@@ -130,7 +131,9 @@
         "derives schema compatibility from product release numbering",
         "attempts a downgrade or normalization write before compatibility is proven"
       ],
-      "required_artifacts": ["schema compatibility and startup gate"],
+      "required_artifacts": [
+        "schema compatibility and startup gate"
+      ],
       "baseline_expected_failure": [
         "existing guidance mentions schema gates but does not explicitly prevent product-version inference"
       ],
@@ -152,7 +155,9 @@
         "updates or deletes the original history row in place",
         "silently substitutes current master data for the historical snapshot"
       ],
-      "required_artifacts": ["immutable history and compensation contract"],
+      "required_artifacts": [
+        "immutable history and compensation contract"
+      ],
       "baseline_expected_failure": [
         "existing guidance asks whether history is compensating but does not define correlation, authority and projection behavior"
       ],
@@ -174,7 +179,9 @@
         "rolls back the already committed local fact in memory and assumes the external effect disappeared",
         "blindly retries without checking durable operation state or external outcome"
       ],
-      "required_artifacts": ["post-commit operation lifecycle and reconciliation contract"],
+      "required_artifacts": [
+        "post-commit operation lifecycle and reconciliation contract"
+      ],
       "baseline_expected_failure": [
         "existing guidance lists side-effect sequencing and partial failure but does not require a durable post-commit lifecycle"
       ],

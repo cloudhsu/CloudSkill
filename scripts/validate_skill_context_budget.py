@@ -40,7 +40,7 @@ def main() -> int:
         else:
             reports.append(f"{skill_id}: {len(data)} bytes (budget {budget})")
 
-    # developing-skills is private-meta (2026-08-28) and not shipped in every
+    # developing-skills is non-core (2026-08-28) and not shipped in every
     # checkout (e.g. the public CloudSkill mirror); same optional-file guard
     # already used for developing-eval below.
     if DEVELOPING_SKILLS.is_file():

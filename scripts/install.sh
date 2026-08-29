@@ -50,9 +50,23 @@ SOURCE_SKILLS="$REPO_ROOT/.agents/skills"
 BEGIN_MARKER='<!-- CLOUDSKILL:BEGIN -->'
 END_MARKER='<!-- CLOUDSKILL:END -->'
 
-for required in '.agents/skills' 'AGENTS.md' 'VERSION' 'scripts/capture_eval_candidate.py'; do
+for required in '.agents/skills' 'AGENTS.md' 'VERSION'; do
   [[ -e "$REPO_ROOT/$required" ]] || { echo "CloudSkill repository is missing $required: $REPO_ROOT" >&2; exit 1; }
 done
+
+EVAL_CAPTURE_AVAILABLE=0
+if [[ -f "$REPO_ROOT/scripts/capture_eval_candidate.py" && -f "$REPO_ROOT/.agents/skills/developing-eval/SKILL.md" ]]; then
+  EVAL_CAPTURE_AVAILABLE=1
+fi
+if [[ $EVAL_CAPTURE_AVAILABLE -eq 0 ]]; then
+  if [[ $CONFIG_ONLY -eq 1 ]]; then
+    echo "--config-only is unavailable in this distribution because Eval capture is not installed" >&2
+    exit 2
+  fi
+  SKIP_LOCAL_CONFIG=1
+  SKIP_LOCAL_CONFIG_EXPLICIT=1
+  echo "NOTE: Eval capture is not part of this distribution; local Eval config will not be created."
+fi
 
 copy_skills() {
   local destination="$1"

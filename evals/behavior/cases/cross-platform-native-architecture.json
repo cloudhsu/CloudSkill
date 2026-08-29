@@ -46,8 +46,8 @@
       ],
       "review_notes": "Review semantic relationships, evidence, and omissions; keyword presence alone is insufficient."
     },
-        {
-            "id": "XPLAT-BEH-003",
+    {
+      "id": "XPLAT-BEH-003",
       "skill": "cross-platform-native-architecture",
       "type": "counterexample",
       "prompt": "Design REST error codes and SQLite transaction semantics for a web service.",
@@ -64,35 +64,35 @@
       "baseline_expected_failure": [
         "agent confuses implementation technology with system boundary"
       ],
-            "review_notes": "Review semantic relationships, evidence, and omissions; keyword presence alone is insufficient."
-        },
-        {
-            "id": "XPLAT-BEH-004",
-            "skill": "cross-platform-native-architecture",
-            "type": "application",
-            "prompt": "Design deployment and recovery for a Qt tool with a Designer plug-in, a background helper, per-user startup and a locally stored service credential across supported desktop platforms.",
-            "expected_routing": true,
-            "expected_alternative_skill": null,
-            "required_behaviors": [
-                "separates Designer-host ABI and discovery compatibility from runtime widget compatibility",
-                "defines a platform and build-mode release matrix covering host architecture, toolkit ABI, packaging, install, upgrade and rollback",
-                "uses OS-verifiable process identity and liveness rather than assuming PID syntax or kill-zero semantics are portable",
-                "assigns startup registration and local-secret storage to explicit per-user or privileged OS owners with least privilege and cleanup"
-            ],
-            "forbidden_behaviors": [
-                "treats successful application linking as proof the Designer host can load the plug-in",
-                "uses one shell's PID or liveness convention as a cross-platform contract",
-                "stores credentials beside portable configuration or gives the UI ownership of privileged startup state"
-            ],
-            "required_artifacts": [
-                "native release matrix",
-                "process, startup and secret ownership map"
-            ],
-            "baseline_expected_failure": [
-                "agent documents packaging generally but misses design-host ABI, process identity and OS-owned secret boundaries"
-            ],
-            "review_notes": "Do not prescribe a specific credential backend; preserve the OS security boundary and verification obligation."
-        },
+      "review_notes": "Review semantic relationships, evidence, and omissions; keyword presence alone is insufficient."
+    },
+    {
+      "id": "XPLAT-BEH-004",
+      "skill": "cross-platform-native-architecture",
+      "type": "application",
+      "prompt": "Design deployment and recovery for a Qt tool with a Designer plug-in, a background helper, per-user startup and a locally stored service credential across supported desktop platforms.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "separates Designer-host ABI and discovery compatibility from runtime widget compatibility",
+        "defines a platform and build-mode release matrix covering host architecture, toolkit ABI, packaging, install, upgrade and rollback",
+        "uses OS-verifiable process identity and liveness rather than assuming PID syntax or kill-zero semantics are portable",
+        "assigns startup registration and local-secret storage to explicit per-user or privileged OS owners with least privilege and cleanup"
+      ],
+      "forbidden_behaviors": [
+        "treats successful application linking as proof the Designer host can load the plug-in",
+        "uses one shell's PID or liveness convention as a cross-platform contract",
+        "stores credentials beside portable configuration or gives the UI ownership of privileged startup state"
+      ],
+      "required_artifacts": [
+        "native release matrix",
+        "process, startup and secret ownership map"
+      ],
+      "baseline_expected_failure": [
+        "agent documents packaging generally but misses design-host ABI, process identity and OS-owned secret boundaries"
+      ],
+      "review_notes": "Do not prescribe a specific credential backend; preserve the OS security boundary and verification obligation."
+    },
     {
       "id": "XPLAT-BEH-005",
       "skill": "cross-platform-native-architecture",

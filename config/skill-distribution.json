@@ -1,14 +1,8 @@
 {
   "schema_version": 1,
-  "description": "Classifies each Skill's distribution tier. As of 2026-08-15 this is enforced, not label-only: scripts/export_public_bundle.py reads this file to build the public/marketplace-facing bundle and the private-only plugin manifest, and refuses to emit a non-core skill into the public bundle. Every tier other than 'core' is private -- all scripts that read this file check `tier != 'core'`, not one literal tier name, so adding a new private sub-tier never requires a script edit. Private tiers are split by content kind: private-meta, private-game, private-equipment, private-operation, and private-art. Update this file whenever a Skill is added, renamed, or its distribution intent changes.",
-  "default_tier_policy": "Standing user policy, made explicit 2026-08-21 (see the decision entries below for the specific reclassifications this triggered): new Skills default private, not core. 'core' (public) is reserved for general software-engineering knowledge (architecture, quality, governance, agent/skill-development tooling), the earliest general-purpose equipment-architecture Skills (equipment-control-architecture, equipment-domain-modeling, semiconductor-equipment-domain-knowledge), and teach-while-building. Every game-related Skill is private-game without exception -- including general-sounding architecture Skills, once their actual scope is game/graphics-engine-specific (cross-platform-engine-architecture) rather than genuinely general (cross-platform-native-architecture, confirmed to stay core because its scope is Qt/native-tooling architecture broadly, not game-specific). Every equipment Skill added after the earliest general ones is private-equipment by default; promoting one to core requires an explicit later decision, same review class wph-equipment-simulator-development went through both directions.",
+  "description": "Public CloudBox distribution manifest. Every listed Skill is core and must equal the Skill directories and plugin manifests in this artifact.",
   "tiers": {
-    "core": "Public CloudBox Core: ordinary software-development Skills (architecture, design, implementation, review, quality, documents, lifecycle, agent-product engineering, and generalized/sanitized domain-engineering knowledge with no company/project/customer identifiers). Dual-published going forward once the split executes, same pattern already used for teach-while-building.",
-    "private-meta": "Private, self-referential: Skill self-development/mining/evolution machinery and the runtime-eval harness CloudBox uses to maintain its own routing and behavior accuracy. Not a Skill a user applies to build their own product -- tooling for maintaining CloudSkill itself. Never published to the public repository.",
-    "private-game": "Private, product-derived: unsanitized Skills distilled from the user's own legacy/indie game products (archaeology, modernization, migration, asset audit, product-scope decisions, release gates, platform rewrites). Never published until an explicit sanitization/publication review promotes an individual Skill to core, same review class wph-equipment-simulator-development went through.",
-    "private-equipment": "Private equipment-family Skills held for complete architecture, quality, simulator, hardware/field-evidence, and publication review. De-identification alone does not authorize public distribution; promote each Skill to core only by an explicit later decision.",
-    "private-operation": "Private, product-derived: unsanitized Skills distilled from the user's own product marketing, growth, and operational decisions (e.g. promotional/creative-channel strategy). Reserved category, no Skills yet as of 2026-08-18 -- see the decision entry below. Never published until an explicit sanitization/publication review.",
-    "private-art": "Private, product-derived: unsanitized Skills for art-pipeline concerns distinct from generic game-product Skills (e.g. design-doc-to-asset-manifest extraction, style-specification/drift-check). Reserved category, no Skills yet as of 2026-08-18. Never published until an explicit sanitization/publication review."
+    "core": "Public, installable CloudBox Skills."
   },
   "skills": {
     "about-me": "core",
@@ -17,169 +11,19 @@
     "architecture-review": "core",
     "code-review": "core",
     "codebase-architecture-discovery": "core",
-    "cloudbox-game-migration": "private-game",
-    "coding-agent-project-governance": "core",
     "coding-agent-git-discipline": "core",
-    "cluster-tool-simulator-development": "private-equipment",
-    "cross-platform-engine-architecture": "private-game",
+    "coding-agent-project-governance": "core",
     "cross-platform-native-architecture": "core",
-    "developing-skills": "private-meta",
-    "developing-eval": "private-meta",
     "development-process-tailoring": "core",
     "document-governance": "core",
     "equipment-control-architecture": "core",
     "equipment-domain-modeling": "core",
     "framework-design": "core",
     "project-management-sync": "core",
-    "game-art-pipeline": "private-art",
-    "game-asset-resolution-audit": "private-game",
-    "game-audio-design": "private-art",
-    "game-design-systems": "private-game",
-    "game-marketing-and-monetization": "private-operation",
-    "game-narrative-design": "private-art",
-    "game-quality-and-release-gates": "private-game",
-    "gameplay-core-modernization": "private-game",
-    "indie-game-product-evolution": "private-game",
-    "legacy-game-product-archaeology": "private-game",
-    "local-runtime-eval-debugging": "private-meta",
-    "native-ios-game-rewrite": "private-game",
-    "runtime-evaluation-engineering": "private-meta",
     "safe-incremental-refactoring": "core",
     "semiconductor-equipment-domain-knowledge": "core",
     "software-quality-iso25010": "core",
     "teach-while-building": "core",
-    "technical-case-content-generation": "private-operation",
-    "tray-descum-simulator-development": "private-equipment",
-    "using-cloudbox-skills": "core",
-    "wafer-bonder-debonder-development": "private-equipment",
-    "wph-equipment-simulator-development": "private-equipment"
-  },
-  "decisions": [
-    {
-      "date": "2026-08-21",
-      "decision": "about-me added as a new Skill, classified core (public), as an explicit user-directed exception to the standing new-skills-default-private policy.",
-      "reasoning": "about-me is not general software-engineering knowledge (the policy's normal core criterion) -- it is a public self-introduction of the pack's author/maintainer, meant to surface alongside meta-questions about the pack itself (what it is, who made it, how it compares to another framework). The user explicitly directed it into the public tier by name (\"放到公開技能區域去\"), the same explicit-override pattern already used for cross-platform-native-architecture. Bio content, capability claims, and both external links (GitHub, LinkedIn) were supplied and approved by the user directly in conversation, not independently sourced.",
-      "decided_by": "user, explicit instruction"
-    },
-    {
-      "date": "2026-08-21",
-      "decision": "game-art-pipeline added as a new Skill, classified private-art (not private-game, not core).",
-      "reasoning": "New Skill governing the art *production* pipeline (style-authority/art-bible gating, spec traceability, aesthetic-vs-technical conflict escalation, outsourcing partition/SOW, vertical-slice production throughput gating, legibility/accessibility validation, code-cross-reference inventory audits) -- distinct from game-asset-resolution-audit's already-existing scope (measured pixel readiness of assets that already exist: size, density, viewport, source quality, upscale/redraw, memory, export). The art-dev product-domain category in config/skill-domain-catalog.json already documents its default_distribution as private-art, a tier distinct from private-game reserved for art-pipeline concerns (design-doc-to-asset-manifest extraction, style-specification/drift-check) per the 2026-08-18 tier-split decision below. Follows the user's standing private-by-default policy for all game-related Skills: experimental stage, case/contract-layer RED evidence only, never public core.",
-      "decided_by": "Claude, following the art-dev category's already-documented default_distribution and the user's standing private-by-default policy for game-related Skills"
-    },
-    {
-      "date": "2026-08-21",
-      "decision": "game-narrative-design added as private-art (not private-game), following config/skill-domain-catalog.json's narrative-dev category default_distribution.",
-      "reasoning": "game-narrative-design is a content/narrative-design skill (premise, lore, dialogue, ambient barks, ludonarrative alignment) distilled from mined evidence, not a product-reconstruction or engineering-architecture skill like the existing private-game family. The narrative-dev taxonomy category already designated private-art as its default distribution before this skill existed, matching the private-meta/private-game/private-operation/private-art split established 2026-08-18. This is also honestly the lowest-confidence skill added to date: 6 of 7 source candidates were inferred confidence and one workflow step rests on a single tier-C source; it is released at lifecycle stage experimental (case/contract-layer evidence only, live behavior execution and managed sub-agent review not yet run), not active.",
-      "decided_by": "Claude, following the domain catalog's pre-existing narrative-dev default_distribution and the user's standing private-by-default policy"
-    },
-    {
-      "date": "2026-08-21",
-      "decision": "game-audio-design added as a new Skill, classified private-art.",
-      "reasoning": "New Skill turning the game-audio-design DRAFT (case/contract-layer evolution evidence, synthesized from 6 eval-inbox candidates) into an installed experimental-stage Skill. Follows config/skill-domain-catalog.json's audio-dev category, whose documented default_distribution is private-art (not private-game) -- audio-dev is grouped with the other role-based content-domain categories (art-dev, narrative-dev, marketing-dev) rather than the original product/engine/qa game-domain categories. Also matches the user's standing private-by-default policy for all game-related Skills made explicit earlier this session: no game-related Skill defaults to core.",
-      "decided_by": "Claude, following config/skill-domain-catalog.json's existing audio-dev category default_distribution and the user's standing private-by-default policy for game-related Skills"
-    },
-    {
-      "date": "2026-08-21",
-      "decision": "game-design-systems added as a new Skill, classified private-game.",
-      "reasoning": "New-skill addition at the design-dev product-domain category's documented default_distribution of private-game (config/skill-domain-catalog.json's categories.design-dev.default_distribution). Follows the user's standing private-by-default policy for every game-related Skill (see the entry directly below): game-design-systems governs mechanic/formula/balance/playtest/core-loop-validation design decisions distilled from sanitized case/contract-layer candidates, the same evidence class as the other private-game Skills, with no public sanitization/publication review performed.",
-      "decided_by": "Claude, following this ledger's default_tier_policy and the design-dev category's own documented default_distribution; no user override requested"
-    },
-    {
-      "date": "2026-08-21",
-      "decision": "game-marketing-and-monetization added as the first Skill on the private-operation tier, classified private-operation at creation (experimental lifecycle stage).",
-      "reasoning": "New Skill distilled from 11 mined Eval Inbox candidates (CCGS open-source agent/skill files plus Atlas private research documents 07/08/09/90), owning marketing/monetization EXECUTION (store page, launch readiness, IAP/live-economy ethics review, crisis communication, evidence-tier discipline on benchmark/fee figures) downstream of indie-game-product-evolution's scope/monetization-MODEL decision. Matches config/skill-domain-catalog.json's marketing-dev category, whose default_distribution was already declared private-operation on 2026-08-18 pending its first Skill. Per the user's standing default-private-tier policy (see this file's default_tier_policy), a product-derived marketing/operational Skill defaults private-operation, not core, at creation -- no separate sanitization/publication review has been requested or performed. scripts/export_public_bundle.py, scripts/sync_private_codex_plugin.py, and scripts/sync_gemini_plugins.py all already filter generically on tier != 'core', so this first private-operation Skill required no script changes to work end-to-end.",
-      "decided_by": "Claude, following developing-skills' Evolution workflow and this file's own already-declared private-operation tier and marketing-dev default_distribution; user's standing private-by-default distribution policy"
-    },
-    {
-      "date": "2026-08-21",
-      "decision": "cross-platform-engine-architecture reclassified core -> private-game; cross-platform-native-architecture explicitly confirmed to STAY core, at the user's direction.",
-      "reasoning": "User's standing distribution policy, made explicit this session: game-related Skills default private; the public tier is reserved for general software-engineering knowledge, the earliest general-purpose equipment Skills, and teach-while-building. cross-platform-engine-architecture's description ('a 2D, game, or graphics engine spans director/scene lifecycle, update/render loops, rendering backends...') is game/graphics-engine-specific, so it moved to private-game alongside the other 7 game-product Skills. cross-platform-native-architecture's description ('a native or Qt system spans OS-specific lifecycle, HID/USB devices, firmware update, privileged integration, packaging, Designer plug-ins, or Qt build/version migration') is general Qt/native-tooling architecture knowledge that only carries a secondary ios-dev product_domain tag from being used on the native iOS game rewrite -- the user explicitly chose to keep it public as general software knowledge rather than private-game, after this distinction was flagged.",
-      "decided_by": "user, explicit instruction, with an AskUserQuestion confirmation on the native-architecture boundary"
-    },
-    {
-      "date": "2026-08-21",
-      "decision": "wph-equipment-simulator-development reclassified core -> private-equipment, at the user's direction, resolving the open Vikunja Task #20 tier question.",
-      "reasoning": "The 7.6.32 discrete-event capacity refactor (see the 2026-08-19 decision entries above) demoted the Skill's own lifecycle stage back to experimental pending re-validation, and its evolution-pack sibling equipment Skills (tray-descum-simulator-development, cluster-tool-simulator-development, wafer-bonder-debonder-development) all stayed private-equipment through that same refactor. Keeping wph alone on core while its own lifecycle evidence had reset created an inconsistent public/private split within the same equipment family. The user made the explicit call to move it back to private-equipment rather than re-doing a publication review to keep it public.",
-      "decided_by": "user, explicit instruction"
-    },
-    {
-      "date": "2026-08-19",
-      "decision": "Hold the three new equipment-family Skills in private-equipment until the full quality-plus-game work and later publication review are complete; marketing remains last.",
-      "reasoning": "The user superseded the earlier public-candidate direction before any push, tag, or GitHub Release succeeded. The Skills remain de-identified and installable for internal testing, but public distribution is a separate later gate. WPH keeps its pre-existing core classification from 7.6.30.",
-      "decided_by": "user"
-    },
-    {
-      "date": "2026-08-19",
-      "decision": "Tray-descum, cluster-tool, and wafer-bonder/debonder equipment-family Skills are public core candidates; WPH is refactored as a cross-equipment capacity-simulation Skill.",
-      "reasoning": "The user explicitly required de-identified public Skills based on public product information. The Skills contain generic equipment mechanisms and sanitized failure patterns only: no company, customer, repository, recipe value, safety limit, site, schedule, source identifier, or private topology. Product-family Skills own physical semantics; WPH composes with them for event, scheduling, bottleneck, uncertainty, and capacity analysis.",
-      "decided_by": "user"
-    },
-    {
-      "date": "2026-08-18",
-      "decision": "Split the flat 'evolution-pack' private tier into four sub-tiers: private-meta (self-referential skill/eval tooling), private-game (existing game-product Skills, reclassified 1:1 from evolution-pack), private-operation and private-art (new, reserved, currently empty).",
-      "reasoning": "User asked to formalize a distinction this ledger already made informally: self-referential Skill maintenance differs from Skills distilled from private products. The operational and art tiers are motivated by sanitized queued candidate families with no clear existing owner, while the domain catalog already anticipated those directions. This makes distribution intent explicit without publishing candidate provenance, local paths or product artifacts. Every script checks non-core rather than one literal private tier, so future private sub-tiers require no script edit. Existing game asset audit work remains in the game tier because it is product-reconstruction work rather than a forward-looking art pipeline.",
-      "decided_by": "user, following an architecture discussion where the user asked whether the split should be three-way and Claude flagged the private-meta/private-game/private-operation/private-art naming to avoid colliding with the existing 'core' tier name"
-    },
-    {
-      "date": "2026-08-18",
-      "decision": "wph-equipment-simulator-development reclassified evolution-pack -> core after an explicit sanitization/publication review, at the user's direction.",
-      "reasoning": "The user explicitly asked for this Skill to become public. Sanitization review removed source-project file identifiers, calibrated machine timing values and a source-specific screenshot label while preserving generic responsibility, evidence-classification and placeholder patterns. No company, customer, recipe or safety-limit identifier remains.",
-      "decided_by": "user, explicit instruction to make the skill public, following Claude's sanitization review"
-    },
-    {
-      "date": "2026-08-18",
-      "decision": "wph-equipment-simulator-development was initially classified private and experimental after import from an external candidate package.",
-      "reasoning": "The imported candidate carried calibrated machine timing and source-project implementation identifiers tied to one simulator. It therefore defaulted to private pending explicit sanitization and publication review. Superseded the same day by the entry above.",
-      "decided_by": "Claude, following this ledger's own default-to-private rule for new product-derived Skills pending explicit sanitization review"
-    },
-    {
-      "date": "2026-08-17",
-      "decision": "codebase-architecture-discovery classified core, distilled from this session's own full scripts/ audit and refactor.",
-      "reasoning": "Generalized, non-CloudBox-specific software-engineering discovery discipline (staged batch reading, cross-file duplication verification, transitive-name search before renaming, architecture-map-as-artifact) with no product/company-identifying content -- the same class of Skill as safe-incremental-refactoring and architecture-review, already core. Checked for an existing owner first per developing-skills' own process: safe-incremental-refactoring assumes the extraction slice is already known (its workflow starts at 'establish behavioral baseline' for a defined slice); architecture-review is a single-decision comparison between named options. Neither covers surveying a whole unfamiliar codebase area to find what needs deciding in the first place. Independently routable trigger (before any specific slice or decision is known) justified a new Skill rather than expanding either existing owner, following the same discovery-precedes-execution precedent already established between legacy-game-product-archaeology and gameplay-core-modernization.",
-      "decided_by": "Claude, following developing-skills' owner-search process; user directed the distillation itself"
-    },
-    {
-      "date": "2026-08-15",
-      "decision": "developing-skills split into developing-skills (core) and developing-eval (evolution-pack); this ledger promoted from a deferred label to an enforced export filter.",
-      "reasoning": "Marketplace submission readiness check found the temporary full-sync exception had already mirrored all three evolution-pack skills into the public CloudSkill repo, contradicting this ledger's own 'never publish' classification -- a memory/discipline-dependent gap, not a structural one. developing-skills itself turned out to bundle two different concerns: generic skill-authoring craft (RED/GREEN, lifecycle stages, routing/behavior case design -- reusable by anyone, analogous to Anthropic's own skill-creator) and CloudBox's own private conversation-mining machinery (reads this user's own interaction history via the private Eval Inbox/exchange). Splitting lets the generic half publish normally while keeping only the genuinely privacy-sensitive half, plus the two runtime-eval skills, in the evolution-pack tier -- now enforced by a script reading this file at export time instead of relying on remembering to filter during each sync.",
-      "decided_by": "user"
-    },
-    {
-      "date": "2026-08-14",
-      "decision": "semiconductor-equipment-domain-knowledge, equipment-control-architecture, and equipment-domain-modeling classified core, not evolution-pack.",
-      "reasoning": "Content is already generalized/de-identified (no specific company, project, customer, recipe, or safety-limit identifiers per developing-skills' own sanitization discipline) -- publishing general equipment-automation-architecture knowledge does not expose the user's specific employer or project work.",
-      "decided_by": "user, explicit choice between two presented options"
-    },
-    {
-      "date": "2026-08-14",
-      "decision": "developing-skills, local-runtime-eval-debugging, and runtime-evaluation-engineering classified evolution-pack.",
-      "reasoning": "These are meta-tooling for maintaining CloudBox's own routing/behavior accuracy and skill-development lifecycle, not skills a user would apply to build their own product -- self-referential rather than general-purpose.",
-      "decided_by": "Claude, following the category boundary the user already stated (skill self-evolution/mining machinery stays private)"
-    },
-    {
-      "date": "2026-08-14",
-      "decision": "using-cloudbox-skills classified core, with a caveat.",
-      "reasoning": "The router itself is general-purpose and belongs in Core, but a Core-only build must not let it route to evolution-pack-tier skills (dead-end routes on the public side, same class of concern skill-portability.json already flags for local-runtime-eval-debugging on sandboxed surfaces). Needs a Core-scoped routing reference at actual split time, not resolved by this ledger alone.",
-      "decided_by": "Claude"
-    },
-    {
-      "date": "2026-08-15",
-      "decision": "The game-specific Skills legacy-game-product-archaeology and game-asset-resolution-audit are private Evolution/Product Pack Skills; future game-dev, art-dev, product-dev, marketing-dev, and qa-dev Skills from this product family default to private until explicitly sanitized and reclassified.",
-      "reasoning": "These Skills were distilled from the user's legacy game products and contain product-specific reconstruction and asset decisions. Keep them out of the public Core until a separate sanitization and publication review proves that the generalized content is safe and still useful without the private product context.",
-      "decided_by": "user"
-    },
-    {
-      "date": "2026-08-16",
-      "decision": "project-management-sync is core and publicly distributable by default; internal endpoints, credentials, mappings, and provider profiles remain local-only runtime configuration.",
-      "reasoning": "The Skill owns generalized external-system synchronization, version-aware adapters, idempotent reconciliation, and cross-platform secret boundaries. It contains no product-specific backlog, endpoint, account, or credential data, so keeping the reusable contract in Core supports macOS, Windows, and Ubuntu consistently. Sensitive deployment data remains outside the Skill.",
-      "decided_by": "user, explicit cross-platform and future-publication requirement"
-    },
-    {
-      "date": "2026-08-28",
-      "decision": "developing-skills reclassified core -> private-meta, at the user's direction, grouping it with developing-eval (already private-meta) as CloudSkill's own self-referential skill-authoring/evolution tooling.",
-      "reasoning": "Prompted by the user asking whether any core (public) Skill has a hidden functional dependency on a private-tier Skill, after discovering developing-skills' own interaction-capture triggers (整理成正向案例/整理成負向案例) are entirely implemented by developing-eval (private), not developing-skills itself -- a public Skill whose own SKILL.md advertises a capability it cannot deliver without a private sibling. A full grep-based audit of all 21 core Skills against all 21 private-tier Skill names found this was the ONLY genuine functional dependency (every other cross-reference found -- codebase-architecture-discovery's legacy-game-product-archaeology analogy, coding-agent-project-governance's explicitly-conditional game-art-pipeline lane, cross-platform-native-architecture's cross-platform-engine-architecture routing handoff, developing-skills' own remaining references to game-audio-design/game-marketing-and-monetization/game-narrative-design/runtime-evaluation-engineering, and using-cloudbox-skills' router-level awareness of every installed private equipment/eval Skill -- were confirmed to be illustrative examples, explicitly optional/conditional references, cross-domain handoff notes, or the router's inherent graceful degradation, none of which break a core Skill's own advertised capability when the private sibling is absent). Rather than only fixing the AGENTS.md routing-attribution line (already done separately), the user chose to resolve the underlying asymmetry by moving developing-skills itself to private-meta, so the public package no longer ships a Skill that names capabilities it cannot itself perform.",
-      "decided_by": "user, explicit instruction, following a full dependency audit"
-    }
-  ]
+    "using-cloudbox-skills": "core"
+  }
 }

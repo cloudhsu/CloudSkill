@@ -19,32 +19,11 @@ From a local clone:
 ```powershell
 codex plugin marketplace add D:\Git\CloudSkill
 codex plugin add cloudbox-skills@cloudbox-marketplace
-codex plugin add cloudbox-skills-private@cloudbox-marketplace
 codex plugin list
 ```
 
-Restart or refresh the ChatGPT/Codex plugin directory, select the **CloudBox** marketplace, and install **CloudBox** plus **CloudBox Skills (Private Add-on)**. The private add-on is declared only by the private checkout; public exports remove its marketplace entry. For a GitHub-hosted marketplace, add the authorized private repository instead of the public `cloudhsu/CloudSkill` mirror when the private add-on is required.
+Restart or refresh the ChatGPT/Codex plugin directory, select the **CloudBox** marketplace, and install **CloudBox**.
 
-The private checkout uses a generated `public-plugin/` source for
-`cloudbox-skills` and `private-plugin/` for `cloudbox-skills-private`. This is
-intentional: the plugin manager copies the complete source directory, so the
-public cache must not point at the private repository root. After changing a
-core Skill, refresh the public package with:
-
-```bash
-python3 scripts/sync_public_plugin.py
-```
-
-The OpenAI manifests use the supplied CloudBox branding for the core plugin. The private add-on intentionally omits cross-directory logo paths so the Codex installer can copy it without path traversal; it retains the CloudBox brand color. Because Codex copies regular files but does not dereference the Claude-oriented symlink projection, the private Codex manifest uses the generated `private-plugin/codex-skills/` projection; refresh it with `python3 scripts/sync_private_codex_plugin.py` after changing a private Skill.
-
-To configure the private Eval Inbox without installing a duplicate standalone skill copy:
-
-```powershell
-& "D:\Git\CloudSkill\scripts\install.ps1" `
-  -Scope user `
-  -CloudSkillRepoPath "D:\Git\CloudSkill" `
-  -ConfigOnly
-```
 
 ## Claude Code installation
 
@@ -53,9 +32,9 @@ From a local clone:
 ```powershell
 claude plugin marketplace add D:\Git\CloudSkill
 claude plugin install cloudbox-skills@cloudbox-marketplace --scope user
-claude plugin install cloudbox-skills-private@cloudbox-marketplace --scope user
 claude plugin list
 ```
+
 
 Then run:
 
@@ -63,7 +42,6 @@ Then run:
 /reload-plugins
 ```
 
-Use the same `-ConfigOnly` setup when the Claude Code plugin should write sanitized positive or negative cases to the local Eval Inbox.
 
 Claude Code namespaces plugin skills. For example:
 

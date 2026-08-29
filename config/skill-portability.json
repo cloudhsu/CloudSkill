@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "description": "Classifies each Skill's compatibility with sandboxed, non-CLI surfaces (claude.ai web Custom Skills, Claude Desktop Custom Skills, Claude API Skills). CLI surfaces (Codex CLI, Claude Code CLI, Gemini CLI) support every Skill regardless of this classification, since they give the model full local filesystem and subprocess access. scripts/validate_skill_portability.py is the executable adapter for this data.",
+  "description": "Portability classification for Skills present in the public CloudBox artifact.",
   "tiers": {
     "portable": "No dependency on scripts/*.py, cloudbox-skills-eval*, .local/, or other CloudSkill-repository-relative tooling. Safe to package as a standalone zip for claude.ai/Desktop/API upload as-is.",
     "hybrid": "Core judgment/methodology is portable, but some documented workflow steps invoke CloudSkill-repository scripts or assume repository-relative paths that will not function in a sandboxed surface. Package as-is but disclose the non-functional steps; do not silently strip them.",
@@ -14,44 +14,19 @@
     "architecture-review": "portable",
     "codebase-architecture-discovery": "portable",
     "code-review": "portable",
-    "cloudbox-game-migration": "portable",
     "coding-agent-project-governance": "portable",
     "coding-agent-git-discipline": "portable",
-    "cluster-tool-simulator-development": "portable",
-    "cross-platform-engine-architecture": "portable",
     "cross-platform-native-architecture": "portable",
-    "developing-skills": "hybrid",
-    "developing-eval": "cli-only",
     "development-process-tailoring": "portable",
     "document-governance": "portable",
     "equipment-control-architecture": "portable",
     "equipment-domain-modeling": "portable",
     "framework-design": "portable",
-    "game-art-pipeline": "portable",
-    "game-asset-resolution-audit": "portable",
-    "game-audio-design": "portable",
-    "game-design-systems": "portable",
-    "game-marketing-and-monetization": "portable",
-    "game-narrative-design": "portable",
-    "game-quality-and-release-gates": "portable",
-    "gameplay-core-modernization": "portable",
-    "indie-game-product-evolution": "portable",
-    "legacy-game-product-archaeology": "portable",
-    "local-runtime-eval-debugging": "cli-only",
-    "native-ios-game-rewrite": "portable",
-    "runtime-evaluation-engineering": "portable",
-    "technical-case-content-generation": "portable",
     "safe-incremental-refactoring": "portable",
     "semiconductor-equipment-domain-knowledge": "portable",
     "software-quality-iso25010": "portable",
     "teach-while-building": "portable",
-    "tray-descum-simulator-development": "portable",
-    "using-cloudbox-skills": "portable",
-    "wafer-bonder-debonder-development": "portable",
-    "wph-equipment-simulator-development": "portable"
+    "using-cloudbox-skills": "portable"
   },
-  "deployment_notes": [
-    "A claude.ai/Desktop bundle should exclude local-runtime-eval-debugging entirely rather than package a non-functional Skill.",
-    "using-cloudbox-skills routes to every Skill including local-runtime-eval-debugging; on a sandboxed surface that route is a dead end. This is a deployment/bundle-composition concern, not a defect in using-cloudbox-skills's own content."
-  ]
+  "deployment_notes": []
 }

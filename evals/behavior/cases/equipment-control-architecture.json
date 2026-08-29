@@ -221,7 +221,7 @@
       "baseline_expected_failure": [
         "agent treats parallel mode as permission for any robot to use any station, or leaves an executable shared module idle because later work reserved it early"
       ],
-      "review_notes": "Distilled 2026-08-28 from a real Eval Inbox interaction candidate (candidate_id=INT-20260827-060244-6ce0a234, captured 2026-08-27T06:02:44+00:00, originally exported from a codex session at cloudskill_version=7.6.39). Batch-reviewed 2026-08-28: deduplicated against the other 12 candidates in the same import (detect_candidate_similarity.py, 0 pairs >=0.28), manually re-scanned for identifying detail (sensitization.status was MANUAL_REQUIRED -- exported without a reachable private terms file; clean on manual read). Candidate only; confirm owner and establish RED in destination repository."
+      "review_notes": "Distilled 2026-08-28 from a real Eval Inbox interaction candidate (sanitized source evidence, captured 2026-08-27T06:02:44+00:00, originally exported from a codex session at cloudskill_version=7.6.39). Batch-reviewed 2026-08-28: deduplicated against the other 12 candidates in the same import (detect_candidate_similarity.py, 0 pairs >=0.28), manually re-scanned for identifying detail (sensitization.status was MANUAL_REQUIRED -- exported without a reachable private terms file; clean on manual read). Candidate only; confirm owner and establish RED in destination repository."
     }
   ]
 }

@@ -49,8 +49,8 @@
       ],
       "review_notes": "Review semantic relationships, evidence, and omissions; keyword presence alone is insufficient."
     },
-        {
-            "id": "CR-BEH-003",
+    {
+      "id": "CR-BEH-003",
       "skill": "code-review",
       "type": "counterexample",
       "prompt": "Design a reusable command/state/device framework for several products.",
@@ -67,174 +67,174 @@
       "baseline_expected_failure": [
         "agent uses code-review for a greenfield framework design"
       ],
-            "review_notes": "Review semantic relationships, evidence, and omissions; keyword presence alone is insufficient."
-        },
-        {
-            "id": "CR-BEH-004",
-            "skill": "code-review",
-            "type": "application",
-            "prompt": "Review a binary-protocol worker that decodes fields successfully in most messages, reports connected as ready, and detaches its thread during shutdown.",
-            "expected_routing": true,
-            "expected_alternative_skill": null,
-            "required_behaviors": [
-                "checks byte order, signedness, field offsets, declared lengths and bounds before decoding",
-                "requires owned joinable shutdown with cancellation, wake-up and a bounded join before dependent resources are destroyed",
-                "distinguishes transport connected, protocol ready, command accepted, correlated completion and physical readback"
-            ],
-            "forbidden_behaviors": [
-                "accepts representative parser examples without boundary and malformed-frame tests",
-                "treats a detached worker as safe merely because process exit eventually reclaims it",
-                "equates a live connection with operation completion"
-            ],
-            "required_artifacts": [
-                "ranked correctness findings",
-                "boundary and shutdown tests"
-            ],
-            "baseline_expected_failure": [
-                "agent reviews happy-path decoding but misses byte-order, lifetime and readiness-state ambiguity"
-            ],
-            "review_notes": "Keep protocol constants generic; review ordering, ownership and state semantics rather than inventing a wire format."
-        },
-        {
-            "id": "CR-BEH-005",
-            "skill": "code-review",
-            "type": "application",
-            "prompt": "Review a multi-sensor readiness aggregator. Each sensor thread calls collector.ReportReady(sensorId), which sets sensorStatus[sensorId] = READY in a shared map. The registration set registeredSensors already tracks every sensor expected this round. ReportReady's callback checks only whether the just-reported sensor's own status is READY, and if so immediately calls AdvanceToNextPhase(). QA reports that phase advancement now happens well before the slower sensors have reported, and registeredSensors is never referenced inside ReportReady.",
-            "expected_routing": true,
-            "expected_alternative_skill": null,
-            "required_behaviors": [
-                "requires an explicit completeness check comparing the ready-status collection against every registered participant before advancing shared state",
-                "identifies that reaching the advance decision from the one just-reported sensor's status alone is the defect, independent of whether that sensor's own status is correct",
-                "treats the unused registeredSensors set as evidence that the completeness comparison was never wired in, not as sufficient bookkeeping on its own",
-                "distinguishes the verified defect (advance triggered without checking other participants) from any hypothesis about which sensor is slow"
-            ],
-            "forbidden_behaviors": [
-                "accepts advancing shared state after inspecting only the one participant's ready flag",
-                "treats the existence of registeredSensors as proof the aggregator already gates on completeness",
-                "recommends a timing/delay fix instead of an explicit all-registered-participants check"
-            ],
-            "required_artifacts": [],
-            "baseline_expected_failure": [
-                "agent confirms ReportReady updates state correctly per sensor and misses that AdvanceToNextPhase is reachable from a single participant's signal instead of a completeness check"
-            ],
-            "review_notes": "Closes the State and Concurrency barrier/rendezvous completeness-check addition."
-        },
-        {
-            "id": "CR-BEH-006",
-            "skill": "code-review",
-            "type": "application",
-            "prompt": "Review a Connection class with a member `weak_ptr<Session> session_` assigned once in the constructor from a Session pointer passed in by the caller. A background keep-alive timer ticks every 5 seconds and calls `session_.lock()->SendKeepAlive()` with no null check on the lock() result. A search of the codebase turns up no shared_ptr<Session> held anywhere -- the caller that constructed Connection passed a raw Session* that it owns on the stack.",
-            "expected_routing": true,
-            "expected_alternative_skill": null,
-            "required_behaviors": [
-                "requires confirming a specific other owner holds the corresponding shared_ptr<Session> for a lifetime that starts before and outlives Connection's use before accepting the weak_ptr member",
-                "flags the session_.lock()->SendKeepAlive() call for dereferencing without a null/expired check",
-                "escalates the finding because no shared_ptr<Session> owner exists anywhere in the codebase, naming the pointer as reliably expired rather than occasionally expired",
-                "recommends Connection own the Session data directly (or an equivalent owning relationship) rather than patching in a null check alone"
-            ],
-            "forbidden_behaviors": [
-                "approves the weak_ptr member without tracing an actual owning shared_ptr elsewhere in the codebase",
-                "treats the crash risk as intermittent or rare given no owner exists at all",
-                "recommends only adding a null check while leaving the ownerless weak_ptr design in place"
-            ],
-            "required_artifacts": [],
-            "baseline_expected_failure": [
-                "agent flags the missing null check on lock() as a minor style nit without checking whether any shared_ptr<Session> owner exists, missing that the reference is reliably expired"
-            ],
-            "review_notes": "Closes the Resource Lifetime weak_ptr independent-owner confirmation addition."
-        },
-        {
-            "id": "CR-BEH-007",
-            "skill": "code-review",
-            "type": "application",
-            "prompt": "Review a newly added `RandomUtil::rand()` wrapper meant to provide seeded random numbers app-wide. On the POSIX #ifdef arm it calls `srand(seed)` once at startup and then its body calls `rand()` to produce each value before returning it. QA reports it works fine on Linux, but the same source file's Windows #ifdef arm hangs/stack-overflows in the field. The PR description says the Windows arm 'does the same thing, just with the Windows RNG call.'",
-            "expected_routing": true,
-            "expected_alternative_skill": null,
-            "required_behaviors": [
-                "checks whether the unqualified rand() call inside RandomUtil::rand() resolves to itself (self-recursion) rather than the intended global/library rand()",
-                "recommends renaming the wrapper or explicitly qualifying the inner call (e.g. ::rand()) to break the self-recursion",
-                "treats the Linux arm working as no evidence that the Windows arm's equivalent call is correct, since the defect can be platform/branch-gated"
-            ],
-            "forbidden_behaviors": [
-                "assumes the Linux success proves the wrapper's calling convention is fine and the Windows hang has an unrelated cause",
-                "attributes the hang purely to a Windows runtime/stack-size quirk without checking name resolution inside the wrapper",
-                "dismisses the wrapper/library name collision as immaterial style"
-            ],
-            "required_artifacts": [],
-            "baseline_expected_failure": [
-                "agent proposes increasing thread stack size or blames a Windows-specific runtime quirk instead of tracing the unqualified rand() call back to self-recursion on the matching #ifdef arm"
-            ],
-            "review_notes": "Closes the new Naming and Control Flow self-recursion mechanism."
-        },
-        {
-            "id": "CR-BEH-008",
-            "skill": "code-review",
-            "type": "application",
-            "prompt": "Review order-routing code. The existing chain handled `isBulk` orders. A new `isExpedited` flag was just added (an order can be bulk and expedited at once), and dispatch was extended as: `if (isBulk) { RouteToBulkLane(); } else if (isBulk && isExpedited) { RouteToExpeditedBulkLane(); } else { RouteToStandardLane(); }`. Since the change shipped, orders that are both bulk and expedited have been routing to the standard bulk lane instead of the expedited lane, and the team suspects the isExpedited flag isn't being set.",
-            "expected_routing": true,
-            "expected_alternative_skill": null,
-            "required_behaviors": [
-                "identifies that the chain is ordered general-before-specific and that if/else-if always takes the first true branch, so isBulk alone swallows the isBulk && isExpedited case before it is ever reached",
-                "recommends reordering branches from most specific (more flags required to match) to least specific",
-                "flags that adding isExpedited to a codebase with a pre-existing isBulk-only chain required re-auditing every existing chain gated on isBulk, since the new flag changed which branch flag combinations reach"
-            ],
-            "forbidden_behaviors": [
-                "accepts the branch order as-is without noting isBulk and isExpedited are not mutually exclusive",
-                "treats the unreachable expedited-bulk branch as a style nit rather than a functional defect that silently swallows the specific case",
-                "endorses the team's theory that isExpedited isn't being set without first examining branch order"
-            ],
-            "required_artifacts": [],
-            "baseline_expected_failure": [
-                "agent chases the team's hypothesis and asks to trace where isExpedited is assigned, missing that branch order itself makes the specific case unreachable regardless of the flag's value"
-            ],
-            "review_notes": "Closes the new Naming and Control Flow non-mutually-exclusive flag-ordering mechanism."
-        },
-        {
-            "id": "CR-BEH-009",
-            "skill": "code-review",
-            "type": "application",
-            "prompt": "Review a factory function `StatusOr<unique_ptr<Widget>> CreateWidget(const Config& cfg)`. Its final lines are: `unique_ptr<Widget> widget = std::make_unique<Widget>(cfg); widget->Initialize(); return widget;`. The build fails with a compiler error citing a deleted copy constructor on Widget at the return statement, and the PR under review proposes adding a copy constructor to Widget to make it compile.",
-            "expected_routing": true,
-            "expected_alternative_skill": null,
-            "required_behaviors": [
-                "identifies that the declared return type StatusOr<unique_ptr<Widget>> is a converting wrapper distinct from the local's type unique_ptr<Widget>, so C++'s implicit-move-on-return exemption does not apply",
-                "recommends explicit construction with std::move, e.g. `return StatusOr<unique_ptr<Widget>>(std::move(widget));`, rather than the bare `return widget;`",
-                "rejects making Widget copyable as the fix, naming the deleted-copy compile error as a signal of the wrapper/local type mismatch rather than a signal to add copyability"
-            ],
-            "forbidden_behaviors": [
-                "endorses adding a copy constructor to Widget to resolve the compile error",
-                "claims C++'s implicit move-on-return already covers a bare `return widget;` into a converting StatusOr wrapper",
-                "treats the deleted-copy-constructor error as unrelated to the wrapper type mismatch"
-            ],
-            "required_artifacts": [],
-            "baseline_expected_failure": [
-                "agent accepts or does not object to making Widget copyable, or assumes the implicit move-on-return rule already applies across the StatusOr wrapper boundary, missing the need for an explicit std::move"
-            ],
-            "review_notes": "Closes the new Naming and Control Flow move-only-through-converting-wrapper mechanism."
-        },
-        {
-            "id": "CR-BEH-010",
-            "skill": "code-review",
-            "type": "discipline",
-            "prompt": "A visual-timeline test searches event timings and treats the first event found at time zero as a valid fixture. Review whether the lookup correctly distinguishes a real zero value from a missing result.",
-            "expected_routing": true,
-            "expected_alternative_skill": null,
-            "required_behaviors": [
-                "flags representing a missing numeric result with a value that is also a legitimate domain value (here, zero) as a defect",
-                "requires an explicit optional/impossible sentinel for missing results instead of a valid-domain-value sentinel",
-                "requires the lookup result to be checked/asserted before it is used to select a component",
-                "requires a time-zero (or equivalent boundary-value) fixture in the regression test"
-            ],
-            "forbidden_behaviors": [
-                "accepts zero, empty string, or false as a not-found sentinel when it is also a valid domain value",
-                "relies on truthiness to validate a lookup result",
-                "recommends repairing a failing assertion by changing the fixture instead of fixing the sentinel contract"
-            ],
-            "required_artifacts": [],
-            "baseline_expected_failure": [
-                "reviewer does not flag the zero-as-not-found sentinel bug, and the test continues to silently select the wrong component whenever a legitimate event starts at time zero"
-            ],
-            "review_notes": "Distilled 2026-08-25 from a real collaborative-distillation candidate (GPT-5.6 Luna/Sol, project-history mining): a time-zero event was mistaken for not-found because zero was reused as the sentinel value. Intentionally scoped to the sentinel-value pattern, separate from event/timeline semantic correctness."
-        }
+      "review_notes": "Review semantic relationships, evidence, and omissions; keyword presence alone is insufficient."
+    },
+    {
+      "id": "CR-BEH-004",
+      "skill": "code-review",
+      "type": "application",
+      "prompt": "Review a binary-protocol worker that decodes fields successfully in most messages, reports connected as ready, and detaches its thread during shutdown.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "checks byte order, signedness, field offsets, declared lengths and bounds before decoding",
+        "requires owned joinable shutdown with cancellation, wake-up and a bounded join before dependent resources are destroyed",
+        "distinguishes transport connected, protocol ready, command accepted, correlated completion and physical readback"
+      ],
+      "forbidden_behaviors": [
+        "accepts representative parser examples without boundary and malformed-frame tests",
+        "treats a detached worker as safe merely because process exit eventually reclaims it",
+        "equates a live connection with operation completion"
+      ],
+      "required_artifacts": [
+        "ranked correctness findings",
+        "boundary and shutdown tests"
+      ],
+      "baseline_expected_failure": [
+        "agent reviews happy-path decoding but misses byte-order, lifetime and readiness-state ambiguity"
+      ],
+      "review_notes": "Keep protocol constants generic; review ordering, ownership and state semantics rather than inventing a wire format."
+    },
+    {
+      "id": "CR-BEH-005",
+      "skill": "code-review",
+      "type": "application",
+      "prompt": "Review a multi-sensor readiness aggregator. Each sensor thread calls collector.ReportReady(sensorId), which sets sensorStatus[sensorId] = READY in a shared map. The registration set registeredSensors already tracks every sensor expected this round. ReportReady's callback checks only whether the just-reported sensor's own status is READY, and if so immediately calls AdvanceToNextPhase(). QA reports that phase advancement now happens well before the slower sensors have reported, and registeredSensors is never referenced inside ReportReady.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "requires an explicit completeness check comparing the ready-status collection against every registered participant before advancing shared state",
+        "identifies that reaching the advance decision from the one just-reported sensor's status alone is the defect, independent of whether that sensor's own status is correct",
+        "treats the unused registeredSensors set as evidence that the completeness comparison was never wired in, not as sufficient bookkeeping on its own",
+        "distinguishes the verified defect (advance triggered without checking other participants) from any hypothesis about which sensor is slow"
+      ],
+      "forbidden_behaviors": [
+        "accepts advancing shared state after inspecting only the one participant's ready flag",
+        "treats the existence of registeredSensors as proof the aggregator already gates on completeness",
+        "recommends a timing/delay fix instead of an explicit all-registered-participants check"
+      ],
+      "required_artifacts": [],
+      "baseline_expected_failure": [
+        "agent confirms ReportReady updates state correctly per sensor and misses that AdvanceToNextPhase is reachable from a single participant's signal instead of a completeness check"
+      ],
+      "review_notes": "Closes the State and Concurrency barrier/rendezvous completeness-check addition."
+    },
+    {
+      "id": "CR-BEH-006",
+      "skill": "code-review",
+      "type": "application",
+      "prompt": "Review a Connection class with a member `weak_ptr<Session> session_` assigned once in the constructor from a Session pointer passed in by the caller. A background keep-alive timer ticks every 5 seconds and calls `session_.lock()->SendKeepAlive()` with no null check on the lock() result. A search of the codebase turns up no shared_ptr<Session> held anywhere -- the caller that constructed Connection passed a raw Session* that it owns on the stack.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "requires confirming a specific other owner holds the corresponding shared_ptr<Session> for a lifetime that starts before and outlives Connection's use before accepting the weak_ptr member",
+        "flags the session_.lock()->SendKeepAlive() call for dereferencing without a null/expired check",
+        "escalates the finding because no shared_ptr<Session> owner exists anywhere in the codebase, naming the pointer as reliably expired rather than occasionally expired",
+        "recommends Connection own the Session data directly (or an equivalent owning relationship) rather than patching in a null check alone"
+      ],
+      "forbidden_behaviors": [
+        "approves the weak_ptr member without tracing an actual owning shared_ptr elsewhere in the codebase",
+        "treats the crash risk as intermittent or rare given no owner exists at all",
+        "recommends only adding a null check while leaving the ownerless weak_ptr design in place"
+      ],
+      "required_artifacts": [],
+      "baseline_expected_failure": [
+        "agent flags the missing null check on lock() as a minor style nit without checking whether any shared_ptr<Session> owner exists, missing that the reference is reliably expired"
+      ],
+      "review_notes": "Closes the Resource Lifetime weak_ptr independent-owner confirmation addition."
+    },
+    {
+      "id": "CR-BEH-007",
+      "skill": "code-review",
+      "type": "application",
+      "prompt": "Review a newly added `RandomUtil::rand()` wrapper meant to provide seeded random numbers app-wide. On the POSIX #ifdef arm it calls `srand(seed)` once at startup and then its body calls `rand()` to produce each value before returning it. QA reports it works fine on Linux, but the same source file's Windows #ifdef arm hangs/stack-overflows in the field. The PR description says the Windows arm 'does the same thing, just with the Windows RNG call.'",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "checks whether the unqualified rand() call inside RandomUtil::rand() resolves to itself (self-recursion) rather than the intended global/library rand()",
+        "recommends renaming the wrapper or explicitly qualifying the inner call (e.g. ::rand()) to break the self-recursion",
+        "treats the Linux arm working as no evidence that the Windows arm's equivalent call is correct, since the defect can be platform/branch-gated"
+      ],
+      "forbidden_behaviors": [
+        "assumes the Linux success proves the wrapper's calling convention is fine and the Windows hang has an unrelated cause",
+        "attributes the hang purely to a Windows runtime/stack-size quirk without checking name resolution inside the wrapper",
+        "dismisses the wrapper/library name collision as immaterial style"
+      ],
+      "required_artifacts": [],
+      "baseline_expected_failure": [
+        "agent proposes increasing thread stack size or blames a Windows-specific runtime quirk instead of tracing the unqualified rand() call back to self-recursion on the matching #ifdef arm"
+      ],
+      "review_notes": "Closes the new Naming and Control Flow self-recursion mechanism."
+    },
+    {
+      "id": "CR-BEH-008",
+      "skill": "code-review",
+      "type": "application",
+      "prompt": "Review order-routing code. The existing chain handled `isBulk` orders. A new `isExpedited` flag was just added (an order can be bulk and expedited at once), and dispatch was extended as: `if (isBulk) { RouteToBulkLane(); } else if (isBulk && isExpedited) { RouteToExpeditedBulkLane(); } else { RouteToStandardLane(); }`. Since the change shipped, orders that are both bulk and expedited have been routing to the standard bulk lane instead of the expedited lane, and the team suspects the isExpedited flag isn't being set.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "identifies that the chain is ordered general-before-specific and that if/else-if always takes the first true branch, so isBulk alone swallows the isBulk && isExpedited case before it is ever reached",
+        "recommends reordering branches from most specific (more flags required to match) to least specific",
+        "flags that adding isExpedited to a codebase with a pre-existing isBulk-only chain required re-auditing every existing chain gated on isBulk, since the new flag changed which branch flag combinations reach"
+      ],
+      "forbidden_behaviors": [
+        "accepts the branch order as-is without noting isBulk and isExpedited are not mutually exclusive",
+        "treats the unreachable expedited-bulk branch as a style nit rather than a functional defect that silently swallows the specific case",
+        "endorses the team's theory that isExpedited isn't being set without first examining branch order"
+      ],
+      "required_artifacts": [],
+      "baseline_expected_failure": [
+        "agent chases the team's hypothesis and asks to trace where isExpedited is assigned, missing that branch order itself makes the specific case unreachable regardless of the flag's value"
+      ],
+      "review_notes": "Closes the new Naming and Control Flow non-mutually-exclusive flag-ordering mechanism."
+    },
+    {
+      "id": "CR-BEH-009",
+      "skill": "code-review",
+      "type": "application",
+      "prompt": "Review a factory function `StatusOr<unique_ptr<Widget>> CreateWidget(const Config& cfg)`. Its final lines are: `unique_ptr<Widget> widget = std::make_unique<Widget>(cfg); widget->Initialize(); return widget;`. The build fails with a compiler error citing a deleted copy constructor on Widget at the return statement, and the PR under review proposes adding a copy constructor to Widget to make it compile.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "identifies that the declared return type StatusOr<unique_ptr<Widget>> is a converting wrapper distinct from the local's type unique_ptr<Widget>, so C++'s implicit-move-on-return exemption does not apply",
+        "recommends explicit construction with std::move, e.g. `return StatusOr<unique_ptr<Widget>>(std::move(widget));`, rather than the bare `return widget;`",
+        "rejects making Widget copyable as the fix, naming the deleted-copy compile error as a signal of the wrapper/local type mismatch rather than a signal to add copyability"
+      ],
+      "forbidden_behaviors": [
+        "endorses adding a copy constructor to Widget to resolve the compile error",
+        "claims C++'s implicit move-on-return already covers a bare `return widget;` into a converting StatusOr wrapper",
+        "treats the deleted-copy-constructor error as unrelated to the wrapper type mismatch"
+      ],
+      "required_artifacts": [],
+      "baseline_expected_failure": [
+        "agent accepts or does not object to making Widget copyable, or assumes the implicit move-on-return rule already applies across the StatusOr wrapper boundary, missing the need for an explicit std::move"
+      ],
+      "review_notes": "Closes the new Naming and Control Flow move-only-through-converting-wrapper mechanism."
+    },
+    {
+      "id": "CR-BEH-010",
+      "skill": "code-review",
+      "type": "discipline",
+      "prompt": "A visual-timeline test searches event timings and treats the first event found at time zero as a valid fixture. Review whether the lookup correctly distinguishes a real zero value from a missing result.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "flags representing a missing numeric result with a value that is also a legitimate domain value (here, zero) as a defect",
+        "requires an explicit optional/impossible sentinel for missing results instead of a valid-domain-value sentinel",
+        "requires the lookup result to be checked/asserted before it is used to select a component",
+        "requires a time-zero (or equivalent boundary-value) fixture in the regression test"
+      ],
+      "forbidden_behaviors": [
+        "accepts zero, empty string, or false as a not-found sentinel when it is also a valid domain value",
+        "relies on truthiness to validate a lookup result",
+        "recommends repairing a failing assertion by changing the fixture instead of fixing the sentinel contract"
+      ],
+      "required_artifacts": [],
+      "baseline_expected_failure": [
+        "reviewer does not flag the zero-as-not-found sentinel bug, and the test continues to silently select the wrong component whenever a legitimate event starts at time zero"
+      ],
+      "review_notes": "Distilled 2026-08-25 from a real collaborative-distillation candidate (GPT-5.6 Luna/Sol, project-history mining): a time-zero event was mistaken for not-found because zero was reused as the sentinel value. Intentionally scoped to the sentinel-value pattern, separate from event/timeline semantic correctness."
+    }
   ]
 }

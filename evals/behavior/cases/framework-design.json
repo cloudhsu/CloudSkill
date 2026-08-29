@@ -69,8 +69,8 @@
       ],
       "review_notes": "Review semantic relationships, evidence, and omissions; keyword presence alone is insufficient."
     },
-        {
-            "id": "FW-BEH-004",
+    {
+      "id": "FW-BEH-004",
       "skill": "framework-design",
       "type": "application",
       "prompt": "Create a shared equipment kernel for several products whose chamber composition, UI and workflows vary by configuration.",
@@ -92,34 +92,34 @@
       "baseline_expected_failure": [
         "agent centralizes all product behavior into one framework"
       ],
-            "review_notes": "Review semantic relationships, authority, lifecycle, failure behavior, and evidence; keyword presence alone is insufficient."
-        },
-        {
-            "id": "FW-BEH-005",
-            "skill": "framework-design",
-            "type": "application",
-            "prompt": "Design one reusable device framework for products that use different transports and discover implementations through a registry consumed by several hosts.",
-            "expected_routing": true,
-            "expected_alternative_skill": null,
-            "required_behaviors": [
-                "models transport-independent capabilities and preserves transport-specific limits, lifecycle and failure semantics",
-                "defines one authoritative registry with a shared adapter and enumerated consumers",
-                "requires positive propagation and negative drift-injection tests for registry changes"
-            ],
-            "forbidden_behaviors": [
-                "forces every transport into a lowest-common-denominator interface",
-                "copies registry entries or switch statements into each consumer",
-                "claims registry centralization is sufficient without mutation evidence"
-            ],
-            "required_artifacts": [
-                "capability and transport-variation map",
-                "registry authority and anti-drift test plan"
-            ],
-            "baseline_expected_failure": [
-                "agent centralizes a registry structurally but does not prove propagation or detect consumer drift"
-            ],
-            "review_notes": "The closest authoritative-contract pattern requires both positive propagation and negative injected-drift coverage."
-        },
+      "review_notes": "Review semantic relationships, authority, lifecycle, failure behavior, and evidence; keyword presence alone is insufficient."
+    },
+    {
+      "id": "FW-BEH-005",
+      "skill": "framework-design",
+      "type": "application",
+      "prompt": "Design one reusable device framework for products that use different transports and discover implementations through a registry consumed by several hosts.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "models transport-independent capabilities and preserves transport-specific limits, lifecycle and failure semantics",
+        "defines one authoritative registry with a shared adapter and enumerated consumers",
+        "requires positive propagation and negative drift-injection tests for registry changes"
+      ],
+      "forbidden_behaviors": [
+        "forces every transport into a lowest-common-denominator interface",
+        "copies registry entries or switch statements into each consumer",
+        "claims registry centralization is sufficient without mutation evidence"
+      ],
+      "required_artifacts": [
+        "capability and transport-variation map",
+        "registry authority and anti-drift test plan"
+      ],
+      "baseline_expected_failure": [
+        "agent centralizes a registry structurally but does not prove propagation or detect consumer drift"
+      ],
+      "review_notes": "The closest authoritative-contract pattern requires both positive propagation and negative injected-drift coverage."
+    },
     {
       "id": "FW-BEH-006",
       "skill": "framework-design",
@@ -215,30 +215,6 @@
         "agent adopts the guessed future consumer's asynchronous dispatch requirement into the kernel's locked public contract before any real second consumer exists to confirm it"
       ],
       "review_notes": "Closes the existing Framework Failure Modes bullet on promoting an unconfirmed future consumer's guessed requirements into confirmed kernel semantics -- confirmed via direct read that no prior case in this file exercised it."
-    },
-    {
-      "id": "FW-BEH-010",
-      "skill": "framework-design",
-      "type": "discipline",
-      "prompt": "A consumer application must use a reusable engine without copying engine source. The engine repository still contains small demo scenes and a legacy product-specific implementation from before the engine was extracted. The team asks whether the boundary is final and how to avoid breaking the examples.",
-      "expected_routing": true,
-      "expected_alternative_skill": null,
-      "required_behaviors": [
-        "classifies the demo scenes and legacy product-specific implementation as compatibility baggage, not as part of the public consumer API",
-        "keeps the validated examples as regression baselines while the reusable core is extracted in a separately gated slice, rather than deleting or freezing them prematurely",
-        "declines to promote the legacy product-specific implementation into the reusable kernel merely because it already exists there",
-        "states explicitly that a successful compile or a single consumer's integration does not prove the boundary is final, and that adoption evidence from more than one consumer is required before calling it stable"
-      ],
-      "forbidden_behaviors": [
-        "removing the legacy examples solely to make the kernel look smaller or cleaner",
-        "promoting a legacy product-specific implementation into the shared kernel without multiple-consumer evidence",
-        "declaring the SDK boundary final from a successful build or a single consumer integration alone"
-      ],
-      "required_artifacts": [],
-      "baseline_expected_failure": [
-        "agent declares the engine/consumer boundary final and ready for general reuse based on the current single pilot integration compiling successfully"
-      ],
-      "review_notes": "Distilled 2026-08-23 from a real, project-history-mined case (collaborative-distillation candidate INT-20260823-080138-a23bceaa): a real cross-platform engine/consumer boundary decision, generalized. Distinct from cloudbox-game-migration's existing 'no engine-tree copying' requirement -- that covers the migration-time boundary for one specific consumer; this covers the engine side's own internal legacy/demo-code classification and the multiple-consumer evidence bar before calling any kernel boundary stable."
     },
     {
       "id": "FW-BEH-011",

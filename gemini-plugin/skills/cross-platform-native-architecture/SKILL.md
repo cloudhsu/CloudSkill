@@ -210,4 +210,4 @@ Define:
 
 Use this skill for general Qt/native application, hardware utility, and platform architecture.
 
-When the primary problem is a director/scene model, update-render loop, rendering backend, texture/resource lifecycle, game actions/events, or engine platform adapters, use `$cross-platform-engine-architecture`.
+When the primary problem is a director/scene model, update-render loop, rendering backend, texture/resource lifecycle, game actions/events, or engine platform adapters, use a private companion capability.

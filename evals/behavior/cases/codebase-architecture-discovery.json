@@ -50,7 +50,6 @@
       "baseline_expected_failure": [
         "A general-purpose approach typically treats visual/structural similarity as sufficient evidence to merge, and treats a passing import/compile check as proof the rename is complete -- this skill's own source session initially declared one such merge verified via `run_all_checks.py` passing alone, and only caught a real broken reference (a sibling test file calling the old private function name directly) via a subsequent explicit repository-wide grep for the exact old name, which was not part of the default verification step until this pattern was recognized."
       ],
-      "required_artifacts": [],
       "review_notes": "Conversation-derived RED evidence: mirrors a real incident from this skill's own source session -- during a JSON-Schema-interpreter consolidation, the static check suite passed after the rename, but a grep across the whole repository (not just the edited files) found `validate_task_continuity_evals.py`'s own adversarial test still calling the old private function name directly. Behavioral execution NOT RUN."
     },
     {

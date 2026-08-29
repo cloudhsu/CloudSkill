@@ -18,6 +18,10 @@ Use `assets/REFACTOR_SLICE.template.md` for each non-trivial slice.
 
 Reduce structural risk without combining behavioral change, architecture migration, schema change, and release change into one unverifiable batch.
 
+## Not this skill
+
+The word "extract" alone does not route here. Pulling a legacy game's rule/state core out of entangled scene code before a rewrite is owned by a private companion capability's own workflow; do not attach this skill as an "extract safely first" supporting step. Use this skill only when the deliverable is a specific already-scoped move of one existing responsibility with characterization seams and contract preservation as the point.
+
 ## Workflow
 
 ### 1. Establish the behavioral baseline

@@ -38,15 +38,9 @@ When multiple skills apply, use this order:
 4. Quality and verification.
 5. Documentation and handoff.
 
-Do not force skills onto trivial tasks. An explicitly requested skill takes priority unless it conflicts with higher-level instructions. Use `developing-skills` for every new or materially changed skill and require RED baseline evidence before claiming behavior improvement.
+Do not force skills onto trivial tasks. An explicitly requested skill takes priority unless it conflicts with higher-level instructions.
 
 When CloudBox coexists with Superpowers or another workflow plugin, use one top-level router. Honor an explicit CloudBox-only scope without claiming host settings changed; in hybrid mode assign generic implementation workflow to the other plugin and domain/architecture/modeling/quality responsibilities to CloudBox. Do not load a standalone CloudBox copy together with the CloudBox plugin.
-
-## Multi-session Skill evolution handoff
-
-When continuing an existing CloudSkill evolution, read `CLOUDBOX_SKILLS_AGENT_HANDOFF.md` before modifying Skills, Evals, graders, or runtime tooling. Then read the design/flow and change-history documents it references.
-
-Update the handoff and change history in the same increment whenever the current evidence, open failure layer, continuation command, provider path, or release decision changes. Repository evidence and the newest review ZIP take precedence over remembered chat context.
 
 ## Core architecture rules
 
@@ -116,27 +110,6 @@ When equipment software is in scope:
 - Validate topology through a reversible ladder: current deployment, same-machine separation, distributed simulation, then a bounded real-equipment pilot.
 - Do not publish confidential project names, schedules, customer details, topology, or hardware identifiers merely because private evidence informed a generalized skill.
 
-
-## Interaction-derived Eval capture
-
-When the user says `整理成正向案例` or `整理成負向案例`, use `developing-eval` to mine and sanitize only the relevant current interaction into an Eval candidate; hand the candidate to `developing-skills` only for the separate, explicit batch-review step that turns it into a formal Eval or Skill edit (see the last bullet below). `developing-eval` never authorizes a formal Eval/Skill edit, a Git mutation, or publication by itself.
-
-- Read project `.cloudbox-skills/config.local.json` first, then user `~/.cloudbox-skills/config.json`.
-- Sanitization is mandatory. Remove or generalize company, customer, person, project, product, machine, site, network, path, schedule, recipe, safety-limit, and other identifying details before writing.
-- Preserve the technical mechanism, user correction, expected skills, required behavior, forbidden behavior, and evidence status.
-- Never save the raw or complete transcript. If safe sanitization is uncertain, route the candidate to manual review rather than the normal candidate queue.
-- Daily capture may write only to the configured private Eval Inbox. It must not modify formal `evals/`, skill files, Git commits, tags, branches, or remotes.
-- When neither config path resolves to a reachable CloudSkill repository (a disconnected/external session), use `developing-eval`'s `scripts/export_eval_candidate.py` instead of guessing a write location: it writes the same sanitized candidate into a local, config-free `.cloudbox-skills/eval-outbox/` and packages it as a zip for the user to transfer into `<CloudSkillRepo>/.local/eval-inbox/imports/`, where `scripts/import_eval_candidates.py` merges it after re-scanning against the repository's own private terms.
-- Convert candidates into formal routing or behavior Evals only from the CloudSkill repository after explicit batch-review instruction, deduplication, ownership analysis, sensitive-content scanning, and human review of the diff.
-
-## Project-history-derived Eval capture
-
-When the user says `從專案提煉優化案例`, use `developing-skills` (see `references/conversation-derived-optimization.md`, "Project-history mining") to mine the current project's commit history, architecture/design documents, and code for reusable engineering pressure — not a live interaction.
-
-- Auto-bound scope by default: rank commits by signal (refactor/fix/redesign-style messages, large diffs, CHANGELOG/release-note/ADR mentions), cap detailed reading to a manageable count, and state what was excluded. Honor an explicit user-specified range, tag boundary, or subdirectory instead when given.
-- Mark every extracted candidate `inferred` or `unknown` confidence, never `observed` — commit history does not reveal what an agent or human actually reasoned through.
-- Apply the same sanitization rule above, plus the third-party citation rule in `skill-authoring-sources.md` when the project is someone else's public repository: extract only the generalized engineering pressure, never copy source text or proprietary logic as a rule.
-- Same output pipeline and safety constraints as interaction capture above, plus one mining-report summary per pass (not per candidate) bundled into the same export.
 
 ## Brownfield modernization
 

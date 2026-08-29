@@ -343,7 +343,7 @@ time -- a schema'd format with stable keys diffs predictably, while a
 table's column/row identity depends on position, which shifts under
 edits.
 
-This is the same principle `developing-skills` already applies to its own
+This is the same principle a private companion capability already applies to its own
 evidence: a RED finding starts as a short, typed note (case/contract
 layer, etc.) and is escalated into a formal JSON case file
 (`evals/behavior/cases/*.json`, schema-validated) once it needs to be a

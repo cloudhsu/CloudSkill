@@ -102,7 +102,7 @@ for skill in sorted(skill_names):
     if missing:
         errors.append(f'{skill}: missing behavior case types {sorted(missing)}')
 
-# ENG-BEH-004 belongs to cross-platform-engine-architecture (private-game);
+# ENG-BEH-004 belongs to a non-core Skill;
 # a filtered public checkout correctly omits it along with the rest of that
 # skill's case file -- do not require it there.
 _elicitation_contract_ids = {'AR-BEH-004', 'AR-BEH-005', 'AR-BEH-006'}
@@ -138,7 +138,7 @@ else:
         if not consumer_path.is_file():
             # A filtered public checkout (scripts/export_public_bundle.py)
             # can legitimately omit a private-tier consumer (e.g.
-            # cross-platform-engine-architecture, private-game) -- skip
+            # cross-platform-engine-architecture, non-core) -- skip
             # rather than fail. A genuinely missing skill folder in the
             # canonical private repo is caught elsewhere (validate_pack.py).
             continue

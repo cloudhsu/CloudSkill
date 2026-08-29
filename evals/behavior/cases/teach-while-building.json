@@ -220,7 +220,7 @@
       "baseline_expected_failure": [
         "agent assumes which mode the user is testing and builds a diagnosis on that assumption, or logs an explanation as learned before the user actually confirms it landed"
       ],
-      "review_notes": "Distilled 2026-08-28 from a real Eval Inbox interaction candidate (candidate_id=INT-20260827-060247-acf6d3b9, captured 2026-08-27T06:02:47+00:00, originally exported from a codex session at cloudskill_version=7.6.39). Batch-reviewed 2026-08-28: deduplicated against the other 12 candidates in the same import (detect_candidate_similarity.py, 0 pairs >=0.28), manually re-scanned for identifying detail (sensitization.status was MANUAL_REQUIRED -- exported without a reachable private terms file; clean on manual read). Add a counterexample showing when not to interrupt with a teaching check."
+      "review_notes": "Distilled 2026-08-28 from a real Eval Inbox interaction candidate (sanitized source evidence, captured 2026-08-27T06:02:47+00:00, originally exported from a codex session at cloudskill_version=7.6.39). Batch-reviewed 2026-08-28: deduplicated against the other 12 candidates in the same import (detect_candidate_similarity.py, 0 pairs >=0.28), manually re-scanned for identifying detail (sensitization.status was MANUAL_REQUIRED -- exported without a reachable private terms file; clean on manual read). Add a counterexample showing when not to interrupt with a teaching check."
     }
   ]
 }

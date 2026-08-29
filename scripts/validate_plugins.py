@@ -61,7 +61,7 @@ public_plugin_codex = load_json("public-plugin/.codex-plugin/plugin.json") if _p
 distribution = load_json("config/skill-distribution.json")
 tiers = distribution.get("skills", {})
 core_names = sorted(name for name, tier in tiers.items() if tier == "core")
-evolution_names = sorted(name for name, tier in tiers.items() if tier != "core")  # any non-core tier is private (private-meta/private-game/private-operation/private-art/...)
+evolution_names = sorted(name for name, tier in tiers.items() if tier != "core")  # every non-core tier is private
 expected_core_paths = sorted(f"./.agents/skills/{name}/" for name in core_names)
 expected_public_plugin_paths = sorted(f"./skills/{name}/" for name in core_names)
 # The real Claude Code plugin loader forbids ".." in a plugin's skills field

@@ -6,9 +6,6 @@ import re
 import sys
 import subprocess
 
-sys.path.insert(0, str(Path(__file__).resolve().parent))
-from export_public_bundle import PRIVATE_INFRASTRUCTURE_PATHS  # noqa: E402
-
 ROOT = Path(__file__).resolve().parents[1]
 SKILLS = ROOT / '.agents' / 'skills'
 errors = []
@@ -81,6 +78,7 @@ required = [
     'docs/evidence/EQUIPMENT_CONTROL_PLATFORM.md', 'docs/evidence/SEMICONDUCTOR_EQUIPMENT_TRAINING.md',
     'docs/standards/ENGINEERING_GOVERNANCE.md', 'docs/DOCUMENTATION_AUDIT.md',
     'scripts/install.ps1', 'scripts/install.sh', 'scripts/audit_docs.py',
+    'scripts/test_export_public_bundle.py',
     'scripts/sync_public_plugin.py',
     'scripts/validate_descriptions.py', 'scripts/validate_behavior_evals.py',
     'scripts/manage_skill.py', 'scripts/validate_skill_lifecycle.py', 'scripts/validate_evolution_handoff.py',
@@ -137,26 +135,39 @@ _distribution_path = ROOT / 'config' / 'skill-distribution.json'
 _evolution_names = []
 if _distribution_path.exists():
     _tiers = json.loads(_distribution_path.read_text(encoding='utf-8')).get('skills', {})
-    # Any tier other than "core" is private (evolution-pack's sub-tiers:
-    # private-meta, private-game, private-operation, private-art, and any
-    # future private sub-tier).
+    # Any tier other than "core" is private, including future tiers.
     _evolution_names = [name for name, tier in _tiers.items() if tier != 'core']
 _evolution_prefixes = tuple(f'.agents/skills/{name}/' for name in _evolution_names)
 _is_private_checkout = any((ROOT / f'.agents/skills/{name}').is_dir() for name in _evolution_names)
-# Non-skill-folder infrastructure that scripts/export_public_bundle.py also
-# excludes from a public checkout. Imported directly from that script's own
-# PRIVATE_INFRASTRUCTURE_PATHS (see top of file) rather than a second
-# hand-maintained copy -- a hand-synced duplicate of this exact set drifted
-# out of sync at least twice (missing config/skill-domain-catalog.json and
-# docs/GAME_SKILL_CATALOG.md, and scripts/sync_private_codex_plugin.py) before
-# this repository's own public export was ever run against it, found
-# 2026-08-21 while actually running the export for the first time.
-_private_infra = set(PRIVATE_INFRASTRUCTURE_PATHS)
+
+if not _is_private_checkout:
+    # The public repository is an installable distribution, not a copy of the
+    # private Skill-evolution control plane. Keep this list aligned with the
+    # fail-closed public-export policy and validate only files the public
+    # artifact intentionally owns.
+    required = [
+        'AGENTS.md', 'CLAUDE.md', 'INSTALL.md', 'PLANS.md', 'README.md', 'VERSION',
+        'scripts/install.ps1', 'scripts/install.sh', 'scripts/install_skill_hooks.py',
+        'scripts/package_surface_skills.py', 'scripts/public_distribution_contract.py',
+        'scripts/render_public_readme.py', 'scripts/run_all_checks.py',
+        'scripts/smoke_install.py', 'scripts/sync_gemini_plugins.py',
+        'scripts/test_install_skill_hooks.py', 'scripts/validate_behavior_evals.py',
+        'scripts/test_public_distribution.py',
+        'scripts/validate_descriptions.py', 'scripts/validate_pack.py',
+        'scripts/validate_plugins.py', 'scripts/validate_public_distribution.py',
+        'scripts/validate_skill_context_budget.py', 'scripts/validate_skill_portability.py',
+        '.codex-plugin/plugin.json', '.claude-plugin/plugin.json',
+        '.agents/plugins/marketplace.json', '.claude-plugin/marketplace.json',
+        'assets/cloudbox.ico', 'assets/cloudbox-icon.png', 'assets/cloudbox-logo.png',
+        'docs/CLOUDBOX_PLUGIN.md', 'docs/PLATFORM_SUPPORT_MATRIX.md',
+        'docs/profile/ARCHITECT_PROFILE.md',
+        'config/skill-distribution.json', 'config/skill-portability.json',
+        'evals/README.md', 'evals/skill-routing-cases.csv',
+        'evals/behavior/README.md', 'evals/behavior/schema.json',
+        'evals/behavior/RESULT.template.json', 'gemini-plugin/gemini-extension.json',
+    ]
 
 for rel in required:
-    is_private_only = rel.startswith(_evolution_prefixes) or rel in _private_infra or rel.startswith('private-plugin/') or rel.startswith('public-plugin/')
-    if is_private_only and not _is_private_checkout:
-        continue
     if not (ROOT / rel).exists():
         errors.append(f'missing required file: {rel}')
 
@@ -171,7 +182,13 @@ try:
     )
     tracked_files = [ROOT / item.decode("utf-8") for item in tracked_result.stdout.split(b"\0") if item]
 except (OSError, subprocess.CalledProcessError, UnicodeDecodeError) as exc:
-    errors.append(f"failed to inspect Git-tracked files: {exc}")
+    if (ROOT / '.git').exists():
+        errors.append(f"failed to inspect Git-tracked files: {exc}")
+    else:
+        # Public export validation runs against a temporary, pre-publication
+        # staging tree. There is deliberately no Git metadata there, so scan
+        # every staged file for local/private artifacts instead.
+        tracked_files = [path for path in ROOT.rglob('*') if path.is_file()]
 
 private_tracked = [
     path for path in tracked_files
@@ -203,7 +220,7 @@ if version and f'**Current version: {version}**' not in readme:
 
 changelog = (ROOT / 'CHANGELOG.md').read_text(encoding='utf-8') if (ROOT / 'CHANGELOG.md').exists() else ''
 first_release = re.search(r'^##\s+(\d+\.\d+\.\d+)\s*$', changelog, re.M)
-if version and (not first_release or first_release.group(1) != version):
+if _is_private_checkout and version and (not first_release or first_release.group(1) != version):
     errors.append('first CHANGELOG release does not match VERSION')
 
 routing_path = ROOT / 'evals' / 'skill-routing-cases.csv'

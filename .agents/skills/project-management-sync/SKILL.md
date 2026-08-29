@@ -139,7 +139,7 @@ from chat scrollback:
 - For an ongoing task, append a new dated block per update rather than
   rewriting the description -- the description is itself an append-only
   progress record, the same discipline `lifecycle.json`'s `notes` field
-  already requires for a Skill (see `developing-skills/references/
+  already requires for a Skill (see a private companion capability
   skill-lifecycle-standard.md`). Mark items done with a clear visual/textual
   distinction (a checkmark, a "still open" list) so a skim shows status
   without reading every paragraph.

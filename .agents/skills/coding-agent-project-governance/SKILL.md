@@ -80,7 +80,7 @@ Provide:
 When the repository hosts both a product and a separately-versioned reusable
 engine or component library, give product direction (owned by
 `document-governance`'s product-direction document role) and visual-artifact
-governance (owned by `game-art-pipeline`'s draft-governance step, when the
+governance (owned by a private companion capability's draft-governance step, when the
 repository has one) their own sibling top-level lanes alongside the
 development-evidence lane above -- not nested under it. Define what each lane
 does and does not have authority over, and require an explicit cross-link

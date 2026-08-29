@@ -26,10 +26,21 @@ $SourceSkills = Join-Path $RepoRoot '.agents\skills'
 $BeginMarker = '<!-- CLOUDSKILL:BEGIN -->'
 $EndMarker = '<!-- CLOUDSKILL:END -->'
 
-foreach ($required in @('.agents\skills', 'AGENTS.md', 'VERSION', 'scripts\capture_eval_candidate.py')) {
+foreach ($required in @('.agents\skills', 'AGENTS.md', 'VERSION')) {
     if (-not (Test-Path (Join-Path $RepoRoot $required))) {
         throw "CloudSkill repository is missing $required`: $RepoRoot"
     }
+}
+
+$evalCaptureAvailable =
+    (Test-Path (Join-Path $RepoRoot 'scripts\capture_eval_candidate.py')) -and
+    (Test-Path (Join-Path $RepoRoot '.agents\skills\developing-eval\SKILL.md'))
+if (-not $evalCaptureAvailable) {
+    if ($ConfigOnly) {
+        throw 'ConfigOnly is unavailable in this distribution because Eval capture is not installed.'
+    }
+    $SkipLocalConfig = $true
+    Write-Host 'NOTE: Eval capture is not part of this distribution; local Eval config will not be created.'
 }
 
 function Copy-CloudSkillSet {
@@ -161,7 +172,7 @@ if (-not $ConfigOnly) {
     }
 }
 
-if (-not $PSBoundParameters.ContainsKey('SkipLocalConfig') -and -not $ConfigOnly -and
+if ($evalCaptureAvailable -and -not $PSBoundParameters.ContainsKey('SkipLocalConfig') -and -not $ConfigOnly -and
         [Environment]::UserInteractive -and -not [Console]::IsInputRedirected) {
     # Neither -SkipLocalConfig nor its absence was stated explicitly, and this
     # is a real interactive session (not CI/scripted/redirected) -- ask once

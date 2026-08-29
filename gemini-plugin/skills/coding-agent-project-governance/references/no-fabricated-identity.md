@@ -54,14 +54,3 @@ identity is genuinely available and must be actively hidden. This rule
 covers the opposite failure: the identity was never part of the task's
 evidence at all, and inventing it is itself the defect, regardless of
 whether hiding it was ever a live question.
-
-## Source
-
-Directly observed in this session's own real model executions (not
-inferred): a live `--provider claude` run under `software-quality-iso25010`
-fabricated a "Submitted-by" line with the real operator's actual email in a
-field the eval prompt never supplied; confirmed via the harness's own
-context-assembly evidence that the identity did not come from the prompt.
-Independently reproduced in the same session under `document-governance` and
-`game-quality-and-release-gates` in a supporting-skill ablation study,
-confirming this is not confined to the skill first observed.

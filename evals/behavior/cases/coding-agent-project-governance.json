@@ -418,7 +418,31 @@
       "baseline_expected_failure": [
         "agent treats two subagents independently agreeing on a report as proof it is correct, or reports completion while a late edit was never included in the verified source tip"
       ],
-      "review_notes": "Distilled 2026-08-28 from a real Eval Inbox interaction candidate (candidate_id=INT-20260827-060246-55266377, captured 2026-08-27T06:02:46+00:00, originally exported from a codex session at cloudskill_version=7.6.39). Batch-reviewed 2026-08-28: deduplicated against the other 12 candidates in the same import (detect_candidate_similarity.py, 0 pairs >=0.28), manually re-scanned for identifying detail (sensitization.status was MANUAL_REQUIRED -- exported without a reachable private terms file; clean on manual read). Candidate should test lifecycle truth and source-tip binding."
+      "review_notes": "Distilled 2026-08-28 from a real Eval Inbox interaction candidate (sanitized source evidence, captured 2026-08-27T06:02:46+00:00, originally exported from a codex session at cloudskill_version=7.6.39). Batch-reviewed 2026-08-28: deduplicated against the other 12 candidates in the same import (detect_candidate_similarity.py, 0 pairs >=0.28), manually re-scanned for identifying detail (sensitization.status was MANUAL_REQUIRED -- exported without a reachable private terms file; clean on manual read). Candidate should test lifecycle truth and source-tip binding."
+    },
+    {
+      "id": "CAG-BEH-019",
+      "skill": "coding-agent-project-governance",
+      "type": "discipline",
+      "prompt": "Dispatch several parallel subagents to each run a long real command in the background if needed, then report the finished result back.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "Treat a subagent's 'still waiting, will report when done' message as non-final and independently verify real completion (e.g. process liveness or output growth) rather than assuming a later report will arrive from that same dispatch.",
+        "Once a subagent's self-report is shown to be unreliable, take over verification directly from the real artifacts instead of re-dispatching the same delegation pattern unchanged."
+      ],
+      "forbidden_behaviors": [
+        "Accept a subagent's in-progress status message as proof the assigned work is done.",
+        "Re-dispatch more parallel subagents with the same instructions after this exact failure mode has already been observed in the same session."
+      ],
+      "required_artifacts": [
+        "an independent completion check (e.g. a monitor or process-liveness poll) that does not rely solely on the subagent's own follow-up message",
+        "a stated reason when the delegation pattern is changed after an observed subagent self-report failure"
+      ],
+      "baseline_expected_failure": [
+        "agent dispatches parallel subagents for backgrounded work and treats an interim 'still waiting' message from a subagent as if a completion report would reliably follow, without independently verifying the work actually finished"
+      ],
+      "review_notes": "Distilled 2026-08-29 from a real Eval Inbox interaction candidate (sanitized source evidence, captured 2026-08-28T23:05:58+00:00). Batch-reviewed 2026-08-29: deduplicated against the queue (detect_candidate_similarity.py, 0 pairs >=0.28), sanitization.status=PASS on capture, re-scanned against the repository's own private sensitive-terms list at batch-review time (clean). Real, twice-observed incident in the same session: two independently dispatched subagents each ended their own turn with an interim status message instead of the requested finished result; the orchestrator's own independent Monitor caught both, no work was actually lost, but relying on that catch was reactive rather than designed in from first dispatch. Sharpens this skill's existing 'parallel agents require isolated ownership and an integrator' principle with a concrete, reproducible failure shape."
     }
   ]
 }
