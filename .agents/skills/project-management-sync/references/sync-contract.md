@@ -55,6 +55,9 @@ the provider supports one.
   that field and surface it as `blocked` or `manual-review`.
 - Never delete as part of ordinary synchronization.
 
+For the bundled Vikunja helper, status ownership must be declared explicitly
+as `source_owned_fields: ["status"]`. Omitting it keeps remote status read-only.
+
 ## Time and status
 
 Map canonical states through an explicit table. Preserve `unknown` when a

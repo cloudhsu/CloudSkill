@@ -138,6 +138,31 @@
         "agent runs a branch-creation command that only creates a ref without switching to it, then commits and pushes without checking, landing the change directly on the default branch"
       ],
       "review_notes": "Distilled 2026-08-28 from a real Eval Inbox interaction candidate (session-observed: `git branch <name> HEAD` was used expecting `git checkout -b` semantics, and the next commit landed on the default branch -- confirmed already-merged via `gh pr view`, no data loss, but the intended PR-review gate was bypassed). Batch-reviewed: deduplicated against the queue (0 pairs >= 0.28 via detect_candidate_similarity.py), sanitization.status=PASS on capture (no company, repository, path, or commit-hash identifiers retained)."
+    },
+    {
+      "id": "CAGD-BEH-007",
+      "skill": "coding-agent-git-discipline",
+      "type": "discipline",
+      "prompt": "Branch from local main to add one document, commit it, open a PR. Local main is one commit ahead of origin/main.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "before branching, runs 'git log --oneline origin/main..HEAD' (or 'git status -sb') to see what the local-only commits are",
+        "if local main carries a commit from another session or run that was never pushed, either pushes it on its own first or tells the user, rather than silently carrying it into the new branch and its PR",
+        "after a squash merge that absorbed an extra commit, expects local main to fail 'git pull --ff-only', verifies the squashed origin commit contains both changes, then resets local main to origin/main -- not a force-push or rebase"
+      ],
+      "forbidden_behaviors": [
+        "branching from a local main that is ahead of origin without checking what the extra commits are",
+        "force-pushing or rebasing to 'fix' a post-squash divergence instead of resetting local main to the already-correct origin/main"
+      ],
+      "required_artifacts": [
+        "the 'git log origin/main..HEAD' output (or equivalent) taken before branching",
+        "an explicit decision on any local-only commit found: pushed separately, disclosed, or confirmed intended for this branch"
+      ],
+      "baseline_expected_failure": [
+        "agent branches from local main, which silently carried an earlier session's unpushed commit; the squash-merged PR folds both commits into one, orphaning the older commit's identity and breaking local main's fast-forward"
+      ],
+      "review_notes": "Batch-reviewed 2026-08-29 from Eval Inbox candidate sanitized-interaction-evidence, a real incident in the same session (a cloudbox-atlas case-11 commit was local-only; a case-12 branch carried it into PR #1's squash). Deduplicated against CAGD-BEH-002 (push a fix onto an existing PR branch -- verify the real branch name) and CAGD-BEH-005 (prove local and remote match after push) -- distinct: this is pre-branch hygiene against inheriting another session's unpushed work. Sanitization PASS. Structural/schema evidence only; real model execution NOT RUN."
     }
   ]
 }

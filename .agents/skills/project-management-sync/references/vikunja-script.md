@@ -14,6 +14,7 @@ The local plan is authoritative and must contain:
   "target_provider": "vikunja",
   "target_profile": "local",
   "agent": "Codex 5.6 Luna xhigh",
+  "source_owned_fields": ["status"],
   "project": {
     "title": "example-project",
     "description": "Project-level scope and ownership."
@@ -43,7 +44,7 @@ the logged-in account, or the host process.
 ```text
 audit      discover and enumerate; never mutate
 dry-run    produce no-op/create/update/ambiguous/blocked counts; never mutate
-apply      create only after discovery, exact-scope enumeration, and capability checks
+apply      create or source-owned status update after discovery, exact-scope enumeration, and capability checks
 reconcile  inspect journaled unknown mutations; never retry automatically
 ```
 
@@ -58,10 +59,14 @@ verified.
 
 Exact title matching is only a fallback after the complete target scope is
 listed. Zero matches may plan a create; one match is a no-op; multiple matches
-are ambiguous and block writes. The helper does not perform ordinary updates or
-deletes. This preserves provider-owned work logs and the append-only human
-record. A transport timeout is journaled as `unknown`; run `reconcile` before
-considering a retry.
+are ambiguous and block writes. An existing task may update only `status`, and
+only when the plan explicitly declares `"source_owned_fields": ["status"]`.
+The only write mapping is `completed -> done:true`; `planned` remains read-only
+and cannot reopen a remote task. All other local statuses fail validation. The adapter selects an advertised
+single-task update method, sends only `done`, preserves all other remote fields,
+then independently verifies task ID, `done`, provider `done_at`, and `updated`.
+The helper never deletes. A transport timeout is journaled as `unknown`; run
+`reconcile` before considering a retry.
 
 Credentials are resolved from macOS Keychain by default (`--keychain-service`
 and `--keychain-account`) or, explicitly for CI, from a secret-manager-injected

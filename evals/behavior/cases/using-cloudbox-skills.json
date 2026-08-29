@@ -170,6 +170,28 @@
         "agent composes plugins by name rather than by responsibility boundary"
       ],
       "review_notes": "Review responsibility ownership and duplicate workflow avoidance."
+    },
+    {
+      "id": "USE-BEH-008",
+      "skill": "using-cloudbox-skills",
+      "type": "discipline",
+      "prompt": "Dispatch a worktree-isolated subagent to read 12 files and produce a detailed comparison report. Tell it to write the full report to a file inside its own worktree and give a short inline summary.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "routes to coding-agent-project-governance -- a dispatched subagent told to keep its only detailed findings inside a worktree that may be torn down before retrieval is exactly that Skill's read-only-investigation reporting rule",
+        "treats 'every mechanical step is specified' as separate from 'the answer is fully determined by supplied text': when following the instruction literally would violate a constraint an installed Skill documents but the prompt omits, the Skill applies because the instruction omits that safeguard",
+        "recognises this as a routing miss to fix in the router, not a missing-content problem, when the owning Skill already documents the exact rule the prompt needs"
+      ],
+      "forbidden_behaviors": [
+        "returning primary_skill=None / no-skill because the requested steps are all given, without checking whether doing them exactly as written trips a documented risk boundary",
+        "concluding 'no unresolved decision' from how completely the steps are dictated rather than from the risk boundary"
+      ],
+      "required_artifacts": [],
+      "baseline_expected_failure": [
+        "router returns no-skill 20/20 on a clean tree, reasoning that the work is 'fully determined by the instruction itself', even though coding-agent-project-governance's own content requires the subagent's full findings in its final report message, not only a worktree file"
+      ],
+      "review_notes": "Batch-reviewed 2026-08-29 from Eval Inbox candidate sanitized-interaction-evidence. The 'fully specified steps != fully determined answer' clause and routing-map row were shipped in Vikunja cloudbox-skills #25 (RED 20/20 no-skill -> GREEN 0/20); this case is the regression guard. Deduplicated against USE-BEH-003 (translation = no skill, genuinely trivial) and USE-BEH-007 (plugin coexistence) -- distinct: this is under-trigger on a fully-specified but risk-bearing task. Sanitization PASS. Structural/schema evidence only; real model execution NOT RUN (routing-mode RED/GREEN evidence recorded in execution-ledger.json under #25)."
     }
   ]
 }

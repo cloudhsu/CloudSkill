@@ -3,6 +3,9 @@
   "target_provider": "vikunja",
   "target_profile": "local",
   "agent": "Codex 5.6 Luna xhigh",
+  "source_owned_fields": [
+    "status"
+  ],
   "project": {
     "title": "example-project",
     "description": "Project-level scope and ownership."

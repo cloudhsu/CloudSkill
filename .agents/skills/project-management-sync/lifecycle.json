@@ -20,11 +20,13 @@
     "PMS-BEH-001",
     "PMS-BEH-002",
     "PMS-BEH-003",
-    "PMS-BEH-004"
+    "PMS-BEH-004",
+    "PMS-BEH-005"
   ],
   "behavior_case_types": [
     "application",
     "counterexample",
+    "discipline",
     "recognition"
   ],
   "next_review_triggers": [

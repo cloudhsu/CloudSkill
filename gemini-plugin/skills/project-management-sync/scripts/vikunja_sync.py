@@ -22,10 +22,10 @@ import urllib.request
 from dataclasses import dataclass
 from datetime import date
 from pathlib import Path
-from typing import Any, Protocol
+from typing import Any
 
 
-Json = dict[str, Any]
+Json = dict
 DEFAULT_TIMEOUT = 20.0
 DEFAULT_PAGE_SIZE = 100
 SUPPORTED_VIKUNJA_MAJOR = 2
@@ -42,7 +42,7 @@ class SyncError(Exception):
         self.unknown = unknown
 
 
-class SecretStore(Protocol):
+class SecretStore:
     def get(self) -> str:
         ...
 
@@ -157,17 +157,20 @@ class Capabilities:
     api_family: str
     project_create_method: str | None
     task_create_method: str | None
+    task_update_method: str | None
     discovery_complete: bool
     read_only_reason: str | None = None
 
     @property
     def writable(self) -> bool:
-        return self.discovery_complete and self.read_only_reason is None and bool(
-            self.project_create_method and self.task_create_method
-        )
+        return bool(self.project_create_method and self.task_create_method)
+
+    @property
+    def task_update_writable(self) -> bool:
+        return bool(self.task_update_method)
 
 
-class ProviderAdapter(Protocol):
+class ProviderAdapter:
     """Provider-neutral surface used by the reconciliation core.
 
     OpenProject and Redmine adapters can implement this same surface later;
@@ -195,6 +198,9 @@ class ProviderAdapter(Protocol):
         ...
 
     def create_task(self, project_id: int, payload: Json) -> Json:
+        ...
+
+    def update_task(self, task_id: int, payload: Json) -> Json:
         ...
 
 
@@ -226,6 +232,7 @@ class VikunjaAdapter:
                 "vikunja-unknown",
                 None,
                 None,
+                None,
                 False,
                 "unsupported_version",
             )
@@ -233,18 +240,18 @@ class VikunjaAdapter:
 
         project_allow = self._allow("projects")
         task_allow = self._allow("projects/0/tasks")
+        task_update_allow = self._allow("tasks/0")
         project_method = self._select_create_method(project_allow)
         task_method = self._select_create_method(task_allow)
-        reason = None
-        if not project_method or not task_method:
-            reason = "required_capability_missing"
+        task_update_method = self._select_update_method(task_update_allow)
         self.capabilities = Capabilities(
             version,
             "vikunja-v2-api-v1-route",
             project_method,
             task_method,
-            bool(project_allow is not None and task_allow is not None),
-            reason,
+            task_update_method,
+            True,
+            None,
         )
         return self.capabilities
 
@@ -263,6 +270,15 @@ class VikunjaAdapter:
         # Current Vikunja uses PUT for collection creation.  POST remains a
         # capability-driven compatibility fallback, never a hard-coded guess.
         for method in ("PUT", "POST"):
+            if method in allowed:
+                return method
+        return None
+
+    @staticmethod
+    def _select_update_method(allowed: set[str] | None) -> str | None:
+        if not allowed:
+            return None
+        for method in ("POST", "PATCH", "PUT"):
             if method in allowed:
                 return method
         return None
@@ -337,6 +353,18 @@ class VikunjaAdapter:
             raise SyncError("invalid_task_create_response")
         return response.payload
 
+    def update_task(self, task_id: int, payload: Json) -> Json:
+        if not self.capabilities or not self.capabilities.task_update_method:
+            raise SyncError("task_update_not_allowed")
+        response = self.http.request(
+            self.capabilities.task_update_method,
+            f"tasks/{task_id}",
+            payload=payload,
+        )
+        if not isinstance(response.payload, dict) or response.payload.get("id") != task_id:
+            raise SyncError("invalid_task_update_response")
+        return response.payload
+
 
 class FakeAdapter:
     """Small in-process adapter used by deterministic tests."""
@@ -344,7 +372,7 @@ class FakeAdapter:
     def __init__(self, projects: list[Json] | None = None, tasks: dict[int, list[Json]] | None = None) -> None:
         self.projects = projects or []
         self.tasks = tasks or {}
-        self.capabilities = Capabilities("2.5.0", "fake", "PUT", "PUT", True)
+        self.capabilities = Capabilities("2.5.0", "fake", "PUT", "PUT", "POST", True)
         self._next_id = 9000
 
     def discover(self) -> Capabilities:
@@ -377,6 +405,16 @@ class FakeAdapter:
         self.tasks.setdefault(project_id, []).append(task)
         return task
 
+    def update_task(self, task_id: int, payload: Json) -> Json:
+        task = self.read_task(task_id)
+        task.update(payload)
+        task["updated"] = "2026-08-29T00:00:00Z"
+        if payload.get("done"):
+            task["done_at"] = "2026-08-29T00:00:00Z"
+        elif payload.get("done") is False:
+            task["done_at"] = None
+        return task
+
 
 def make_adapter(provider: str, http: VikunjaHTTP) -> ProviderAdapter:
     """Select a provider adapter before any provider-specific operation."""
@@ -400,6 +438,9 @@ def validate_plan(plan: Any) -> Json:
         _require_string(plan.get(field), field, errors)
     if plan.get("target_provider") not in SUPPORTED_PROVIDER_ADAPTERS:
         errors.append("unsupported_target_provider")
+    source_owned_fields = plan.get("source_owned_fields", [])
+    if not isinstance(source_owned_fields, list) or any(field != "status" for field in source_owned_fields):
+        errors.append("invalid_source_owned_fields")
     project = plan.get("project")
     if not isinstance(project, dict):
         errors.append("missing_project")
@@ -419,6 +460,8 @@ def validate_plan(plan: Any) -> Json:
             continue
         for field in ("source_key", "title", "problem_background", "approach", "source"):
             _require_string(task.get(field), f"{prefix}_{field}", errors)
+        if task.get("status", "planned") not in {"planned", "completed"}:
+            errors.append(f"{prefix}_status")
         criteria = task.get("acceptance_criteria")
         if not isinstance(criteria, list) or not criteria or not all(
             isinstance(item, str) and item.strip() for item in criteria
@@ -559,7 +602,19 @@ def plan_remote(adapter: Any, plan: Json, mode: str, today: str) -> tuple[Json, 
         for task in plan["tasks"]:
             matches = _title_matches(tasks, task["title"])
             if len(matches) == 1:
-                action, reason = "no-op", "exact_title_match"
+                if "status" in plan.get("source_owned_fields", []):
+                    completion_requested = task.get("status", "planned") == "completed"
+                    if completion_requested and matches[0].get("done") is not True:
+                        if capabilities.task_update_writable:
+                            action, reason = "update", "source_owned_status_differs"
+                        else:
+                            action, reason = "blocked", "task_update_capability_missing"
+                    elif not completion_requested:
+                        action, reason = "no-op", "no_completion_requested"
+                    else:
+                        action, reason = "no-op", "source_owned_status_matches"
+                else:
+                    action, reason = "no-op", "exact_title_match"
             elif len(matches) > 1:
                 action, reason = "ambiguous", "multiple_exact_title_matches"
             elif mode == "audit":
@@ -674,7 +729,76 @@ def apply_plan(
         matches = _title_matches(tasks, task["title"])
         operation_id = f"task:{task['source_key']}"
         if len(matches) == 1:
-            report["executed"]["no-op"] += 1
+            existing_entry = next(
+                (entry for entry in journal["operations"] if entry.get("operation_id") == operation_id),
+                None,
+            )
+            if existing_entry and existing_entry.get("status") == "unknown":
+                report["executed"]["blocked"] += 1
+                report["status"] = "UNKNOWN"
+                report["reconciliation"] = "run_reconcile_before_retry"
+                continue
+            operation = next(
+                item for item in operations
+                if item.get("kind") == "task" and item.get("source_key") == task["source_key"]
+            )
+            if operation["action"] == "no-op":
+                report["executed"]["no-op"] += 1
+                continue
+            if operation["action"] != "update":
+                report["executed"]["blocked"] += 1
+                report["status"] = "BLOCKED"
+                continue
+            remote = matches[0]
+            task_id = int(remote["id"])
+            desired_done = True
+            before_updated = remote.get("updated")
+            _journal_record(
+                journal,
+                operation_id,
+                kind="task",
+                source_key=task["source_key"],
+                title=task["title"],
+                target_project_id=project_id,
+                remote_id=task_id,
+                status="requested",
+                operation="update_status",
+                desired_done=desired_done,
+                before_updated=before_updated,
+            )
+            _journal_save(journal_path, journal)
+            try:
+                adapter.update_task(task_id, {"done": desired_done})
+                readback = adapter.read_task(task_id)
+                completion_valid = bool(readback.get("done_at"))
+                readback_updated = readback.get("updated")
+                updated_changed = bool(readback_updated) and (
+                    not before_updated or readback_updated != before_updated
+                )
+                if (
+                    readback.get("id") != task_id
+                    or readback.get("done") is not desired_done
+                    or not completion_valid
+                    or not updated_changed
+                ):
+                    raise SyncError("task_update_readback_mismatch", unknown=True)
+            except SyncError as exc:
+                unknown = exc.unknown or exc.code.startswith("invalid_") or exc.code.endswith("_readback_mismatch")
+                _journal_record(journal, operation_id, status="unknown" if unknown else "blocked", error=exc.code)
+                _journal_save(journal_path, journal)
+                report["executed"]["blocked"] += 1
+                report["status"] = "UNKNOWN" if unknown else "BLOCKED"
+                report["reconciliation"] = "run_reconcile_before_retry" if unknown else exc.code
+                continue
+            _journal_record(
+                journal,
+                operation_id,
+                status="verified",
+                remote_id=task_id,
+                completion_timestamp_source="provider",
+            )
+            _journal_save(journal_path, journal)
+            report["executed"]["update"] += 1
             continue
         if len(matches) > 1:
             report["executed"]["ambiguous"] += 1
@@ -725,8 +849,12 @@ def apply_plan(
             }
             _journal_save(mapping_path, mapping)
         tasks.append({"id": task_id, **payload})
-    report["post_write_readback"] = "PASS" if report["executed"]["create"] else "not_applicable"
-    if report["executed"]["ambiguous"] or report["executed"]["blocked"]:
+    report["post_write_readback"] = (
+        "PASS" if report["executed"]["create"] or report["executed"]["update"] else "not_applicable"
+    )
+    if report["status"] != "UNKNOWN" and (
+        report["executed"]["ambiguous"] or report["executed"]["blocked"]
+    ):
         report["status"] = "BLOCKED"
     return report
 
@@ -744,10 +872,41 @@ def reconcile_unknowns(adapter: Any, journal_path: Path) -> Json:
         "blocked": 0,
         "privacy_audit": "PASS: no credential or raw provider response emitted",
     }
-    projects = adapter.list_projects()
+    projects: list[Json] | None = None
     for entry in unknowns:
         if entry.get("kind") == "project":
+            if projects is None:
+                projects = adapter.list_projects()
             matches = _title_matches(projects, str(entry.get("title", "")))
+        elif entry.get("operation") == "update_status":
+            remote_id = entry.get("remote_id")
+            if isinstance(remote_id, bool) or not isinstance(remote_id, int) or remote_id <= 0:
+                report["blocked"] += 1
+                continue
+            try:
+                remote = adapter.read_task(int(remote_id))
+            except SyncError:
+                report["blocked"] += 1
+                continue
+            desired_done = entry.get("desired_done")
+            completion_valid = bool(remote.get("done_at"))
+            updated = remote.get("updated")
+            before_updated = entry.get("before_updated")
+            committed = (
+                desired_done is True
+                and remote.get("id") == int(remote_id)
+                and remote.get("done") is desired_done
+                and completion_valid
+                and bool(updated)
+                and (not before_updated or updated != before_updated)
+            )
+            if committed:
+                entry["status"] = "reconciled"
+                report["reconciled"] += 1
+            else:
+                entry["status"] = "safe_to_retry_after_review"
+                report["safe_to_retry"] += 1
+            continue
         else:
             project_id = entry.get("target_project_id")
             if not project_id:

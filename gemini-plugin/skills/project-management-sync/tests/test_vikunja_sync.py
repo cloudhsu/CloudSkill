@@ -58,6 +58,32 @@ class VikunjaSyncTests(unittest.TestCase):
         self.assertTrue(capabilities.writable)
         self.assertEqual(capabilities.api_family, "vikunja-v2-api-v1-route")
 
+    def test_missing_update_capability_does_not_disable_create(self) -> None:
+        class CreateOnlyHTTP:
+            def request(self, method, path, **kwargs):
+                if method == "GET" and path == "info":
+                    return vikunja_sync.HttpResponse(200, {}, {"version": "v2.5.0"})
+                if method == "OPTIONS" and path == "tasks/0":
+                    raise vikunja_sync.SyncError("http_405")
+                return vikunja_sync.HttpResponse(204, {"allow": "OPTIONS, GET, PUT"}, None)
+
+        capabilities = vikunja_sync.VikunjaAdapter(CreateOnlyHTTP()).discover()
+        self.assertTrue(capabilities.writable)
+        self.assertFalse(capabilities.task_update_writable)
+
+    def test_missing_create_capability_does_not_disable_update(self) -> None:
+        class UpdateOnlyHTTP:
+            def request(self, method, path, **kwargs):
+                if method == "GET" and path == "info":
+                    return vikunja_sync.HttpResponse(200, {}, {"version": "v2.5.0"})
+                if method == "OPTIONS" and path == "tasks/0":
+                    return vikunja_sync.HttpResponse(204, {"allow": "OPTIONS, GET, PATCH"}, None)
+                raise vikunja_sync.SyncError("http_405")
+
+        capabilities = vikunja_sync.VikunjaAdapter(UpdateOnlyHTTP()).discover()
+        self.assertFalse(capabilities.writable)
+        self.assertTrue(capabilities.task_update_writable)
+
     def test_description_has_fixed_sections_and_agent(self) -> None:
         description = vikunja_sync.render_description(plan()["tasks"][0], plan()["agent"], "2026-08-23")
         positions = [description.index(section) for section in vikunja_sync.DESCRIPTION_SECTIONS]
@@ -94,6 +120,39 @@ class VikunjaSyncTests(unittest.TestCase):
         self.assertEqual(report["planned"]["no-op"], 2)
         self.assertEqual(operations[-1]["reason"], "exact_title_match")
 
+    def test_completed_source_owned_status_plans_update(self) -> None:
+        candidate = plan()
+        candidate["source_owned_fields"] = ["status"]
+        candidate["tasks"][0]["status"] = "completed"
+        adapter = vikunja_sync.FakeAdapter(
+            projects=[{"id": 1, "title": "test-project"}],
+            tasks={1: [{"id": 2, "title": "test-task", "done": False}]},
+        )
+        report, _, operations = vikunja_sync.plan_remote(
+            adapter, vikunja_sync.validate_plan(candidate), "dry-run", "2026-08-29"
+        )
+        self.assertEqual(report["planned"]["update"], 1)
+        self.assertEqual(operations[-1]["reason"], "source_owned_status_differs")
+
+    def test_status_is_read_only_without_explicit_ownership(self) -> None:
+        candidate = plan()
+        candidate["tasks"][0]["status"] = "completed"
+        adapter = vikunja_sync.FakeAdapter(
+            projects=[{"id": 1, "title": "test-project"}],
+            tasks={1: [{"id": 2, "title": "test-task", "done": False}]},
+        )
+        report, _, _ = vikunja_sync.plan_remote(
+            adapter, vikunja_sync.validate_plan(candidate), "dry-run", "2026-08-29"
+        )
+        self.assertEqual(report["planned"]["no-op"], 2)
+
+    def test_unknown_owned_field_and_status_are_rejected(self) -> None:
+        candidate = plan()
+        candidate["source_owned_fields"] = ["description"]
+        candidate["tasks"][0]["status"] = "closed-ish"
+        with self.assertRaises(vikunja_sync.SyncError):
+            vikunja_sync.validate_plan(candidate)
+
     def test_duplicate_exact_task_is_ambiguous(self) -> None:
         adapter = vikunja_sync.FakeAdapter(
             projects=[{"id": 1, "title": "test-project"}],
@@ -115,6 +174,209 @@ class VikunjaSyncTests(unittest.TestCase):
             self.assertEqual(report["executed"]["create"], 2)
             self.assertEqual(report["post_write_readback"], "PASS")
             self.assertEqual(json.loads(mapping.read_text())["records"]["TEST-1"]["target_record_id"], 9002)
+
+    def test_apply_updates_only_source_owned_status_and_verifies_completion(self) -> None:
+        candidate = plan()
+        candidate["source_owned_fields"] = ["status"]
+        candidate["tasks"][0]["status"] = "completed"
+        remote = {
+            "id": 2,
+            "title": "test-task",
+            "description": "provider-owned narrative",
+            "done": False,
+            "done_at": None,
+            "updated": "2026-08-28T00:00:00Z",
+        }
+        adapter = vikunja_sync.FakeAdapter(
+            projects=[{"id": 1, "title": "test-project"}], tasks={1: [remote]}
+        )
+        with tempfile.TemporaryDirectory() as directory:
+            journal = Path(directory) / "journal.json"
+            report, project_id, operations = vikunja_sync.plan_remote(
+                adapter, vikunja_sync.validate_plan(candidate), "apply", "2026-08-29"
+            )
+            report = vikunja_sync.apply_plan(
+                adapter, candidate, report, project_id, operations, journal, None, "2026-08-29"
+            )
+        self.assertEqual(report["status"], "PASS")
+        self.assertEqual(report["executed"]["update"], 1)
+        self.assertEqual(report["post_write_readback"], "PASS")
+        self.assertTrue(remote["done"])
+        self.assertTrue(remote["done_at"])
+        self.assertEqual(remote["description"], "provider-owned narrative")
+
+    def test_update_timeout_is_unknown_and_not_retried(self) -> None:
+        class TimeoutAdapter(vikunja_sync.FakeAdapter):
+            calls = 0
+
+            def update_task(self, task_id, payload):
+                self.calls += 1
+                raise vikunja_sync.SyncError("transport_unknown", unknown=True)
+
+        candidate = plan()
+        candidate["source_owned_fields"] = ["status"]
+        candidate["tasks"][0]["status"] = "completed"
+        adapter = TimeoutAdapter(
+            projects=[{"id": 1, "title": "test-project"}],
+            tasks={1: [{"id": 2, "title": "test-task", "done": False}]},
+        )
+        with tempfile.TemporaryDirectory() as directory:
+            journal = Path(directory) / "journal.json"
+            report, project_id, operations = vikunja_sync.plan_remote(
+                adapter, vikunja_sync.validate_plan(candidate), "apply", "2026-08-29"
+            )
+            report = vikunja_sync.apply_plan(
+                adapter, candidate, report, project_id, operations, journal, None, "2026-08-29"
+            )
+            retry_report, retry_project_id, retry_operations = vikunja_sync.plan_remote(
+                adapter, vikunja_sync.validate_plan(candidate), "apply", "2026-08-29"
+            )
+            retry_report = vikunja_sync.apply_plan(
+                adapter,
+                candidate,
+                retry_report,
+                retry_project_id,
+                retry_operations,
+                journal,
+                None,
+                "2026-08-29",
+            )
+            entry = json.loads(journal.read_text())["operations"][0]
+        self.assertEqual(report["status"], "UNKNOWN")
+        self.assertEqual(retry_report["status"], "UNKNOWN")
+        self.assertEqual(report["reconciliation"], "run_reconcile_before_retry")
+        self.assertEqual(entry["status"], "unknown")
+        self.assertEqual(adapter.calls, 1)
+
+    def test_update_readback_requires_updated_marker(self) -> None:
+        class MissingUpdatedAdapter(vikunja_sync.FakeAdapter):
+            def update_task(self, task_id, payload):
+                task = super().update_task(task_id, payload)
+                task.pop("updated", None)
+                return task
+
+        candidate = plan()
+        candidate["source_owned_fields"] = ["status"]
+        candidate["tasks"][0]["status"] = "completed"
+        adapter = MissingUpdatedAdapter(
+            projects=[{"id": 1, "title": "test-project"}],
+            tasks={1: [{"id": 2, "title": "test-task", "done": False, "done_at": None}]},
+        )
+        with tempfile.TemporaryDirectory() as directory:
+            journal = Path(directory) / "journal.json"
+            report, project_id, operations = vikunja_sync.plan_remote(
+                adapter, vikunja_sync.validate_plan(candidate), "apply", "2026-08-29"
+            )
+            report = vikunja_sync.apply_plan(
+                adapter, candidate, report, project_id, operations, journal, None, "2026-08-29"
+            )
+        self.assertEqual(report["status"], "UNKNOWN")
+
+    def test_reconcile_status_update_distinguishes_committed_from_not_committed(self) -> None:
+        class TimeoutAfterCommit(vikunja_sync.FakeAdapter):
+            def update_task(self, task_id, payload):
+                super().update_task(task_id, payload)
+                raise vikunja_sync.SyncError("transport_unknown", unknown=True)
+
+        candidate = plan()
+        candidate["source_owned_fields"] = ["status"]
+        candidate["tasks"][0]["status"] = "completed"
+        for adapter_type, expected_key in (
+            (TimeoutAfterCommit, "reconciled"),
+            (None, "safe_to_retry"),
+        ):
+            adapter = (
+                adapter_type(
+                    projects=[{"id": 1, "title": "test-project"}],
+                    tasks={1: [{"id": 2, "title": "test-task", "done": False, "done_at": None, "updated": "before"}]},
+                )
+                if adapter_type
+                else vikunja_sync.FakeAdapter(
+                    projects=[{"id": 1, "title": "test-project"}],
+                    tasks={1: [{"id": 2, "title": "test-task", "done": False, "done_at": None, "updated": "before"}]},
+                )
+            )
+            with tempfile.TemporaryDirectory() as directory:
+                journal = Path(directory) / "journal.json"
+                report, project_id, operations = vikunja_sync.plan_remote(
+                    adapter, vikunja_sync.validate_plan(candidate), "apply", "2026-08-29"
+                )
+                if adapter_type:
+                    vikunja_sync.apply_plan(
+                        adapter, candidate, report, project_id, operations, journal, None, "2026-08-29"
+                    )
+                else:
+                    vikunja_sync._journal_save(
+                        journal,
+                        {
+                            "schema_version": 1,
+                            "operations": [{
+                                "operation_id": "task:TEST-1",
+                                "kind": "task",
+                                "operation": "update_status",
+                                "title": "test-task",
+                                "remote_id": 2,
+                                "desired_done": True,
+                                "before_updated": "before",
+                                "status": "unknown",
+                            }],
+                        },
+                    )
+                reconciled = vikunja_sync.reconcile_unknowns(adapter, journal)
+            self.assertEqual(reconciled[expected_key], 1)
+
+    def test_timeout_after_commit_still_requires_reconcile_before_second_apply(self) -> None:
+        class TimeoutAfterCommit(vikunja_sync.FakeAdapter):
+            calls = 0
+
+            def update_task(self, task_id, payload):
+                self.calls += 1
+                super().update_task(task_id, payload)
+                raise vikunja_sync.SyncError("transport_unknown", unknown=True)
+
+        candidate = plan()
+        candidate["source_owned_fields"] = ["status"]
+        candidate["tasks"][0]["status"] = "completed"
+        adapter = TimeoutAfterCommit(
+            projects=[{"id": 1, "title": "test-project"}],
+            tasks={1: [{"id": 2, "title": "test-task", "done": False, "done_at": None, "updated": "before"}]},
+        )
+        with tempfile.TemporaryDirectory() as directory:
+            journal = Path(directory) / "journal.json"
+            first, project_id, operations = vikunja_sync.plan_remote(
+                adapter, vikunja_sync.validate_plan(candidate), "apply", "2026-08-29"
+            )
+            vikunja_sync.apply_plan(adapter, candidate, first, project_id, operations, journal, None, "2026-08-29")
+            second, project_id, operations = vikunja_sync.plan_remote(
+                adapter, vikunja_sync.validate_plan(candidate), "apply", "2026-08-29"
+            )
+            second = vikunja_sync.apply_plan(
+                adapter, candidate, second, project_id, operations, journal, None, "2026-08-29"
+            )
+        self.assertEqual(second["status"], "UNKNOWN")
+        self.assertEqual(adapter.calls, 1)
+
+    def test_reconcile_rejects_malformed_remote_id_without_transport(self) -> None:
+        adapter = vikunja_sync.FakeAdapter()
+        with tempfile.TemporaryDirectory() as directory:
+            journal = Path(directory) / "journal.json"
+            vikunja_sync._journal_save(
+                journal,
+                {
+                    "schema_version": 1,
+                    "operations": [{
+                        "operation_id": "task:TEST-1",
+                        "kind": "task",
+                        "operation": "update_status",
+                        "remote_id": "not-an-id",
+                        "desired_done": True,
+                        "status": "unknown",
+                    }],
+                },
+            )
+            report = vikunja_sync.reconcile_unknowns(adapter, journal)
+        self.assertEqual(report["status"], "BLOCKED")
+        self.assertEqual(report["blocked"], 1)
 
 
 if __name__ == "__main__":
