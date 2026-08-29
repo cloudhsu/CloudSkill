@@ -137,10 +137,9 @@ from chat scrollback:
   pass/fail counts -- a claim a reader could verify against the repository
   themselves, not "made good progress."
 - For an ongoing task, append a new dated block per update rather than
-  rewriting the description -- the description is itself an append-only
-  progress record, the same discipline `lifecycle.json`'s `notes` field
-  already requires for a Skill (see a private companion capability
-  skill-lifecycle-standard.md`). Mark items done with a clear visual/textual
+  rewriting prior task evidence. This is a provider audit-trail rule, distinct
+  from the compact structured Skill lifecycle index (see
+  a private companion capability). Mark items done with a clear visual/textual
   distinction (a checkmark, a "still open" list) so a skim shows status
   without reading every paragraph.
 - Keep the chat reply itself short when a detailed description was just

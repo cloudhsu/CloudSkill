@@ -40,6 +40,5 @@
     "a user correction reveals a reusable missing safeguard",
     "the skill has not been reviewed for two feature releases"
   ],
-  "replacement_skill": null,
-  "notes": "Current lifecycle state and case identifiers are retained. Detailed maintenance history is omitted from the public distribution."
+  "replacement_skill": null
 }

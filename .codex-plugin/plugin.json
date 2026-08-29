@@ -1,6 +1,6 @@
 {
   "name": "cloudbox-skills",
-  "version": "7.8.5",
+  "version": "7.8.6",
   "description": "Architecture, equipment-domain, quality, governance, refactoring, and Eval workflows for Codex and ChatGPT.",
   "author": {
     "name": "CloudBox"
