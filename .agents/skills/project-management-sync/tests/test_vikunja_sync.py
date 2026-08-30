@@ -356,6 +356,81 @@ class VikunjaSyncTests(unittest.TestCase):
         self.assertEqual(second["status"], "UNKNOWN")
         self.assertEqual(adapter.calls, 1)
 
+    def test_status_update_preserves_description_against_whole_object_write(self) -> None:
+        """Vikunja resets any field absent from an update body. The status-only
+        path must round-trip the whole task so the description survives."""
+
+        class ClobberingVikunjaFake(vikunja_sync.FakeAdapter):
+            # Models the real provider: only fields present in the payload are
+            # kept; every other writable field is reset to its zero value.
+            _WRITABLE = ("title", "description", "due_date", "priority", "done", "percent_done")
+
+            def update_task(self, task_id, payload):
+                task = self.read_task(task_id)
+                for field in self._WRITABLE:
+                    task[field] = payload.get(field, "" if isinstance(task.get(field), str) else None)
+                task["updated"] = "2026-08-29T00:00:01Z"
+                if task.get("done"):
+                    task["done_at"] = "2026-08-29T00:00:00Z"
+                return task
+
+        candidate = plan()
+        candidate["source_owned_fields"] = ["status"]
+        candidate["tasks"][0]["status"] = "completed"
+        adapter = ClobberingVikunjaFake(
+            projects=[{"id": 1, "title": "test-project"}],
+            tasks={
+                1: [{
+                    "id": 2,
+                    "title": "test-task",
+                    "description": "load-bearing narrative that must not be lost",
+                    "done": False,
+                    "done_at": None,
+                    "updated": "before",
+                }],
+            },
+        )
+        with tempfile.TemporaryDirectory() as directory:
+            journal = Path(directory) / "journal.json"
+            report, project_id, operations = vikunja_sync.plan_remote(
+                adapter, vikunja_sync.validate_plan(candidate), "apply", "2026-08-29"
+            )
+            report = vikunja_sync.apply_plan(
+                adapter, candidate, report, project_id, operations, journal, None, "2026-08-29"
+            )
+        self.assertEqual(report["status"], "PASS")
+        self.assertEqual(report["executed"]["update"], 1)
+        remote = adapter.read_task(2)
+        self.assertTrue(remote["done"])
+        self.assertEqual(remote["description"], "load-bearing narrative that must not be lost")
+
+    def test_status_update_fails_closed_if_a_preserved_field_is_clobbered(self) -> None:
+        """If the provider still drops a preserved field, the readback must fail
+        as UNKNOWN (so reconcile runs) rather than silently reporting success."""
+
+        class DescriptionDroppingFake(vikunja_sync.FakeAdapter):
+            def update_task(self, task_id, payload):
+                # Simulate a provider that ignores the description on update.
+                return super().update_task(task_id, {**payload, "description": ""})
+
+        candidate = plan()
+        candidate["source_owned_fields"] = ["status"]
+        candidate["tasks"][0]["status"] = "completed"
+        adapter = DescriptionDroppingFake(
+            projects=[{"id": 1, "title": "test-project"}],
+            tasks={1: [{"id": 2, "title": "test-task", "description": "keep me", "done": False, "done_at": None, "updated": "before"}]},
+        )
+        with tempfile.TemporaryDirectory() as directory:
+            journal = Path(directory) / "journal.json"
+            report, project_id, operations = vikunja_sync.plan_remote(
+                adapter, vikunja_sync.validate_plan(candidate), "apply", "2026-08-29"
+            )
+            report = vikunja_sync.apply_plan(
+                adapter, candidate, report, project_id, operations, journal, None, "2026-08-29"
+            )
+        self.assertEqual(report["status"], "UNKNOWN")
+        self.assertEqual(report["reconciliation"], "run_reconcile_before_retry")
+
     def test_reconcile_rejects_malformed_remote_id_without_transport(self) -> None:
         adapter = vikunja_sync.FakeAdapter()
         with tempfile.TemporaryDirectory() as directory:

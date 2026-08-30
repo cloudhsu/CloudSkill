@@ -1,3 +1,5 @@
+# Aggregate repository check runner. Invoked by CI (validate-cloudskill workflow)
+# and locally before every release.
 from pathlib import Path
 import json
 import os
@@ -39,6 +41,7 @@ commands = [
     [sys.executable, 'scripts/validate_benchmark_report.py'],
     [sys.executable, 'scripts/validate_eval_priority_ranker.py'],
     [sys.executable, 'scripts/eval_priority_ranker.py', '--check-governance'],
+    [sys.executable, 'scripts/rubric_score_view.py', '--check'],
     [sys.executable, 'scripts/validate_review_assurance.py'],
     [sys.executable, 'scripts/validate_lifecycle_orchestration.py'],
     [sys.executable, 'scripts/validate_lifecycle_templates.py'],

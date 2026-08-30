@@ -681,6 +681,63 @@ def _journal_record(journal: Json, operation_id: str, **fields: Any) -> Json:
     return entry
 
 
+# --- Vikunja whole-object write semantics -------------------------------------
+#
+# Vikunja's task update endpoint (`POST /api/v1/tasks/{id}`, and `PUT` alike) is
+# NOT a partial patch. The request body is bound into a full task model and
+# written back column-for-column: any writable field that is absent from the
+# body -- description, due_date, priority, labels, ... -- is reset to its zero
+# value. Sending `{"done": true}` on its own therefore SILENTLY WIPES the task
+# description. This actually happened: an earlier minimal-payload version of
+# this helper blanked the description of 18 tasks while its readback still
+# reported "PASS" because it only checked `done`/`done_at`/`updated`.
+#
+# Every status change here MUST be a read-modify-write: GET the current task,
+# flip only `done`, and POST the ENTIRE object back. Do not "optimise" this
+# into a minimal `{"done": ...}` payload -- that is the bug, not an improvement.
+# The readback below then asserts that no other user-authored field moved.
+
+# Server-computed / read-only keys. Echoing these back can cause spurious writes
+# or provider 500s, so they are dropped from the round-tripped payload. Every
+# key NOT listed here is treated as user-authored and is preserved verbatim.
+_TASK_SERVER_OWNED_KEYS = frozenset(
+    {
+        "updated",
+        "created",
+        "identifier",
+        "index",
+        "done_at",
+        "reactions",
+        "related_tasks",
+        "attachments",
+        "subscription",
+    }
+)
+
+# Fields a status-only update must never alter. The readback compares these
+# before/after and fails closed (as UNKNOWN, so reconcile runs) on any drift.
+_STATUS_UPDATE_PRESERVED_FIELDS = ("description", "title", "due_date", "priority")
+
+
+def _status_update_payload(current: Json, desired_done: bool) -> Json:
+    """Full task object with only `done` changed (Vikunja whole-object write)."""
+    payload = {key: value for key, value in current.items() if key not in _TASK_SERVER_OWNED_KEYS}
+    payload["done"] = desired_done
+    return payload
+
+
+def _preserved_fields_snapshot(task: Json) -> dict[str, Any]:
+    """Copy the fields a status-only update must not touch, for a later compare.
+    Snapshotting (not holding the task reference) is deliberate: it stays valid
+    even if the caller mutates the same dict in place."""
+    return {field: (task.get(field) or "") for field in _STATUS_UPDATE_PRESERVED_FIELDS}
+
+
+def _preserved_fields_intact(before: dict[str, Any], after: Json) -> bool:
+    """True iff no user-authored field was collaterally cleared by the update."""
+    return all(value == (after.get(field) or "") for field, value in before.items())
+
+
 def apply_plan(
     adapter: Any,
     plan: Json,
@@ -768,7 +825,13 @@ def apply_plan(
             )
             _journal_save(journal_path, journal)
             try:
-                adapter.update_task(task_id, {"done": desired_done})
+                # Read-modify-write: Vikunja's task update is a whole-object
+                # write, so a minimal {"done": ...} body would clear every
+                # other field (notably the description). See the module note
+                # on `_status_update_payload` above.
+                current = adapter.read_task(task_id)
+                before_preserved = _preserved_fields_snapshot(current)
+                adapter.update_task(task_id, _status_update_payload(current, desired_done))
                 readback = adapter.read_task(task_id)
                 completion_valid = bool(readback.get("done_at"))
                 readback_updated = readback.get("updated")
@@ -780,6 +843,7 @@ def apply_plan(
                     or readback.get("done") is not desired_done
                     or not completion_valid
                     or not updated_changed
+                    or not _preserved_fields_intact(before_preserved, readback)
                 ):
                     raise SyncError("task_update_readback_mismatch", unknown=True)
             except SyncError as exc:
