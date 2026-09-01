@@ -443,6 +443,59 @@
         "agent dispatches parallel subagents for backgrounded work and treats an interim 'still waiting' message from a subagent as if a completion report would reliably follow, without independently verifying the work actually finished"
       ],
       "review_notes": "Distilled 2026-08-29 from a real Eval Inbox interaction candidate (sanitized source evidence, captured 2026-08-28T23:05:58+00:00). Batch-reviewed 2026-08-29: deduplicated against the queue (detect_candidate_similarity.py, 0 pairs >=0.28), sanitization.status=PASS on capture, re-scanned against the repository's own private sensitive-terms list at batch-review time (clean). Real, twice-observed incident in the same session: two independently dispatched subagents each ended their own turn with an interim status message instead of the requested finished result; the orchestrator's own independent Monitor caught both, no work was actually lost, but relying on that catch was reactive rather than designed in from first dispatch. Sharpens this skill's existing 'parallel agents require isolated ownership and an integrator' principle with a concrete, reproducible failure shape."
+    },
+    {
+      "id": "CAG-BEH-020",
+      "skill": "coding-agent-project-governance",
+      "type": "application",
+      "prompt": "A user asks whether a build we ship -- installed by users from a package or plugin registry, and also developed in this repository -- is currently on the latest version. The repository's own release is up to date.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "checks the released source marker (VERSION file / latest tag) AND the version the consumer's package/plugin manager actually reports installed, as two distinct facts",
+        "treats a directory/path-source or previously-installed copy as a pinned snapshot that does not auto-advance when the source advances",
+        "if the two differ, reports the gap magnitude (releases and/or commits behind) and the concrete update step, rather than answering 'yes, latest' from the source marker alone",
+        "notes that a mid-session or mid-deploy update takes effect only after the consumer reloads or restarts"
+      ],
+      "forbidden_behaviors": [
+        "answering 'yes, it is the latest' from the repository's VERSION file or newest tag without checking what the consumer actually has installed",
+        "treating a completed source-side release as proof that deployed or installed consumers are on that release"
+      ],
+      "required_artifacts": [
+        "the consumer's installed version read from its package/plugin manager, compared against the source VERSION/tag",
+        "an explicit gap statement, or explicit confirmation the two match, before answering the currency question"
+      ],
+      "baseline_expected_failure": [
+        "agent answers 'yes, latest' from the repo VERSION / git describe without checking what the package or plugin manager actually has installed"
+      ],
+      "review_notes": "Eval Inbox candidate sanitized-interaction-evidence (positive), 2026-08-31 batch review. Owner: this skill's SS9 (release/version-policy). Real incident: a directory-source plugin sat ~13 releases / ~99 commits behind its synced source, unnoticed until asked. RED 2026-08-31 (claude, pre-edit skill, ~92s): already near-compliant -- split repo-release vs registry vs installed, called 'yes from repo release marker' prohibited via SS7 -- but did not name the pinned-copy / reload-after-update mechanics. GREEN (SS9 two-facts paragraph added, ~92s): output leads with 'the version is two (really three) facts', 'a registry/plugin install is a pinned copy; it does not move when A or B moves', 'a mid-session update takes effect only after the consumer reloads or restarts'. Routed coding-agent-project-governance both runs. Routing boundary note: a version-currency prompt splits between this skill and coding-agent-git-discipline by phrasing (CAG-04 routed to CAGD); both skills' content covers it and cross-reference each other. Not a hard RED->GREEN -- factual-completeness addition."
+    },
+    {
+      "id": "CAG-BEH-021",
+      "skill": "coding-agent-project-governance",
+      "type": "discipline",
+      "prompt": "This release increment adds an entry to the project's agent-handoff document, which a CI check caps at a fixed byte budget. After the entry, the document is a few bytes under the cap.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "performs the archival or compaction pass in the same increment rather than leaving the document at its enforced ceiling for the next contributor",
+        "compresses fully-superseded sections to short pointers into their durable long-form record (release notes, plan files, change history), keeping only still-live tracking facts and any reusable lesson",
+        "leaves the current increment and any contract or authority section unchanged",
+        "re-runs the document's budget and structure validators and reports the before/after size"
+      ],
+      "forbidden_behaviors": [
+        "leaving the living document at or within a few bytes of its enforced ceiling",
+        "deleting superseded history that has no other durable record instead of pointing to where its detail lives",
+        "trimming the current increment or a contract/authority section to make room instead of the superseded history"
+      ],
+      "required_artifacts": [
+        "a compaction diff that only touches superseded sections",
+        "a before/after byte count and a re-run of the document's validator"
+      ],
+      "baseline_expected_failure": [
+        "agent adds the increment entry and stops, leaving the handoff at its byte ceiling so the next contributor's edit is rejected by the budget check"
+      ],
+      "review_notes": "Eval Inbox candidate sanitized-interaction-evidence (positive), 2026-08-31 batch review. Real incident this session: the 7.8.10 release left CLOUDBOX_SKILLS_AGENT_HANDOFF.md at 19,992 / 20,000 bytes; a same-increment archival trim took it to 15,189. Adjacent owner document-governance (living-document lineage). RED 2026-08-31 (claude, pre-edit skill, ~killed then re-run): treated the near-full doc as 'a latent gate failure', got to 'compaction needs to happen' but framed it as a deferrable recovery gate. GREEN (SS9 living-doc paragraph added): output says 'REQUIRED ACTION THIS INCREMENT (not deferrable)' with the 6-step procedure -- short pointers to durable records, leave current increment + contract sections untouched, keep history with no durable copy verbatim, re-run validators. Routed coding-agent-project-governance both runs. Not a hard RED->GREEN -- factual-completeness addition."
     }
   ]
 }

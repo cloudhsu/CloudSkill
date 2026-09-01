@@ -226,6 +226,27 @@ the agent cannot complete itself (a remaining push, an external approval),
 leave a precise operator handoff naming exactly what is left and why,
 rather than an ambiguous "done" that omits it.
 
+"Version" is two facts, not one: the released source marker (VERSION file /
+latest tag) and the version the consumer actually has — a deployed build, or
+a package/plugin installed from a directory or path source, which is a
+pinned copy that does not advance when its source does. When asked whether
+something is "on the latest version," check both and report the gap
+(releases / commits behind) and the update step, not "yes" from the source
+marker alone; a mid-session update applies only after the consumer reloads
+or restarts. A source-side release completing is not evidence that deployed
+or installed consumers are on it (this is the §7 unverified-external-state
+rule applied to version claims).
+
+When an increment writes to a size-budgeted living document (an agent
+handoff, a change log, a decision log) whose budget a check enforces, and
+the write leaves it within a small margin of the ceiling, do the archival
+compaction in the same increment: compress fully-superseded sections to
+short pointers into the durable record they already cite (release notes,
+plan files, change history), leave the current increment and any
+contract/authority section untouched, re-run the document's validators, and
+report the before/after size. Do not leave it at the ceiling for the next
+contributor, and do not delete history that has no other durable record.
+
 Before rebuilding a GUI or other long-running executable, verify no relevant
 process still holds the target output and remind the operator to close it
 first. Treat that lock as a stop condition for the operator to resolve —

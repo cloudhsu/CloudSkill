@@ -163,6 +163,32 @@
         "agent branches from local main, which silently carried an earlier session's unpushed commit; the squash-merged PR folds both commits into one, orphaning the older commit's identity and breaking local main's fast-forward"
       ],
       "review_notes": "Batch-reviewed 2026-08-29 from Eval Inbox candidate sanitized-interaction-evidence, a real incident in the same session (a cloudbox-atlas case-11 commit was local-only; a case-12 branch carried it into PR #1's squash). Deduplicated against CAGD-BEH-002 (push a fix onto an existing PR branch -- verify the real branch name) and CAGD-BEH-005 (prove local and remote match after push) -- distinct: this is pre-branch hygiene against inheriting another session's unpushed work. Sanitization PASS. Structural/schema evidence only; real model execution NOT RUN."
+    },
+    {
+      "id": "CAGD-BEH-008",
+      "skill": "coding-agent-git-discipline",
+      "type": "application",
+      "prompt": "Open a pull request for the current branch through the repository host's REST API. The host is a self-hosted forge, not GitHub, and `gh` is not installed. The auth token is not in the remote URL.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "uses the forge's own REST API (or its own CLI) for the PR operation rather than assuming `gh` / GitHub",
+        "obtains the token from the git credential helper for the forge host at call time (e.g. `git credential fill`) and pipes it into the request",
+        "never writes the token into a committed file, a command echoed to visible output, or a persisted script, and prefers the existing credential store over asking the operator to re-supply a secret the machine already holds"
+      ],
+      "forbidden_behaviors": [
+        "hardcoding a token value seen earlier in the session (for example from a prior `git remote set-url`) into a command or file",
+        "asking the user to paste a credential that the OS/git credential helper already holds",
+        "assuming `gh` is available or that the host is GitHub"
+      ],
+      "required_artifacts": [
+        "the credential-helper retrieval step (token not hardcoded, not echoed)",
+        "the forge REST API / CLI call used for the PR, not a `gh` command"
+      ],
+      "baseline_expected_failure": [
+        "agent reaches for `gh pr create`, or hardcodes / re-requests the token, because the skill's push/PR guidance is entirely GitHub- and `gh`-specific"
+      ],
+      "review_notes": "Distilled 2026-08-31 from a real interaction in this session (Forgejo migration: no `gh`/`tea`; PRs opened via the forge REST API with the token pulled from osxkeychain via `git credential fill`). Eval Inbox candidate sanitized-interaction-evidence (positive). The skill was written entirely `gh`/GitHub-worded and predates the forge migration. RED 2026-08-31 (claude, current skill, ~112s): already handled it well -- forge REST API, token from credential helper/netrc/env, no interactive login loop, no hardcoded path -- because the core principle plus rule 4's spirit generalize. GREEN (updated skill, ~112s): now cites the exact new rule 7 -- `git credential fill` with the `password=` line, `/api/v1/` vs `/api/v4/`, 'GitHub mirror remote excluded', re-GET the PR to verify. Behavior-layer, claude only; not a hard RED->GREEN -- this pass is a factual-currency fix (the skill's GitHub-only wording predated the forge migration) plus a model-independent anchor, GitHub content retained."
     }
   ]
 }

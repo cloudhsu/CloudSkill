@@ -26,6 +26,7 @@ REF-03,cbComponent和cbWorkshop有同名但不同版本的Qt元件，如何選�
 REF-NEG-01,從零設計一個新的 Client/Server 訂餐系統。,safe-incremental-refactoring,false,greenfield application architecture
 DOC-02,這個專案已有三份重複的架構規範，請先判斷唯一來源再合併。,document-governance,true,document ownership and deduplication
 CAG-03,讓同一個repo同時支援Codex的AGENTS.md與Claude Code的CLAUDE.md，但不要維護兩份規則。,coding-agent-project-governance,true,cross-tool repository instruction adapter
+CAG-05,這次進版在專案的 agent handoff 文件加了一段，那份文件有 CI 強制的 byte budget 上限，加完之後只差幾個 byte 就滿了。,coding-agent-project-governance,true,same-increment living-document compaction against an enforced byte budget
 XPLAT-05,設計一個Qt觸控IC工具，需處理HID熱插拔、裝置清單、command builder、monitor mapping、Admin權限、FW update與installer，架構邊界怎麼切？,cross-platform-native-architecture,true,native touch device utility architecture
 XPLAT-06,觸控工具中UI、設定檔、FW實際狀態、裝置掃描、HID傳輸與Windows API誰是權威來源，重新插拔後如何reconcile？,cross-platform-native-architecture,true,device authority lifecycle and reconciliation
 PROC-02,請從多版規格、Git commits、release tags、installer變更與現場修正重建產品演化流程，並規劃下一版release train。,development-process-tailoring,true,evidence based product evolution and release flow
@@ -98,5 +99,6 @@ ABM-NEG-03,幫我把這個 Python 腳本翻譯成使用者手冊。,about-me,fal
 CAGD-01,幫我推送這個 commit 到 GitHub，但推送失敗說認證有問題，該怎麼處理才不會一直要求登入？,coding-agent-git-discipline,true,failed GitHub push auth recovery
 CAGD-02,要把修好的內容推到既有 PR 的分支上，但我不確定實際的分支名稱是什麼。,coding-agent-git-discipline,true,verify PR branch name before push
 CAGD-03,commit 之前這個 repo 好像有其他未預期的未提交變更，可能是別的 agent 同時在改，該怎麼確認？,coding-agent-git-discipline,true,shared checkout detection before commit
+CAGD-04,要在自架的 Git forge（不是 GitHub、沒有 gh）上用 REST API 幫這個分支開 PR，token 不在 remote URL 裡。,coding-agent-git-discipline,true,"forge REST API + credential-helper token, not gh"
 CAGD-NEG-01,幫我設計這個 repo 的 AGENTS.md 分層、風險路由跟 Sub Agent 角色分工。,coding-agent-git-discipline,false,"belongs to coding-agent-project-governance, not git mechanics"
 CAGD-NEG-02,幫我解掉這個 merge conflict，兩邊改了同一段邏輯要選哪個。,coding-agent-git-discipline,false,"conflict content decision, not git mechanics"

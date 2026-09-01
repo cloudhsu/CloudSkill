@@ -1,5 +1,5 @@
 {
-  "version": "7.8.10",
+  "version": "7.8.11",
   "skills": [
     {
       "name": "about-me",
@@ -39,7 +39,7 @@
     },
     {
       "name": "coding-agent-git-discipline",
-      "description": "Use when a coding agent must commit, push, branch, or clean up git state safely -- avoiding shell-quoting bugs in commit messages, verifying an existing PR's real branch name before pushing fixes, recovering from a failed GitHub push without a login loop, detecting a possibly-shared working tree before committing, and reminding about an overdue version/release cut.",
+      "description": "Use when a coding agent must commit, push, branch, or clean up git state safely -- avoiding shell-quoting bugs in commit messages, verifying an existing PR's real branch name before pushing fixes, recovering from a failed push (GitHub or a self-hosted forge like Forgejo/Gitea) without a login loop, working a forge through its REST API when `gh` is unavailable, detecting a possibly-shared working tree before committing, and reminding about an overdue version/release cut.",
       "path": ".agents/skills/coding-agent-git-discipline/SKILL.md",
       "file_count": 17
     },

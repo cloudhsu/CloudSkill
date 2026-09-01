@@ -7,7 +7,7 @@
 > manifest are validated as one closed artifact before publication.
 
 
-**Current version: 7.8.10**
+**Current version: 7.8.11**
 
 
 CloudBox is the user-facing plugin brand for the `CloudSkill` repository: a portable set of software/system architecture skills and operating guidance for **OpenAI Codex**, **ChatGPT**, and **Claude Code**.
@@ -30,7 +30,7 @@ CloudBox supports Codex/ChatGPT, Claude Code, and Gemini CLI packages, plus the 
 | `architecture-review` | Use when comparing or assessing architecture decisions, module boundaries, state ownership, distributed design, platform/domain separation, failure behavior, or migration risk. |
 | `code-review` | Use when production C, C++, C#, Qt, WinForms, WPF, framework, device-control, communication, or industrial code must be checked for correctness, concurrency, state, lifetime, recovery, maintainability, or boundary violations. |
 | `codebase-architecture-discovery` | Use when a codebase area is being extended, is unfamiliar, or is suspected of accumulated duplication, and no current architecture map or duplication survey exists for it -- before proposing or executing any specific refactor. |
-| `coding-agent-git-discipline` | Use when a coding agent must commit, push, branch, or clean up git state safely -- avoiding shell-quoting bugs in commit messages, verifying an existing PR's real branch name before pushing fixes, recovering from a failed GitHub push without a login loop, detecting a possibly-shared working tree before committing, and reminding about an overdue version/release cut. |
+| `coding-agent-git-discipline` | Use when a coding agent must commit, push, branch, or clean up git state safely -- avoiding shell-quoting bugs in commit messages, verifying an existing PR's real branch name before pushing fixes, recovering from a failed push (GitHub or a self-hosted forge like Forgejo/Gitea) without a login loop, working a forge through its REST API when `gh` is unavailable, detecting a possibly-shared working tree before committing, and reminding about an overdue version/release cut. |
 | `coding-agent-project-governance` | Use when a repository needs coding-agent instructions, risk routing, worktree rules, multi-agent ownership, test evidence, migration controls, release rules, or truthful handoff. |
 | `cross-platform-native-architecture` | Use when a native or Qt system spans OS-specific lifecycle, HID/USB devices, firmware update, privileged integration, packaging, Designer plug-ins, or Qt build/version migration boundaries. |
 | `development-process-tailoring` | Use when delivery is constrained by unstable requirements, hardware dependencies, release trains, urgent work, field feedback, product variants, stage gates, or competing lifecycle models. |

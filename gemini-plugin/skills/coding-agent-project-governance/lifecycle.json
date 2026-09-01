@@ -8,12 +8,14 @@
     "CAG-01",
     "CAG-02",
     "CAG-03",
+    "CAG-05",
     "CAG-NEG-01"
   ],
   "positive_routing_case_ids": [
     "CAG-01",
     "CAG-02",
-    "CAG-03"
+    "CAG-03",
+    "CAG-05"
   ],
   "negative_routing_case_ids": [
     "CAG-NEG-01"
@@ -37,7 +39,9 @@
     "CAG-BEH-016",
     "CAG-BEH-017",
     "CAG-BEH-018",
-    "CAG-BEH-019"
+    "CAG-BEH-019",
+    "CAG-BEH-020",
+    "CAG-BEH-021"
   ],
   "behavior_case_types": [
     "application",

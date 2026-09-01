@@ -1,6 +1,6 @@
 ---
 name: coding-agent-git-discipline
-description: Use when a coding agent must commit, push, branch, or clean up git state safely -- avoiding shell-quoting bugs in commit messages, verifying an existing PR's real branch name before pushing fixes, recovering from a failed GitHub push without a login loop, detecting a possibly-shared working tree before committing, and reminding about an overdue version/release cut.
+description: Use when a coding agent must commit, push, branch, or clean up git state safely -- avoiding shell-quoting bugs in commit messages, verifying an existing PR's real branch name before pushing fixes, recovering from a failed push (GitHub or a self-hosted forge like Forgejo/Gitea) without a login loop, working a forge through its REST API when `gh` is unavailable, detecting a possibly-shared working tree before committing, and reminding about an overdue version/release cut.
 ---
 
 # Coding-agent Git Discipline
@@ -21,12 +21,24 @@ before trusting an assumption or a naming convention, and prefer
 deterministic hooks over remembering the rule, since every mistake this
 skill's content is drawn from was a real, observed failure to remember.
 
+The examples below use the GitHub CLI (`gh`) because most of these
+mistakes were first hit on GitHub, and GitHub is still in active use.
+Every rule applies unchanged to a self-hosted forge (Forgejo, Gitea,
+GitLab): there `gh` is typically absent, so the same operation goes
+through the forge's REST API, and its token comes from the git
+credential helper rather than `gh auth`. A repository may use both at
+once (e.g. a self-hosted forge for day-to-day PRs, GitHub for release
+mirrors) -- check which remote a given command targets.
+
 ## Trigger conditions
 
 - Committing, pushing, branching, or cleaning up branches in a git
   repository as a coding agent.
-- Recovering from a failed `git push` (especially GitHub authentication).
+- Recovering from a failed `git push` (GitHub or self-hosted-forge
+  authentication).
 - Pushing a fix onto an already-open PR's branch.
+- Opening or inspecting a PR/issue on a forge where `gh` is unavailable
+  (self-hosted Forgejo/Gitea/GitLab) -- through its REST API.
 - Working in a repository another concurrent agent or session might also
   be actively modifying.
 - Deciding whether a version bump / release cut is due.
@@ -48,11 +60,13 @@ skill's content is drawn from was a real, observed failure to remember.
    actual commit -- verify the message landed as written
    (`git log -1 --format=%B`) before treating the commit as done.
 2. **Pushing to an existing PR's branch**: fetch the actual branch name
-   (`gh pr view <number> --json headRefName -q .headRefName`) before
-   pushing a fix, never guess it from a naming-convention pattern. A
-   guessed name that is merely plausible creates a stray branch needing
-   separate local and remote cleanup, while the real PR branch never
-   receives the fix.
+   (`gh pr view <number> --json headRefName -q .headRefName`; on a forge
+   with no `gh`, `GET /api/v1/repos/{owner}/{repo}/pulls/{n}` on
+   Forgejo/Gitea or `/api/v4/projects/{id}/merge_requests/{n}` on GitLab,
+   and read the head-ref field) before pushing a fix, never guess it from
+   a naming-convention pattern. A guessed name that is merely plausible
+   creates a stray branch needing separate local and remote cleanup, while
+   the real PR branch never receives the fix.
 3. **Committing in a possibly-shared working tree**: before `git commit`,
    check for unstaged-modified or untracked content not part of the
    commit (`git status --porcelain`). Content sitting dirty at commit
@@ -61,11 +75,13 @@ skill's content is drawn from was a real, observed failure to remember.
    isolate your own changes (`git stash push -u -- <your files>`) and
    work in a separate `git worktree add` checkout rather than committing
    into a possibly-shared tree. See `references/git-commit-and-branch-hygiene.md`.
-4. **Recovering from a failed GitHub push**: preserve the local commit,
-   run the read-only `gh auth status` check once with redacted output. If
-   it reports an active account, inspect the configured credential
-   helper, remote/protocol, and repository/branch permission, then try
-   the existing helper once -- do not invoke or repeat `gh auth login`
+4. **Recovering from a failed push (GitHub or self-hosted forge)**:
+   preserve the local commit, run the read-only `gh auth status` check
+   once with redacted output (off GitHub, inspect the git credential
+   helper for the forge host directly). If it reports an active account,
+   inspect the configured credential helper, remote/protocol, and
+   repository/branch permission, then try the existing helper once -- do
+   not invoke or repeat `gh auth login` (or the forge's login flow)
    automatically. If the same authentication failure recurs, stop as
    `BLOCKED`／`MANUAL REQUIRED` and report the exact cause and remaining
    local commit instead of asking the operator to log in repeatedly. See
@@ -83,7 +99,24 @@ skill's content is drawn from was a real, observed failure to remember.
    treat it as worth a deliberate check-in -- not every push past the
    threshold is actually a good moment to cut a release, but silently
    never checking is how a repository's own tags once fell 90 commits
-   behind before anyone noticed.
+   behind before anyone noticed. For the mirror question -- is an
+   *installed or deployed* build current with its released source (a
+   directory/path-source install is a pinned copy that does not advance
+   with the source) -- see `coding-agent-project-governance` SS9, which
+   owns the release/version-policy treatment; a version-currency prompt
+   routes to either skill by phrasing.
+7. **A forge that is not GitHub / no `gh`**: use the forge's own REST API
+   (Forgejo/Gitea `/api/v1/...`, GitLab `/api/v4/...`) for PR, issue, and
+   status-check operations. Get the token from the git credential helper
+   for the forge host at call time
+   (`printf 'protocol=https\nhost=<forge-host>\n\n' | git credential fill`,
+   read the `password=` line) and pipe it into the request -- never
+   hardcode a token (including one seen earlier in a `git remote set-url`
+   command), echo it to visible output, or write it into a committed file
+   or a persisted script, and prefer the existing credential store over
+   asking the operator to re-supply a secret the machine already holds.
+   After any write, read the object back through the API before reporting
+   success.
 
 ## Required output
 
@@ -106,11 +139,17 @@ skill's content is drawn from was a real, observed failure to remember.
 - Committing into a working tree without checking for another agent's
   concurrent uncommitted changes first (real: hit repeatedly in one
   session before a deterministic hook was built for it).
+- Reaching for `gh` on a self-hosted forge that has no `gh`, or
+  hardcoding a forge token (or re-asking the operator for it) instead of
+  pulling it from the git credential helper (real: post-Forgejo-migration
+  PRs opened via the forge REST API).
 
 ## Supporting references
 
 - `references/git-push-auth-recovery.md` -- full bounded-retry sequence
-  and diagnosis table for a failed GitHub push.
+  and diagnosis table for a failed push (GitHub-specific commands; the
+  same sequence on a self-hosted forge substitutes the credential helper
+  for `gh auth`).
 - `references/git-commit-and-branch-hygiene.md` -- the 4 real-mistake
   lessons in fuller detail (backtick quoting, branch-name verification,
   branch cleanup, next-branch creation).
