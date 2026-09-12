@@ -166,6 +166,10 @@ Handoff must separate:
 
 Do not claim device, OS, deployment, browser, or external-system tests that were not executed.
 
+Treat an agent's self-reported validation as a claim to verify before using it as acceptance evidence: inspect enough of the checking script to confirm pass/fail fields are computed rather than hard-coded, verify cited files and paths exist, and for work still running confirm an explicit completion signal and the expected repository HEAD before rebuilding, testing, or diagnosing a regression. If provenance or completion is unverified, report the result as NOT RUN and do not treat intermediate working-tree output or clean-looking visual inspection as confirmation; independently measure material claims where practical.
+
+Evidence status: directional experiment evidence, n=1-per-arm at the `skill_behavior` layer; it is not proven or validated at a higher layer.
+
 Do not fabricate an attribution, author, submitted-by, or other identity
 field that the task never supplied, even when a report-style deliverable
 "looks like" it should carry one -- see `references/no-fabricated-identity.md`
