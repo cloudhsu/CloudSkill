@@ -10,12 +10,25 @@ This skill governs the product engineering of an AI agent or agentic system. For
 
 Follow `references/agent-lifecycle.md`.
 
-Also read when relevant:
+Also read the reference whose condition matches the task at hand, not all
+four by default:
 
-- `references/evaluation-strategy.md`
-- `references/tool-and-state-design.md`
-- `references/security-and-governance.md`
-- `references/coding-agent-workflow.md`
+- `references/evaluation-strategy.md` -- when designing or reviewing how
+  the agent's behavior is tested: the evaluation layers (deterministic
+  unit tests, tool-contract tests, scenario evaluations, adversarial/
+  negative evaluations) and what each layer actually proves.
+- `references/tool-and-state-design.md` -- when defining what tools the
+  agent has access to or where its state/memory lives: the tool contract,
+  tool-design rules, state-ownership boundaries, and how to decide whether
+  a recurring gap belongs in a harness component fix versus a memory note.
+- `references/security-and-governance.md` -- when the agent crosses a
+  trust boundary or takes a consequential action: trust-boundary
+  identification, required controls, which actions need approval, and
+  what counts as governance evidence.
+- `references/coding-agent-workflow.md` -- specifically when the agent
+  under design is a coding agent that reads or modifies a codebase:
+  before-modification checks, planning, implementation, verification, and
+  handoff.
 
 Use the templates in `assets/`.
 

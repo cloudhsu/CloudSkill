@@ -7,12 +7,28 @@ description: Use when engineering documents disagree on authority, version linea
 
 Create documents that support a specific decision, implementation, verification, operation, maintenance, training, release, or audit purpose.
 
-Read:
+Read the reference whose condition matches the task at hand, not all four by
+default:
 
-- `references/document-rules.md`
-- `references/document-types.md`
-- `references/traceability.md`
-- `references/requirements-spec-evolution.md` for requirement/specification chains, customer feedback, release baselines, and supersession control.
+- `references/document-rules.md` -- when actually drafting or editing a
+  document's content: controlled metadata fields every document needs
+  (ID, version, status, owner, effective date, classification), normative
+  language, precision, and table/diagram conventions.
+- `references/document-types.md` -- when deciding which document TYPE to
+  create or which one an existing document actually is: per-type required
+  emphasis for a Requirement Specification, Architecture Decision Record,
+  Architecture/Design Specification, Test Plan/Verification Specification,
+  Release Notes, Incident/Field Issue Report, or Multi-Audience Quality
+  Report.
+- `references/traceability.md` -- when linking a document to others or
+  auditing whether links exist: the recommended identifier families (OBJ,
+  NEED, REQ, QAR, ADR, INT, RISK, TEST, DEFECT, REL, FIELD), minimum
+  required linkage, and what counts as traceability quality vs. a broken
+  chain.
+- `references/requirements-spec-evolution.md` -- when a requirement or
+  specification changes over time and customer feedback, mockups,
+  implementation notes, release plans, and field fixes coexist: document
+  roles, chains, and supersession control.
 
 Use the templates in `assets/` when applicable.
 

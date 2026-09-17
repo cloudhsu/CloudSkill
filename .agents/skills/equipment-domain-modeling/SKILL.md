@@ -11,12 +11,24 @@ Model physical identity, authority, lifecycle, units, measurement quality, and t
 
 **REQUIRED COMPANION:** Use `semiconductor-equipment-domain-knowledge` when the component purpose, measurement range, vacuum/process meaning, or completion evidence is uncertain.
 
-Read:
+Read the reference whose condition matches the task at hand, not all four by
+default:
 
-- `references/state-command-reconciliation.md`
-- `references/command-catalog-and-capability-model.md`
-- `references/config-and-snapshot-contracts.md`
-- `references/equipment-component-state-patterns.md`
+- `references/state-command-reconciliation.md` -- when defining
+  Commanded/Desired versus Actual/Readback for a component: the core
+  authority separation, a writable-signal example, and the reconciliation
+  rules between what was asked for and what the hardware reports.
+- `references/command-catalog-and-capability-model.md` -- when defining
+  what commands a component or module exposes: the four semantic command
+  tools, required catalog fields, the responsibility boundary between
+  issuing and executing a command, and how module/topology capability is
+  declared.
+- `references/config-and-snapshot-contracts.md` -- when separating
+  configuration from runtime snapshot data: what belongs in each and why
+  they must stay separate contracts.
+- `references/equipment-component-state-patterns.md` -- when modeling a
+  specific component type's state shape: patterns for a binary actuator,
+  discrete sensor, analog regulator, measurement, or motion axis.
 
 Use:
 

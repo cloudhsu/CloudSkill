@@ -12,12 +12,25 @@ advance the plan. Repository actions remain bounded by worktree, test, commit,
 PR, migration, and release controls even when another plugin generated the
 detailed task steps.
 
-Read:
+Read the reference whose condition matches the task at hand, not all four by
+default:
 
-- `references/instruction-architecture.md`
-- `references/risk-routing.md`
-- `references/multi-agent-delivery.md`
-- `references/artifact-matrix.md`
+- `references/instruction-architecture.md` -- when deciding where a rule
+  belongs or resolving a scope conflict between instruction layers: global
+  guidance, repository `AGENTS.md`, a nested `AGENTS.md`/override, Skills,
+  and how to resolve ambiguous scope between them.
+- `references/risk-routing.md` -- when classifying how much autonomy an
+  action should get: low/medium/high risk tiers, delegation scope for
+  irreversible steps, and when to hold back a large or
+  verification-heavy item even though it is technically reversible.
+- `references/multi-agent-delivery.md` -- when more than one agent works
+  the same repository concurrently: role split (Main/Integrator,
+  Architecture, Development, Test) and the concurrency rule governing
+  shared state between them.
+- `references/artifact-matrix.md` -- when deciding which document should
+  hold a given kind of project fact: the suggested artifact (entry order,
+  always-on rules, product state, domain invariants, module map,
+  engineering workflow, and more) per concern.
 
 Use templates in `assets/`.
 
@@ -168,7 +181,24 @@ Do not claim device, OS, deployment, browser, or external-system tests that were
 
 Treat an agent's self-reported validation as a claim to verify before using it as acceptance evidence: inspect enough of the checking script to confirm pass/fail fields are computed rather than hard-coded, verify cited files and paths exist, and for work still running confirm an explicit completion signal and the expected repository HEAD before rebuilding, testing, or diagnosing a regression. If provenance or completion is unverified, report the result as NOT RUN and do not treat intermediate working-tree output or clean-looking visual inspection as confirmation; independently measure material claims where practical.
 
-Evidence status: directional experiment evidence, n=1-per-arm at the `skill_behavior` layer; it is not proven or validated at a higher layer.
+A batch (tens of items) visual- or content-judgment self-report that lands
+on a single uniform conclusion across every item (e.g. "all N flagged files
+are false positives," "all N pass") is itself a red flag, not reassurance
+-- a real distribution across that many independently-generated items
+rarely comes back unanimous. Spot-check at least a few concrete items from
+such a report, including their file timestamps against the task's actual
+run window, before accepting it; a real batch of ~40 flagged files was
+reported as "all false positives, nothing modified" while several,
+independently re-opened, showed an unambiguous, unmodified real defect.
+When a spot-check contradicts a uniform-conclusion report, treat the whole
+report as unreliable rather than asking the same agent to re-run the same
+self-audit -- hand the next attempt a pre-confirmed item list instead of
+asking it to re-judge which items are real.
+
+Evidence status: directional experiment evidence, n=1-per-arm at the
+`skill_behavior` layer; it is not proven or validated at a higher layer.
+The batch-uniform-conclusion case is separately evidenced, also
+`skill_behavior`, n=1.
 
 Do not fabricate an attribution, author, submitted-by, or other identity
 field that the task never supplied, even when a report-style deliverable

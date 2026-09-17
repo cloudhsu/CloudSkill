@@ -8,13 +8,26 @@ description: Use when a native or Qt system spans OS-specific lifecycle, HID/USB
 When a missing material architecture decision would change the design, follow
 `../architecture-review/references/architecture-decision-elicitation.md`.
 
-Read:
+Read the reference whose condition matches the task at hand, not all five by
+default:
 
-- `references/platform-boundary-principles.md`
-- `references/opengl-engine-checklist.md`
-- `references/qt-tool-checklist.md`
-- `references/qt-component-modernization.md` when the repository contains legacy Qt widgets, Designer plug-ins, duplicated component sources, qmake coupling, or a Qt-version migration.
-- `references/touch-device-utility-architecture.md` when a native utility owns device discovery, HID/USB commands, monitor/input mapping, privileged OS functions, firmware update, or installer/startup behavior.
+- `references/platform-boundary-principles.md` -- when a portability
+  decision is being made: why portability is not uniformity, boundary
+  tests to apply, and how to assign ownership across platforms.
+- `references/opengl-engine-checklist.md` -- when reviewing or building an
+  OpenGL-based 2D engine: rendering, resource, input/lifecycle, and
+  testing checklist items.
+- `references/qt-tool-checklist.md` -- when reviewing or building a
+  cross-platform Qt tool: UI/application, Designer components, hardware/
+  communication, build/deployment, and process/startup/local-secrets
+  checklist items.
+- `references/qt-component-modernization.md` -- when the repository
+  contains legacy Qt widgets, Designer plug-ins, duplicated component
+  sources, qmake coupling, or a Qt-version migration.
+- `references/touch-device-utility-architecture.md` -- when a native
+  utility owns device discovery, HID/USB commands, monitor/input mapping,
+  privileged OS functions, firmware update, or installer/startup
+  behavior.
 
 Use:
 

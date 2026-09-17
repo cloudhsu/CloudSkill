@@ -51,3 +51,26 @@ local and remote branch names can differ (a renamed remote branch, a
 locally-renamed tracking branch, a stray branch from an earlier mistake),
 and starting the next branch from the wrong base silently carries over
 content that should not be there.
+
+## Continuing work on an already-checked-out branch: re-verify it hasn't been merged
+
+The previous lesson covers starting the *next* unit of work; this one covers
+*continuing* on a branch that is still checked out from earlier in the same
+session. A branch can go stale mid-session the moment its own pull request
+merges -- nothing about the local checkout changes when that happens, so a
+clean working tree gives no signal either way. Real, observed pattern: a
+feature branch was checked out, used to open a PR, and then -- after the
+*user* separately merged that same PR -- new, unrelated commits were added
+directly onto the still-checked-out (now-stale) branch, because the working
+tree was clean and no explicit branch switch had been requested. This
+recurred three times in one session before being made a routine check.
+
+Before adding a new commit to any already-checked-out branch, run
+`git fetch <remote> --quiet && git merge-base --is-ancestor <remote>/<default>
+HEAD` and treat `HEAD` being an ancestor of the remote default branch (i.e.
+already merged) as the recovery trigger: `git checkout <default> && git pull
+<remote> <default> --ff-only`, branch fresh from that, cherry-pick anything
+already committed on the stale branch, then delete the stale local branch.
+This is a mechanical ancestor check on every commit onto an existing
+checkout, not a one-time check performed only when a branch is first
+created.

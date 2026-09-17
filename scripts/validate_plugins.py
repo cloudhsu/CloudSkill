@@ -193,6 +193,27 @@ if evolution_dirs_present:
             fail(f"private-plugin/codex-skills/{name} is missing; run scripts/sync_private_codex_plugin.py")
         elif tree_hashes(canonical) != tree_hashes(packaged):
             fail(f"private-plugin/codex-skills/{name} is stale; run scripts/sync_private_codex_plugin.py")
+    # Per-sub-tier plugin packages (Forgejo #91's install-only-what-you-need
+    # follow-up): additional, independently-installable packages alongside
+    # the monolithic private-plugin above, one per non-core tier in
+    # config/skill-distribution.json. Delegates to sync_private_subtier_
+    # plugins.py's own tier_matches() so the packaging generator and this
+    # validator can never silently drift apart. Imported lazily, only once
+    # evolution_dirs_present confirms this is a private checkout --
+    # sync_private_subtier_plugins.py is itself a private-tier script and
+    # does not exist in a public-only checkout, where this module-level
+    # import would otherwise crash validate_plugins.py (a public-tier
+    # script) before it ever reaches this branch.
+    import sync_private_subtier_plugins as subtier
+
+    subtier_by_tier = subtier.tier_membership()
+    for tier_name, tier_skill_names in subtier_by_tier.items():
+        if not subtier.tier_matches(tier_name, tier_skill_names):
+            fail(
+                f"{tier_name}-plugin/{tier_name}-gemini-plugin is missing or stale; "
+                "run scripts/sync_private_subtier_plugins.py"
+            )
+
     if private_gemini.get("name") != "cloudbox-skills-private" or private_gemini.get("version") != version:
         fail("Private Gemini extension name/version must match CloudBox private and VERSION")
     private_gemini_skills = ROOT / "private-gemini-plugin" / "skills"
@@ -240,11 +261,18 @@ for name in skill_dirs:
     if not (skills_root / name / "SKILL.md").is_file():
         fail(f"canonical skill missing SKILL.md: {name}")
 
+# Forgejo #91: alongside the monolithic cloudbox-skills-private, one
+# additional cloudbox-skills-<tier> entry per sub-tier is expected once the
+# private repo is checked out, so an operator can install only the tier(s)
+# they need.
+expected_subtier_plugin_names = {f"cloudbox-skills-{tier}" for tier in subtier_by_tier} if evolution_dirs_present else set()
+
 codex_plugins = codex_market.get("plugins", [])
 codex_plugin_names = {p.get("name"): p for p in codex_plugins}
 if evolution_dirs_present:
-    if set(codex_plugin_names) != {"cloudbox-skills", "cloudbox-skills-private"}:
-        fail("Private Codex marketplace must expose exactly cloudbox-skills and cloudbox-skills-private")
+    expected_codex_names = {"cloudbox-skills", "cloudbox-skills-private"} | expected_subtier_plugin_names
+    if set(codex_plugin_names) != expected_codex_names:
+        fail(f"Private Codex marketplace must expose exactly {sorted(expected_codex_names)}")
 else:
     if set(codex_plugin_names) != {"cloudbox-skills"}:
         fail("Public Codex marketplace must expose exactly one cloudbox-skills plugin")
@@ -259,6 +287,14 @@ if evolution_dirs_present and "cloudbox-skills-private" in codex_plugin_names:
     private_source = codex_plugin_names["cloudbox-skills-private"].get("source", {})
     if private_source.get("source") != "local" or private_source.get("path") != "./private-plugin":
         fail("Codex marketplace cloudbox-skills-private must point at ./private-plugin")
+for tier_plugin_name in expected_subtier_plugin_names:
+    tier = tier_plugin_name[len("cloudbox-skills-"):]
+    entry = codex_plugin_names.get(tier_plugin_name)
+    if entry is None:
+        continue  # already reported by the expected_codex_names comparison above
+    source = entry.get("source", {})
+    if source.get("source") != "local" or source.get("path") != f"./{tier}-plugin":
+        fail(f"Codex marketplace {tier_plugin_name} must point at ./{tier}-plugin")
 
 claude_plugins = claude_market.get("plugins", [])
 claude_plugin_names = {p.get("name"): p for p in claude_plugins}
@@ -272,8 +308,14 @@ if evolution_dirs_present:
         fail("Claude marketplace must expose cloudbox-skills-private (private-repo-only add-on)")
     elif claude_plugin_names["cloudbox-skills-private"].get("source") != "./private-plugin":
         fail("Claude marketplace cloudbox-skills-private must point at ./private-plugin")
-    if len(claude_plugins) != 2:
-        fail(f"Claude marketplace must expose exactly cloudbox-skills and cloudbox-skills-private, found {len(claude_plugins)} entries")
+    expected_claude_names = {"cloudbox-skills", "cloudbox-skills-private"} | expected_subtier_plugin_names
+    if set(claude_plugin_names) != expected_claude_names:
+        fail(f"Claude marketplace must expose exactly {sorted(expected_claude_names)}, found {sorted(claude_plugin_names)}")
+    for tier_plugin_name in expected_subtier_plugin_names:
+        tier = tier_plugin_name[len("cloudbox-skills-"):]
+        entry = claude_plugin_names.get(tier_plugin_name)
+        if entry is not None and entry.get("source") != f"./{tier}-plugin":
+            fail(f"Claude marketplace {tier_plugin_name} must point at ./{tier}-plugin")
 elif len(claude_plugins) != 1:
     fail(f"Public checkout's Claude marketplace must expose exactly cloudbox-skills, found {len(claude_plugins)} entries")
 

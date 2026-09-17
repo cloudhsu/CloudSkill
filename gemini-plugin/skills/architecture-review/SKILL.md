@@ -13,12 +13,18 @@ Use available repository files, diagrams, requirements, issue descriptions, logs
 
 When critical information is absent, list the uncertainty and continue with explicit assumptions unless the missing item prevents a responsible recommendation.
 
-Read these references when relevant:
+Read the reference whose condition matches the task at hand, not all three by
+default:
 
-- `references/architect-context.md`
-- `references/review-checklist.md`
-- `references/architecture-decision-elicitation.md` when a missing material
-  decision can change the review conclusion.
+- `references/architect-context.md` -- when calibrating how to communicate
+  a review to the audience it's for: the assumed experience pattern,
+  typical architectural lens, an important distinction the review should
+  not blur, and the expected communication level.
+- `references/review-checklist.md` -- when running the actual review:
+  responsibility, state, commands/side effects, failure/recovery, and
+  boundary checklist items.
+- `references/architecture-decision-elicitation.md` -- when a missing
+  material decision can change the review conclusion.
 
 ## Workflow
 

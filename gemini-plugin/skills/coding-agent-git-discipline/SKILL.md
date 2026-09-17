@@ -94,7 +94,20 @@ mirrors) -- check which remote a given command targets.
    starting the next unit of work, create the new branch from a freshly
    pulled default branch, not from whatever was checked out a moment
    before -- local and remote branch names can differ.
-6. **Version/release cadence**: when commits-since-last-tag has grown
+6. **Confirming a merge actually landed its content**: a PR API response's
+   `merged: true` (or a web-UI merge confirmation) proves the merge event
+   happened, not that the target branch's current content actually
+   contains everything the PR's commits added. Before building on top of a
+   just-merged branch, check that the specific files/sections the PR was
+   supposed to add are actually present in the target branch's current
+   state -- not only that the commit is reachable in `git log`. A real
+   merge (`merged: true` confirmed via API) still ended up missing an
+   entire file's content on the target branch while the two other commits
+   in the same PR landed correctly; the exact mechanism was not
+   conclusively identified, and recovering the content from an intact
+   copy kept elsewhere took priority over diagnosing the root cause.
+   Evidence status: directional, `case_contract` layer, n=1.
+7. **Version/release cadence**: when commits-since-last-tag has grown
    noticeably (the `release-cut-reminder` hook's threshold, default 6),
    treat it as worth a deliberate check-in -- not every push past the
    threshold is actually a good moment to cut a release, but silently
@@ -105,7 +118,7 @@ mirrors) -- check which remote a given command targets.
    with the source) -- see `coding-agent-project-governance` SS9, which
    owns the release/version-policy treatment; a version-currency prompt
    routes to either skill by phrasing.
-7. **A forge that is not GitHub / no `gh`**: use the forge's own REST API
+8. **A forge that is not GitHub / no `gh`**: use the forge's own REST API
    (Forgejo/Gitea `/api/v1/...`, GitLab `/api/v4/...`) for PR, issue, and
    status-check operations. Get the token from the git credential helper
    for the forge host at call time
@@ -117,6 +130,18 @@ mirrors) -- check which remote a given command targets.
    asking the operator to re-supply a secret the machine already holds.
    After any write, read the object back through the API before reporting
    success.
+9. **Continuing work on an already-checked-out branch**: before adding a
+   new commit to a branch that is already checked out from earlier work in
+   the same session -- not only when explicitly starting the next unit of
+   work -- check whether that branch has already been merged into the
+   current default branch (`git merge-base --is-ancestor origin/<default>
+   HEAD`, or the forge-API equivalent). A branch left checked out across
+   several pieces of work can go stale mid-session once its own PR merges;
+   a clean working tree is not evidence the branch itself is still current.
+   If it is already merged, fetch/pull the default branch, branch fresh
+   from it, and cherry-pick any commits already made on the stale branch
+   before continuing -- do not keep committing onto it. See
+   `references/git-commit-and-branch-hygiene.md`.
 
 ## Required output
 
@@ -139,10 +164,19 @@ mirrors) -- check which remote a given command targets.
 - Committing into a working tree without checking for another agent's
   concurrent uncommitted changes first (real: hit repeatedly in one
   session before a deterministic hook was built for it).
+- Trusting a PR's `merged: true` API response as proof the target branch's
+  content is complete, then building the next change on top of a branch
+  silently missing one of the PR's commits' content (real: caught only
+  when the next task needed the specific missing feature).
 - Reaching for `gh` on a self-hosted forge that has no `gh`, or
   hardcoding a forge token (or re-asking the operator for it) instead of
   pulling it from the git credential helper (real: post-Forgejo-migration
   PRs opened via the forge REST API).
+- Continuing to add commits to a branch that is already checked out from
+  earlier work, without checking whether it has since been merged (real:
+  hit three separate times in one session, each caught only after new
+  commits already existed on the stale branch, recovered by cherry-picking
+  them onto a freshly branched copy of the updated default branch).
 
 ## Supporting references
 
@@ -150,9 +184,10 @@ mirrors) -- check which remote a given command targets.
   and diagnosis table for a failed push (GitHub-specific commands; the
   same sequence on a self-hosted forge substitutes the credential helper
   for `gh auth`).
-- `references/git-commit-and-branch-hygiene.md` -- the 4 real-mistake
+- `references/git-commit-and-branch-hygiene.md` -- the 5 real-mistake
   lessons in fuller detail (backtick quoting, branch-name verification,
-  branch cleanup, next-branch creation).
+  branch cleanup, next-branch creation, continuing on an already-stale
+  checkout).
 
 ## Hooks bundled with this skill
 

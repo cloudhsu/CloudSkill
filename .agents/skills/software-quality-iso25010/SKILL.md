@@ -7,11 +7,21 @@ description: Use when software quality must be translated into measurable scenar
 
 Default to ISO/IEC 25010:2023 unless the project explicitly declares ISO/IEC 25010:2011.
 
-Read:
+Read the reference whose condition matches the task at hand, not all three
+by default:
 
-- `references/quality-model.md`
-- `references/quality-scenarios.md`
-- `references/release-gates.md`
+- `references/quality-model.md` -- when classifying a quality concern into
+  the ISO/IEC 25010 model: edition control (2011 vs. 2023) and the
+  practical interpretation of each characteristic (functional suitability,
+  performance efficiency, compatibility, interaction capability,
+  reliability, and the rest).
+- `references/quality-scenarios.md` -- when turning a quality
+  characteristic into a testable requirement: the quality-scenario
+  template and worked examples for reliability and maintainability.
+- `references/release-gates.md` -- when deciding whether a quality result
+  blocks, conditions, or merely monitors a release: hard gate/conditional
+  gate/monitored-target types, the gate-record fields, and real-time/
+  native evidence requirements.
 
 Do not reproduce copyrighted standard text. Use the quality model as a classification framework and translate it into system-specific, measurable requirements.
 

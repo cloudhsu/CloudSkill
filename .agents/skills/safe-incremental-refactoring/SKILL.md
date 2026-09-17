@@ -5,12 +5,24 @@ description: Use when legacy or brownfield responsibilities must move without br
 
 # Safe Incremental Refactoring
 
-Read:
+Read the reference whose condition matches the task at hand, not all four by
+default:
 
-- `references/refactoring-workflow.md`
-- `references/compatibility-facade.md`
-- `references/data-migration-safety.md`
-- `references/evidence-checklist.md`
+- `references/refactoring-workflow.md` -- when planning the actual
+  extraction sequence: characterization-first discipline, choosing the
+  smallest coherent slice, a worked sequence example, and the
+  compact-extraction decision.
+- `references/compatibility-facade.md` -- when a public contract must keep
+  working while the implementation behind it changes: compatibility
+  façades, dynamic seams, a dual implementation behind one compile-time
+  switch, and capability ports.
+- `references/data-migration-safety.md` -- when the change touches
+  persisted data or a schema: pre-change checks, additive migration,
+  version gates, and persistence-model concerns.
+- `references/evidence-checklist.md` -- when assembling the evidence a
+  slice needs before it counts as verified: the contract/data/failure
+  checklist, and two named real-mistake patterns (a disabled assignment on
+  the return path; a configured field shadowed by a hardcoded literal).
 
 Use `assets/REFACTOR_SLICE.template.md` for each non-trivial slice.
 

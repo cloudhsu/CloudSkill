@@ -8,12 +8,25 @@ description: Use when an application crosses client/server, API, persistence, id
 When a missing material architecture decision would change the design, follow
 `../architecture-review/references/architecture-decision-elicitation.md`.
 
-Read:
+Read the reference whose condition matches the task at hand, not all four by
+default:
 
-- `references/full-stack-boundaries.md`
-- `references/client-server-checklist.md`
-- `references/production-small-system-case.md`
-- `references/durable-state-contracts.md`
+- `references/full-stack-boundaries.md` -- when placing a responsibility
+  and it is unclear which layer should own it: per-layer authority for
+  Client, HTTP/API, Application Service, Domain Policy, and Repository/
+  Persistence Adapter.
+- `references/client-server-checklist.md` -- when auditing or designing a
+  client/server split: authority, consistency, history, API, and frontend
+  checklist items to verify before treating the split as complete.
+- `references/production-small-system-case.md` -- when a small internal
+  system (tens of users) is being judged low-risk by size alone: real
+  architecture risks that still apply (money/balance consistency, auth,
+  audit history, concurrency, upgrade compatibility, backup/recovery,
+  release integrity) and patterns from a reviewed internal ordering system.
+- `references/durable-state-contracts.md` -- when a decision touches what
+  gets persisted, migrated, or corrected after the fact: logical commit
+  vs. durable persistence, schema compatibility vs. product release,
+  immutable history and correction, and post-external-commit lifecycle.
 
 ## Workflow
 

@@ -14,13 +14,34 @@ Separate process intent from device execution without losing physical-state auth
 
 **REQUIRED COMPANION:** Use `semiconductor-equipment-domain-knowledge` when the physical purpose, vacuum/process state, component capability, or completion evidence is uncertain.
 
-Read:
+Read the reference whose condition matches the task at hand, not all five by
+default:
 
-- `references/physical-runtime-and-network-topology.md`
-- `references/sequence-service-event-contract.md`
-- `references/config-driven-equipment-platform.md`
-- `references/equipment-platform-modernization.md`
-- `references/physical-process-readiness-and-interlocks.md`
+- `references/physical-runtime-and-network-topology.md` -- when separating
+  or auditing the four architecture views (physical/runtime/communication/
+  responsibility): the view matrix, cross-view traceability questions, and
+  a deployment-node checklist for where each executable actually runs.
+- `references/sequence-service-event-contract.md` -- when defining the
+  Sequence/Equipment-Service boundary or a command/event contract: the
+  responsibility split between the two layers, the command/event lifecycle
+  states, required correlation fields (wafer/lot/sequence/attempt IDs),
+  and failure/timeout/retry rules.
+- `references/config-driven-equipment-platform.md` -- when a chamber/UI
+  behavior is (or should be) driven by configuration rather than code:
+  the configuration domains (identity, capability, IO binding, units,
+  interlocks, recipe/tolerance binding, UI presentation, product/chamber
+  variant), the controls a config schema needs as a versioned contract,
+  and common-library governance for shared config-driven UI.
+- `references/equipment-platform-modernization.md` -- when planning or
+  reviewing a migration from a legacy or monolithic platform: the two
+  coordinated roadmaps (capability vs. migration/deployment), the
+  checkpoint contract each stage must record, and the recommended
+  same-machine -> distributed-simulation -> real-hardware-pilot ladder.
+- `references/physical-process-readiness-and-interlocks.md` -- when
+  material transfer, pump-down/vent, gas/pressure stabilization, or
+  power/plasma process readiness must be evaluated as an actual physical
+  predicate (not a flag copied from the UI): per-domain readiness
+  evidence and the interlock layers that gate each transition.
 
 Use:
 

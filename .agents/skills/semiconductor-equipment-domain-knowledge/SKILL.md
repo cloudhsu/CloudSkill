@@ -9,12 +9,23 @@ description: Use when a semiconductor-equipment task depends on the physical mea
 
 Interpret the physical equipment and process before translating it into software. Preserve the distinction between general process principles, product-specific implementation, recipe-specific values, and software contracts.
 
-Read:
+Read the reference whose condition matches the task at hand, not all four by
+default:
 
-- `references/equipment-topology-and-material-flow.md`
-- `references/component-capabilities-and-io.md`
-- `references/vacuum-and-pvd-process-principles.md`
-- `references/domain-to-software-contracts.md`
+- `references/equipment-topology-and-material-flow.md` -- when placing a
+  responsibility on the right physical module: common module
+  responsibilities (EFEM, Main Frame/vacuum transfer system, process
+  chamber) and material/environment state as it moves between them.
+- `references/component-capabilities-and-io.md` -- when deciding what a
+  physical component can actually do or expose as IO, and the cautions
+  around assuming a capability that isn't confirmed.
+- `references/vacuum-and-pvd-process-principles.md` -- when a decision
+  touches vacuum state or a PVD/sputtering process: vacuum principles
+  relevant to software, the generalized magnetron sputtering chain, and
+  variant/quality relationships between them.
+- `references/domain-to-software-contracts.md` -- when translating a
+  physical readiness or completion concept into a software contract: the
+  readiness-predicate pattern and the completion pattern.
 
 Use:
 

@@ -82,12 +82,21 @@ action identity, budgets, evidence lineage, and Review Assurance state. Resume
 read-only: reconcile late external completion, reject stale plan/lease writers,
 and continue from the first unproven step without expanding authority.
 
-Read:
+Read the reference whose condition matches the task at hand, not all four by
+default:
 
-- `references/process-selection.md`
-- `references/hybrid-lifecycle.md`
-- `references/process-health.md`
-- `references/product-evolution-and-release-flow.md` when reconstructing a long-lived product from specifications, Git history, tags, release notes, customer requests, field defects, variants, installers, or support evidence.
+- `references/process-selection.md` -- when choosing which development
+  process fits the project: Waterfall/stage-gated governance, iterative
+  development, Agile delivery, Extreme Programming practices, or a hybrid.
+- `references/hybrid-lifecycle.md` -- when the project is following (or
+  should follow) a staged hybrid model: a worked 5-stage example from
+  business/feasibility through release and field validation.
+- `references/process-health.md` -- when judging whether the current
+  process is actually working, not just whether it was followed.
+- `references/product-evolution-and-release-flow.md` -- when
+  reconstructing a long-lived product from specifications, Git history,
+  tags, release notes, customer requests, field defects, variants,
+  installers, or support evidence.
 
 Use:
 

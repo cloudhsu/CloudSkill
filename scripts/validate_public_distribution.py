@@ -31,6 +31,16 @@ OPERATIONAL_DOCS = ("AGENTS.md", "README.md", "INSTALL.md", "docs/CLOUDBOX_PLUGI
 PROHIBITED_PATH_PREFIXES = (
     "private-plugin/",
     "private-gemini-plugin/",
+    "private-meta-plugin/",
+    "private-meta-gemini-plugin/",
+    "private-game-plugin/",
+    "private-game-gemini-plugin/",
+    "private-equipment-plugin/",
+    "private-equipment-gemini-plugin/",
+    "private-art-plugin/",
+    "private-art-gemini-plugin/",
+    "private-operation-plugin/",
+    "private-operation-gemini-plugin/",
     "public-plugin/",
     "evals/runtime/",
 )
@@ -38,6 +48,15 @@ PROHIBITED_PATHS = {".github/workflows/runtime-eval.yml"}
 IMPLEMENTATION_SCAN_EXCLUSIONS = {
     "scripts/validate_public_distribution.py",
     "scripts/public_distribution_contract.py",
+    # These three legitimately need to name the private sub-tier plugin
+    # directories (private-meta-plugin/, private-game-plugin/, etc.) to
+    # exclude/register them correctly -- the "private tier metadata" pattern
+    # below exists to keep that vocabulary out of prose/description content
+    # a public user would read, not out of the implementation code that
+    # actually builds and packages the private/public split.
+    "scripts/audit_docs.py",
+    ".agents/plugins/marketplace.json",
+    ".claude-plugin/marketplace.json",
 }
 FILE_REFERENCE_RE = re.compile(
     r"(?<![A-Za-z0-9_.-])((?:scripts|docs|config|evals)/[A-Za-z0-9_./-]+"
