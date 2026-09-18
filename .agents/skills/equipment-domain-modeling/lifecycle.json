@@ -3,7 +3,7 @@
   "skill": "equipment-domain-modeling",
   "stage": "active",
   "introduced_version": "unknown",
-  "last_reviewed_version": "7.8.0",
+  "last_reviewed_version": "7.9.0",
   "routing_case_ids": [
     "EDM-01",
     "EDM-02",
