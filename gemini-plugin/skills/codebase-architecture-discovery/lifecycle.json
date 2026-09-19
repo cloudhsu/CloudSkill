@@ -3,7 +3,7 @@
   "skill": "codebase-architecture-discovery",
   "stage": "active",
   "introduced_version": "7.6.25",
-  "last_reviewed_version": "7.8.0",
+  "last_reviewed_version": "7.10.0",
   "routing_case_ids": [
     "CAD-01",
     "CAD-02",

@@ -3,7 +3,7 @@
   "skill": "project-management-sync",
   "stage": "active",
   "introduced_version": "7.6.23",
-  "last_reviewed_version": "7.8.0",
+  "last_reviewed_version": "7.10.0",
   "routing_case_ids": [
     "PMS-01",
     "PMS-NEG-01",

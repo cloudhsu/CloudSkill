@@ -3,7 +3,7 @@
   "skill": "teach-while-building",
   "stage": "experimental",
   "introduced_version": "7.1.0",
-  "last_reviewed_version": "7.8.0",
+  "last_reviewed_version": "7.10.0",
   "routing_case_ids": [
     "TWB-01",
     "TWB-NEG-01"
