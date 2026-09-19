@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
   "skill": "using-cloudbox-skills",
-  "stage": "active",
+  "stage": "stable",
   "introduced_version": "unknown",
-  "last_reviewed_version": "7.8.0",
+  "last_reviewed_version": "7.9.0",
   "routing_case_ids": [
     "USE-01",
     "USE-02",
