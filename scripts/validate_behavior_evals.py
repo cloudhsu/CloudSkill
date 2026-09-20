@@ -28,6 +28,15 @@ import sys
 ROOT = Path(__file__).resolve().parents[1]
 SKILLS = ROOT / '.agents' / 'skills'
 CASES = ROOT / 'evals' / 'behavior' / 'cases'
+# Forgejo #123 follow-up: sealed-tier cases (holdout_tier=sealed) live in a
+# separate directory by convention -- physically out of ordinary
+# exploratory grep/search over CASES, but still real cases that must pass
+# the exact same structural checks (unique ID, valid type, required
+# fields, skill coverage credit) as everything else. See
+# .agents/skills/runtime-evaluation-engineering/references/
+# case-and-grader-design.md's "Holdout tier" section for the policy this
+# directory implements.
+SEALED = ROOT / 'evals' / 'behavior' / 'sealed'
 errors = []
 warnings = []
 ids = set()
@@ -46,7 +55,8 @@ required_fields = {
 if not CASES.exists():
     errors.append(f'missing behavior cases directory: {CASES}')
 else:
-    for path in sorted(CASES.glob('*.json')):
+    scan_paths = sorted(CASES.glob('*.json')) + (sorted(SEALED.glob('*.json')) if SEALED.exists() else [])
+    for path in scan_paths:
         try:
             payload = json.loads(path.read_text(encoding='utf-8'))
         except json.JSONDecodeError as exc:

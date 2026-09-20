@@ -3,7 +3,7 @@
   "skill": "document-governance",
   "stage": "active",
   "introduced_version": "unknown",
-  "last_reviewed_version": "7.9.0",
+  "last_reviewed_version": "7.11.0",
   "routing_case_ids": [
     "DOC-01",
     "DOC-02",

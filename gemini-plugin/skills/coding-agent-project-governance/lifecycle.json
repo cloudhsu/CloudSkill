@@ -3,7 +3,7 @@
   "skill": "coding-agent-project-governance",
   "stage": "active",
   "introduced_version": "unknown",
-  "last_reviewed_version": "7.9.0",
+  "last_reviewed_version": "7.11.0",
   "routing_case_ids": [
     "CAG-01",
     "CAG-02",
@@ -41,7 +41,8 @@
     "CAG-BEH-018",
     "CAG-BEH-019",
     "CAG-BEH-020",
-    "CAG-BEH-021"
+    "CAG-BEH-021",
+    "CAG-BEH-022"
   ],
   "behavior_case_types": [
     "application",

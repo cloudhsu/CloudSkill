@@ -58,7 +58,7 @@
       "expected_routing": false,
       "expected_alternative_skill": "framework-design",
       "required_behaviors": [
-        "routes to framework-design or native architecture",
+        "does not route to document-governance: it either answers the interface design directly or routes to framework-design, native architecture or equipment-domain-modeling",
         "does not create a document-governance workflow"
       ],
       "forbidden_behaviors": [
@@ -68,33 +68,7 @@
       "baseline_expected_failure": [
         "agent avoids the interface design by proposing document templates"
       ],
-      "review_notes": "Review semantic relationships, evidence, and omissions; keyword presence alone is insufficient."
-    },
-    {
-      "id": "DOC-BEH-004",
-      "skill": "document-governance",
-      "type": "application",
-      "prompt": "A confidential equipment deck contains physical, runtime, network and team-responsibility diagrams plus schedules. Create reusable public skill evidence.",
-      "expected_routing": true,
-      "expected_alternative_skill": null,
-      "required_behaviors": [
-        "classifies each view by purpose and authority",
-        "preserves traceability without collapsing views",
-        "sanitizes product, company, customer, schedule, hardware and topology details",
-        "separates source-derived facts from generalized inference"
-      ],
-      "forbidden_behaviors": [
-        "copies confidential diagrams or dates into the public repository",
-        "treats one diagram as the full architecture"
-      ],
-      "required_artifacts": [
-        "sanitized evidence record",
-        "document ownership map update"
-      ],
-      "baseline_expected_failure": [
-        "agent republishes sensitive detail or loses evidence provenance"
-      ],
-      "review_notes": "Review semantic relationships, authority, lifecycle, failure behavior, and evidence; keyword presence alone is insufficient."
+      "review_notes": "Review semantic relationships, evidence, and omissions; keyword presence alone is insufficient. Contract repaired 2026-09-20 (Forgejo #171, release 7.11.0): the original first required behavior demanded routing to framework-design or native architecture. Two real runs (2026-08-27 routed to equipment-domain-modeling; 2026-09-20 chose no skill and answered directly) both honored the property under test, that document-governance must not self-trigger, so a direct answer is now accepted. Original wording: 'routes to framework-design or native architecture'."
     },
     {
       "id": "DOC-BEH-005",
@@ -145,7 +119,7 @@
       "id": "DOC-BEH-007",
       "skill": "document-governance",
       "type": "discipline",
-      "prompt": "About to publish a status-only commit (e.g. an archive notice) to a downstream or mirror-only copy, intending it as a deliberately terminal, isolated action never to be merged back.",
+      "prompt": "We need to record an archive notice in our project's status document. The only copy we can edit right now is the downstream mirror, and the plan is to commit a status-only change there as a deliberately terminal, isolated action that is never merged back. Where should the notice live, and how do we keep the two copies from diverging?",
       "expected_routing": true,
       "expected_alternative_skill": null,
       "required_behaviors": [
@@ -160,7 +134,7 @@
       "baseline_expected_failure": [
         "a later legitimate sync to the same downstream remote fails as a non-fast-forward push, forcing an unplanned merge and conflict resolution that a shared-history commit would have avoided"
       ],
-      "review_notes": "The isolation itself isn't wrong when the copy really is terminal; the failure is treating 'terminal' as assumed rather than verified."
+      "review_notes": "The isolation itself isn't wrong when the copy really is terminal; the failure is treating 'terminal' as assumed rather than verified. Prompt repaired 2026-09-20 (Forgejo #171, release 7.11.0): the original prompt was framed as a git publishing action and two real runs (2026-08-27, 2026-09-20) routed to a git skill. The repaired prompt asks the document-governance question (where the authoritative status record lives and how copies stay consistent); required and forbidden behaviors are unchanged. Original prompt: 'About to publish a status-only commit (e.g. an archive notice) to a downstream or mirror-only copy, intending it as a deliberately terminal, isolated action never to be merged back.'"
     },
     {
       "id": "DOC-BEH-008",
@@ -259,29 +233,6 @@
         "agent reorganizes the directories via delete-and-recreate, losing file history, and leaves at least one existing document's link pointing at the old path"
       ],
       "review_notes": "Distilled 2026-08-23 from two real, project-history-mined candidates (sanitized-interaction-evidence, sanitized-interaction-evidence) describing the same real reorganization pattern in two separate real repositories. Extends html-overview-views.md's 'Reorganizing existing content into this convention' section -- covers the update/migrate case, distinct from the existing rules which cover initial adoption on a fresh domain."
-    },
-    {
-      "id": "DOC-BEH-013",
-      "skill": "document-governance",
-      "type": "discipline",
-      "prompt": "Write a change-record entry for a requirement that has been accepted and its implementation has landed in code, but has not yet been tested or released.",
-      "expected_routing": true,
-      "expected_alternative_skill": null,
-      "required_behaviors": [
-        "records requirement status, implementation status, verification status, and release status as separate fields per requirements-spec-evolution.md's status model",
-        "leaves verification status as untested and release status as unreleased rather than inferring either from implementation status"
-      ],
-      "forbidden_behaviors": [
-        "collapses requirement/implementation/verification/release status into one flat 'Status' field",
-        "infers verified or released from the fact that implementation landed"
-      ],
-      "required_artifacts": [
-        "change record with separated status dimensions"
-      ],
-      "baseline_expected_failure": [
-        "agent writes a single Status: implemented field and treats that as sufficient, hiding that the change is untested and unreleased"
-      ],
-      "review_notes": "Distilled 2026-08-23 from a deep-read verification pass that found development-process-tailoring's own change-record template collapsing this Skill's explicit five-dimension status model into one flat field -- the exact anti-pattern Section 6 names. Fixed alongside this case in the same PR; see PROC-BEH-017 for the corresponding development-process-tailoring case."
     },
     {
       "id": "DOC-BEH-014",

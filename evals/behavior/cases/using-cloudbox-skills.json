@@ -191,7 +191,9 @@
       "baseline_expected_failure": [
         "router returns no-skill 20/20 on a clean tree, reasoning that the work is 'fully determined by the instruction itself', even though coding-agent-project-governance's own content requires the subagent's full findings in its final report message, not only a worktree file"
       ],
-      "review_notes": "Batch-reviewed 2026-08-29 from Eval Inbox candidate sanitized-interaction-evidence. The 'fully specified steps != fully determined answer' clause and routing-map row were shipped in Vikunja cloudbox-skills #25 (RED 20/20 no-skill -> GREEN 0/20); this case is the regression guard. Deduplicated against USE-BEH-003 (translation = no skill, genuinely trivial) and USE-BEH-007 (plugin coexistence) -- distinct: this is under-trigger on a fully-specified but risk-bearing task. Sanitization PASS. Real model execution added 2026-09-19 (n=3 Claude Sonnet-5, 3/3 clean, see execution-ledger.json's USE-BEH-008 entry) as part of using-cloudbox-skills' stable-promotion evidence review -- the routing-mode RED/GREEN under #25 remains the original fix's own evidence."
+      "review_notes": "Batch-reviewed 2026-08-29 from Eval Inbox candidate sanitized-interaction-evidence. The 'fully specified steps != fully determined answer' clause and routing-map row were shipped in Vikunja cloudbox-skills #25 (RED 20/20 no-skill -> GREEN 0/20); this case is the regression guard. Deduplicated against USE-BEH-003 (translation = no skill, genuinely trivial) and USE-BEH-007 (plugin coexistence) -- distinct: this is under-trigger on a fully-specified but risk-bearing task. Sanitization PASS. Real model execution added 2026-09-19 (n=3 Claude Sonnet-5, 3/3 clean, see execution-ledger.json's USE-BEH-008 entry) as part of using-cloudbox-skills' stable-promotion evidence review -- the routing-mode RED/GREEN under #25 remains the original fix's own evidence.",
+      "provenance": "field_distilled",
+      "source_reference": "sanitized-interaction-evidence"
     }
   ]
 }

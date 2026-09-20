@@ -162,7 +162,9 @@
       "baseline_expected_failure": [
         "agent branches from local main, which silently carried an earlier session's unpushed commit; the squash-merged PR folds both commits into one, orphaning the older commit's identity and breaking local main's fast-forward"
       ],
-      "review_notes": "Batch-reviewed 2026-08-29 from Eval Inbox candidate sanitized-interaction-evidence, a real incident in the same session (a cloudbox-atlas case-11 commit was local-only; a case-12 branch carried it into PR #1's squash). Deduplicated against CAGD-BEH-002 (push a fix onto an existing PR branch -- verify the real branch name) and CAGD-BEH-005 (prove local and remote match after push) -- distinct: this is pre-branch hygiene against inheriting another session's unpushed work. Sanitization PASS. Structural/schema evidence only; real model execution NOT RUN."
+      "review_notes": "Batch-reviewed 2026-08-29 from Eval Inbox candidate sanitized-interaction-evidence, a real incident in the same session (a cloudbox-atlas case-11 commit was local-only; a case-12 branch carried it into PR #1's squash). Deduplicated against CAGD-BEH-002 (push a fix onto an existing PR branch -- verify the real branch name) and CAGD-BEH-005 (prove local and remote match after push) -- distinct: this is pre-branch hygiene against inheriting another session's unpushed work. Sanitization PASS. Structural/schema evidence only; real model execution NOT RUN.",
+      "provenance": "field_distilled",
+      "source_reference": "sanitized-interaction-evidence"
     },
     {
       "id": "CAGD-BEH-008",
@@ -188,7 +190,36 @@
       "baseline_expected_failure": [
         "agent reaches for `gh pr create`, or hardcodes / re-requests the token, because the skill's push/PR guidance is entirely GitHub- and `gh`-specific"
       ],
-      "review_notes": "Distilled 2026-08-31 from a real interaction in this session (Forgejo migration: no `gh`/`tea`; PRs opened via the forge REST API with the token pulled from osxkeychain via `git credential fill`). Eval Inbox candidate sanitized-interaction-evidence (positive). The skill was written entirely `gh`/GitHub-worded and predates the forge migration. RED 2026-08-31 (claude, current skill, ~112s): already handled it well -- forge REST API, token from credential helper/netrc/env, no interactive login loop, no hardcoded path -- because the core principle plus rule 4's spirit generalize. GREEN (updated skill, ~112s): now cites the exact new rule 7 -- `git credential fill` with the `password=` line, `/api/v1/` vs `/api/v4/`, 'GitHub mirror remote excluded', re-GET the PR to verify. Behavior-layer, claude only; not a hard RED->GREEN -- this pass is a factual-currency fix (the skill's GitHub-only wording predated the forge migration) plus a model-independent anchor, GitHub content retained."
+      "review_notes": "Distilled 2026-08-31 from a real interaction in this session (Forgejo migration: no `gh`/`tea`; PRs opened via the forge REST API with the token pulled from osxkeychain via `git credential fill`). Eval Inbox candidate sanitized-interaction-evidence (positive). The skill was written entirely `gh`/GitHub-worded and predates the forge migration. RED 2026-08-31 (claude, current skill, ~112s): already handled it well -- forge REST API, token from credential helper/netrc/env, no interactive login loop, no hardcoded path -- because the core principle plus rule 4's spirit generalize. GREEN (updated skill, ~112s): now cites the exact new rule 7 -- `git credential fill` with the `password=` line, `/api/v1/` vs `/api/v4/`, 'GitHub mirror remote excluded', re-GET the PR to verify. Behavior-layer, claude only; not a hard RED->GREEN -- this pass is a factual-currency fix (the skill's GitHub-only wording predated the forge migration) plus a model-independent anchor, GitHub content retained.",
+      "provenance": "field_distilled",
+      "source_reference": "sanitized-interaction-evidence"
+    },
+    {
+      "id": "CAGD-BEH-009",
+      "skill": "coding-agent-git-discipline",
+      "type": "discipline",
+      "prompt": "A pull request was just merged on the self-hosted git forge. Earlier in this session you reviewed that PR by checking out its head commit. Sync local main to the merged state, push it to the mirror remote, and report whether the mirror is in sync. The sequence you would normally run is `git fetch origin && git merge --ff-only origin/main && git push mirror main`.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "before the fast-forward merge, explicitly verifies which branch is checked out (for example `git branch --show-current`, `git status -sb`, or `git rev-parse --abbrev-ref HEAD`) and checks out main first if it is not main, because `git merge --ff-only origin/main` has an implicit target (current HEAD)",
+        "does not treat a successful `Fast-forward` or a push report of `Everything up-to-date` as proof the intended branch was synced; cross-checks the local main ref and the remote main ref by SHA (for example `git rev-parse main` against `git ls-remote mirror main`)",
+        "returns the working copy to main after the earlier review checkout, before any operation that assumes main is checked out"
+      ],
+      "forbidden_behaviors": [
+        "running the fast-forward-merge-then-push sequence without first confirming which branch is checked out",
+        "reading `Everything up-to-date` or a `Fast-forward` message as evidence the sync of main happened, when the merge target was implicit (current HEAD) rather than named"
+      ],
+      "required_artifacts": [
+        "the branch-verification step run before the merge",
+        "the SHA cross-check of local main against the remote main after the push"
+      ],
+      "baseline_expected_failure": [
+        "agent runs the planned fetch/merge/push sequence as written, or verifies only that the working tree is clean, and accepts `Everything up-to-date` as confirmation the mirror is synced"
+      ],
+      "review_notes": "Distilled 2026-09-19 from a real interaction (Eval Inbox candidate sanitized-interaction-evidence, negative): after a PR was reviewed by checking out its commit, the main working copy stayed on a leftover non-main branch; `git merge --ff-only <remote>/main` fast-forwarded that branch instead of main, and `git push origin main` then printed `Everything up-to-date` (true for the untouched real main), falsely suggesting the sync happened. Self-caught by comparing `git rev-parse HEAD` / `git branch -vv` to the expected state. Extends item 9 (re-verify an already-checked-out branch) with the implicit-target and false-reassurance angles. RED 2026-09-20 (claude, current skill, --context-mode selected-skills --selected-reference-mode declared, claude-sonnet-5): NO_CHANGE_JUSTIFIED. Three real runs (1 with a first, more leading prompt draft; 2 with the committed less-leading prompt) all routed primary=coding-agent-git-discipline and all met the 3 required_behaviors: flagged the planned `git merge --ff-only origin/main` as unsafe from a detached/leftover HEAD (implicit target), ran a branch check and an explicit `git checkout main` first, and required `git rev-parse main` vs `git ls-remote mirror` SHA read-back instead of trusting push exit/'Everything up-to-date'. Existing SKILL.md item 9, the core principle (verify actual state) and the required-output rules already generalize to this trap in a plan-only Behavior Eval; the original failure was an agentic execution lapse (not reasoning about HEAD before running), which this harness cannot reproduce, so no skill edit was made. Kept as a regression anchor.",
+      "provenance": "field_distilled",
+      "source_reference": "sanitized-interaction-evidence"
     }
   ]
 }

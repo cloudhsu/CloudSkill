@@ -563,30 +563,6 @@
       "review_notes": "Closes refactoring-workflow.md's new unconfirmed-baseline paragraph under 'Characterization First'."
     },
     {
-      "id": "REF-BEH-025",
-      "skill": "safe-incremental-refactoring",
-      "type": "application",
-      "prompt": "The actual request is: mirror the three existing validation checks already used on the `updateProfile` path onto the new `updateBillingAddress` path, so both paths validate consistently. Implement this slice, including how you break the work into safely revertible steps as you go.",
-      "expected_routing": true,
-      "expected_alternative_skill": null,
-      "required_behaviors": [
-        "implements the requested literal mirroring of the three existing checks directly, even if it means visibly duplicated validation code",
-        "does not self-invent a larger unrequested mechanism (e.g. a new shared trust/threat-model validation layer or generalized safeguard framework) in place of the literal request",
-        "if a larger design elaboration is genuinely worth considering, names it explicitly and asks for an explicit checkpoint before building it, rather than silently expanding scope",
-        "commits at the slice boundary once the mirrored checks are in and working, rather than leaving a large uncommitted diff"
-      ],
-      "forbidden_behaviors": [
-        "builds a new generalized trust/threat-model validation framework instead of the requested literal check-mirroring",
-        "accumulates the change across many edits with zero commits, leaving no way to revert partially",
-        "silently expands scope to a larger design without naming it and getting an explicit checkpoint first"
-      ],
-      "required_artifacts": [],
-      "baseline_expected_failure": [
-        "agent designs and partially builds a new generalized 'validation policy engine' intended to unify all current and future paths, instead of directly mirroring the three specific checks, and leaves the work as one large uncommitted, still-failing diff on the branch"
-      ],
-      "review_notes": "Closes refactoring-workflow.md's new 'Smallest Coherent Slice' additions: no self-invented mechanism beyond the literal request, and commit at each slice boundary as a stop condition. Prompt reworded 2026-09-19 (Forgejo #114): the original wording ('deciding what to commit and when') lexically overlapped coding-agent-git-discipline's description after that skill split out of coding-agent-project-governance (2026-08-23), causing 2/3 real router misroutes away from this skill despite the task being a pure refactoring-slice question, not a git-mechanics one. Required/forbidden behaviors are unchanged -- only the prompt's surface wording changed, to remove the false lexical cue while still testing the same commit-at-slice-boundary behavior."
-    },
-    {
       "id": "REF-BEH-026",
       "skill": "safe-incremental-refactoring",
       "type": "application",

@@ -95,6 +95,7 @@
     },
     {
       "id": "PROC-BEH-017",
+      "holdout_tier": "regression",
       "skill": "development-process-tailoring",
       "type": "discipline",
       "prompt": "Write a change-record entry's status field for a requirement that has been accepted and implemented but not yet verified or released.",

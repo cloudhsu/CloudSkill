@@ -21,7 +21,8 @@
     "PMS-BEH-002",
     "PMS-BEH-003",
     "PMS-BEH-004",
-    "PMS-BEH-005"
+    "PMS-BEH-005",
+    "PMS-BEH-006"
   ],
   "behavior_case_types": [
     "application",

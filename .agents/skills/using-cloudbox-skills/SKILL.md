@@ -94,6 +94,7 @@ When the user asks to optimize skills from prior conversations:
 
 - An explicitly requested skill takes priority unless it conflicts with higher-level instructions.
 - Do not load adjacent skills merely because they share vocabulary.
+- A clause that only describes execution or delivery mechanics for the task's own deliverable, phrased in another skill's trigger vocabulary (for example, a refactoring task that also says to commit and push each step as you go), does not by itself move `primary_skill` to that other skill. Decide primary ownership by which skill's deliverable or failure boundary the request is actually about; reused vocabulary describing how that same deliverable should be carried out is not a subject change.
 - Do not add an adjacent skill as a "prerequisite analysis", "reconstruct-first", "extract-safely", or "supporting evidence" step when the primary skill's own documented workflow already covers that step. Add a supporting skill only when its own distinct deliverable or evidence is separately required, not to narrate a phase the primary owner already performs.
 - Do not use an architecture skill for an isolated terminology or process-principle question.
 - Do not use domain knowledge alone when the task requires state ownership, event lifecycle, resource arbitration, or recovery design.

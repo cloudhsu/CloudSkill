@@ -28,6 +28,7 @@
     },
     {
       "id": "CAD-BEH-002",
+      "holdout_tier": "sealed",
       "skill": "codebase-architecture-discovery",
       "type": "application",
       "prompt": "While extending our codebase I noticed `auth_adapter.py::run_request()` and `billing_adapter.py::run_request()` look nearly identical -- same subprocess call, same error handling shape, just a different exception class raised at the end. Should I just merge them into one shared function?",
