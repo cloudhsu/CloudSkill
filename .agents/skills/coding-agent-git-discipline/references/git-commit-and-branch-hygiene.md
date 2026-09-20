@@ -52,6 +52,15 @@ locally-renamed tracking branch, a stray branch from an earlier mistake),
 and starting the next branch from the wrong base silently carries over
 content that should not be there.
 
+Create and switch in one command that actually changes the current branch:
+`git checkout -b <name>` or `git switch -c <name>`. `git branch <name>
+[<commit>]` only creates a ref and does not switch, so a following commit
+lands silently on whatever branch was checked out before (often the default
+branch, bypassing the PR gate). Confirm with `git branch --show-current`
+before the first commit and again before any push, and push only the
+intended feature branch. A successful push is not proof the commit is on
+that branch, so read the current branch name rather than inferring it.
+
 ## Continuing work on an already-checked-out branch: re-verify it hasn't been merged
 
 The previous lesson covers starting the *next* unit of work; this one covers

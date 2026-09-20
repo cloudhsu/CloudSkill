@@ -96,7 +96,7 @@
       "id": "AR-BEH-005",
       "skill": "architecture-review",
       "type": "application",
-      "prompt": "Review this architecture using the supplied authority matrix, lifecycle diagram, restart reconciliation contract, deployment topology, and verified failure tests. All decision boundaries are explicit.",
+      "prompt": "Review this architecture using the supplied evidence. All decision boundaries are explicit.\n\nAuthority matrix: order state, owner = order service (single writer), read by billing and UI; billing ledger, owner = billing service, order service reads only. Lifecycle: order goes CREATED -> PAID -> FULFILLED, or CREATED -> CANCELLED; PAID -> CANCELLED is only allowed through a refund transition owned by billing; FULFILLED and CANCELLED are terminal. Restart reconciliation contract: on startup the order service replays unacknowledged payment events from the billing event log; the billing ledger wins on any payment-state conflict; in-flight commands carry an idempotency key and are re-issued at most once. Deployment topology: order service and billing service run as separate processes on two hosts behind one gateway, with a shared message broker; the event schema is versioned and both services must run compatible versions during a rolling upgrade. Verified failure tests (executed, passing): broker outage during payment, order service crash between PAID and FULFILLED, duplicate payment event, billing timeout with late completion.",
       "expected_routing": true,
       "expected_alternative_skill": null,
       "required_behaviors": [
@@ -111,7 +111,7 @@
       "baseline_expected_failure": [
         "agent asks unnecessary generic clarification questions"
       ],
-      "review_notes": "Complete evidence is a negative control for over-questioning."
+      "review_notes": "Complete evidence is a negative control for over-questioning. Contract repaired 2026-09-20 (Forgejo #3 follow-up): the original prompt said 'using the supplied authority matrix, lifecycle diagram, restart reconciliation contract, deployment topology, and verified failure tests' but supplied none of them, so the recorded answer correctly reported that no artifact contents were provided and could not exercise the no-over-questioning negative control; a compact version of each artifact is now inlined and the required and forbidden behaviors are unchanged. Original prompt: 'Review this architecture using the supplied authority matrix, lifecycle diagram, restart reconciliation contract, deployment topology, and verified failure tests. All decision boundaries are explicit.'"
     },
     {
       "id": "AR-BEH-006",

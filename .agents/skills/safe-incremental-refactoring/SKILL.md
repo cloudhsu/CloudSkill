@@ -10,8 +10,9 @@ default:
 
 - `references/refactoring-workflow.md` -- when planning the actual
   extraction sequence: characterization-first discipline, choosing the
-  smallest coherent slice, a worked sequence example, and the
-  compact-extraction decision.
+  smallest coherent slice, per-slice commit and delivery status
+  discipline (including engine plus host changing together), a worked
+  sequence example, and the compact-extraction decision.
 - `references/compatibility-facade.md` -- when a public contract must keep
   working while the implementation behind it changes: compatibility
   façades, dynamic seams, a dual implementation behind one compile-time

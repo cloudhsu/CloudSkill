@@ -63,7 +63,10 @@ model.
    capabilities are read-only/manual-review conditions.
 4. Enumerate the complete target scope with pagination and stable ordering.
    Resolve identity using a persisted source key or remote ID. Title matching is
-   only a fallback when exactly one match exists; ambiguity blocks mutation.
+   only a fallback when exactly one match exists; ambiguity blocks mutation. A
+   human-visible `#N` is a project-local number, a different namespace from the
+   provider-global record ID: enumerate that project's scope to map `#N` to its
+   global ID, and record the mapping (project, `#N`, global ID) before mutating.
 5. Normalize only supported canonical fields: title, description, status,
    priority, dates, project key, labels, and provenance. Preserve unknown fields
    and report lossy mappings instead of inventing provider fields.
@@ -74,7 +77,9 @@ model.
    retries. A timeout or lost response is `unknown`, not proof of failure;
    reconcile by reading the remote system before retrying.
 8. Re-read every mutated record and verify authoritative fields, completion
-   timestamps, remote IDs, and unchanged task counts. Report the exact result,
+   timestamps, remote IDs, and unchanged task counts, reading back the same
+   scoped record (by global ID and `#N`), never another record sharing the
+   number. Report both identifiers so the mapping is auditable. Report the exact result,
    residual uncertainty, unavailable evidence, and a final privacy audit. Never
    echo an ambient user's email, account, or identity—even to explain that it
    was redacted; use a generic placeholder such as `actor@example.invalid`.

@@ -186,8 +186,8 @@ mirrors) -- check which remote a given command targets.
   for `gh auth`).
 - `references/git-commit-and-branch-hygiene.md` -- the 5 real-mistake
   lessons in fuller detail (backtick quoting, branch-name verification,
-  branch cleanup, next-branch creation, continuing on an already-stale
-  checkout).
+  branch cleanup, next-branch creation including create-and-switch and
+  current-branch verification, continuing on an already-stale checkout).
 
 ## Hooks bundled with this skill
 

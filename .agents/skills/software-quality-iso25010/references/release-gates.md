@@ -64,3 +64,11 @@ whose platform, architecture, ABI, build mode, device, driver or timing behavior
 can change the result. Use risk to select required cells, but record unsupported,
 not-run and failed cells explicitly with owners and hard, conditional or
 monitored disposition; do not improve a pass rate by removing them.
+
+For a distributed or config-driven system moving toward hardware, classify
+evidence by the topology it exercised: simulated, same-machine multi-process,
+multi-PC (real network), and real hardware. Each gate names the minimum class
+that can satisfy it; a lower class never closes a gate that needs a higher one
+(process-local runs cannot show network partition, clock skew or node-version
+skew; simulation cannot show sensor, timing or safe-state behavior). Report
+results per class with owner and disposition.

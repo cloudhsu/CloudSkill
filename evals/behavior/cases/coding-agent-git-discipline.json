@@ -143,7 +143,7 @@
       "id": "CAGD-BEH-007",
       "skill": "coding-agent-git-discipline",
       "type": "discipline",
-      "prompt": "Branch from local main to add one document, commit it, open a PR. Local main is one commit ahead of origin/main.",
+      "prompt": "Branch from local main to add one document, commit it, open a PR. Local main is one commit ahead of origin/main. After the PR is later squash-merged on the forge, git pull --ff-only on local main fails.",
       "expected_routing": true,
       "expected_alternative_skill": null,
       "required_behaviors": [
@@ -162,7 +162,7 @@
       "baseline_expected_failure": [
         "agent branches from local main, which silently carried an earlier session's unpushed commit; the squash-merged PR folds both commits into one, orphaning the older commit's identity and breaking local main's fast-forward"
       ],
-      "review_notes": "Batch-reviewed 2026-08-29 from Eval Inbox candidate sanitized-interaction-evidence, a real incident in the same session (a cloudbox-atlas case-11 commit was local-only; a case-12 branch carried it into PR #1's squash). Deduplicated against CAGD-BEH-002 (push a fix onto an existing PR branch -- verify the real branch name) and CAGD-BEH-005 (prove local and remote match after push) -- distinct: this is pre-branch hygiene against inheriting another session's unpushed work. Sanitization PASS. Structural/schema evidence only; real model execution NOT RUN.",
+      "review_notes": "Batch-reviewed 2026-08-29 from Eval Inbox candidate sanitized-interaction-evidence, a real incident in the same session (a cloudbox-atlas case-11 commit was local-only; a case-12 branch carried it into PR #1's squash). Deduplicated against CAGD-BEH-002 (push a fix onto an existing PR branch -- verify the real branch name) and CAGD-BEH-005 (prove local and remote match after push) -- distinct: this is pre-branch hygiene against inheriting another session's unpushed work. Sanitization PASS. Structural/schema evidence only; real model execution NOT RUN. Contract repaired 2026-09-20 (Forgejo #3 follow-up): required behavior 3 and the second forbidden behavior concern the post-squash-merge divergence, but the original prompt described only the pre-branch state, so that later event could never be triggered; the prompt now states the squash merge and the failing git pull --ff-only. Required and forbidden behaviors are unchanged. Original prompt: 'Branch from local main to add one document, commit it, open a PR. Local main is one commit ahead of origin/main.'",
       "provenance": "field_distilled",
       "source_reference": "sanitized-interaction-evidence"
     },

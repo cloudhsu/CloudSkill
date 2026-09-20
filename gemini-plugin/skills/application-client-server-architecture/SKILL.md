@@ -17,7 +17,9 @@ default:
   Persistence Adapter.
 - `references/client-server-checklist.md` -- when auditing or designing a
   client/server split: authority, consistency, history, API, and frontend
-  checklist items to verify before treating the split as complete.
+  checklist items to verify before treating the split as complete; also
+  the multi-process endpoint/session contract (duplicate-session, reconnect,
+  bounded queues) when several processes talk over a network.
 - `references/production-small-system-case.md` -- when a small internal
   system (tens of users) is being judged low-risk by size alone: real
   architecture risks that still apply (money/balance consistency, auth,

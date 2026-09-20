@@ -181,6 +181,12 @@ Do not claim device, OS, deployment, browser, or external-system tests that were
 
 Treat an agent's self-reported validation as a claim to verify before using it as acceptance evidence: inspect enough of the checking script to confirm pass/fail fields are computed rather than hard-coded, verify cited files and paths exist, and for work still running confirm an explicit completion signal and the expected repository HEAD before rebuilding, testing, or diagnosing a regression. If provenance or completion is unverified, report the result as NOT RUN and do not treat intermediate working-tree output or clean-looking visual inspection as confirmation; independently measure material claims where practical.
 
+Delegated workers have lifecycles: a worker whose lifecycle has ended or
+expired is restarted or replaced, never implied still active. Bind completion
+to a verified source tip: record the repository tip that was actually verified,
+and do not report completion when a later or late edit is not in that tip.
+Agreeing worker reports are claims, not executable proof.
+
 A batch (tens of items) visual- or content-judgment self-report that lands
 on a single uniform conclusion across every item (e.g. "all N flagged files
 are false positives," "all N pass") is itself a red flag, not reassurance
@@ -234,6 +240,16 @@ continuing:
   more than once in response to the same repeated failure without an
   explicit user checkpoint. A defensive change made to satisfy one review
   pass must not introduce a new conflict with the agent's own prior changes.
+
+Tool-use discipline: a tool whose name or description ties it to a specific
+session mode (for example self-paced loop wakeups) is used only after checking
+the current context matches that mode. While a background task or subagent is
+running and the only goal is to avoid polling, do nothing further and rely on
+the harness's completion notification; do not schedule a fallback. Before
+calling any stop/cancel action, read that tool's documented scope to confirm
+it does not also affect other live work (a cancel can terminate a running
+subagent), and do not assume an undo call is harmless or repeat it "once more"
+without that check.
 
 For a failed GitHub `git push` or any other git-mechanics failure, use
 `$coding-agent-git-discipline`.

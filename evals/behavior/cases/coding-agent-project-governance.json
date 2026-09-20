@@ -167,7 +167,7 @@
       "id": "CAG-BEH-008",
       "skill": "coding-agent-project-governance",
       "type": "discipline",
-      "prompt": "A task requires configuring a cross-compile build for a specific target architecture. The agent has not yet checked what the host machine actually is.",
+      "prompt": "In a repository governed by coding-agent rules, a coding agent is assigned a task that requires configuring a cross-compile build for a specific target architecture. The agent has not yet checked what the host machine actually is.",
       "expected_routing": true,
       "expected_alternative_skill": null,
       "required_behaviors": [
@@ -182,7 +182,7 @@
       "baseline_expected_failure": [
         "agent picks a target architecture/toolchain flag matching what is common or expected, without inspecting the actual host, then fails later at install/run time"
       ],
-      "review_notes": "Derived from a real session: a build was configured for the wrong CPU architecture because the host was assumed rather than checked (`uname -m` was not run until an install failure forced it). The fix generalizes to any host-dependent configuration decision, not just this one flag."
+      "review_notes": "Derived from a real session: a build was configured for the wrong CPU architecture because the host was assumed rather than checked (`uname -m` was not run until an install failure forced it). The fix generalizes to any host-dependent configuration decision, not just this one flag. Contract repaired 2026-09-20 (Forgejo #3 follow-up): the original prompt had no repository or coding-agent governance framing, so the router reasonably selected no skill ('no installed skill owns that decision') and the host-inspection rule in coding-agent-project-governance never loaded; the prompt now states the coding-agent-in-a-governed-repository context. Required and forbidden behaviors are unchanged. Original prompt: 'A task requires configuring a cross-compile build for a specific target architecture. The agent has not yet checked what the host machine actually is.'"
     },
     {
       "id": "CAG-BEH-009",

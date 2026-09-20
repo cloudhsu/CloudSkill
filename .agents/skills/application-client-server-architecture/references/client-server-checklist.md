@@ -48,3 +48,23 @@
 - Health checks.
 - Logs and secret redaction.
 - Supported writer/process topology.
+
+## Multi-endpoint / inter-process transport
+
+Apply when several long-lived processes (front end, coordinator, worker or
+device-facing services) talk over a network, not only one client to one server.
+Keep this layer generic: transport acknowledgement never stands in for the
+owning domain's completion or readback semantics.
+
+- Endpoint and session ownership: who listens, who dials, who owns each
+  session's identity and lifecycle (startup, handshake, version negotiation,
+  authentication, health).
+- Duplicate session: one live session per endpoint identity; state whether a
+  second connect is rejected or supersedes the first, and how the stale
+  session is fenced so its late messages cannot mutate state.
+- Reconnect: define the states from disconnected to ready (resync or replay
+  before new work) and what happens to in-flight requests; never leave it
+  implicit.
+- Bounded queues: every inbound/outbound queue has a size, an overflow policy
+  (reject, drop-oldest, or back-pressure the sender), and a slow-peer rule so
+  one slow endpoint cannot stall the others.

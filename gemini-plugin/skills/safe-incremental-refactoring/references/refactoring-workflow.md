@@ -64,6 +64,23 @@ is passing -- because it removes the ability to revert partially; the
 only way out of a large uncommitted, still-failing self-invented design
 becomes abandoning the whole branch.
 
+When a reusable engine and a host application change together, deliver each
+verified slice in this shape:
+
+- One commit per repository per green slice, engine and host separately when
+  their ownership differs, never one mixed commit and never a history
+  rewrite to tidy it.
+- Update the living documents in the same slice as the code: the authority
+  map (who owns which state), the behavior/visual contract, the verification
+  plan, and the development log. Do not defer them to a final pass.
+- Report automated tests, manual runtime checks, device checks, install,
+  push, and merge as separate statuses, each marked done, not done, or not
+  observed. A passing build is not runtime or visual verification, and a
+  status that was not observed is never written as done.
+- End with the next continuation point and the known limitations, including
+  known behavior or visual differences and unfinished documentation, stated
+  as open rather than hidden behind a completed label.
+
 ## Refactoring Sequence Example
 
 ```text

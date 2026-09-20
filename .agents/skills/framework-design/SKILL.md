@@ -68,6 +68,15 @@ For each extension point define:
 
 Do not add an interface without explaining the variation or isolation boundary.
 
+When splitting a legacy monolith into a family of components, fix the structure
+before coding: one primary component per source unit with shared helpers
+isolated in their own unit; state for each family member whether it derives
+from the base contract or is an intentional non-deriving auxiliary (overlay,
+route, path); keep the legacy entry point and old names as a compatibility
+facade or alias until downstream migration is verified, documenting any rename;
+and add a contract test per component covering construction, layout, rendering,
+and compatibility.
+
 ### 5. Model state and commands
 
 Specify:

@@ -27,9 +27,9 @@
     {
       "id": "TWB-BEH-002",
       "skill": "teach-while-building",
-      "type": "discipline",
+      "type": "counterexample",
       "prompt": "The agent just explained something routine (ordinary syntax, or something the user clearly already knew) during a task.",
-      "expected_routing": true,
+      "expected_routing": false,
       "expected_alternative_skill": null,
       "required_behaviors": [
         "does not trigger a teaching-moment check",
@@ -43,7 +43,7 @@
       "baseline_expected_failure": [
         "agent fires a comprehension check on trivial or already-known material, turning the workflow into constant quizzing"
       ],
-      "review_notes": "Self-judged triggering only pays off if it stays selective; over-triggering is the main failure mode to guard against."
+      "review_notes": "Self-judged triggering only pays off if it stays selective; over-triggering is the main failure mode to guard against. Contract repaired 2026-09-20 (Forgejo #3 follow-up): this is a do-not-fire (negative) case whose required behavior is that no teaching-moment check triggers, yet it was marked expected_routing true, so a correct null route failed; it is now a counterexample with expected_routing false and the required/forbidden behaviors are unchanged. Original expected_routing: 'true'. Type also changed from discipline to counterexample in integration: the validator requires an expected_routing=false case to be a counterexample."
     },
     {
       "id": "TWB-BEH-003",
@@ -202,7 +202,7 @@
       "id": "TWB-BEH-010",
       "skill": "teach-while-building",
       "type": "discipline",
-      "prompt": "Help a domain expert learn the architecture while collaboratively testing and correcting a simulator.",
+      "prompt": "Help a domain expert learn the architecture while collaboratively testing and correcting a simulator. Partway through, the user pastes a screenshot of the simulator display and says it looks wrong, without saying which test mode was being run.",
       "expected_routing": true,
       "expected_alternative_skill": null,
       "required_behaviors": [
@@ -220,7 +220,7 @@
       "baseline_expected_failure": [
         "agent assumes which mode the user is testing and builds a diagnosis on that assumption, or logs an explanation as learned before the user actually confirms it landed"
       ],
-      "review_notes": "Distilled 2026-08-28 from a real Eval Inbox interaction candidate (sanitized source evidence, captured 2026-08-27T06:02:47+00:00, originally exported from a codex session at cloudskill_version=7.6.39). Batch-reviewed 2026-08-28: deduplicated against the other 12 candidates in the same import (detect_candidate_similarity.py, 0 pairs >=0.28), manually re-scanned for identifying detail (sensitization.status was MANUAL_REQUIRED -- exported without a reachable private terms file; clean on manual read). Add a counterexample showing when not to interrupt with a teaching check."
+      "review_notes": "Distilled 2026-08-28 from a real Eval Inbox interaction candidate (sanitized source evidence, captured 2026-08-27T06:02:47+00:00, originally exported from a codex session at cloudskill_version=7.6.39). Batch-reviewed 2026-08-28: deduplicated against the other 12 candidates in the same import (detect_candidate_similarity.py, 0 pairs >=0.28), manually re-scanned for identifying detail (sensitization.status was MANUAL_REQUIRED -- exported without a reachable private terms file; clean on manual read). Add a counterexample showing when not to interrupt with a teaching check. Contract repaired 2026-09-20 (Forgejo #3 follow-up): the required behavior and artifact ('confirm the active test mode and expected physical behavior before diagnosing a screenshot') could never be triggered because the prompt contained no screenshot or ambiguous test mode; a screenshot with an unstated mode is now supplied and the required/forbidden behaviors are unchanged. Original prompt: 'Help a domain expert learn the architecture while collaboratively testing and correcting a simulator.'."
     }
   ]
 }

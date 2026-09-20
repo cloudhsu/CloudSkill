@@ -153,6 +153,13 @@ Independent wafer sequences still contend for shared robots, aligners, loadlocks
 - Lease/heartbeat behavior when the owner disappears.
 - Release, compensation, and operator takeover.
 - Interaction with interlocks, pressure states, and equipment faults.
+- Multi-lane reach: when each robot reaches only its own stations, model lane
+  affinity as a hard reachability constraint (parallel mode never lets any
+  robot use any station), separate from shared-module dispatch.
+- Work-conserving dispatch: an executable shared module never idles because
+  later work reserved it early; dispatch already-waiting buffered work that
+  can run now ahead of a future reservation, keeping reservations only for
+  physical hand-off correctness.
 
 Do not let each sequence infer availability from a stale snapshot and issue competing commands.
 

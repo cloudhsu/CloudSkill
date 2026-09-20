@@ -31,6 +31,9 @@ the extraction itself.
   no one has confirmed whether they've already drifted apart.
 - Before adding a new cross-cutting helper, per this repository's own
   `AGENTS.md` architecture rule 15.
+- A new host or port must reproduce a legacy application's behavior and
+  visual/timing mismatches have already appeared -- use the legacy-reproduction
+  variant below instead of the duplication survey.
 
 ## Non-trigger conditions
 
@@ -81,6 +84,22 @@ the extraction itself.
    own the actual merge -- unless explicitly asked to execute it in the
    same pass, in which case follow that skill's workflow for each cluster
    individually, not all of them as one undifferentiated change.
+
+## Legacy-reproduction variant
+
+When the pressure is reproducing a legacy application (not finding
+duplicates), stop component work and do this first:
+
+1. Read the current architecture map and the authoritative legacy
+   implementation and documents themselves; never infer the contract from
+   filenames, one screenshot, or a visual approximation.
+2. Record each fact as source-verified (cite file/function) or inferred, kept
+   in separate lists.
+3. Build a boundary map naming the owner of state, timing, coordinate
+   space, input, and rendering. Identify the authoritative state owner
+   before any renderer or broad component work.
+4. Use that map to pick the smallest compatible extraction and its
+   regression fixtures (captured legacy traces or frames), then hand off.
 
 ## Required output
 
