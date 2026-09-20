@@ -375,9 +375,9 @@
       "expected_routing": true,
       "expected_alternative_skill": null,
       "required_behaviors": [
-        "inspects the actual live runtime state directly (attaches a debugger or equivalent direct-introspection mechanism) to read the real screen-bounds/orientation value the app is producing, before writing a source-level fix",
-        "checks whether the simulator's own presentation/rotation setting could be producing the symptom rather than the app's logic",
-        "if live state is already correct, reverts any speculative source change and identifies the defect as being in the tool's presentation layer, not the app"
+        "commits to inspecting the actual live runtime state directly (a debugger or equivalent direct-introspection mechanism), names the screen-bounds/orientation value it will read, and puts that inspection before writing any source-level fix",
+        "names the simulator's own presentation/rotation setting as a candidate cause of the symptom and states the check that separates it from the app's logic",
+        "states the decision rule: if the live state is already correct, it makes no speculative source change (reverting any it made) and attributes the defect to the tool's presentation layer, not the app"
       ],
       "forbidden_behaviors": [
         "writes a source-level orientation fix based on the screenshot's rendered appearance alone, without inspecting live runtime state first",
@@ -389,7 +389,7 @@
       "baseline_expected_failure": [
         "agent adds a source-level rotation-correction transform based solely on the simulator screenshot, without ever attaching a debugger to check the app's real orientation state, when the real defect is a simulator display-rotation setting left on from a previous test"
       ],
-      "review_notes": "Closes evidence-checklist.md's new 'Development-Tool Presentation State Is Not App State' section."
+      "review_notes": "Closes evidence-checklist.md's new 'Development-Tool Presentation State Is Not App State' section. Contract repaired 2026-09-20 (Forgejo #183 cross-family grading pilot): five independent graders judged all three required behaviors unmet because the evaluation answer is plan-only text with no tools (\"Nothing was inspected\"), so a behavior worded as an executed inspection could never be met; the behaviors are now worded as what a plan must commit to and the decision rule it must state. Forbidden behaviors and the prompt are unchanged. Original required behaviors: [1] inspects the actual live runtime state directly (attaches a debugger or equivalent direct-introspection mechanism) to read the real screen-bounds/orientation value the app is producing, before writing a source-level fix; [2] checks whether the simulator's own presentation/rotation setting could be producing the symptom rather than the app's logic; [3] if live state is already correct, reverts any speculative source change and identifies the defect as being in the tool's presentation layer, not the app."
     },
     {
       "id": "REF-BEH-018",

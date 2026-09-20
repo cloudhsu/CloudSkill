@@ -72,3 +72,15 @@ that can satisfy it; a lower class never closes a gate that needs a higher one
 (process-local runs cannot show network partition, clock skew or node-version
 skew; simulation cannot show sensor, timing or safe-state behavior). Report
 results per class with owner and disposition.
+
+For a port or rewrite that must reproduce a legacy view or behavior, a
+done/not-done verdict needs parity evidence, not build success. Map the legacy
+authority chain (what owns state, timing, geometry and assets) before judging.
+Compare deterministic frame fixtures captured at exact playback times, one
+component and one state transition at a time. Report architecture parity,
+state/custody parity and pixel parity as three independent gates, each
+PASS/FAIL/NOT RUN, never one aggregate impression. Keep an explicit open list
+of missing legacy assets, geometry, typography and timing semantics until each
+is closed. A compile, matching class names or a smoke test closes none of the
+three, and an approximate renderer is not reported as a faithful clone.
+
