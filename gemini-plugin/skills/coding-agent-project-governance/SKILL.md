@@ -141,6 +141,8 @@ Possible roles:
 
 Do not use subagents when tasks cannot be isolated or when they will edit the same critical files concurrently. When two or more isolated subagents' inputs do not depend on each other's output, dispatch them in parallel within the same turn rather than serializing work that has no ordering dependency.
 
+On a brownfield change with several agents, make the root agent the single integration owner: one read-only architecture reviewer, one bounded code-and-test implementer, one authoritative build and test pass, and integration-owner control of commits. Sub-agents do not build concurrently into shared outputs, reviewers do not mutate the implementation, and unreviewed agent commits are not verification.
+
 ### 6. Preserve evidence before it is committed
 
 - Commit product-direction and visual-artifact discussion documents,
@@ -178,6 +180,8 @@ Handoff must separate:
 - MANUAL REQUIRED.
 
 Do not claim device, OS, deployment, browser, or external-system tests that were not executed.
+
+When new behavior must be testable and the project has custom regression runners, put the new tests in the language's standard, CI-discoverable framework (a standard test project, a mature test framework and its test SDK, CI-readable results), migrate the affected legacy cases incrementally, and keep a legacy regression path only until equivalent tests exist, with that end condition stated. Do not add another custom runner or claim coverage from an executable CI cannot discover.
 
 Treat an agent's self-reported validation as a claim to verify before using it as acceptance evidence: inspect enough of the checking script to confirm pass/fail fields are computed rather than hard-coded, verify cited files and paths exist, and for work still running confirm an explicit completion signal and the expected repository HEAD before rebuilding, testing, or diagnosing a regression. If provenance or completion is unverified, report the result as NOT RUN and do not treat intermediate working-tree output or clean-looking visual inspection as confirmation; independently measure material claims where practical.
 

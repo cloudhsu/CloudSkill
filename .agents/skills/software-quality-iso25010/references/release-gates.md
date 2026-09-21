@@ -84,3 +84,4 @@ of missing legacy assets, geometry, typography and timing semantics until each
 is closed. A compile, matching class names or a smoke test closes none of the
 three, and an approximate renderer is not reported as a faithful clone.
 
+When a new path is compared with a legacy path, keep machine-readable events and add a compact per-workpiece timeline; state the configuration and run conditions; compare equivalent modes and timing permutations; and report the first divergence and any invariant failures. Report throughput separately from correctness: aggregate throughput alone never shows behavioral equivalence.

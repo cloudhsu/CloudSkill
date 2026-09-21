@@ -118,6 +118,34 @@
         "agent accepts a familiar numeric value without checking authority or validity"
       ],
       "review_notes": "Judge physical meaning, boundaries, uncertainty, and software implications; keyword presence alone is insufficient."
+    },
+    {
+      "id": "SEDK-BEH-007",
+      "skill": "semiconductor-equipment-domain-knowledge",
+      "type": "application",
+      "provenance": "project_history_distilled",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "prompt": "An editable sequence can process several recipes, change workpiece orientation, process the opposite side, repeat earlier recipes, and return in either orientation. A single processed flag cannot explain or debug the result. Describe how you would proceed.",
+      "required_behaviors": [
+        "change orientation on every successful flip operation",
+        "record process history per physical side",
+        "retain multiple process identifiers and repeated visits",
+        "preserve final orientation when explicitly requested",
+        "insert a return flip when the contract requires original orientation",
+        "include orientation and process history in diagnostic events"
+      ],
+      "forbidden_behaviors": [
+        "represent processing as one boolean",
+        "treat an orientation change as visual-only",
+        "erase opposite-side history",
+        "assume every cassette return has the same orientation"
+      ],
+      "required_artifacts": [],
+      "baseline_expected_failure": [
+        "Orientation became authoritative material state and process history remained ordered, side-specific, and traceable."
+      ],
+      "review_notes": "Distilled 2026-09-21 from Eval Inbox candidate sanitized-interaction-evidence (project-history distillation, inferred confidence, one project; imported from a disconnected 7.11.2 export). Sanitized. The behaviors are the candidate's own wording; the prompt is the candidate's situation plus a neutral request to describe how to proceed. Candidate status: not evidence of a model failure until RED."
     }
   ]
 }

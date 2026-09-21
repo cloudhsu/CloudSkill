@@ -198,6 +198,113 @@
         "agent treats parallel mode as permission for any robot to use any station, or leaves an executable shared module idle because later work reserved it early"
       ],
       "review_notes": "Distilled 2026-08-28 from a real Eval Inbox interaction candidate (sanitized source evidence, captured 2026-08-27T06:02:44+00:00, originally exported from a codex session at cloudskill_version=7.6.39). Batch-reviewed 2026-08-28: deduplicated against the other 12 candidates in the same import (detect_candidate_similarity.py, 0 pairs >=0.28), manually re-scanned for identifying detail (sensitization.status was MANUAL_REQUIRED -- exported without a reachable private terms file; clean on manual read). Candidate only; confirm owner and establish RED in destination repository."
+    },
+    {
+      "id": "ECA-BEH-010",
+      "skill": "equipment-control-architecture",
+      "type": "application",
+      "provenance": "project_history_distilled",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "prompt": "A material-handling simulator must reserve multiple physical resources and move a workpiece through source, robot, and destination without overlaps or partially committed state. Describe how you would proceed.",
+      "required_behaviors": [
+        "check all prerequisites before committing",
+        "reserve shared resources atomically",
+        "use half-open time intervals",
+        "persist station claims across occupancy",
+        "record source-to-arm-to-destination custody",
+        "fail stop after irreversible physical admission"
+      ],
+      "forbidden_behaviors": [
+        "reserve one prerequisite before discovering another conflict",
+        "show material at a destination before placement",
+        "release a station claim while occupied",
+        "pretend an admitted workpiece was rolled back"
+      ],
+      "required_artifacts": [],
+      "baseline_expected_failure": [
+        "Atomic reservations and explicit custody aligned event logs, physical snapshots, and visual material location."
+      ],
+      "review_notes": "Distilled 2026-09-21 from Eval Inbox candidate sanitized-interaction-evidence (project-history distillation, inferred confidence, one project; imported from a disconnected 7.11.2 export). Sanitized. The behaviors are the candidate's own wording; the prompt is the candidate's situation plus a neutral request to describe how to proceed. Candidate status: not evidence of a model failure until RED."
+    },
+    {
+      "id": "ECA-BEH-011",
+      "skill": "equipment-control-architecture",
+      "type": "application",
+      "provenance": "project_history_distilled",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "prompt": "A chamber displays door motion when retrieving material but not when placing it. Happy-path end-state tests pass because occupancy is correct, while the ingress event sequence is incomplete. Describe how you would proceed.",
+      "required_behaviors": [
+        "specify preconditions and transitions for both ingress and egress",
+        "assert door open before robot access",
+        "assert custody transfer at pick or place",
+        "assert door close after robot withdrawal",
+        "test ordered intermediate events rather than only final occupancy"
+      ],
+      "forbidden_behaviors": [
+        "infer ingress correctness from working egress",
+        "test only final chamber occupancy",
+        "open a door after robot access has begun",
+        "leave an empty chamber open"
+      ],
+      "required_artifacts": [],
+      "baseline_expected_failure": [
+        "Ordered event assertions exposed missing ingress operations that final-state tests did not detect."
+      ],
+      "review_notes": "Distilled 2026-09-21 from Eval Inbox candidate sanitized-interaction-evidence (project-history distillation, inferred confidence, one project; imported from a disconnected 7.11.2 export). Sanitized. The behaviors are the candidate's own wording; the prompt is the candidate's situation plus a neutral request to describe how to proceed. Candidate status: not evidence of a model failure until RED."
+    },
+    {
+      "id": "ECA-BEH-012",
+      "skill": "equipment-control-architecture",
+      "type": "application",
+      "provenance": "project_history_distilled",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "prompt": "A simulator animates doors, robots, pressure transitions, alignment, processing, and material orientation. The GUI must accurately display these operations without becoming an equipment controller. Describe how you would proceed.",
+      "required_behaviors": [
+        "make simulation events and snapshots authoritative",
+        "project state into read-only visual models",
+        "keep internal component operations explicit"
+      ],
+      "forbidden_behaviors": [
+        "let rendering dispatch or complete operations",
+        "infer readiness only from animation",
+        "duplicate door or aligner behavior per screen",
+        "store authoritative time as animation frames"
+      ],
+      "required_artifacts": [],
+      "baseline_expected_failure": [
+        "Physical components became reusable state authorities while product-specific routing and GUI rendering remained separate."
+      ],
+      "review_notes": "Distilled 2026-09-21 from Eval Inbox candidate sanitized-interaction-evidence (project-history distillation, inferred confidence, one project; imported from a disconnected 7.11.2 export). Sanitized. The behaviors are the candidate's own wording; the prompt is the candidate's situation plus a neutral request to describe how to proceed. Candidate status: not evidence of a model failure until RED. Contract repaired 2026-09-21 after RED (scope): two required behaviors belong to other owners and were removed here; original wording: [model common physical components independently of product orchestration] [convert human time configuration once into integer internal units]. The first is framework-design territory (product-line boundary), the second equipment-domain-modeling (time units)."
+    },
+    {
+      "id": "ECA-BEH-013",
+      "skill": "equipment-control-architecture",
+      "type": "application",
+      "provenance": "project_history_distilled",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "prompt": "An external sequence editor describes recipes, workpiece assignments, and parallel execution. Treating all three as one mutable sequence makes adapters and schedulers own ambiguous semantics. Describe how you would proceed.",
+      "required_behaviors": [
+        "model process intent separately",
+        "model carrier-slot assignment as a plan referencing process intent",
+        "model concurrency as an execution profile",
+        "compile external formats through an adapter",
+        "validate a typed operation graph before dispatch"
+      ],
+      "forbidden_behaviors": [
+        "embed the external editor inside the runtime model",
+        "let slot assignment replace the process definition",
+        "represent parallel policy as a second process route",
+        "dispatch unvalidated editor data"
+      ],
+      "required_artifacts": [],
+      "baseline_expected_failure": [
+        "The target boundary became editor to adapter/compiler to typed contracts to validated operations to scheduler."
+      ],
+      "review_notes": "Distilled 2026-09-21 from Eval Inbox candidate sanitized-interaction-evidence (project-history distillation, inferred confidence, one project; imported from a disconnected 7.11.2 export). Sanitized. The behaviors are the candidate's own wording; the prompt is the candidate's situation plus a neutral request to describe how to proceed. Candidate status: not evidence of a model failure until RED."
     }
   ]
 }

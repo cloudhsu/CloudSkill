@@ -120,6 +120,8 @@ The Equipment Service layer owns:
 
 Sequence must not reach through the service into a concrete driver. Equipment Service must not silently embed product workflow policy. A process phase should complete on defined physical/readback evidence, not merely because a command returned or a timer expired.
 
+Keep process intent (one sequence definition), carrier-to-slot assignment (a plan that references it) and concurrency (an execution profile) as separate layers. Parallel execution is an execution profile over one process definition, not a second route: serialize shared physical resources, preserve source carrier and slot identity, and compare concurrent results against a deterministic single-flow baseline. Compile an external sequence format through an adapter into a typed operation graph and validate it before dispatch.
+
 Use direct calls for bounded same-process operations only when synchronous semantics, failure propagation, and testability remain explicit. Use an asynchronous command/event contract when work is long-running, cancellable, remote, restartable, queued, or produces late completion.
 
 ### 6. Define command and event lifecycle
@@ -160,6 +162,10 @@ Independent wafer sequences still contend for shared robots, aligners, loadlocks
   later work reserved it early; dispatch already-waiting buffered work that
   can run now ahead of a future reservation, keeping reservations only for
   physical hand-off correctness.
+- Persistent claims: check every prerequisite before reserving any; a station
+  or resource claim persists while the workpiece occupies it and is released
+  only after the custody transfer commits; use half-open [start, end)
+  intervals so adjacent reservations do not overlap.
 
 Do not let each sequence infer availability from a stale snapshot and issue competing commands.
 
@@ -232,6 +238,7 @@ Require evidence for:
 - Process and IPC restart.
 - Resource-owner loss and reservation recovery.
 - Interlock or readiness changes during execution.
+- Ordered ingress and egress events, tested as sequences and not only as final occupancy (for example door open before robot access, custody transfer at pick or place, door close after withdrawal).
 - Invalid/stale/out-of-range sensor state.
 - Config/schema mismatch.
 - Local/simulate/remote semantic parity.

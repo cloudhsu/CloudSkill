@@ -41,6 +41,8 @@ The kernel should contain only concepts that:
 
 Keep product policy outside the kernel.
 
+Keep product orchestration (routing, choosing the next actor, scheduling) in the product: a shared device component exposes readiness and capability and never selects the next actor, and a mechanism that only some products support (for example a feeding mechanism) stays behind an adapter or inside those products.
+
 Classify a framework repository's own demo scenes and legacy product-
 specific implementations as compatibility baggage, not as the public
 consumer API -- keep validated examples as regression baselines while the

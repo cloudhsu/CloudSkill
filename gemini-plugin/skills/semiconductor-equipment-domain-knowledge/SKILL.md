@@ -63,6 +63,8 @@ Identify:
 
 Do not treat EFEM, Main Frame, Load Lock, Transfer Chamber, and Process Chamber as interchangeable boxes. Their physical responsibilities and failure consequences differ.
 
+Treat orientation and per-side process history as material state, not visual detail: every successful flip changes orientation, history is kept per physical side with repeated visits and several process identifiers, a required final orientation needs a planned return flip, and one "processed" boolean cannot explain the result.
+
 ### 3. Interpret equipment modules by physical responsibility
 
 Use the following high-level distinctions:

@@ -87,6 +87,8 @@ Each slice must state:
 - Rollback path.
 - Explicit exclusions.
 
+When a change combines several physical or semantic boundaries (a scheduler rewrite, a new product flow), make each slice add exactly one boundary (for example one physical transition such as custody transfer, door motion or a pressure change, never several in one checkpoint) with its own exact-behavior tests (exact internal timestamps where timing is part of the behavior) and recorded acceptance evidence, keep the comparison path and rollback until it is accepted, stop before the next boundary, and generalize (a shared scheduler, a route language) only after a second consumer proves the semantics are shared.
+
 ### 4. Restrict capability
 
 Do not pass a powerful façade or raw database object when a narrower port is sufficient.

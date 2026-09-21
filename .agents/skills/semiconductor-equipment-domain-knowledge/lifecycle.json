@@ -31,7 +31,9 @@
     "SEDK-BEH-002",
     "SEDK-BEH-003",
     "SEDK-BEH-004",
-    "SEDK-BEH-005"
+    "SEDK-BEH-005",
+    "SEDK-BEH-006",
+    "SEDK-BEH-007"
   ],
   "behavior_case_types": [
     "application",

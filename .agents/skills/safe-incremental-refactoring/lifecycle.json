@@ -47,7 +47,8 @@
     "REF-BEH-024",
     "REF-BEH-025",
     "REF-BEH-026",
-    "REF-BEH-027"
+    "REF-BEH-027",
+    "REF-BEH-028"
   ],
   "behavior_case_types": [
     "application",

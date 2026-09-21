@@ -210,6 +210,8 @@ When the main deliverable is the component-level `Commanded`, `Desired`, `Pendin
 - “The generated UI is the command authority.”
 - “Configuration and snapshot are interchangeable because both serialize.”
 - “Polling will eventually fix inconsistent command state without an explicit reconciliation model.”
+- “Each chamber variant can carry its own door logic.” A door is one reusable component with occupancy state, composed into every chamber variant: it opens only for a robot transfer, closes after placement or retrieval, stays closed when idle, is never the source of chamber readiness, and process or orientation behavior plugs into the shared chamber shell.
+- “The robot must return home after every operation.” Home is an idle policy target: start motion from the current pose, travel directly to the next reserved operation, wait in place when it becomes ready sooner, return toward home only when idle (allowing safe retargeting on the way), and keep carried material's custody synchronized with pick and place.
 
 ## Skill composition
 

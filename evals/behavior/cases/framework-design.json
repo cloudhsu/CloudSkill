@@ -240,6 +240,58 @@
         "agent puts multiple virtual components in one source file with class names that don't communicate the requested hierarchy, clarified only after implementation begins"
       ],
       "review_notes": "Distilled 2026-08-25 from a real collaborative-distillation candidate (GPT-5.6 Luna/Sol, project-history mining): a first implementation's class-to-file mapping and naming were corrected only after the fact; the fix separated implementation files, shared support code, and a compatibility facade."
+    },
+    {
+      "id": "FW-BEH-012",
+      "skill": "framework-design",
+      "type": "application",
+      "provenance": "project_history_distilled",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "prompt": "Two equipment products reuse robots, aligners, doors, timing, custody, and visual projections but differ in topology, material-feeding mechanisms, routing, and scheduling semantics. Describe how you would proceed.",
+      "required_behaviors": [
+        "share stable physical contracts and projections",
+        "keep topology and orchestration product-owned",
+        "keeps routing and next-actor selection product-owned, with shared devices such as an aligner exposing readiness rather than choosing the next robot",
+        "keeps a mechanism that only some products support (for example a feeding mechanism) behind an adapter or inside the products that support it",
+        "prove a second semantic consumer before extracting scheduler abstractions"
+      ],
+      "forbidden_behaviors": [
+        "force one product runner into another product",
+        "let a common component choose product routing",
+        "equate similar GUI shapes with identical physical topology"
+      ],
+      "required_artifacts": [],
+      "baseline_expected_failure": [
+        "Physical primitives remained reusable while each product retained its own route compiler, execution policy, and topology."
+      ],
+      "review_notes": "Distilled 2026-09-21 from Eval Inbox candidate sanitized-interaction-evidence (project-history distillation, inferred confidence, one project; imported from a disconnected 7.11.2 export). Sanitized. The behaviors are the candidate's own wording; the prompt is the candidate's situation plus a neutral request to describe how to proceed. Candidate status: not evidence of a model failure until RED. Contract repaired 2026-09-21 after RED (over-specific): original required behaviors were [let the aligner expose readiness rather than select the next robot] [keep feeding mechanisms outside products that do not support them]; the general principle is unchanged."
+    },
+    {
+      "id": "FW-BEH-013",
+      "skill": "framework-design",
+      "type": "application",
+      "provenance": "project_history_distilled",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "prompt": "Two views draw the same logical equipment connection with different animation behavior. Copying the link component per view causes geometry and activation semantics to drift. Describe how you would proceed.",
+      "required_behaviors": [
+        "share the logical link and activation contract",
+        "select animation behavior through an explicit strategy or property",
+        "keep endpoint geometry configurable",
+        "derive active state from projected events",
+        "allow new visual styles without changing simulation behavior"
+      ],
+      "forbidden_behaviors": [
+        "clone the whole link component for each view",
+        "let line animation initiate transfer",
+        "encode screen coordinates into physical topology"
+      ],
+      "required_artifacts": [],
+      "baseline_expected_failure": [
+        "Views could retain distinct presentation while sharing state, endpoints, and activation semantics."
+      ],
+      "review_notes": "Distilled 2026-09-21 from Eval Inbox candidate sanitized-interaction-evidence (project-history distillation, inferred confidence, one project; imported from a disconnected 7.11.2 export). Sanitized. The behaviors are the candidate's own wording; the prompt is the candidate's situation plus a neutral request to describe how to proceed. Candidate status: not evidence of a model failure until RED."
     }
   ]
 }

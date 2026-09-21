@@ -221,6 +221,112 @@
         "agent allows two materials to occupy a single-capacity aligner or process module, or starts an upstream unload before the required downstream transfer resource is confirmed available"
       ],
       "review_notes": "Distilled 2026-08-28 from a real Eval Inbox interaction candidate (sanitized source evidence, captured 2026-08-27T06:02:45+00:00, originally exported from a codex session at cloudskill_version=7.6.39). Batch-reviewed 2026-08-28: deduplicated against the other 12 candidates in the same import (detect_candidate_similarity.py, 0 pairs >=0.28), manually re-scanned for identifying detail (sensitization.status was MANUAL_REQUIRED -- exported without a reachable private terms file; clean on manual read). Candidate only."
+    },
+    {
+      "id": "EDM-BEH-010",
+      "skill": "equipment-domain-modeling",
+      "type": "application",
+      "provenance": "project_history_distilled",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "prompt": "Process and orientation-changing chambers duplicated door behavior. One variant then left its door open after unloading because its lifecycle diverged from the other implementation. Describe how you would proceed.",
+      "required_behaviors": [
+        "compose the chamber from a reusable door component and occupancy state",
+        "open only for a robot transfer",
+        "close after placement or retrieval",
+        "keep idle chambers closed",
+        "plug process or orientation behavior into the shared shell"
+      ],
+      "forbidden_behaviors": [
+        "copy door logic into each chamber type",
+        "leave a door open after the workpiece is removed",
+        "make a visual door the source of chamber readiness"
+      ],
+      "required_artifacts": [],
+      "baseline_expected_failure": [
+        "A composed door lifecycle removed behavior duplication while preserving distinct internal chamber operations."
+      ],
+      "review_notes": "Distilled 2026-09-21 from Eval Inbox candidate sanitized-interaction-evidence (project-history distillation, inferred confidence, one project; imported from a disconnected 7.11.2 export). Sanitized. The behaviors are the candidate's own wording; the prompt is the candidate's situation plus a neutral request to describe how to proceed. Candidate status: not evidence of a model failure until RED."
+    },
+    {
+      "id": "EDM-BEH-011",
+      "skill": "equipment-domain-modeling",
+      "type": "application",
+      "provenance": "project_history_distilled",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "prompt": "A robot animation jumps directly to a pickup orientation or returns home after every transfer, adding unrealistic motion and delaying an immediately available follow-up operation. Describe how you would proceed.",
+      "required_behaviors": [
+        "begin motion from current pose",
+        "allow direct travel to the next reserved operation",
+        "wait in place when the next operation becomes ready sooner",
+        "return toward home only when idle",
+        "permit safe retargeting while returning home",
+        "keep custody synchronized with pick and place"
+      ],
+      "forbidden_behaviors": [
+        "jump to a target pose",
+        "force home between every operation",
+        "make home a physical prerequisite without domain evidence",
+        "detach carried material from robot motion"
+      ],
+      "required_artifacts": [],
+      "baseline_expected_failure": [
+        "Motion followed current pose and future intent without changing authoritative operation ordering or material custody."
+      ],
+      "review_notes": "Distilled 2026-09-21 from Eval Inbox candidate sanitized-interaction-evidence (project-history distillation, inferred confidence, one project; imported from a disconnected 7.11.2 export). Sanitized. The behaviors are the candidate's own wording; the prompt is the candidate's situation plus a neutral request to describe how to proceed. Candidate status: not evidence of a model failure until RED."
+    },
+    {
+      "id": "EDM-BEH-012",
+      "skill": "equipment-domain-modeling",
+      "type": "application",
+      "provenance": "project_history_distilled",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "prompt": "Configurable load locks can have one slot, vertically paired slots, lateral groups, or combined groups. Pressure actuation may be shared or independently controlled, so slot count alone cannot define pump and vent behavior. Describe how you would proceed.",
+      "required_behaviors": [
+        "model slots independently from pressure domains",
+        "map one or more slots to a pressure domain",
+        "support shared and independent pump or vent configurations",
+        "gate each door by compatible pressure and custody state",
+        "derive visuals from configured topology"
+      ],
+      "forbidden_behaviors": [
+        "infer one pressure controller per slot",
+        "hard-code one visual layout as the physical model",
+        "allow atmosphere and vacuum access simultaneously"
+      ],
+      "required_artifacts": [],
+      "baseline_expected_failure": [
+        "Topology and pressure ownership became separately configurable, allowing transfer rules to remain consistent across layouts."
+      ],
+      "review_notes": "Distilled 2026-09-21 from Eval Inbox candidate sanitized-interaction-evidence (project-history distillation, inferred confidence, one project; imported from a disconnected 7.11.2 export). Sanitized. The behaviors are the candidate's own wording; the prompt is the candidate's situation plus a neutral request to describe how to proceed. Candidate status: not evidence of a model failure until RED."
+    },
+    {
+      "id": "EDM-BEH-013",
+      "skill": "equipment-domain-modeling",
+      "type": "application",
+      "provenance": "project_history_distilled",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "prompt": "Configuration is authored in seconds, but event ordering and comparison require finer deterministic precision. Mixed units spread through fixtures and control flow, making exact timing difficult to verify. Describe how you would proceed.",
+      "required_behaviors": [
+        "keep user configuration in documented units",
+        "convert once at an explicit boundary",
+        "use one integer internal time unit (for example milliseconds)",
+        "name unit-bearing values and fields",
+        "assert exact internal timestamps in tests"
+      ],
+      "forbidden_behaviors": [
+        "mix seconds and milliseconds in arithmetic",
+        "use floating-point wall time as simulation authority",
+        "let animation frame rate define operation completion"
+      ],
+      "required_artifacts": [],
+      "baseline_expected_failure": [
+        "A global conversion boundary simplified sequence timing and exposed incorrect fixtures through exact timestamp assertions."
+      ],
+      "review_notes": "Distilled 2026-09-21 from Eval Inbox candidate sanitized-interaction-evidence (project-history distillation, inferred confidence, one project; imported from a disconnected 7.11.2 export). Sanitized. The behaviors are the candidate's own wording; the prompt is the candidate's situation plus a neutral request to describe how to proceed. Candidate status: not evidence of a model failure until RED. Contract repaired 2026-09-21 after RED (over-literal unit): original third required behavior was \"use integer milliseconds internally\"; both RED answers used integer ticks with a stated unit and failed only on the unit name."
     }
   ]
 }
