@@ -6,7 +6,7 @@
       "id": "TWB-BEH-001",
       "skill": "teach-while-building",
       "type": "recognition",
-      "prompt": "Mid-task, the agent just explained a genuinely new, non-obvious platform/toolchain behavior the user hadn't hit before, and it's likely to matter again later in this project.",
+      "prompt": "Mid-task, the agent just explained a genuinely new, non-obvious platform/toolchain behavior the user hadn't hit before, and it's likely to matter again later in this project. For example, the agent just explained that on this toolchain a successful build does not run the post-link signing step, so an unsigned binary can pass every local check.",
       "expected_routing": true,
       "expected_alternative_skill": null,
       "required_behaviors": [
@@ -22,7 +22,7 @@
       "baseline_expected_failure": [
         "agent explains the concept once and moves straight on, with no check"
       ],
-      "review_notes": "Fluency strength (feels understood) vs. storage strength (actually retained) is the point -- passive explanation alone does not build the latter."
+      "review_notes": "Fluency strength (feels understood) vs. storage strength (actually retained) is the point -- passive explanation alone does not build the latter. Review repair 2026-09-21 (docs/evolution/2026-09-21-skill-review-plan.md): a concrete concept was added because the abstract prompt gave the answer nothing to ask about, so it could only return a placeholder template."
     },
     {
       "id": "TWB-BEH-002",
@@ -69,19 +69,21 @@
       "id": "TWB-BEH-004",
       "skill": "teach-while-building",
       "type": "application",
-      "prompt": "During a real engineering task, the agent discovers a genuinely new root cause (e.g. a platform restriction that explains a bug), explains it, runs the short check, and the user's answer confirms real understanding.",
+      "prompt": "You are fixing a bug together with a user in their iOS app: large photo uploads silently stop whenever the user switches to another app. You have just found the root cause: iOS suspends an app shortly after it leaves the foreground, so the app's own upload loop simply stops running; only work handed to the system (a background-configured URLSession) keeps going through suspension. You moved the upload to a background URLSession and the previously failing test now passes; two more items remain on the task list. The user said earlier that they mostly do Android work, and the project's LEARNING_LOG.md has no iOS entries. Write what you say to the user now. Then, given that the user replies: 'so any loop of my own dies once the app is backgrounded -- if the upload has to survive, I hand it to the system session instead of keeping my own loop alive', write what you do with that reply.",
       "expected_routing": true,
       "expected_alternative_skill": null,
       "required_behaviors": [
-        "explains the concept concisely before checking it, not after",
-        "runs exactly one short round of 1-2 questions with its own stated expected answer",
-        "on confirmation, appends a short entry to the project's LEARNING_LOG.md in the user's own framing, not a copy of the explanation",
-        "continues the original task afterward without turning the moment into a detour"
+        "explains the suspension root cause to the user in a few sentences before asking any check question",
+        "asks a question that requires the user to apply the suspension concept (for example to another background scenario), not merely 'does that make sense?'",
+        "states its own expected answer next to each question it asks",
+        "keeps the check to one short round and says it waits for the user's reply before moving on",
+        "after the confirming reply, appends a short entry to the project's LEARNING_LOG.md (creating it if absent) phrased in the user's own framing, not a copy of its own explanation",
+        "after appending the entry, returns to the remaining task items in the same turn without waiting for acknowledgement of the log"
       ],
       "forbidden_behaviors": [
-        "skipping the log even though the concept was confirmed durable and relevant",
-        "writing a long transcript-style entry instead of a short reference note",
-        "blocking further task progress on the logging step"
+        "skips the check on the grounds that the user is an experienced developer, although there is no iOS history for this user",
+        "skips or defers the log although the reply confirmed the concept",
+        "writes a transcript-style entry that reproduces the explanation or the question-and-answer instead of a short reference note"
       ],
       "required_artifacts": [
         "LEARNING_LOG.md entry"
@@ -89,7 +91,7 @@
       "baseline_expected_failure": [
         "agent explains the finding well but never checks or logs it, so nothing durable survives the session"
       ],
-      "review_notes": "This is the end-to-end positive path: discover, explain, check, log, continue -- the whole point of the skill in one realistic pass."
+      "review_notes": "This is the end-to-end positive path: discover, explain, check, log, continue -- the whole point of the skill in one realistic pass. [2026-09-22 redesign by Fable 5.1, owner-requested] Original prompt/behaviors kept here: {\"prompt\": \"During a real engineering task, the agent discovers a genuinely new root cause (e.g. a platform restriction that explains a bug), explains it, runs the short check, and the user's answer confirms real understanding.\", \"required_behaviors\": [\"explains the concept concisely before checking it, not after\", \"runs exactly one short round of 1-2 questions with its own stated expected answer\", \"on confirmation, appends a short entry to the project's LEARNING_LOG.md in the user's own framing, not a copy of the explanation\", \"continues the original task afterward without turning the moment into a detour\"], \"forbidden_behaviors\": [\"skipping the log even though the concept was confirmed durable and relevant\", \"writing a long transcript-style entry instead of a short reference note\", \"blocking further task progress on the logging step\"]} Problems found: the skill never states that the agent resumes the original task after logging (the last behavior is a skill gap, RED-tested separately); the original prompt narrated the behaviors under test and never gave the confirming reply, so the user-framing behavior could not be produced or graded."
     },
     {
       "id": "TWB-BEH-005",

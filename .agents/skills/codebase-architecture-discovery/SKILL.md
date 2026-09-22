@@ -128,5 +128,9 @@ duplicates), stop component work and do this first:
   whether the codebase already has (or deliberately lacks) that structure
   -- a flat codebase's own existing convention is itself evidence about
   where a new shared module belongs.
+- Treating a header comment or a filename that says code is old or unused as
+  evidence: it is an unverified claim. Trace reachability from the real
+  application entry point (preferably by building and running) and name the
+  entry point and reference chain before excluding the file as dead code.
 - Treating a maintained architecture map as a one-time report instead of
   something the next change is expected to read and keep current.

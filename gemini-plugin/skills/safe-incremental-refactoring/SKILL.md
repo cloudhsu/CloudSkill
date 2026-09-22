@@ -130,6 +130,7 @@ When an existing defect is discovered:
 - Decide whether the current slice preserves or fixes it.
 - Do not quietly fix it inside a structural change.
 - Use a separate decision, patch, and release note for the behavior change.
+- Even when a constructor's eager open of an external client is deferred as a behavior change, the seam's own unit tests inject or fake the client so import and tests stay isolated from it.
 
 ### 7. Verify
 

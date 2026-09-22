@@ -3,7 +3,7 @@
   "skill": "about-me",
   "stage": "experimental",
   "introduced_version": "7.6.35",
-  "last_reviewed_version": "7.10.0",
+  "last_reviewed_version": "7.11.3",
   "routing_case_ids": [
     "ABM-01",
     "ABM-02",

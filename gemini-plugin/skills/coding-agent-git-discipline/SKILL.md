@@ -180,6 +180,7 @@ mirrors) -- check which remote a given command targets.
 
 ## Supporting references
 
+- For a release, tag or merge step the user has delegated in one line, the scope of that delegation (established in-session pattern as evidence, reversible versus irreversible steps, verification gates, audience stop condition) is governed by `../coding-agent-project-governance/references/risk-routing.md` under "Delegation Scope for Irreversible Steps"; do not decide it from git mechanics alone.
 - `references/git-push-auth-recovery.md` -- full bounded-retry sequence
   and diagnosis table for a failed push (GitHub-specific commands; the
   same sequence on a self-hosted forge substitutes the credential helper

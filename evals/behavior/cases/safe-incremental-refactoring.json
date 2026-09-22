@@ -128,7 +128,7 @@
       "type": "recognition",
       "prompt": "After a code change, a local test fails with an operating-system-specific low-level error (a file-permission model that differs structurally between operating systems, not incidentally). The same suite also runs in CI on a different operating system.",
       "expected_routing": true,
-      "expected_alternative_skill": null,
+      "expected_alternative_skill": "coding-agent-project-governance",
       "required_behaviors": [
         "classifies the failure as environment-agnostic or mechanism-specific to one OS before choosing what counts as evidence",
         "for a mechanism-specific failure, requires a same-OS independent run (clean VM/container, colleague machine, same-OS CI runner) rather than a differently-configured run",
@@ -146,7 +146,7 @@
       "baseline_expected_failure": [
         "agent treats any independent CI run, regardless of whether it exercises the same OS-specific mechanism, as sufficient evidence for an environment attribution"
       ],
-      "review_notes": "Counterexample: with no independent, correctly-matched execution path available, reasoning-based attribution is acceptable if explicitly flagged as unconfirmed."
+      "review_notes": "Counterexample: with no independent, correctly-matched execution path available, reasoning-based attribution is acceptable if explicitly flagged as unconfirmed. Review repair 2026-09-21 (docs/evolution/2026-09-21-skill-review-plan.md): expected_alternative_skill coding-agent-project-governance declared (the prompt has no refactoring cue) and that skill gained a sentence for same-OS independent runs."
     },
     {
       "id": "REF-BEH-007",
@@ -224,7 +224,7 @@
       "id": "REF-BEH-010",
       "skill": "safe-incremental-refactoring",
       "type": "discipline",
-      "prompt": "A component's replacement implementation is suspected of a hard bug. Two independently-built implementations of the same capability (different libraries/backends) both exhibit the identical failure symptom, and each implementation's own API/logs report success at every layer it exposes -- no exception, no error code, nothing.",
+      "prompt": "During a refactoring slice that swaps a component's implementation, the replacement implementation is suspected of a hard bug. Two independently-built implementations of the same capability (different libraries/backends) both exhibit the identical failure symptom, and each implementation's own API/logs report success at every layer it exposes -- no exception, no error code, nothing.",
       "expected_routing": true,
       "expected_alternative_skill": null,
       "required_behaviors": [
@@ -244,7 +244,7 @@
       "baseline_expected_failure": [
         "repeated, deepening investigation of implementation A, then implementation B, then back to A, chasing a symptom that is actually caused by something both implementations depend on, because the convergence itself was never used as evidence and no control test against the shared resource was run"
       ],
-      "review_notes": "Complements the existing 'Environment vs. Defect Attribution' rule: that rule is about whether an independent run on a DIFFERENT environment corroborates a defect-vs-environment call; this case is about using multiple DIFFERENT IMPLEMENTATIONS on the SAME environment as evidence, which is a distinct signal available even when no differently-configured environment exists to test against."
+      "review_notes": "Complements the existing 'Environment vs. Defect Attribution' rule: that rule is about whether an independent run on a DIFFERENT environment corroborates a defect-vs-environment call; this case is about using multiple DIFFERENT IMPLEMENTATIONS on the SAME environment as evidence, which is a distinct signal available even when no differently-configured environment exists to test against. Review repair 2026-09-21 (docs/evolution/2026-09-21-skill-review-plan.md): prompt changed to name its context; original prompt: \"A component's replacement implementation is suspected of a hard bug. Two independently-built implementations of the same capability (different libraries/backends) both exhibit the identical failure symptom, and each implementation's own API/logs report success at every layer it exposes -- no exception, no error code, nothing.\"."
     },
     {
       "id": "REF-BEH-012",

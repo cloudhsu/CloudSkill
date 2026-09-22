@@ -205,6 +205,7 @@ When the main deliverable is the component-level `Commanded`, `Desired`, `Pendin
 - “The pressure is a double, so range and gauge status do not belong in the model.”
 - “MFC setpoint and actual flow are the same property.”
 - “Every repeated field belongs in a base class.”
+- “The module type or cluster arrangement decides what a chamber does and where its time comes from.” A chamber's function (process, Flip, or a customized add-on, each with its own recipe where the function is recipe-driven) is its own attribute with its own recipe binding; see `references/command-catalog-and-capability-model.md` (module capability declaration) and `semiconductor-equipment-domain-knowledge`.
 - “Every value should be wrapped in Signal<T>.”
 - “All pumps can use one OnOff model.”
 - “The generated UI is the command authority.”

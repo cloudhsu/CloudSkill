@@ -3,7 +3,7 @@
   "skill": "coding-agent-git-discipline",
   "stage": "experimental",
   "introduced_version": "7.6.37",
-  "last_reviewed_version": "7.10.0",
+  "last_reviewed_version": "7.11.3",
   "routing_case_ids": [
     "CAGD-01",
     "CAGD-02",

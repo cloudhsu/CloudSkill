@@ -95,7 +95,7 @@
       "id": "AID-BEH-005",
       "skill": "agent-development-process",
       "type": "discipline",
-      "prompt": "A required step in an agent's or team's operating process was silently skipped (e.g. a follow-up action that must always happen the same way after a main step completes), the gap went undetected until a stakeholder noticed missing external evidence, and a fix is being decided.",
+      "prompt": "A required step in an AI agent product's operating process (its harness of instructions, tools and workflow) was silently skipped (e.g. a follow-up action that must always happen the same way after a main step completes), the gap went undetected until a stakeholder noticed missing external evidence, and a fix is being decided.",
       "expected_routing": true,
       "expected_alternative_skill": null,
       "required_behaviors": [
@@ -110,7 +110,7 @@
       "baseline_expected_failure": [
         "the single missed instance is patched by hand, and a note is written asking a future run to remember to re-check, or a monitor is added to detect a recurrence after the fact; the same class of gap can recur silently because the process itself was never fixed"
       ],
-      "review_notes": "Conversation-derived, 2026-08-15: a release process silently skipped its tag/GitHub-Release step for 5 consecutive versions across 2 repos, undetected for a whole session. The first proposed fixes were a standing memory reminder, then a scheduled cron audit; the user rejected both and required the fix to go into the process artifact that governs releases instead, reserving memory for judgment-based state that actually changes over time."
+      "review_notes": "Conversation-derived, 2026-08-15: a release process silently skipped its tag/GitHub-Release step for 5 consecutive versions across 2 repos, undetected for a whole session. The first proposed fixes were a standing memory reminder, then a scheduled cron audit; the user rejected both and required the fix to go into the process artifact that governs releases instead, reserving memory for judgment-based state that actually changes over time. Review repair 2026-09-21 (docs/evolution/2026-09-21-skill-review-plan.md): prompt changed to name its context; original prompt: \"A required step in an agent's or team's operating process was silently skipped (e.g. a follow-up action that must always happen the same way after a main step completes), the gap went undetected until a stakeholder noticed missing external evidence, and a fix is being decided.\"."
     },
     {
       "id": "AID-BEH-006",

@@ -15,7 +15,9 @@ default:
 - `references/equipment-topology-and-material-flow.md` -- when placing a
   responsibility on the right physical module: common module
   responsibilities (EFEM, Main Frame/vacuum transfer system, process
-  chamber) and material/environment state as it moves between them.
+  chamber), a chamber's function (PVD, ALD, pre-clean, degas, Flip) and
+  which functions take a recipe, and material/environment state as it moves
+  between them.
 - `references/component-capabilities-and-io.md` -- when deciding what a
   physical component can actually do or expose as IO, and the cautions
   around assuming a capability that isn't confirmed.

@@ -183,6 +183,8 @@ Do not claim device, OS, deployment, browser, or external-system tests that were
 
 When new behavior must be testable and the project has custom regression runners, put the new tests in the language's standard, CI-discoverable framework (a standard test project, a mature test framework and its test SDK, CI-readable results), migrate the affected legacy cases incrementally, and keep a legacy regression path only until equivalent tests exist, with that end condition stated. Do not add another custom runner or claim coverage from an executable CI cannot discover.
 
+When a failure is specific to one operating system's mechanism (for example a file-permission model), classify it first and require an independent run on the same OS (a clean VM or container, a colleague's machine, or a same-OS CI runner); a differently configured run, a run on a structurally different OS, or a CI run from before the change is not evidence, and the attribution is reported as confirmed only after the matched run has executed.
+
 Treat an agent's self-reported validation as a claim to verify before using it as acceptance evidence: inspect enough of the checking script to confirm pass/fail fields are computed rather than hard-coded, verify cited files and paths exist, and for work still running confirm an explicit completion signal and the expected repository HEAD before rebuilding, testing, or diagnosing a regression. If provenance or completion is unverified, report the result as NOT RUN and do not treat intermediate working-tree output or clean-looking visual inspection as confirmation; independently measure material claims where practical.
 
 Delegated workers have lifecycles: a worker whose lifecycle has ended or

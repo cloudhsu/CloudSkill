@@ -13,13 +13,13 @@
         "recognizes idempotent reconciliation, provider adapters, version/capability discovery, and OS-specific SecretStore boundaries"
       ],
       "forbidden_behaviors": [
-        "treats title-only creation, hard-coded API methods, plaintext credentials, and unknown-version writes as unsafe"
+        "treats title-only creation, hard-coded API methods, plaintext credentials, or unknown-version writes as safe"
       ],
       "required_artifacts": [],
       "baseline_expected_failure": [
         "agent gives a provider-specific CRUD recipe without authority, version, secret, or duplicate-write boundaries"
       ],
-      "review_notes": "Recognition case; review ownership and platform-boundary reasoning, not keywords alone."
+      "review_notes": "Recognition case; review ownership and platform-boundary reasoning, not keywords alone. Review repair 2026-09-21 (docs/evolution/2026-09-21-skill-review-plan.md): forbidden behavior F1 was worded inverted (\"as unsafe\"); original wording: [treats title-only creation, hard-coded API methods, plaintext credentials, and unknown-version writes as unsafe]."
     },
     {
       "id": "PMS-BEH-002",
