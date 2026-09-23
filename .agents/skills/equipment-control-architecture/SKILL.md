@@ -92,15 +92,13 @@ GUI state is a projection. A command-send success is not hardware-state confirma
 
 ### 4. Model location, environment, readiness, and boundary state together
 
-A safe material move depends on more than source and destination names. Define:
-
-- Authoritative source/destination occupancy.
-- Robot/blade position and reservation.
-- Loadlock/chamber pressure domain and gauge validity.
-- Door/slit/gate actual position.
-- Pressure equalization or isolation conditions.
-- Process/chamber availability and contamination boundary.
-- Post-move location confirmation and rollback/recovery state.
+A safe material move depends on more than source and destination names. Beyond
+the occupancy, reservation, and readiness checklist in
+`references/physical-process-readiness-and-interlocks.md`, also confirm:
+pressure equalization or isolation conditions before opening a boundary,
+contamination-boundary status for the destination process/chamber, and
+post-move location confirmation with a defined rollback/recovery state if the
+move does not complete as expected.
 
 Pump-down and vent complete on authoritative physical criteria, not elapsed time alone. Opening a vacuum boundary requires current pressure, valve, path, and interlock evidence. After restart or reconnect, reconstruct these facts before accepting new movement.
 
