@@ -220,6 +220,57 @@
       "review_notes": "Distilled 2026-09-19 from a real interaction (Eval Inbox candidate sanitized-interaction-evidence, negative): after a PR was reviewed by checking out its commit, the main working copy stayed on a leftover non-main branch; `git merge --ff-only <remote>/main` fast-forwarded that branch instead of main, and `git push origin main` then printed `Everything up-to-date` (true for the untouched real main), falsely suggesting the sync happened. Self-caught by comparing `git rev-parse HEAD` / `git branch -vv` to the expected state. Extends item 9 (re-verify an already-checked-out branch) with the implicit-target and false-reassurance angles. RED 2026-09-20 (claude, current skill, --context-mode selected-skills --selected-reference-mode declared, claude-sonnet-5): NO_CHANGE_JUSTIFIED. Three real runs (1 with a first, more leading prompt draft; 2 with the committed less-leading prompt) all routed primary=coding-agent-git-discipline and all met the 3 required_behaviors: flagged the planned `git merge --ff-only origin/main` as unsafe from a detached/leftover HEAD (implicit target), ran a branch check and an explicit `git checkout main` first, and required `git rev-parse main` vs `git ls-remote mirror` SHA read-back instead of trusting push exit/'Everything up-to-date'. Existing SKILL.md item 9, the core principle (verify actual state) and the required-output rules already generalize to this trap in a plan-only Behavior Eval; the original failure was an agentic execution lapse (not reasoning about HEAD before running), which this harness cannot reproduce, so no skill edit was made. Kept as a regression anchor.",
       "provenance": "field_distilled",
       "source_reference": "sanitized-interaction-evidence"
+    },
+    {
+      "id": "CAGD-BEH-010",
+      "skill": "coding-agent-git-discipline",
+      "type": "discipline",
+      "prompt": "Run a git commit for a batch of verified file changes; if the command is moved to background execution because it is taking longer than a foreground timeout, confirm afterward whether the commit actually happened.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "after the backgrounded commit returns/exits, confirms completion using the operation's own observable, independently-checkable result (for example `git log -1` shows the new commit, or `git status` shows a clean tree) rather than treating an empty or missing background-output capture as evidence that nothing happened or that it is safe to move on",
+        "if the observable result shows the commit did not complete, simply retries it in the foreground rather than assuming a deeper failure occurred"
+      ],
+      "forbidden_behaviors": [
+        "treating a background command's empty output file as proof the commit is done and requires no further action",
+        "assuming the background-execution transport is reliable enough that 'no output, no error' can stand in for 'confirmed complete' on a write operation"
+      ],
+      "required_artifacts": [
+        "an independent post-hoc check of the commit (git log / git status) run after the backgrounded command returns, not inferred from the absence of captured output"
+      ],
+      "baseline_expected_failure": [
+        "agent sees the background job exit with no captured output/error and reports the commit as done without checking git log/git status, when the commit in fact did not land"
+      ],
+      "review_notes": "Eval Inbox candidate sanitized-interaction-evidence (positive). RED 2026-09-23 (claude, claude-sonnet-5, current unchanged skill, --context-mode selected-skills --selected-reference-mode declared, repeat=2): NO_CHANGE_JUSTIFIED. Both attempts PASS on blind cross-family grading (claude-opus-5, 2/2 items, 0 required-behavior misses, 0 forbidden-behavior violations) -- e.g. attempt 1 evidence: \"a reported success is not itself proof the commit object exists\", verification keyed to `git log -1`/`git status --porcelain`, not the background capture; attempt 2 evidence: \"the process's own exit status is not trusted alone\" and re-issue only \"once steps 1-5 conclusively show no commit landed\". The skill's existing core principle (verify actual state before trusting an assumption) and item 6's merge-confirmation pattern (API success != content landed) already generalize to a backgrounded commit in this plan-only Behavior Eval; no skill-text change made. Kept as a regression anchor.",
+      "provenance": "field_distilled",
+      "source_reference": "sanitized-interaction-evidence"
+    },
+    {
+      "id": "CAGD-BEH-011",
+      "skill": "coding-agent-git-discipline",
+      "type": "discipline",
+      "prompt": "Commit one finished subordinate agent's file changes to version control, in a shared working tree where other subordinate agents may currently be mid-edit on overlapping directories.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "before staging, checks git status for files that do not belong to the finished task and deliberately excludes them, rather than assuming every currently-modified file belongs to the task being committed",
+        "stages the finished task's output with an exact, enumerated file list (`git add <file1> <file2> ...`) rather than a directory-level `git add <dir>` or wildcard, even when enumerating every path is more tedious"
+      ],
+      "forbidden_behaviors": [
+        "using a directory-wide or wildcard `git add` (e.g. `git add <dir>`, `git add -A`, `git add .`) when other agents may be concurrently writing into that same directory tree",
+        "assuming the full current `git status` output reflects only the task being committed just because that is the task the coordinating agent is currently focused on"
+      ],
+      "required_artifacts": [
+        "an enumerated file list passed to git add, not a directory or wildcard argument",
+        "a pre-stage git status check that names files excluded as not belonging to this task"
+      ],
+      "baseline_expected_failure": [
+        "agent runs `git add <shared-dir>` to stage the finished task's output, silently sweeping in another agent's concurrently-modified file in the same directory"
+      ],
+      "review_notes": "Eval Inbox candidate sanitized-interaction-evidence (positive). RED 2026-09-23 (claude, claude-sonnet-5, current unchanged skill, --context-mode selected-skills --selected-reference-mode declared, repeat=2): NO_CHANGE_JUSTIFIED. Both attempts PASS on blind cross-family grading (claude-opus-5, 2/2 items, 0 required-behavior misses, 0 forbidden-behavior violations) -- e.g. attempt 1 evidence: \"Stage narrowly -> `git add -- <explicit finished-agent paths>`, never `git add -A` or `git add .` in a shared tree\"; attempt 2 evidence: \"Reject staging any path outside the subordinate agent's declared scope, even if `git add -A` would be more convenient -- no blanket adds in a shared tree.\" The existing section 3 (\"Committing in a possibly-shared working tree\", `git status --porcelain` check + isolate-and-worktree guidance) already generalizes to the exact-file-list-vs-directory-add angle in this plan-only Behavior Eval; no skill-text change made. Kept as a regression anchor.",
+      "provenance": "field_distilled",
+      "source_reference": "sanitized-interaction-evidence"
     }
   ]
 }

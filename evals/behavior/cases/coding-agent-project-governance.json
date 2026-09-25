@@ -609,6 +609,51 @@
         "Role separation preserved independent review while keeping build and repository evidence coherent."
       ],
       "review_notes": "Distilled 2026-09-21 from Eval Inbox candidate sanitized-interaction-evidence (project-history distillation, inferred confidence, one project; imported from a disconnected 7.11.2 export). Sanitized. The behaviors are the candidate's own wording; the prompt is the candidate's situation plus a neutral request to describe how to proceed. Candidate status: not evidence of a model failure until RED."
+    },
+    {
+      "id": "CAG-BEH-026",
+      "skill": "coding-agent-project-governance",
+      "type": "discipline",
+      "provenance": "field_distilled",
+      "source_reference": "sanitized-interaction-evidence",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "prompt": "You are the Main/Integrator agent governing a repository's coding-agent workforce across a multi-milestone software project. Dispatch commit-producing work items to recurring functional roles (an Architecture coding agent, a Development coding agent, a Test/QA coding agent) repeatedly over many work items spanning multiple project phases. Describe how you dispatch each new work item to its role.",
+      "required_behaviors": [
+        "when dispatching a task to a functional role expected to recur across the multi-milestone project, first checks whether a persistent agent identity already owns that role and resumes it rather than defaulting to a fresh agent instance",
+        "maintains a visible roster mapping each functional role to its current persistent agent identity, so a new dispatch can look up whether to resume before spawning and so the mapping survives context resets",
+        "treats binding one persistent agent identity per recurring role as a starting default established at the very first task for that role, not an optimization retrofitted later"
+      ],
+      "forbidden_behaviors": [
+        "defaults to spawning a brand-new agent instance for every dispatched task without first checking whether an existing, resumable agent already owns that functional role",
+        "frames late adoption of role-persistence as a neutral learning-curve improvement when the project already paid the cost of not having it from the start"
+      ],
+      "required_artifacts": [],
+      "baseline_expected_failure": [
+        "agent spawns a fresh agent instance per dispatched task for each role with no roster tracking which identity already owns a recurring role"
+      ],
+      "review_notes": "Eval Inbox candidate sanitized-interaction-evidence (2026-09-23 batch review). Prompt lightly reworded from the source candidate's generic 'engineering/design/QA' framing to explicitly name a Main/Integrator agent dispatching to Architecture/Development/Test coding-agent roles in a repository, after the original generic wording was found to route to agent-development-process (an AI-agent-product skill) rather than this skill in a real routing check -- same substance (recurring-role dispatch over many work items across phases), reframed to the repository-governance domain this skill actually owns. RED 2026-09-23 (claude sonnet, unchanged skill, routed coding-agent-project-governance both runs): claude-opus-5 blind grade, 0/3 required behaviors met in both of 2 attempts (no persistent-agent-identity check before dispatch, no role->agent-identity roster, no first-task-default framing); forbidden behavior 1 (defaults to fresh instance without checking) VIOLATED in both attempts, e.g. 'ended agents are restarted or replaced' with no resume-lookup step. Edit: added a 'Recurring-role Persistence' section to references/multi-agent-delivery.md (roster lookup before spawn, visible role->identity roster surviving context resets, first-task default, late-adoption-is-a-paid-cost framing). GREEN 2026-09-23 (same prompt/model, edited skill): 2/2 PASS, all 3 required behaviors met both attempts (explicit roster lookup before spawn, a named roster table, first-task binding language), 0/2 forbidden violations."
+    },
+    {
+      "id": "CAG-BEH-027",
+      "skill": "coding-agent-project-governance",
+      "type": "discipline",
+      "provenance": "field_distilled",
+      "source_reference": "sanitized-interaction-evidence",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "prompt": "As the coding agent doing repository housekeeping, you are about to close a batch of this repository's own issue-tracker items (its GitHub/Forgejo issues tracking coding-agent project work) now that a round of engineering decisions has been made in this session. For each item you believe one of those decisions resolves, decide whether to close it and write the closing comment.",
+      "required_behaviors": [
+        "before closing or otherwise batch-resolving any issue-tracker item, re-reads that item's actual current body to confirm it is really the same topic as the decision being applied, rather than relying on a remembered title or a general impression of what it was about"
+      ],
+      "forbidden_behaviors": [
+        "batch-closes multiple issue-tracker items based on title similarity or memory of their general topic without individually re-reading each item's current content first"
+      ],
+      "required_artifacts": [],
+      "baseline_expected_failure": [
+        "agent closes items by matching remembered titles to decisions without opening each item's current body first, closing at least one item that is not actually resolved by the cited decision"
+      ],
+      "review_notes": "Eval Inbox candidate sanitized-interaction-evidence (2026-09-23 batch review). Prompt reworded from the source candidate's generic 'issue-tracker items' framing to this repository's own GitHub/Forgejo issue housekeeping, after the original generic wording was found to route to project-management-sync (a different skill governing external PM-tool sync) rather than this skill in a real routing check -- same substance (deciding per-item whether a decision actually resolves it), reframed to the repository-governance domain this skill actually owns. RED 2026-09-23 (claude sonnet, unchanged skill, routed coding-agent-project-governance both runs): claude-opus-5 blind grade, 2/2 PASS -- required behavior already met both attempts (e.g. 'Do not infer or guess issue identities, numbers, or content not supplied' / 'read, not summarized from memory', with 0 issues closed pending real tracker data), 0/2 forbidden violations. NO_CHANGE_JUSTIFIED: no real gap found against this skill once correctly routed, so no skill-text edit was made; existing SS7 evidence-discipline language (self-report as a claim to verify, do not fabricate/infer unsupplied facts) already covers this behavior. Case kept as a permanent regression guard."
     }
   ]
 }
