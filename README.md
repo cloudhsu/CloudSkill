@@ -7,7 +7,7 @@
 > manifest are validated as one closed artifact before publication.
 
 
-**Current version: 7.11.6**
+**Current version: 7.12.0**
 
 
 CloudBox is the user-facing plugin brand for the `CloudSkill` repository: a portable set of software/system architecture skills and operating guidance for **OpenAI Codex**, **ChatGPT**, and **Claude Code**.
