@@ -19,7 +19,9 @@ default:
   switch, and capability ports.
 - `references/data-migration-safety.md` -- when the change touches
   persisted data or a schema: pre-change checks, additive migration,
-  version gates, and persistence-model concerns.
+  version gates, persistence-model concerns, and externalizing compiled
+  constants into a schema-validated tunable data file with a compiled-
+  default fallback.
 - `references/evidence-checklist.md` -- when assembling the evidence a
   slice needs before it counts as verified: the contract/data/failure
   checklist, and two named real-mistake patterns (a disabled assignment on

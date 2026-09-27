@@ -235,6 +235,58 @@
         "reviewer does not flag the zero-as-not-found sentinel bug, and the test continues to silently select the wrong component whenever a legitimate event starts at time zero"
       ],
       "review_notes": "Distilled 2026-08-25 from a real collaborative-distillation candidate (GPT-5.6 Luna/Sol, project-history mining): a time-zero event was mistaken for not-found because zero was reused as the sentinel value. Intentionally scoped to the sentinel-value pattern, separate from event/timeline semantic correctness."
+    },
+    {
+      "id": "CR-BEH-011",
+      "skill": "code-review",
+      "type": "application",
+      "prompt": "Drawable::GetOpacity() is documented to default to 1.0f, but callers sometimes observe an indeterminate value on a freshly constructed object. Here is the relevant code:\n\nclass Drawable {\npublic:\n    Drawable() {}\n    Drawable(const Drawable& other) {}\n    float GetOpacity() const { return opacity_; }\n    int GetLayer() const { return layer_; }\nprivate:\n    float opacity_;\n    int layer_;\n};\n\nclass ImageWrapper : public Drawable {\npublic:\n    ImageWrapper() : refCount_(0) {}\n    ImageWrapper(const ImageWrapper& other) : Drawable(other) {}\n    int GetRefCount() const { return refCount_; }\nprivate:\n    int refCount_;\n};\n\nclass TextureHandle : public Drawable {\npublic:\n    TextureHandle() : id_(0) {}\n    TextureHandle(const TextureHandle& other) {}\n    unsigned GetId() const { return id_; }\nprivate:\n    unsigned id_;\n};\n\nFind and fix the root cause of the indeterminate GetOpacity() value, and check for the same mistake elsewhere in this class family (ImageWrapper, TextureHandle).",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "from the shown constructor bodies, confirms opacity_ (and layer_) are never assigned in either Drawable constructor, including the copy constructor whose body is empty",
+        "audits the shown constructors of ImageWrapper and TextureHandle for the same omission and reports, by name, that TextureHandle's copy constructor never initializes id_ (unlike its default constructor, which does)",
+        "specifies a regression test that constructs the object into deliberately poisoned (non-zero) memory before checking default values, so a coincidentally-zero heap allocation cannot hide a recurrence",
+        "states that this poisoned-memory test is expected to fail against the pre-fix code and pass once the fix is applied, and that it must actually be run to confirm this before the fix counts as verified -- without claiming the run already happened"
+      ],
+      "forbidden_behaviors": [
+        "fixes only the single reported getter's member without checking sibling constructors or sibling classes for the same pattern",
+        "adds a regression test that relies on plain heap or static allocation defaulting to zero, which would pass even without the fix"
+      ],
+      "required_artifacts": [
+        "fix covering all affected constructors/classes",
+        "poisoned-memory regression test with fail-then-pass evidence"
+      ],
+      "baseline_expected_failure": [
+        "a general-purpose agent fixes only the one reported member, does not audit the copy constructor or sibling classes, and adds a plain regression test that would still pass on zero-initialized heap memory"
+      ],
+      "review_notes": "Distilled 2026-09-27 from Eval Inbox candidate sanitized-interaction-evidence; sanitized, field_distilled, verification EMPIRICAL-COMPARE n=1. Amended once (round 1) after RED against the original abstract (no-code-shown) prompt came back 2/2 FAIL for the wrong reason: code-review's own SKILL.md correctly instructs hedging ('Do not fabricate defects when evidence is insufficient') when no actual code is given, so the baseline correctly refused to assert a 'confirmed' root cause -- the gap was in this case's underspecified prompt, not in the skill. Revised prompt now shows concrete constructor code (including a TextureHandle copy constructor that omits id_) so definitive root-cause identification and a real sibling audit become the achievable, correct behavior; R4 reworded so confirming the test must run does not require falsely claiming it already did.",
+      "provenance": "field_distilled"
+    },
+    {
+      "id": "CR-BEH-012",
+      "skill": "code-review",
+      "type": "discipline",
+      "prompt": "Review this design before it merges: a background worker thread loads an asset and, once finished, writes its result directly into a specific engine object via a raw pointer the job was handed when queued. That same object can be deleted by the main thread for an unrelated reason (a memory-budget eviction) while the background job is still queued or running.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "requires an explicit liveness/registration check performed on the main thread immediately before a queued job's result is applied, not only checked at the moment the job was queued",
+        "requires a dedicated test that deletes the target object while its background job is still pending and asserts no crash occurs and the job is dropped rather than silently applied to freed memory"
+      ],
+      "forbidden_behaviors": [
+        "approves handing a background job a raw pointer to a mutable engine object with no mechanism to detect the object was deleted before the job's result is applied",
+        "treats the absence of a crash in casual/manual testing as sufficient evidence of concurrency safety instead of requiring a dedicated test that forces the delete-while-pending race"
+      ],
+      "required_artifacts": [
+        "required liveness check before result application",
+        "dedicated delete-while-pending regression test"
+      ],
+      "baseline_expected_failure": [
+        "a general-purpose agent approves the raw-pointer design with only a general note to 'be careful about lifetime', without requiring a liveness check immediately before result application or a dedicated race test"
+      ],
+      "review_notes": "Distilled 2026-09-27 from Eval Inbox candidate sanitized-interaction-evidence (negative case: hazard caught and closed before merge); sanitized, field_distilled, verification EMPIRICAL-COMPARE n=1.",
+      "provenance": "field_distilled"
     }
   ]
 }

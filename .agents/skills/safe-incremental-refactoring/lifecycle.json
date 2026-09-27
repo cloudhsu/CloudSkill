@@ -3,7 +3,7 @@
   "skill": "safe-incremental-refactoring",
   "stage": "active",
   "introduced_version": "unknown",
-  "last_reviewed_version": "7.11.0",
+  "last_reviewed_version": "7.13.0",
   "routing_case_ids": [
     "REF-01",
     "REF-02",
@@ -48,7 +48,8 @@
     "REF-BEH-025",
     "REF-BEH-026",
     "REF-BEH-027",
-    "REF-BEH-028"
+    "REF-BEH-028",
+    "REF-BEH-029"
   ],
   "behavior_case_types": [
     "application",

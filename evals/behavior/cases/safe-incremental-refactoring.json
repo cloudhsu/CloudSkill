@@ -639,6 +639,34 @@
         "Successive slices isolated defects in compilation, reservation, custody, internal operations, pressure transition, and transfer boundaries."
       ],
       "review_notes": "Distilled 2026-09-21 from Eval Inbox candidate sanitized-interaction-evidence (project-history distillation, inferred confidence, one project; imported from a disconnected 7.11.2 export). Sanitized. The behaviors are the candidate's own wording; the prompt is the candidate's situation plus a neutral request to describe how to proceed. Candidate status: not evidence of a model failure until RED."
+    },
+    {
+      "id": "REF-BEH-029",
+      "skill": "safe-incremental-refactoring",
+      "type": "application",
+      "prompt": "Externalize a hardcoded per-enemy combat-tuning table (health/damage multipliers, attack range, telegraph and cooldown timing, and two enemy-specific extra fields) from compiled C++ constants into a runtime-loaded, schema-validated data file, and wire the new file into the project's existing content validator with its own rule-ID family.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "keeps the exact old compiled default values reachable and used whenever the new file is missing, unreadable, or a caller bypasses the loader entirely, so existing call sites and tests need zero changes",
+        "applies the new data as a per-field, per-id merge over the compiled defaults (only overwriting a field the file actually specifies), not a wholesale replace, so a partial or hand-edited file degrades safely",
+        "gives the new rule family its own schema and its own rule-ID prefix under the existing validator, rather than folding it into an unrelated existing rule category",
+        "adds data-specific consistency checks beyond schema validity: duplicate ids, missing expected ids, unknown ids, and a cross-field consistency check between two fields meant to represent the same real-world quantity"
+      ],
+      "forbidden_behaviors": [
+        "makes the loader the only path that can produce a valid definition, so direct construction bypassing the loader no longer works with its original numbers",
+        "lets a missing or malformed data file hard-fail startup instead of falling back to the compiled default with a warning",
+        "folds the new, functionally distinct rule family into an existing unrelated rule category merely because the validator already has a home for it"
+      ],
+      "required_artifacts": [
+        "per-field merge design over compiled defaults",
+        "new rule-ID family with dedicated consistency checks"
+      ],
+      "baseline_expected_failure": [
+        "a general-purpose agent replaces the compiled constants wholesale with a file-only source, hard-fails or silently no-ops on a missing/malformed file, and lumps the new validation into an existing unrelated rule category"
+      ],
+      "review_notes": "Distilled 2026-09-27 from Eval Inbox candidate sanitized-interaction-evidence; sanitized, field_distilled, verification FIELD-PITFALL n=1 project.",
+      "provenance": "field_distilled"
     }
   ]
 }

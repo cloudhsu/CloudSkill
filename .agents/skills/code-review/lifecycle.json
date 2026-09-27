@@ -3,7 +3,7 @@
   "skill": "code-review",
   "stage": "active",
   "introduced_version": "unknown",
-  "last_reviewed_version": "7.11.3",
+  "last_reviewed_version": "7.13.0",
   "routing_case_ids": [
     "CR-01"
   ],
@@ -21,7 +21,9 @@
     "CR-BEH-007",
     "CR-BEH-008",
     "CR-BEH-009",
-    "CR-BEH-010"
+    "CR-BEH-010",
+    "CR-BEH-011",
+    "CR-BEH-012"
   ],
   "behavior_case_types": [
     "application",

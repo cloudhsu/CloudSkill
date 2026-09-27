@@ -24,6 +24,17 @@
   separate ready-status/registration collection as a requirement to
   actually compare its size/membership against the participant set before
   advancing, not merely bookkeeping.
+- When a fix adds a member initializer for a previously-uninitialized field,
+  does the required regression test construct the object into deliberately
+  poisoned (non-zero/non-default-pattern) memory before checking the
+  default, rather than a plain default-construction assertion? A plain
+  `new`/stack construction can pass such an assertion by coincidence on a
+  zero-filled heap or static allocation even when the fix is missing, so
+  that test proves nothing about the actual defect. Require the review to
+  state that this test is expected to fail against the pre-fix code and
+  pass against the post-fix code, and that it must actually be run to
+  confirm that before the fix counts as verified -- without itself
+  fabricating a claim that the run already happened.
 
 ## Communication
 
