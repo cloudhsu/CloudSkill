@@ -1,4 +1,5 @@
 from pathlib import Path
+import re
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -31,6 +32,20 @@ def main() -> int:
             continue
         skill_id = skill_dir.name
         data = skill_md.read_bytes()
+        # Check literal reference paths, not semantic indexing quality. Ignore
+        # escaped teaching examples and glob placeholders in authoring guides.
+        for match in re.finditer(r"(?<!\\)`([^`]+)`", data.decode("utf-8")):
+            target = match.group(1)
+            if "references/" not in target or not target.endswith(".md") or any(c in target for c in "*<>"):
+                continue
+            if "\n" in target or "\r" in target:
+                errors.append(f"{skill_id}: reference path split across lines: {target!r}")
+            elif target.startswith("../") and not (skill_dir / Path(target).parts[0] / Path(target).parts[1]).is_dir():
+                # A public/sub-tier export may omit a companion Skill. Its
+                # cross-package reference is checked in the full source tree.
+                continue
+            elif not (skill_dir / target).is_file():
+                errors.append(f"{skill_id}: reference target does not exist: {target}")
         budget = GRANDFATHERED_CEILINGS.get(skill_id, DEFAULT_MAX_BYTES)
         if len(data) > budget:
             note = " (frozen ceiling, pending a slimming pass)" if skill_id in GRANDFATHERED_CEILINGS else ""

@@ -442,6 +442,29 @@ the currently-selected backend just because the build reported success.
 
 ## Delivery
 
+### Generated provenance and developer-only release boundaries
+
+If a hand-added provenance note disappears when a package is regenerated,
+trace the field to its authoritative source record. First check whether the
+existing generator already passes that field through; if so, put it in the
+source instead of changing the generator or re-patching derived output.
+Rerun the complete packaging pipeline and require a zero diff against the
+already-committed package when output is deterministic, plus the package's
+own invariants (binary identity, allowed metadata differences, reference
+closure). Preserve any failed run; do not call a one-field visual check
+idempotency proof.
+
+For developer-only overlays, diagnostics, or asset overrides that must be
+absent from release binaries, find and reuse the project's existing
+compile-time exclusion pattern before introducing another. Exclude guarded
+sources and flag registration from the release build, and reject a release
+configuration that enables them unless an explicitly authorized override is
+present. Inspect the *built executable* for every inventoried symbol and
+string marker. Run the same scanner on a developer build and require it to
+find every marker there; an all-clear on both builds is a broken control,
+not proof of release absence. Separately check developer capability still
+works and release rejects its flags.
+
 - Focused tests pass.
 - Regression passes.
 - Build/package verified when affected.

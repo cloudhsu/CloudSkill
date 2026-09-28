@@ -667,6 +667,30 @@
       ],
       "review_notes": "Distilled 2026-09-27 from Eval Inbox candidate sanitized-interaction-evidence; sanitized, field_distilled, verification FIELD-PITFALL n=1 project.",
       "provenance": "field_distilled"
+    },
+    {
+      "id": "REF-BEH-030",
+      "skill": "safe-incremental-refactoring",
+      "type": "application",
+      "prompt": "Make a bounded, behavior-preserving correction to an existing game-art packaging pipeline: a hand-added provenance note in the shipped package disappears every time the generator runs. The package derives from separate source JSONs, and the generator may already copy unknown fields unchanged. Fix durable ownership and prove regenerated output remains identical to the committed package.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "moves the note into the authoritative source rather than re-patching generated output",
+        "checks existing field pass-through before changing generator logic",
+        "reruns the full package generator and checks zero diff against committed packaged output plus package invariants"
+      ],
+      "forbidden_behaviors": [
+        "only re-adds the note to derived files",
+        "calls a one-field visual check an idempotency proof"
+      ],
+      "required_artifacts": [],
+      "baseline_expected_failure": [
+        "baseline patches derived output or modifies generator logic unnecessarily"
+      ],
+      "review_notes": "Sanitized M1 field case; source commit and M1 distillation inspected, exact historical zero-diff console record not located. Initial Codex gpt-6-astra RED n=2 routed to document-governance and omitted committed-output zero diff. The final bounded-refactor prompt routed safe-incremental-refactoring and GREEN n=2 required source pass-through and full-package zero diff. Manually reviewed plan-only evidence; no independent grader or package rerun.",
+      "provenance": "field_distilled",
+      "source_reference": "sanitized-interaction-evidence"
     }
   ]
 }

@@ -287,6 +287,30 @@
       ],
       "review_notes": "Distilled 2026-09-27 from Eval Inbox candidate sanitized-interaction-evidence (negative case: hazard caught and closed before merge); sanitized, field_distilled, verification EMPIRICAL-COMPARE n=1.",
       "provenance": "field_distilled"
+    },
+    {
+      "id": "CR-BEH-013",
+      "skill": "code-review",
+      "type": "discipline",
+      "prompt": "A last-moment dodge makes an enemy attack feel cancelled. Two reviewers offer conflicting code-level causes and fixes. The issue is low priority. The real simulation and presentation logic, plus shipped animation timings, are available. What evidence should decide whether either fix is warranted?",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "requires an executable trace joining the real simulation and unmodified presentation timing with shipped frame durations",
+        "uses the printed state sequence, including unexpected post-attack behavior, to test and explicitly reject contradicted theories",
+        "keeps a newly inferred code-grounded explanation unverified and does not ship a guessed fix"
+      ],
+      "forbidden_behaviors": [
+        "implements either proposed fix before tracing the real sequence",
+        "reports an inferred visual cause as observed fact"
+      ],
+      "required_artifacts": [],
+      "baseline_expected_failure": [
+        "baseline selects a plausible reviewer theory without a combined trace"
+      ],
+      "review_notes": "Sanitized M1 field investigation; diagnostic test commit and M1 distillation inspected, but its exact console trace was not found. Codex gpt-6-astra RED n=2 routed code-review and missed shipped timing; owner-corrected GREEN n=2 explicitly used shipped timing and real core/presentation logic. Manually reviewed plan-only evidence, no independent grader or game rerun.",
+      "provenance": "field_distilled",
+      "source_reference": "sanitized-interaction-evidence"
     }
   ]
 }

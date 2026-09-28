@@ -24,6 +24,16 @@ Identify:
 - Lifetime and ownership.
 - Callers and downstream dependencies.
 
+For a feel or presentation defect accompanied by competing proposed causes,
+do not choose the more authoritative reviewer or patch by intuition. Build an
+executable trace that runs the real state-transition logic and unmodified
+presentation timing together, using the shipped content's actual timing data
+instead of placeholder frame counts. Print the event/state/frame sequence
+around the report, test each theory's prediction against it, and retain
+unexpected observations (including what happens immediately afterward).
+Reject contradicted theories explicitly; a new code-grounded explanation is
+still unverified, and a low-priority case does not justify a guessed fix.
+
 ### 2. Check correctness risks
 
 Prioritize:

@@ -49,7 +49,8 @@
     "REF-BEH-026",
     "REF-BEH-027",
     "REF-BEH-028",
-    "REF-BEH-029"
+    "REF-BEH-029",
+    "REF-BEH-030"
   ],
   "behavior_case_types": [
     "application",
@@ -64,7 +65,7 @@
     "the routing reference or selected-skill context no longer fits its supported budget",
     "a deterministic grader produces a demonstrated false positive or false negative",
     "a user correction reveals a reusable missing safeguard",
-    "the skill has not been reviewed for two feature releases"
+    "the skill has not been reviewed for four feature releases"
   ],
   "replacement_skill": null
 }

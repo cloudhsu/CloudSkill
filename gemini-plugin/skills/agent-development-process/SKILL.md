@@ -8,7 +8,9 @@ description: Use when building or improving an AI-agent product whose task contr
 This skill governs the product engineering of an AI agent or agentic system. For repository rules controlling Codex or other coding agents, use `coding-agent-project-governance`.
 
 
-Follow `references/agent-lifecycle.md`.
+Before selecting lifecycle activities, read `references/agent-lifecycle.md`
+for the Discover-to-Improve stages, their outputs, evaluation gates and
+release/operations handoff.
 
 Also read the reference whose condition matches the task at hand, not all
 four by default:

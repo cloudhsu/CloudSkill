@@ -162,6 +162,17 @@ Run:
   packaging/export/install step exists, run it for real before calling
   the slice done; the source repo's own tests passing does not prove that
   step is complete.
+- When the slice changes a generated package or compile-time developer-only
+  capability, use the source-of-truth and binary-evidence checks in
+  `references/evidence-checklist.md`; source diffs alone do not prove either
+  persistence across regeneration or absence from a release executable.
+  In particular, first reuse an existing compile guard; reject release plus
+  developer capability at configure time; scan every inventoried developer
+  symbol/string in the built release binary, then require the *same scanner*
+  to find every marker in a developer build as its positive control. If a
+  generated annotation vanishes, put it in the owning source after checking
+  existing generator pass-through, then rerun packaging to a zero diff
+  against the committed output when deterministic.
 
 ### 8. Handoff
 
