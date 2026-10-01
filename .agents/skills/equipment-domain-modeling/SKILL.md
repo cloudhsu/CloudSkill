@@ -188,6 +188,10 @@ Test:
 - Snapshot version compatibility.
 - Config referencing missing or incompatible IO.
 - Metadata-driven UI and executor using the same catalog contract.
+- A time-varying quantity (pressure ramp, temperature) shown by a reused visual
+  component: sample the model's published trajectory at the start, a middle
+  point and the end through that component; render rate or playback speed must
+  not change readiness.
 
 ## Component-contract ownership boundary
 

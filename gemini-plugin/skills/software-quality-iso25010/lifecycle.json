@@ -21,7 +21,9 @@
     "ISO-BEH-005",
     "ISO-BEH-006",
     "ISO-BEH-007",
-    "ISO-BEH-008"
+    "ISO-BEH-008",
+    "ISO-BEH-009",
+    "ISO-BEH-010"
   ],
   "behavior_case_types": [
     "application",

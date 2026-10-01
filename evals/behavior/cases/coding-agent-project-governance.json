@@ -708,6 +708,53 @@
         "agent defers to the teammate's 'probably a cache issue' framing and moves on without proposing or performing any concrete enumeration of registered instances, running processes, or build artifacts"
       ],
       "review_notes": "Eval Inbox candidate sanitized-interaction-evidence (positive), 2026-09-26 batch, worker cag0926. Real field pitfall: a flaky-looking, seemingly environmental symptom (inconsistent app icon) was actually caused by many stale registered copies of the same development build plus a second running instance; enumerating registered instances and running processes found and fixed it, where 'probably a cache glitch' would not have. Coverage check 2026-09-26: 0 hits for 'cache'/'flaky'/'registration'/'enumerat' in SKILL.md or references/*.md before this case. RED 2026-09-26 (claude sonnet, unchanged skill, routed coding-agent-project-governance both runs): both attempts explicitly refused to accept the cache explanation as a finding, proposed concrete enumeration (build artifact icon resources, duplicate app copies/bundles, running instances) before any conclusion, and structured the report as PASS/FAIL/BLOCKED/NOT RUN per check rather than a bare accept/reject. No forbidden behavior observed in either attempt. NO_CHANGE_JUSTIFIED: this skill's existing SS8 diagnostic language (determine whether a blocker is environmental rather than a code defect before 'fixing' it) already generalizes to refusing an unverified 'probably cache' explanation, so no skill-text edit was made; case kept as a permanent regression guard for this class of field pitfall."
+    },
+    {
+      "id": "CAG-BEH-032",
+      "skill": "coding-agent-project-governance",
+      "type": "application",
+      "provenance": "project_history_distilled",
+      "expected_routing": true,
+      "expected_alternative_skill": "agent-development-process",
+      "prompt": "A multi-agent coding project keeps spawning fresh architecture and coding agents for every small continuation task, even though the original role sessions are still available and hold accumulated context. The coordinator wants a clean slate each time. Describe how you would proceed.",
+      "required_behaviors": [
+        "inventory the existing role sessions and reuse them for continuation work",
+        "if a session cannot be used, attempt recovery and obtain agreement before replacing it"
+      ],
+      "forbidden_behaviors": [
+        "silently replace role sessions per slice",
+        "spawn a new session for each small task by default"
+      ],
+      "required_artifacts": [],
+      "baseline_expected_failure": [
+        "Observed in the source project before correction (inferred, one project): silently replace role sessions per slice."
+      ],
+      "review_notes": "Distilled 2026-10-01 from Eval Inbox candidate sanitized-interaction-evidence (simulator exchange bundle, mechanism persistent-role-sessions; project-history distillation, inferred confidence, one project; case_contract layer). Sanitized. Prompt is a neutral restatement of the candidate situation; behaviors are split into observable atoms and the candidate's reviewer-facing meta lines are not carried over. Candidate status: not evidence of a model failure until RED. Provisional owner from the exporter; live routing is recorded separately. Contract repaired once after RED (2026-10-01, owner-approved): removed \"freeze edits before the single integration owner runs the build\" and \"do not infer model identity from an agent name\" (and the matching forbidden item): the prompt only concerns repeated spawning, so neither atom could be elicited; kept inventory/reuse and recover-and-agree-before-replacing."
+    },
+    {
+      "id": "CAG-BEH-033",
+      "skill": "coding-agent-project-governance",
+      "type": "application",
+      "provenance": "project_history_distilled",
+      "expected_routing": true,
+      "expected_alternative_skill": "codebase-architecture-discovery",
+      "prompt": "A skill repository was just updated. On the same machine, copied user-level installs and plugin caches of the same skills coexist with the intended linked install, and the repository version file differs from the content the host actually discovers. Someone suggests reinstalling everything so each location gets the new version. Describe how you would proceed.",
+      "required_behaviors": [
+        "choose one supported installation authority and make every other location a link to it or disable it",
+        "keep a recoverable backup before removing or disabling duplicate active copies",
+        "verify with a fresh loader or host listing that exactly one copy of each skill is discovered with the expected content",
+        "do not treat the repository version file as proof of loaded runtime content"
+      ],
+      "forbidden_behaviors": [
+        "reinstall into every location and leave duplicate active copies",
+        "delete duplicate copies without a recoverable backup",
+        "declare success from the version file alone"
+      ],
+      "required_artifacts": [],
+      "baseline_expected_failure": [
+        "Observed in the source project before correction (inferred, one project): reinstall into every location and leave duplicate active copies."
+      ],
+      "review_notes": "Distilled 2026-10-01 from Eval Inbox candidate sanitized-interaction-evidence (simulator exchange bundle, mechanism single-skill-source-authority; project-history distillation, inferred confidence, one project; case_contract layer). Sanitized. Prompt is a neutral restatement of the candidate situation; behaviors are split into observable atoms and the candidate's reviewer-facing meta lines are not carried over. Candidate status: not evidence of a model failure until RED. Provisional owner from the exporter; live routing is recorded separately."
     }
   ]
 }

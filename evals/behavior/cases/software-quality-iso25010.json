@@ -196,6 +196,31 @@
         "UI and reports disclosed the simulation boundary and verification remained evidence-layer specific."
       ],
       "review_notes": "Distilled 2026-09-21 from Eval Inbox candidate sanitized-interaction-evidence (project-history distillation, inferred confidence, one project; imported from a disconnected 7.11.2 export). Sanitized. The behaviors are the candidate's own wording; the prompt is the candidate's situation plus a neutral request to describe how to proceed. Candidate status: not evidence of a model failure until RED."
+    },
+    {
+      "id": "ISO-BEH-010",
+      "skill": "software-quality-iso25010",
+      "type": "application",
+      "provenance": "project_history_distilled",
+      "expected_routing": true,
+      "expected_alternative_skill": "coding-agent-project-governance",
+      "prompt": "A test run record for a simulator change mixes four failures: the test host failed to launch because of an environment permission problem; a behavioral test compiled against a stub failed as expected; one test fails because its timing expectation does not apply to the profile under test; and one fails because it asserts a step identity in the wrong format. The team wants to call the whole run 'RED' and move on. Describe how you would proceed.",
+      "required_behaviors": [
+        "record whether each test actually executed",
+        "classify the permission or launch failure as an environment problem, not behavioral RED",
+        "separate genuine product defects from invalid test oracles and correct the oracle rather than the product",
+        "preserve the failed evidence and rerun the corrected cases to show the result"
+      ],
+      "forbidden_behaviors": [
+        "call environment or build failures behavioral RED",
+        "change production behavior to satisfy a mistaken oracle",
+        "discard the failed run instead of preserving it"
+      ],
+      "required_artifacts": [],
+      "baseline_expected_failure": [
+        "Observed in the source project before correction (inferred, one project): call environment or build failures behavioral RED."
+      ],
+      "review_notes": "Distilled 2026-10-01 from Eval Inbox candidate sanitized-interaction-evidence (simulator exchange bundle, mechanism classify-red-evidence; project-history distillation, inferred confidence, one project; case_contract layer). Sanitized. Prompt is a neutral restatement of the candidate situation; behaviors are split into observable atoms and the candidate's reviewer-facing meta lines are not carried over. Candidate status: not evidence of a model failure until RED. Provisional owner from the exporter; live routing is recorded separately."
     }
   ]
 }

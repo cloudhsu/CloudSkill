@@ -327,6 +327,31 @@
         "A global conversion boundary simplified sequence timing and exposed incorrect fixtures through exact timestamp assertions."
       ],
       "review_notes": "Distilled 2026-09-21 from Eval Inbox candidate sanitized-interaction-evidence (project-history distillation, inferred confidence, one project; imported from a disconnected 7.11.2 export). Sanitized. The behaviors are the candidate's own wording; the prompt is the candidate's situation plus a neutral request to describe how to proceed. Candidate status: not evidence of a model failure until RED. Contract repaired 2026-09-21 after RED (over-literal unit): original third required behavior was \"use integer milliseconds internally\"; both RED answers used integer ticks with a stated unit and failed only on the unit name."
+    },
+    {
+      "id": "EDM-BEH-014",
+      "skill": "equipment-domain-modeling",
+      "type": "application",
+      "provenance": "project_history_distilled",
+      "expected_routing": true,
+      "expected_alternative_skill": "framework-design",
+      "prompt": "In a vacuum equipment simulator, the pump-down and vent animation jumps from the initial pressure straight to the terminal pressure. The UI developer proposes computing intermediate pressures in the rendering code with an easing curve so the animation looks smooth. Describe how you would proceed.",
+      "required_behaviors": [
+        "the physical model owns pressure evolution and publishes it as an immutable trajectory or a time query with units",
+        "rendering samples the model's published values at the display time rather than inventing them",
+        "playback speed or sampling must not change when the model considers the chamber ready",
+        "test the start, a middle point and the end through the reused visual component"
+      ],
+      "forbidden_behaviors": [
+        "compute authoritative or displayed pressure independently in the UI",
+        "let playback speed alter authoritative readiness",
+        "present rendering-invented intermediate values as modelled pressure"
+      ],
+      "required_artifacts": [],
+      "baseline_expected_failure": [
+        "Observed in the source project before correction (inferred, one project): compute authoritative or displayed pressure independently in the UI."
+      ],
+      "review_notes": "Distilled 2026-10-01 from Eval Inbox candidate sanitized-interaction-evidence (simulator exchange bundle, mechanism model-owned-pressure-trajectory; project-history distillation, inferred confidence, one project; case_contract layer). Sanitized. Prompt is a neutral restatement of the candidate situation; behaviors are split into observable atoms and the candidate's reviewer-facing meta lines are not carried over. Candidate status: not evidence of a model failure until RED. Provisional owner from the exporter; live routing is recorded separately."
     }
   ]
 }

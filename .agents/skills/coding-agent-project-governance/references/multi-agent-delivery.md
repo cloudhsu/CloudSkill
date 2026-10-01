@@ -51,4 +51,7 @@ resume before spawning, and so the mapping survives context resets. Do not
 default to spawning a brand-new agent instance for every dispatched task
 without first checking whether an existing, resumable agent already owns
 that role. If a project's history shows this binding arrived late, report it
-as a cost that was paid, not as a neutral learning-curve improvement.
+as a cost that was paid, not as a neutral learning-curve improvement. Replace a
+role session only after trying to recover it and obtaining the owner's
+agreement, with a handoff of decisions, open questions and source revision;
+never replace sessions silently or per slice.

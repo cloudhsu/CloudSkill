@@ -45,6 +45,7 @@ commands = [
     [sys.executable, 'scripts/test_verdicts.py'],
     [sys.executable, 'scripts/test_cross_family_grade.py'],
     [sys.executable, 'scripts/test_evidence_integrity.py'],
+    [sys.executable, 'scripts/test_import_eval_candidates.py'],
     [sys.executable, 'scripts/evidence_integrity.py', '--check'],
     [sys.executable, 'scripts/eval_priority_ranker.py', '--check-governance'],
     [sys.executable, 'scripts/rubric_score_view.py', '--check'],

@@ -305,6 +305,30 @@
         "The target boundary became editor to adapter/compiler to typed contracts to validated operations to scheduler."
       ],
       "review_notes": "Distilled 2026-09-21 from Eval Inbox candidate sanitized-interaction-evidence (project-history distillation, inferred confidence, one project; imported from a disconnected 7.11.2 export). Sanitized. The behaviors are the candidate's own wording; the prompt is the candidate's situation plus a neutral request to describe how to proceed. Candidate status: not evidence of a model failure until RED."
+    },
+    {
+      "id": "ECA-BEH-014",
+      "skill": "equipment-control-architecture",
+      "type": "application",
+      "provenance": "project_history_distilled",
+      "expected_routing": true,
+      "expected_alternative_skill": "equipment-domain-modeling",
+      "prompt": "A simulator has two independent load-lock volumes that share one pump service. A mutual-exclusion test shows the two cannot pump at the same time, and a developer concludes their pressures therefore change together and wants a single shared pressure snapshot. Describe how you would proceed.",
+      "required_behaviors": [
+        "treat the shared service as an exclusive resource reservation, separate from each volume's own pressure state",
+        "keep and verify a pressure state per volume; exclusivity alone does not couple volumes",
+        "coupled-volume behavior requires an explicit configured coupling; reject or flag unsupported coupled-volume execution rather than inferring it",
+        "present each volume's own snapshot to consumers"
+      ],
+      "forbidden_behaviors": [
+        "infer coupled pressure behavior from a shared service identifier or a passing exclusion test",
+        "merge the two volumes into one pressure snapshot without a configured coupling"
+      ],
+      "required_artifacts": [],
+      "baseline_expected_failure": [
+        "Observed in the source project before correction (inferred, one project): infer coupled pressure behavior from a shared service identifier or a passing exclusion test."
+      ],
+      "review_notes": "Distilled 2026-10-01 from Eval Inbox candidate sanitized-interaction-evidence (simulator exchange bundle, mechanism pressure-service-volume; project-history distillation, inferred confidence, one project; case_contract layer). Sanitized. Prompt is a neutral restatement of the candidate situation; behaviors are split into observable atoms and the candidate's reviewer-facing meta lines are not carried over. Candidate status: not evidence of a model failure until RED. Provisional owner from the exporter; live routing is recorded separately."
     }
   ]
 }
