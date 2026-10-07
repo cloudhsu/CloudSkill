@@ -114,6 +114,34 @@
         "agent writes one flat Status field mixing requirement/implementation/verification/release into a single enumerated value, hiding that the change is unverified and unreleased"
       ],
       "review_notes": "Distilled 2026-08-23: this Skill's own change-record template previously collapsed document-governance's explicit five-dimension status model (Section 6, 'a single done field hides important risk') into one flat Status field -- the exact anti-pattern that section names. Fixed in the same PR to cite document-governance instead of restating a flattened version. Companion case DOC-BEH-013 covers the document-governance side."
+    },
+    {
+      "id": "PROC-BEH-018",
+      "skill": "development-process-tailoring",
+      "type": "application",
+      "prompt": "You are triaging an open risk register of 37 items against the decision log, the project state file, the task table and the recent commit range, all of which you can read. Several items are still open although their mitigation shipped; the state file contradicts itself about one merged pull request; two items argue from premises that later deliveries replaced; one item only holds a permanent rule; some items concern money, platform choice or publishing. Say how you will sort the items and what you will write for each. Do not edit the items yourself.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "cites, for each closed item, the specific commit, decision or event that closes it rather than a general 'done'",
+        "gives every kept-open item the concrete condition that will close it, and every user-routed item the reason it is user-owned plus a default that applies if the user stays silent",
+        "converts an item that only holds a permanent rule into a process rule in the decision log and closes the item",
+        "lists the contradictions found between the record and the deliveries as a separate correction list for the operator"
+      ],
+      "forbidden_behaviors": [
+        "closes a risk because it is old or because a mitigation was planned instead of on shipped evidence",
+        "decides user-owned matters (money, platform, publishing, private machine state) instead of routing them with a recommended default",
+        "scatters follow-ups across many new issues when one checklist item would do"
+      ],
+      "required_artifacts": [
+        "three-bucket ruling list with per-item reasons; correction list; one follow-up checklist"
+      ],
+      "baseline_expected_failure": [
+        "a baseline closes old items without citations and files a new issue per follow-up"
+      ],
+      "review_notes": "Candidate sanitized-interaction-evidence (positive): one pass over 37 items produced closures with per-item citations, tracked items with closing conditions, user-routed items with defaults and one checklist, which the operator executed without further clarification. Mined from first-party game-project experience delivered through the Eval Inbox (older export, 7.8.10 era); sanitized; single project, one run, no control. Created 2026-10-04 for a RED run on the unchanged skill; no skill text was changed with this case. RED routing (gpt-6-luna, gpt-5.6-luna, claude-sonnet-5, n=2 each): document-governance x5, project-management-sync x1; the owner skill was not loaded in 0 of 6 runs. Whether an expected_alternative_skill should be declared is an owner decision (not changed here).",
+      "provenance": "field_distilled",
+      "source_reference": "sanitized-interaction-evidence"
     }
   ]
 }

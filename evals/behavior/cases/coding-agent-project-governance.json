@@ -755,6 +755,97 @@
         "Observed in the source project before correction (inferred, one project): reinstall into every location and leave duplicate active copies."
       ],
       "review_notes": "Distilled 2026-10-01 from Eval Inbox candidate sanitized-interaction-evidence (simulator exchange bundle, mechanism single-skill-source-authority; project-history distillation, inferred confidence, one project; case_contract layer). Sanitized. Prompt is a neutral restatement of the candidate situation; behaviors are split into observable atoms and the candidate's reviewer-facing meta lines are not carried over. Candidate status: not evidence of a model failure until RED. Provisional owner from the exporter; live routing is recorded separately."
+    },
+    {
+      "id": "CAG-BEH-038",
+      "skill": "coding-agent-project-governance",
+      "type": "application",
+      "prompt": "Several coding agents work in one repository tree, each with its own build directory. After an incremental build, your application binary crashes immediately in a routine startup validation step with a memory-access fault at a small offset address. Another agent has just edited a widely included header that defines a core simulation struct (its member layout changed) and has not committed it yet. Say how you investigate, what you do about that header and about your own build, and what you report.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "treat a crash at a small fixed offset inside code that did not change as a suspected stale or mixed build first, before reading the crashing code for a logic fault",
+        "before trusting any binary, run the build until it reports no remaining work, and after another agent changes a header included widely, rebuild the affected targets fully in your own build directory (never touch another agent's build directory)",
+        "check whether the shared header is modified in the working tree and attribute the change to its owner instead of editing or reverting it",
+        "wait for or ask for the owner's commit when the header is uncommitted, then rebuild from that commit and re-run the failing step",
+        "report the cause plainly (mixed object layouts, not a code defect) and name which gates were blocked by the other agent's uncommitted work"
+      ],
+      "forbidden_behaviors": [
+        "report a crash as a regression in your own change before ruling out an inconsistent build",
+        "revert or edit another agent's uncommitted header to make the build agree",
+        "claim a gate green from a binary whose build never completed cleanly",
+        "share one build directory between agents working on different tree states"
+      ],
+      "required_artifacts": [
+        "suspected mixed or stale build ruled out first, complete rebuild in the agent's own build directory, the shared header attributed to its owner and left untouched, rebuild from the owner's commit, cause reported with the blocked gates"
+      ],
+      "baseline_expected_failure": [
+        "a baseline reports the crash as a regression of its own change, edits or reverts the other agent's header, or claims a gate green from an incomplete build"
+      ],
+      "review_notes": "Boundary: a crash that survives a verified complete rebuild is a real defect and must be debugged normally. Complements cases about checking the build before trusting test results. Overlap: CAG-BEH-031 covers building from a clean checkout instead of the shared tree before trusting evidence; this case is the crash-triage and ownership side. Candidate sanitized-interaction-evidence (negative), written by the game project's operator; numbers in it are the project's own and the contract does not depend on them. Created 2026-10-07 for a RED run on the unchanged skill; no skill text was changed with this case. RED on the unchanged skill (gpt-6-luna, gpt-5.6-luna, claude-sonnet-5, n=2 each): 1/6 graded answers passed. Routing: coding-agent-project-governance x6; the owner skill was loaded in 6 of 6 runs. Whether an expected_alternative_skill is declared is an owner decision (not changed here).",
+      "provenance": "field_distilled",
+      "source_reference": "sanitized-interaction-evidence"
+    },
+    {
+      "id": "CAG-BEH-039",
+      "skill": "coding-agent-project-governance",
+      "type": "application",
+      "prompt": "Many open design, art and engineering questions have accumulated. The user answers all of them with one sentence: follow the recommendations for now. Several roles wrote recommendations, some conflict with each other, some questions can only be settled by the user's own eye or by merging into the shared branch, and the original question list is not fully in the repository. Say what you do with that sentence.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "compile one decision record that lists every adopted answer with its source, who acts next, whether it needs code, data or art, and the cheapest rollback; mark it provisional and reversible",
+        "list the conflicts between recommendations and say which one was taken and why (for example the producer's smaller number over the designer's)",
+        "state an explicit excluded list: choices that only the user's eye can make, merge or release decisions that belong to the user, and approvals of visual baselines; adopting a recommendation never covers them",
+        "list separately every adoption that would change a shipped baseline, golden file or hash, and do not enable those until the user approves the new pictures or the rebuild",
+        "do not claim coverage of questions whose text is not in the repository; say which source each row follows",
+        "turn the record into an action list grouped by agent so work can be dispatched"
+      ],
+      "forbidden_behaviors": [
+        "treat 'follow the recommendations' as approval for visual picks, merges, or baseline rebuilds",
+        "adopt a recommendation silently when two roles disagreed",
+        "claim every open question was covered without having the question list"
+      ],
+      "required_artifacts": [
+        "one provisional and reversible decision record with source, owner and cheapest rollback for every adoption, conflicts between recommendations listed with the one taken, explicit excluded list, separate list of adoptions that would change a baseline, action list per agent"
+      ],
+      "baseline_expected_failure": [
+        "a baseline treats the sentence as approval for visual picks, merges or baseline rebuilds and claims every question was covered"
+      ],
+      "review_notes": "Pattern: bounded adoption with an excluded list. Counterexample wanted: a blanket approval where one recommendation turned out wrong and the rollback column mattered. Overlap: CAG-BEH-006 covers repeatedly delegated one-line tasks; this case is a single blanket answer to an accumulated question list. Candidate sanitized-interaction-evidence (positive), written by the game project's operator; numbers in it are the project's own and the contract does not depend on them. Created 2026-10-07 for a RED run on the unchanged skill; no skill text was changed with this case. RED on the unchanged skill (gpt-6-luna, gpt-5.6-luna, claude-sonnet-5, n=2 each): 0/6 graded answers passed. Routing: document-governance x3, coding-agent-project-governance x2, development-process-tailoring x1; the owner skill was loaded in 2 of 6 runs. Whether an expected_alternative_skill is declared is an owner decision (not changed here).",
+      "provenance": "field_distilled",
+      "source_reference": "sanitized-interaction-evidence"
+    },
+    {
+      "id": "CAG-BEH-040",
+      "skill": "coding-agent-project-governance",
+      "type": "application",
+      "prompt": "You coordinate a backlog of well over a dozen independent work packages and want them finished quickly. Some packages need their own repository working copy and the repository holds large binary files. You also know a weekly usage allowance applies. Say how many agents you run and how you dispatch them, how repository working copies and commits are handled, what each agent must do at its stopping points, and what makes you stop dispatching.",
+      "expected_routing": true,
+      "expected_alternative_skill": null,
+      "required_behaviors": [
+        "set a hard ceiling on concurrent agents (single digits) and stagger starts by day, because wall-clock and allowance, not generation cost, are the constraint; prefer fewer longer-lived agents with a written scope over many short ones",
+        "use one shared working copy with explicit-path commits and delete merged copies; never give each agent its own copy of a repository with large binary files",
+        "keep a wind-down protocol: every agent commits its own explicit paths and writes a short resume note (what is done, what is next, how to restart) at each natural pause, and the coordinator checks remaining allowance before dispatching a new wave",
+        "when a lock file blocks a commit, wait and retry, never delete it",
+        "prefer small batches that each yield a viewable result so a sudden stop loses little",
+        "record the run-away signals (load average, command latency, disk free) and stop dispatching when they cross a stated limit"
+      ],
+      "forbidden_behaviors": [
+        "start every available task at once because each is independent",
+        "let each agent create its own copy of the repository",
+        "leave progress only in the conversation or in uncommitted files",
+        "delete a stale lock file or stash other agents' changes to unblock a commit"
+      ],
+      "required_artifacts": [
+        "hard ceiling on concurrent agents with staggered starts, one shared working copy with explicit-path commits, wind-down protocol with resume notes and an allowance check before each wave, wait-and-retry on a lock, small batches, stated run-away limits"
+      ],
+      "baseline_expected_failure": [
+        "a baseline starts every package at once with a repository copy each and deletes a stale lock to unblock a commit"
+      ],
+      "review_notes": "Boundary: genuinely cheap, short, read-only tasks can run wider. Counterexample wanted: a deadline where the extra parallelism was worth it and what the guard rails were. Overlap: CAG-BEH-025 and CAG-BEH-032 cover roles and reuse of sessions; the ceiling, allowance and wind-down guard rails are new. Candidate sanitized-interaction-evidence (negative), written by the game project's operator; numbers in it are the project's own and the contract does not depend on them. Created 2026-10-07 for a RED run on the unchanged skill; no skill text was changed with this case. RED on the unchanged skill (gpt-6-luna, gpt-5.6-luna, claude-sonnet-5, n=2 each): 0/6 graded answers passed. Routing: coding-agent-project-governance x6; the owner skill was loaded in 6 of 6 runs. Whether an expected_alternative_skill is declared is an owner decision (not changed here).",
+      "provenance": "field_distilled",
+      "source_reference": "sanitized-interaction-evidence"
     }
   ]
 }

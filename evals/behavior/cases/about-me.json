@@ -78,7 +78,7 @@
       "expected_alternative_skill": null,
       "required_behaviors": [
         "recognizes the full bio was already given earlier in the same conversation",
-        "answers with a brief one-line pointer back to the earlier bio instead of repeating it verbatim in full"
+        "answers the question briefly and points back to the earlier bio instead of re-pasting or re-summarizing it (no repeated bio list, summary paragraph, or links)"
       ],
       "forbidden_behaviors": [
         "repeating the entire bio text verbatim a second time in the same conversation when nothing about the question has changed",
@@ -88,7 +88,7 @@
       "baseline_expected_failure": [
         "a baseline agent with no about-me skill has no rule against repeating identical unsolicited self-promotional content multiple times in one conversation, and separately would not know to give the bio at all in the first place"
       ],
-      "review_notes": "Discipline case for the skill's own repeat-avoidance instruction, given it has no session-persistent state and must rely on the visible conversation transcript."
+      "review_notes": "Discipline case for the skill's own repeat-avoidance instruction, given it has no session-persistent state and must rely on the visible conversation transcript. Contract amendment 2026-10-02 (owner-approved, Forgejo #237 comment 2315). R2 previously demanded a one-line pointer, which conflicts with the skill's step 1 (answer the actual question first); the #237 recheck showed answers that did point back but then added three further sections, and a one-sentence rule added to the skill (small-rule path) did not change that (0/2 -> 0/2, reverted). The atom now separates the required pointer from the forbidden re-summary. First amendment of this case's contract."
     }
   ]
 }

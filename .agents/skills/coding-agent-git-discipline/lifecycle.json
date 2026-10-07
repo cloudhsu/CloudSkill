@@ -33,7 +33,8 @@
     "CAGD-BEH-008",
     "CAGD-BEH-009",
     "CAGD-BEH-010",
-    "CAGD-BEH-011"
+    "CAGD-BEH-011",
+    "CAGD-BEH-012"
   ],
   "behavior_case_types": [
     "application",

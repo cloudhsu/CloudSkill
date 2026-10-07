@@ -38,7 +38,8 @@
     "DOC-BEH-013",
     "DOC-BEH-014",
     "DOC-BEH-015",
-    "DOC-BEH-016"
+    "DOC-BEH-016",
+    "DOC-BEH-017"
   ],
   "behavior_case_types": [
     "application",
